@@ -285,7 +285,7 @@ Exemplo:
 
 ```json
 {
-  "name": "@devlog/api",
+  "name": "api",
   "scripts": {
     "dev": "nest start --watch",
     "start:dev": "nest start --watch",
@@ -301,7 +301,7 @@ O script `start:dev` pode continuar existindo. O script `dev` funciona como uma 
 Para iniciar apenas a API:
 
 ```bash
-pnpm --filter @devlog/api dev
+pnpm --filter api dev
 ```
 
 Também é possível filtrar pelo caminho:
@@ -367,14 +367,14 @@ O nome do pacote pode ser alterado para:
 
 ```json
 {
-  "name": "@devlog/web"
+  "name": "web"
 }
 ```
 
 Para iniciar somente o frontend:
 
 ```bash
-pnpm --filter @devlog/web dev
+pnpm --filter web dev
 ```
 
 Por padrão, o Vite utiliza:
@@ -430,18 +430,18 @@ pnpm dev
 O Turborepo iniciará as duas aplicações:
 
 ```text
-@devlog/api → nest start --watch
-@devlog/web → vite
+api → nest start --watch
+web → vite
 ```
 
 Também é possível executar cada aplicação separadamente:
 
 ```bash
-pnpm --filter @devlog/api dev
+pnpm --filter api dev
 ```
 
 ```bash
-pnpm --filter @devlog/web dev
+pnpm --filter web dev
 ```
 
 ---
@@ -593,33 +593,4 @@ devlog/
 ├── pnpm-workspace.yaml
 ├── turbo.json
 └── README.md
-```
-
-Comandos principais:
-
-```bash
-# Instalar todas as dependências
-pnpm install
-
-# Executar todas as aplicações
-pnpm dev
-
-# Executar somente a API
-pnpm --filter @devlog/api dev
-
-# Executar somente o frontend
-pnpm --filter @devlog/web dev
-
-# Executar prisma
-pnpm --filter api exec prisma migrate dev --name init
-pnpm --filter api exec prisma generate
-
-# Gerar os builds
-pnpm build
-
-# Executar lint
-pnpm lint
-
-# Executar testes
-pnpm test
 ```
