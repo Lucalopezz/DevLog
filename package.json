@@ -5,7 +5,11 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "test": "turbo test"
+    "test": "turbo test",
+    "db:up": "docker compose --env-file .env -f docker/compose.yaml up -d database",
+    "db:down": "docker compose --env-file .env -f docker/compose.yaml down",
+    "db:logs": "docker compose --env-file .env -f docker/compose.yaml logs -f database",
+    "db:reset": "docker compose --env-file .env -f docker/compose.yaml down -v"
   },
   "devDependencies": {
     "turbo": "latest"
