@@ -610,6 +610,10 @@ pnpm --filter @devlog/api dev
 # Executar somente o frontend
 pnpm --filter @devlog/web dev
 
+# Executar prisma
+pnpm --filter api exec prisma migrate dev --name init
+pnpm --filter api exec prisma generate
+
 # Gerar os builds
 pnpm build
 

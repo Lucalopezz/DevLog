@@ -11,3 +11,180 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String           @db.VarChar(120)
+  email        String           @unique(map: "users_email_key") @db.VarChar(255)
+  passwordHash String           @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  projects     Project[]
+  entries      TechnicalEntry[]
+  tags         Tag[]
+
+  @@map("users")
+}
+
+model Project {
+  id           String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String              @map("user_id") @db.Uuid
+  name         String              @db.VarChar(150)
+  description  String?
+  status       ProjectStatus       @default(ACTIVE)
+  localPath    String?             @map("local_path")
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt   DateTime?           @map("archived_at") @db.Timestamptz(6)
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries      TechnicalEntry[]
+  technologies ProjectTechnology[]
+  commands     ProjectCommand[]
+  resources    ProjectResource[]
+
+  @@unique([userId, name], map: "projects_user_id_name_key")
+  @@index([userId], map: "idx_projects_user")
+  @@index([userId, archivedAt], map: "idx_projects_active")
+  @@map("projects")
+}
+
+model TechnicalEntry {
+  id               String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String              @map("user_id") @db.Uuid
+  projectId        String?             @map("project_id") @db.Uuid
+  title            String              @db.VarChar(200)
+  type             TechnicalEntryType
+  context          String
+  conclusion       String?
+  resolvedAt       DateTime?           @map("resolved_at") @db.Timestamptz(6)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt       DateTime?           @map("archived_at") @db.Timestamptz(6)
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project          Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  solutionAttempts SolutionAttempt[]
+  tags             TechnicalEntryTag[]
+
+  @@index([userId, createdAt(sort: Desc)], map: "idx_entries_user_created")
+  @@index([userId, archivedAt, createdAt(sort: Desc)], map: "idx_entries_active_created")
+  @@index([projectId], map: "idx_entries_project")
+  @@index([userId, type], map: "idx_entries_type")
+  @@index([userId, resolvedAt], map: "idx_entries_resolved")
+  @@map("technical_entries")
+}
+
+model SolutionAttempt {
+  id               String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  technicalEntryId String                @map("technical_entry_id") @db.Uuid
+  description      String
+  result           SolutionAttemptResult
+  createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+  technicalEntry   TechnicalEntry        @relation(fields: [technicalEntryId], references: [id], onDelete: Cascade)
+
+  @@index([technicalEntryId, createdAt], map: "idx_attempts_entry")
+  @@map("solution_attempts")
+}
+
+model Tag {
+  id             String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String              @map("user_id") @db.Uuid
+  name           String              @db.VarChar(80)
+  normalizedName String              @map("normalized_name") @db.VarChar(80)
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries        TechnicalEntryTag[]
+
+  @@unique([userId, normalizedName], map: "tags_user_id_normalized_name_key")
+  @@map("tags")
+}
+
+model TechnicalEntryTag {
+  technicalEntryId String         @map("technical_entry_id") @db.Uuid
+  tagId            String         @map("tag_id") @db.Uuid
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  technicalEntry   TechnicalEntry @relation(fields: [technicalEntryId], references: [id], onDelete: Cascade)
+  tag              Tag            @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([technicalEntryId, tagId])
+  @@index([tagId], map: "idx_entry_tags_tag")
+  @@map("technical_entry_tags")
+}
+
+model ProjectTechnology {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId String   @map("project_id") @db.Uuid
+  name      String   @db.VarChar(100)
+  version   String?  @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, name], map: "project_technologies_project_id_name_key")
+  @@index([projectId], map: "idx_technologies_project")
+  @@map("project_technologies")
+}
+
+model ProjectCommand {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId      String   @map("project_id") @db.Uuid
+  title          String   @db.VarChar(120)
+  command        String
+  description    String?
+  executionOrder Int?     @map("execution_order")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, executionOrder], map: "idx_commands_project_order")
+  @@map("project_commands")
+}
+
+model ProjectResource {
+  id        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId String              @map("project_id") @db.Uuid
+  label     String              @db.VarChar(120)
+  url       String
+  type      ProjectResourceType
+  createdAt DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project   Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, url], map: "project_resources_project_id_url_key")
+  @@index([projectId], map: "idx_resources_project")
+  @@map("project_resources")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  PAUSED
+  FINISHED
+
+  @@map("project_status")
+}
+
+enum TechnicalEntryType {
+  ISSUE
+  LEARNING
+
+  @@map("technical_entry_type")
+}
+
+enum SolutionAttemptResult {
+  FAILED
+  PARTIAL
+  SUCCESSFUL
+
+  @@map("solution_attempt_result")
+}
+
+enum ProjectResourceType {
+  REPOSITORY
+  DOCUMENTATION
+  LOCAL_URL
+  EXTERNAL_URL
+  OTHER
+
+  @@map("project_resource_type")
+}
