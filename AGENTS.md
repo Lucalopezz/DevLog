@@ -1,0 +1,27 @@
+# Repository Guidelines
+
+## Project Structure & Module Organization
+
+DevLog is a pnpm/Turborepo monorepo. Application code lives in `apps/`: `apps/api` is the NestJS backend, with source in `src/` and end-to-end tests in `test/`; `apps/web` is the React + Vite frontend, with code in `src/` and static files in `public/`. Reserve `packages/` for genuinely shared workspace packages. Infrastructure is in `docker/`, while project decisions and setup notes live in `docs/`.
+
+## Build, Test, and Development Commands
+
+Run commands from the repository root using pnpm 11.18.0.
+
+- `pnpm dev` starts all available development tasks through Turborepo.
+- `pnpm build`, `pnpm lint`, and `pnpm test` build, lint, or test workspace packages that implement those tasks.
+- `pnpm --filter api dev` runs the Nest API in watch mode; `pnpm --filter web dev` starts Vite.
+- `pnpm --filter api test:e2e` runs API end-to-end tests; `pnpm --filter api test:cov` produces coverage.
+- `pnpm db:up` starts the Docker database using root `.env`; use `pnpm db:down` to stop it and `pnpm db:logs` to follow its logs. Do not run `pnpm db:reset` unless intentionally removing database volumes.
+
+## Coding Style & Naming Conventions
+
+Write TypeScript throughout. Follow the nearest ESLint configuration: `apps/api` uses ESLint with Prettier, while `apps/web` uses ESLint with React Hooks and React Refresh rules. Format API TypeScript with `pnpm --filter api format`; let Prettier determine spacing and line endings. Use PascalCase for React components, Nest classes, and interfaces; camelCase for functions and variables; and kebab-case filenames such as `user-profile.tsx`. Keep Nest modules, controllers, and services grouped by feature under `apps/api/src/`.
+
+## Testing Guidelines
+
+API unit tests use Jest and belong beside source as `*.spec.ts`. End-to-end tests belong in `apps/api/test/` and use the `*.e2e-spec.ts` convention with Supertest. Add tests for new backend behavior and run the smallest relevant test command before submitting. The web app has no test runner configured yet; at minimum run its lint and build commands after frontend changes.
+
+## Commit & Pull Request Guidelines
+
+Use concise Conventional Commit-style subjects, as in `feat(api): remove unnecessary configs` or `feat(docker): create docker configuration`. Prefer a type and optional scope: `feat(web): add entry form`, `fix(api): validate payload`. Keep commits focused. Pull requests should explain the user-visible or architectural change, link relevant issues, list validation performed, and include screenshots for UI changes. Never commit `.env` files or credentials; update `.env.example` when configuration requirements change.
