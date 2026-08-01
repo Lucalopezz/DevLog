@@ -4,6 +4,11 @@
     "target": "es2023",
     "lib": ["ES2023"],
     "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "ignoreDeprecations": "6.0",
     "skipLibCheck": true,
 
     /* Bundler mode */

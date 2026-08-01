@@ -1,4 +1,4 @@
-import { PrismaClient } from 'generated/prisma/client';
+import { PrismaClient } from '@generated/prisma/client';
 import { execSync } from 'node:child_process';
 
 export function setupPrismaTests() {
