@@ -4,6 +4,23 @@
 
 DevLog is a pnpm/Turborepo monorepo. Application code lives in `apps/`: `apps/api` is the NestJS backend, with source in `src/` and end-to-end tests in `test/`; `apps/web` is the React + Vite frontend, with code in `src/` and static files in `public/`. Reserve `packages/` for genuinely shared workspace packages. Infrastructure is in `docker/`, while project decisions and setup notes live in `docs/`.
 
+## Learning-Focused Development
+
+Remember that this is a study project. My main goal is not only to get the code working, but to understand the reasoning behind the implementation.
+
+Whenever you make changes to the codebase:
+
+- Explain each relevant decision you made.
+- Explain why you chose that approach over reasonable alternatives.
+- Point out important architectural, design, or implementation concepts involved.
+- Explain any trade-offs introduced by the change.
+- Avoid making significant changes without explaining their purpose.
+- When appropriate, mention what I should study or understand to better grasp the solution.
+
+Prefer teaching and explaining over simply providing a finished implementation.
+
+The goal is for me to learn as much as possible from every change.
+
 ## Build, Test, and Development Commands
 
 Run commands from the repository root using pnpm 11.18.0.
