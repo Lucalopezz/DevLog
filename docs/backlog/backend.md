@@ -32,11 +32,11 @@ Escopo deste arquivo: API NestJS, camada de aplicação, domínio, persistência
 
 ### RegisterUser
 
-- [ ] Criar o caso de uso `CreateUserUseCase`.
-- [ ] Validar `name`, `email` e `password`.
-- [ ] Rejeitar email já cadastrado. -> findUserByEmail
-- [ ] Fazer hash da senha antes de persistir o usuário.
-- [ ] Nunca retornar ou armazenar a senha em texto puro.
+- [x] Criar o caso de uso `CreateUserUseCase`.
+- [x] Validar `name`, `email` e `password`.
+- [x] Rejeitar email já cadastrado. -> findUserByEmail
+- [x] Fazer hash da senha antes de persistir o usuário.
+- [x] Nunca retornar ou armazenar a senha em texto puro.
 - [ ] Criar o endpoint de cadastro.
 - [ ] Testar cadastro válido, email inválido, email duplicado e senha fora dos critérios mínimos.
 

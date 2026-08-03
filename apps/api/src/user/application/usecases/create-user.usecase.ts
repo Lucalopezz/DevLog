@@ -27,8 +27,12 @@ export class CreateUserUseCase implements UseCaseContract<
     const { name, email, password, confirmPassword } = input;
 
     if (password !== confirmPassword) {
-      throw new ConflictException('Passwords do not match');
+      throw new ConflictException('As senhas não conferem');
     }
+    if (name.length < 3) {
+      throw new ConflictException('Name must be at least 3 characters long');
+    }
+
     const emailExists = await this.userRepository.findByEmail(email);
 
     if (emailExists === null) {
