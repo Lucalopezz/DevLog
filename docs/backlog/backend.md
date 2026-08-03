@@ -20,7 +20,7 @@ Escopo deste arquivo: API NestJS, camada de aplicação, domínio, persistência
 
 ## 1. Fundação compartilhada
 
-- [X] Definir a estrutura dos módulos por feature em `apps/api/src/modules/`. -> shared, user, project, technical-entry, tag, solution-attempt.
+- [x] Definir a estrutura dos módulos por feature em `apps/api/src/modules/`. -> shared, user, project, technical-entry, tag, solution-attempt.
 - [ ] Definir entidades, identificadores, datas de criação/atualização e estratégia de arquivamento lógico.
 - [ ] Configurar o schema do banco e as migrations para usuários, projetos, entradas, tags e seus relacionamentos.
 - [ ] Definir as interfaces de repositório usadas pela camada de aplicação.
@@ -32,7 +32,7 @@ Escopo deste arquivo: API NestJS, camada de aplicação, domínio, persistência
 
 ### RegisterUser
 
-- [ ] Criar o caso de uso `RegisterUser`.
+- [ ] Criar o caso de uso `CreateUserUseCase`.
 - [ ] Validar `name`, `email` e `password`.
 - [ ] Rejeitar email já cadastrado. -> findUserByEmail
 - [ ] Fazer hash da senha antes de persistir o usuário.
