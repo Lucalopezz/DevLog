@@ -1,7 +1,9 @@
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
-import { UserOutput } from '../dto/user-output.dto';
+import { UserOutput, UserOutputMapper } from '../dto/user-output.dto';
 import { UserRepository } from '@/user/domain/repositories/user.repository';
 import { ConflictException } from '@nestjs/common';
+import { HashProvider } from '@/shared/application/providers/hash-provaider';
+import { UserEntity } from '@/user/domain/entities/user.entity';
 
 export type CreateUserUseCaseInput = {
   name: string;
@@ -16,19 +18,34 @@ export class CreateUserUseCase implements UseCaseContract<
   CreateUserUseCaseInput,
   CreateUserUseCaseOutput
 > {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly hashProvider: HashProvider,
+  ) {}
 
-  execute(input: CreateUserUseCaseInput): UserOutput | Promise<UserOutput> {
+  async execute(input: CreateUserUseCaseInput): Promise<UserOutput> {
     const { name, email, password, confirmPassword } = input;
 
     if (password !== confirmPassword) {
       throw new ConflictException('Passwords do not match');
     }
-    const emailExists = this.userRepository.findByEmail(email);
+    const emailExists = await this.userRepository.findByEmail(email);
 
     if (emailExists === null) {
       throw new ConflictException('Email already exists');
     }
-    // TODO: password hashing and user creation logic here
+    const hashPass = await this.hashProvider.generateHash(password);
+
+    const entity = new UserEntity({
+      name,
+      email,
+      password: hashPass,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await this.userRepository.insert(entity);
+
+    return UserOutputMapper.toOutput(entity);
   }
 }
