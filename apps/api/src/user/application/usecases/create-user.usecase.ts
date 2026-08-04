@@ -1,7 +1,7 @@
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
 import { UserOutput, UserOutputMapper } from '../dto/user-output.dto';
 import { UserRepository } from '@/user/domain/repositories/user.repository';
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { HashProvider } from '@/shared/application/providers/hash-provaider';
 import { UserEntity } from '@/user/domain/entities/user.entity';
 
@@ -29,14 +29,14 @@ export class CreateUserUseCase implements UseCaseContract<
     if (password !== confirmPassword) {
       throw new ConflictException('As senhas não conferem');
     }
-    if (name.length < 3) {
-      throw new ConflictException('Name must be at least 3 characters long');
+    if (!name) {
+      throw new BadRequestException('O nome é obrigatório');
     }
 
     const emailExists = await this.userRepository.findByEmail(email);
 
     if (emailExists === null) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException('Email ja cadastrado');
     }
     const hashPass = await this.hashProvider.generateHash(password);
 
