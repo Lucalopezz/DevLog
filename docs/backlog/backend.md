@@ -4,6 +4,8 @@ Este documento lista as tarefas necessárias para implementar o backend do DevLo
 
 Escopo deste arquivo: API NestJS, camada de aplicação, domínio, persistência, autenticação, autorização e testes. O backlog do frontend será criado separadamente.
 
+O passo a passo da autenticação está em [`docs/guides/authentication_workflow.md`](../guides/authentication_workflow.md).
+
 ## Regras transversais
 
 - [ ] Garantir que todo recurso tenha `userId` e pertença ao usuário autenticado.
