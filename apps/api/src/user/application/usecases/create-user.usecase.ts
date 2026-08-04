@@ -35,7 +35,7 @@ export class CreateUserUseCase implements UseCaseContract<
 
     const emailExists = await this.userRepository.findByEmail(email);
 
-    if (emailExists === null) {
+    if (emailExists !== null) {
       throw new ConflictException('Email ja cadastrado');
     }
     const hashPass = await this.hashProvider.generateHash(password);

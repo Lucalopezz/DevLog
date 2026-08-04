@@ -37,7 +37,7 @@ Escopo deste arquivo: API NestJS, camada de aplicação, domínio, persistência
 - [x] Rejeitar email já cadastrado. -> findUserByEmail
 - [x] Fazer hash da senha antes de persistir o usuário.
 - [x] Nunca retornar ou armazenar a senha em texto puro.
-- [ ] Criar o endpoint de cadastro.
+- [x] Criar o endpoint de cadastro.
 - [ ] Testar cadastro válido, email inválido, email duplicado e senha fora dos critérios mínimos.
 
 ### AuthenticateUser
@@ -53,11 +53,29 @@ Escopo deste arquivo: API NestJS, camada de aplicação, domínio, persistência
 
 ### GetCurrentUser
 
-- [ ] Criar o caso de uso `GetCurrentUser`.
+- [x] Criar o caso de uso `GetCurrentUser`.
 - [ ] Criar o guard ou middleware que identifica o usuário autenticado.
-- [ ] Criar `GET /users/me`.
-- [ ] Retornar apenas os dados públicos do usuário atual.
+- [x] Criar `GET /users/me`.
+- [x] Retornar apenas os dados públicos do usuário atual.
 - [ ] Testar acesso autenticado e acesso sem autenticação.
+
+### UpdateUser
+
+- [x] Criar o caso de uso `UpdateUser`.
+- [x] Permitir a alteração somente do nome do usuário.
+- [x] Manter o e-mail imutável após o cadastro.
+- [x] Criar `PATCH /users/:id`.
+- [ ] Garantir que somente o usuário autenticado possa alterar o próprio perfil.
+- [ ] Testar atualização válida, usuário inexistente e tentativa de alteração sem autenticação.
+
+### UpdateUserPassword
+
+- [x] Criar o caso de uso `UpdateUserPassword`.
+- [x] Validar a confirmação da nova senha.
+- [x] Fazer hash da nova senha antes de persistir.
+- [x] Criar `PATCH /users/:id/password`.
+- [ ] Exigir autenticação e validar a senha atual obrigatoriamente.
+- [ ] Testar atualização válida, senha atual inválida, confirmação divergente e usuário inexistente.
 
 ### LogoutUser
 

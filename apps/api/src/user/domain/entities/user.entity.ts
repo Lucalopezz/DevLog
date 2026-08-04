@@ -71,10 +71,6 @@ export class UserEntity extends Entity<UserProps> {
     this.props.name = name;
   }
 
-  private set email(email: string) {
-    this.props.email = email;
-  }
-
   private set password(password: string) {
     this.props.password = password;
   }
