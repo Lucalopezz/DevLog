@@ -9,6 +9,7 @@ import {
   Inject,
   Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,12 +21,9 @@ import { GetCurrentUserUseCase } from '../application/usecases/get-current-user.
 import { UpdateUserUseCase } from '../application/usecases/update-user.usecase';
 import { UpdateUserPasswordUseCase } from '../application/usecases/update-user-password.usecase';
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
-
-type AuthenticatedRequest = Request & {
-  user?: {
-    id: string;
-  };
-};
+import { AuthGuard } from '@/auth/infrastructure/auth.guard';
+import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '@/auth/types/authenticated-user';
 
 @Controller('users')
 export class UserController {
@@ -52,12 +50,16 @@ export class UserController {
   }
 
   @Get('me')
-  async getCurrentUser(@Req() request: AuthenticatedRequest) {
-    // TODO: Implementar autenticação e autorização para obter o usuário atual
-    // const output = await this.getCurrentUserUseCase.execute({ id: userId });
-    // return UserController.userToResponse(output);
+  @UseGuards(AuthGuard)
+  async getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
+    const output = await this.getCurrentUserUseCase.execute({
+      id: user.id,
+    });
+
+    return UserController.userToResponse(output);
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const output = await this.updateUserUseCase.execute({
@@ -67,6 +69,7 @@ export class UserController {
     return UserController.userToResponse(output);
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id/password')
   async updatePassword(
     @Param('id') id: string,
