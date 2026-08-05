@@ -9,6 +9,7 @@ import { UpdateUserPasswordUseCase } from '../application/usecases/update-user-p
 import { UpdateUserUseCase } from '../application/usecases/update-user.usecase';
 import { UserRepository } from '../domain/repositories/user.repository';
 import { HashProvider } from '@/shared/application/providers/hash-provaider';
+import { FindUserByEmailUseCase } from '../application/usecases/find-user-by-email.usecase';
 
 @Module({
   controllers: [UserController],
@@ -28,6 +29,7 @@ import { HashProvider } from '@/shared/application/providers/hash-provaider';
       provide: 'HashProvider',
       useClass: BcryptjsHashProvider,
     },
+    FindUserByEmailUseCase,
     {
       provide: CreateUserUseCase,
       useFactory: (
