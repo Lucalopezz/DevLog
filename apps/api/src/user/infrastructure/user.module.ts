@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { AuthModule } from '@/auth/infrastructure/auth.module';
 import { UserController } from './user.controller';
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
 import { UserPrismaRepository } from './database/prisma/repositories/user-prisma.repository';
@@ -13,6 +14,7 @@ import { FindUserByEmailUseCase } from '../application/usecases/find-user-by-ema
 
 @Module({
   controllers: [UserController],
+  imports: [forwardRef(() => AuthModule)],
   providers: [
     {
       provide: 'PrismaService',
@@ -65,5 +67,6 @@ import { FindUserByEmailUseCase } from '../application/usecases/find-user-by-ema
       inject: ['UserRepository', 'HashProvider'],
     },
   ],
+  exports: ['UserRepository', 'HashProvider'],
 })
 export class UserModule {}

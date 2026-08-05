@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { UserModule } from '@/user/infrastructure/user.module';
 import { EnvConfigModule } from '@/shared/infrastructure/env-config/env-config.module';
@@ -11,7 +11,7 @@ import { AuthGuard } from './auth.guard';
 @Module({
   controllers: [AuthController],
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     EnvConfigModule,
     // Config do JwtModule
     JwtModule.registerAsync({
@@ -34,6 +34,6 @@ import { AuthGuard } from './auth.guard';
     AuthenticateUserUseCase,
     AuthGuard,
   ],
-  exports: [AuthGuard],
+  exports: [AuthGuard, 'TokenProvider'],
 })
 export class AuthModule {}
