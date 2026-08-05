@@ -54,8 +54,8 @@ export class UserController {
   @Get('me')
   async getCurrentUser(@Req() request: AuthenticatedRequest) {
     // TODO: Implementar autenticação e autorização para obter o usuário atual
-    const output = await this.getCurrentUserUseCase.execute({ id: userId });
-    return UserController.userToResponse(output);
+    // const output = await this.getCurrentUserUseCase.execute({ id: userId });
+    // return UserController.userToResponse(output);
   }
 
   @Patch(':id')
@@ -78,5 +78,4 @@ export class UserController {
     });
     return UserController.userToResponse(output);
   }
-
 }

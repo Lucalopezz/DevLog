@@ -65,7 +65,6 @@ Pendências identificadas no código atual:
 
 - cookie-parser está instalado, mas não é registrado em main.ts;
 - CORS possui configuração prevista, mas não é habilitado com credenciais;
-- getJtwExpiresInSeconds() está com Jtw escrito incorretamente;
 - UserOutput ainda contém o hash da senha;
 - getCurrentUser() usa userId sem declará-lo;
 - UserModule ainda não exporta os providers que AuthModule precisará usar;
@@ -133,10 +132,6 @@ Gere um segredo real localmente com um gerador apropriado. Não use o valor de e
 ### 4.2 Corrigir o nome da configuração
 
 Renomeie:
-
-~~~ts
-getJtwExpiresInSeconds()
-~~~
 
 para:
 

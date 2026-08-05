@@ -24,7 +24,7 @@ export class EnvConfigService implements EnvConfig {
     }
     return origins;
   }
-  getJtwExpiresInSeconds(): number {
+  getJwtExpiresInSeconds(): number {
     return Number(
       this.configService.get<number>('JWT_EXPIRES_IN_SECONDS', 3600),
     );

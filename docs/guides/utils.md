@@ -12,6 +12,10 @@ pnpm dev
 # Executar somente a API
 pnpm --filter api dev
 
+# Criar arquivos nest pela cli + diretorio correto
+pnpm --filter api exec nest g controller auth/infrastructure/auth --flat --no-spec
+pnpm --filter api exec nest g guard auth/infrastructure/auth --flat --no-spec
+
 # Executar somente o frontend
 pnpm --filter web dev
 
