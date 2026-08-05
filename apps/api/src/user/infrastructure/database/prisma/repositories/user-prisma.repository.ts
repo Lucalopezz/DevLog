@@ -9,8 +9,12 @@ export class UserPrismaRepository implements UserRepository {
   async insert(entity: UserEntity): Promise<void> {
     await this.prismaService.user.create({
       data: {
-        ...entity.toJSON(),
+        id: entity.id,
+        name: entity.name,
+        email: entity.email,
         passwordHash: entity.password,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
       },
     });
   }
@@ -19,8 +23,10 @@ export class UserPrismaRepository implements UserRepository {
     await this.prismaService.user.update({
       where: { id: entity.id },
       data: {
-        ...entity.toJSON(),
+        name: entity.name,
+        email: entity.email,
         passwordHash: entity.password,
+        updatedAt: entity.updatedAt,
       },
     });
   }
