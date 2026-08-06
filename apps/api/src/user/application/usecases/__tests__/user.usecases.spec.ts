@@ -165,13 +165,14 @@ describe('Casos de uso de usuário', () => {
       const useCase = new UpdateUserUseCase(repository);
 
       await useCase.execute({
-        id: user.id,
+        userId: user.id,
         name: 'Updated User',
       });
 
       expect(user.name).toBe('Updated User');
       expect(user.email).toBe('lucas@example.com');
     });
+
   });
 
   describe('UpdateUserPasswordUseCase', () => {
@@ -185,7 +186,7 @@ describe('Casos de uso de usuário', () => {
       );
 
       await useCase.execute({
-        id: user.id,
+        userId: user.id,
         currentPassword: 'secret',
         password: 'new-secret',
         confirmPassword: 'new-secret',
@@ -205,12 +206,13 @@ describe('Casos de uso de usuário', () => {
 
       await expect(
         useCase.execute({
-          id: user.id,
+          userId: user.id,
           currentPassword: 'wrong-secret',
           password: 'new-secret',
           confirmPassword: 'new-secret',
         }),
       ).rejects.toBeInstanceOf(UnauthorizedException);
     });
+
   });
 });

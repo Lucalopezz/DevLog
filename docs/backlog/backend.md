@@ -70,8 +70,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o caso de uso `UpdateUser`.
 - [x] Permitir a alteração somente do nome do usuário.
 - [x] Manter o e-mail imutável após o cadastro.
-- [x] Criar `PATCH /users/:id`.
-- [ ] Garantir que o `:id` seja o mesmo usuário identificado pelo guard.
+- [x] Criar `PATCH /users/me`, usando o usuário identificado pelo guard.
 - [ ] Testar atualização válida, usuário inexistente e tentativa de alteração sem autenticação.
 
 ### UpdateUserPassword
@@ -79,8 +78,8 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o caso de uso `UpdateUserPassword`.
 - [x] Validar a confirmação da nova senha.
 - [x] Fazer hash da nova senha antes de persistir.
-- [x] Criar `PATCH /users/:id/password`.
-- [ ] Exigir autenticação e validar a senha atual obrigatoriamente (hoje `currentPassword` é opcional).
+- [x] Criar `PATCH /users/me/password`, usando o usuário identificado pelo guard.
+- [x] Exigir autenticação e tornar `currentPassword` obrigatório para validar a senha atual; esse valor deve ser usado somente na validação e nunca persistido no banco.
 - [ ] Testar atualização válida, senha atual inválida, confirmação divergente e usuário inexistente.
 
 ### LogoutUser

@@ -4,7 +4,7 @@ import { UserRepository } from '@/user/domain/repositories/user.repository';
 import { UserOutput, UserOutputMapper } from '../dto/user-output.dto';
 
 export type UpdateUserUseCaseInput = {
-  id: string;
+  userId: string;
   name: string;
 };
 
@@ -17,7 +17,7 @@ export class UpdateUserUseCase implements UseCaseContract<
   constructor(private readonly userRepository: UserRepository) {}
 
   async execute(input: UpdateUserUseCaseInput): Promise<UserOutput> {
-    const user = await this.userRepository.findById(input.id);
+    const user = await this.userRepository.findById(input.userId);
 
     if (user === null) {
       throw new NotFoundException('Usuário não encontrado');

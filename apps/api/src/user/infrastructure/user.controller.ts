@@ -4,11 +4,9 @@ import {
   Post,
   Body,
   Patch,
-  Param,
   Inject,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserUseCase } from '../application/usecases/create-user.usecase';
@@ -57,23 +55,26 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  @Patch('me')
+  async update(
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     const output = await this.updateUserUseCase.execute({
-      id,
+      userId: user.id,
       name: updateUserDto.name,
     });
     return UserController.userToResponse(output);
   }
 
   @UseGuards(AuthGuard)
-  @Patch(':id/password')
+  @Patch('me/password')
   async updatePassword(
-    @Param('id') id: string,
     @Body() updateUserPasswordDto: UpdateUserPasswordDto,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
     const output = await this.updateUserPasswordUseCase.execute({
-      id,
+      userId: user.id,
       ...updateUserPasswordDto,
     });
     return UserController.userToResponse(output);

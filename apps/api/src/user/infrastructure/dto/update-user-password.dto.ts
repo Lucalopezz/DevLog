@@ -1,14 +1,13 @@
-import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 import { UpdateUserPasswordUseCaseInput } from '@/user/application/usecases/update-user-password.usecase';
 
 export class UpdateUserPasswordDto implements Omit<
   UpdateUserPasswordUseCaseInput,
-  'id'
+  'userId'
 > {
   @IsString({ message: 'Parametro inválido' })
   @IsNotEmpty({ message: 'A senha atual é obrigatória' })
-  @IsOptional()
-  currentPassword?: string;
+  currentPassword: string;
 
   @IsString({ message: 'Parametro inválido' })
   @IsNotEmpty({ message: 'A senha é obrigatória' })
