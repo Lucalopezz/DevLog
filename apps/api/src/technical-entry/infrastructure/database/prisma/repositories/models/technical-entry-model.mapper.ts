@@ -1,6 +1,6 @@
 import { ValidationError } from '@/shared/domain/errors/validation-error';
-import { TechnicalEntryEntity } from '@/technicalEntry/domain/entities/technicalEntry.entity';
-import { TechnicalEntryType } from '@/technicalEntry/domain/entities/technical-entry-type.enum';
+import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technicalEntry.entity';
+import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
 import {
   TechnicalEntryType as PrismaTechnicalEntryType,
   type TechnicalEntry,

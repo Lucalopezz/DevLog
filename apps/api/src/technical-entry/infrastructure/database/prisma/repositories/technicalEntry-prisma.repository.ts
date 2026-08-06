@@ -1,11 +1,11 @@
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
-import { TechnicalEntryEntity } from '@/technicalEntry/domain/entities/technicalEntry.entity';
+import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technicalEntry.entity';
 import {
   TechnicalEntryRepository,
   type TechnicalEntryFilter,
   TechnicalEntrySearchParams,
   TechnicalEntrySearchResult,
-} from '@/technicalEntry/domain/repositories/technicalEntry.repository';
+} from '@/technical-entry/domain/repositories/technicalEntry.repository';
 import { SearchResult } from '@/shared/domain/repositories/searchable.repository';
 import { Prisma } from '@generated/prisma/client';
 import { TechnicalEntryModelMapper } from './models/technical-entry-model.mapper';
