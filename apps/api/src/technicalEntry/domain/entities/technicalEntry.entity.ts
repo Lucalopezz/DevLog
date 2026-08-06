@@ -1,9 +1,9 @@
 import { Entity } from '@/shared/domain/entities/entity';
+import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
+import { TechnicalEntryValidatorFactory } from '../validators/techinicalEntry.validator';
+import { TechnicalEntryType } from './technical-entry-type.enum';
 
-export enum TechnicalEntryType {
-  ISSUE,
-  LEARNING,
-}
+export { TechnicalEntryType } from './technical-entry-type.enum';
 
 export type TechnicalEntryProps = {
   userId: string;
@@ -154,6 +154,11 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   }
 
   static validate(props: TechnicalEntryProps): void {
-    void props;
+    const technicalEntryValidator = TechnicalEntryValidatorFactory.create();
+    const isValid = technicalEntryValidator.validate(props);
+
+    if (!isValid) {
+      throw new EntityValidationError(technicalEntryValidator.errors ?? {});
+    }
   }
 }
