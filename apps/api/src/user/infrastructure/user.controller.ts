@@ -5,10 +5,7 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   Inject,
-  Req,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
