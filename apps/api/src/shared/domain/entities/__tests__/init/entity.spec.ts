@@ -7,13 +7,13 @@ type StubeProps = {
 };
 
 class StubEntity extends Entity<StubeProps> {
-  constructor(props: any, id?: string) {
+  constructor(props: StubeProps, id?: string) {
     super(props, id);
   }
 }
 
-describe('User Entity unit tests', () => {
-  it('Should set props and id', () => {
+describe('Testes unitários de Entity', () => {
+  it('deve definir propriedades e id', () => {
     const props = {
       prop1: 'value1',
       prop2: 42,
@@ -24,7 +24,7 @@ describe('User Entity unit tests', () => {
     expect(entity._id).not.toBeNull();
     expect(uuidValidate(entity._id)).toBeTruthy();
   });
-  it('Should accept a valid uuid', () => {
+  it('deve aceitar um UUID válido', () => {
     const props = {
       prop1: 'value1',
       prop2: 42,
@@ -36,7 +36,7 @@ describe('User Entity unit tests', () => {
     expect(entity._id).toBe(id);
   });
 
-  it('Should converte a entity to a JSON', () => {
+  it('deve converter uma entidade para JSON', () => {
     const props = {
       prop1: 'value1',
       prop2: 42,

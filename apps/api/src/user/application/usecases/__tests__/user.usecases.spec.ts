@@ -7,6 +7,7 @@ import { HashProvider } from '@/shared/application/providers/hash-provaider';
 import { UserEntity } from '@/user/domain/entities/user.entity';
 import { UserRepository } from '@/user/domain/repositories/user.repository';
 import { CreateUserUseCase } from '../create-user.usecase';
+import { FindUserByEmailUseCase } from '../find-user-by-email.usecase';
 import { GetCurrentUserUseCase } from '../get-current-user.usecase';
 import { UpdateUserPasswordUseCase } from '../update-user-password.usecase';
 import { UpdateUserUseCase } from '../update-user.usecase';
@@ -75,9 +76,9 @@ function makeUser(
   );
 }
 
-describe('User use cases', () => {
+describe('Casos de uso de usuário', () => {
   describe('CreateUserUseCase', () => {
-    it('creates a user when the email is available', async () => {
+    it('cria um usuário quando o e-mail está disponível', async () => {
       const repository = new InMemoryUserRepository();
       const useCase = new CreateUserUseCase(repository, new StubHashProvider());
 
@@ -93,7 +94,7 @@ describe('User use cases', () => {
       expect(output.email).toBe('lucas@example.com');
     });
 
-    it('rejects an already registered email', async () => {
+    it('rejeita um e-mail já cadastrado', async () => {
       const repository = new InMemoryUserRepository();
       repository.users.push(makeUser());
       const useCase = new CreateUserUseCase(repository, new StubHashProvider());
@@ -110,7 +111,7 @@ describe('User use cases', () => {
   });
 
   describe('GetCurrentUserUseCase', () => {
-    it('returns the user identified by the authenticated context', async () => {
+    it('retorna o usuário identificado pelo contexto autenticado', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);
@@ -122,7 +123,7 @@ describe('User use cases', () => {
       });
     });
 
-    it('fails when the user does not exist', async () => {
+    it('falha quando o usuário não existe', async () => {
       const useCase = new GetCurrentUserUseCase(new InMemoryUserRepository());
 
       await expect(
@@ -131,8 +132,33 @@ describe('User use cases', () => {
     });
   });
 
+  describe('FindUserByEmailUseCase', () => {
+    it('retorna os dados públicos do usuário encontrado pelo e-mail', async () => {
+      const repository = new InMemoryUserRepository();
+      const user = makeUser();
+      repository.users.push(user);
+      const useCase = new FindUserByEmailUseCase(repository);
+
+      await expect(
+        useCase.execute({ email: user.email }),
+      ).resolves.toMatchObject({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      });
+    });
+
+    it('falha quando nenhum usuário possui o e-mail solicitado', async () => {
+      const useCase = new FindUserByEmailUseCase(new InMemoryUserRepository());
+
+      await expect(
+        useCase.execute({ email: 'missing@example.com' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
   describe('UpdateUserUseCase', () => {
-    it('updates the name and persists the same entity', async () => {
+    it('atualiza o nome e persiste a mesma entidade', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);
@@ -149,7 +175,7 @@ describe('User use cases', () => {
   });
 
   describe('UpdateUserPasswordUseCase', () => {
-    it('hashes and persists a new password', async () => {
+    it('gera hash e persiste uma nova senha', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);
@@ -168,7 +194,7 @@ describe('User use cases', () => {
       expect(user.password).toBe('hashed-new-secret');
     });
 
-    it('rejects an incorrect current password', async () => {
+    it('rejeita uma senha atual incorreta', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);
