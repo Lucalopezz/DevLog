@@ -1,0 +1,55 @@
+import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
+import {
+  TechnicalEntryOutput,
+  TechnicalEntryOutputMapper,
+} from '../dto/technical-entry.dto';
+import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
+import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technicalEntry.repository';
+import { UserRepository } from '@/user/domain/repositories/user.repository';
+import { NotFoundException } from '@nestjs/common';
+import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry.entity';
+
+export type CreateTechnicalEntryUseCaseInput = {
+  userId: string;
+  title: string;
+  context: string;
+  conclusion?: string;
+  type: TechnicalEntryType;
+};
+
+export type CreateTechnicalEntryUseCaseOutput = TechnicalEntryOutput;
+
+export class CreateTechnicalEntryUseCase implements UseCaseContract<
+  CreateTechnicalEntryUseCaseInput,
+  CreateTechnicalEntryUseCaseOutput
+> {
+  constructor(
+    private readonly technicalEntryRepository: TechnicalEntryRepository,
+    private readonly userRepository: UserRepository,
+  ) {}
+
+  async execute(
+    input: CreateTechnicalEntryUseCaseInput,
+  ): Promise<TechnicalEntryOutput> {
+    const { userId, title, context, conclusion, type } = input;
+    const user = userId ? await this.userRepository.findById(userId) : null;
+
+    if (user === null) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    const entity = new TechnicalEntryEntity({
+      userId,
+      title,
+      context,
+      ...(conclusion !== undefined && { conclusion }),
+      type,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await this.technicalEntryRepository.insert(entity);
+
+    return TechnicalEntryOutputMapper.toOutput(entity);
+  }
+}

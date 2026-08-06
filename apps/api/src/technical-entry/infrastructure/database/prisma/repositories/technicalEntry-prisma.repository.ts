@@ -1,5 +1,5 @@
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
-import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technicalEntry.entity';
+import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry.entity';
 import {
   TechnicalEntryRepository,
   type TechnicalEntryFilter,
@@ -65,7 +65,7 @@ export class TechnicalEntryPrismaRepository implements TechnicalEntryRepository 
         context: entity.context,
         conclusion: entity.conclusion ?? null,
         type: TechnicalEntryModelMapper.toPrismaType(entity.type),
-        resolvedAt: entity.resolvedAt,
+        resolvedAt: entity.resolvedAt ?? null,
         archivedAt: entity.archivedAt ?? null,
         updatedAt: entity.updatedAt,
       },

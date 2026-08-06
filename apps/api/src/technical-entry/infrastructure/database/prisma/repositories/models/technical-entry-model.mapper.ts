@@ -1,5 +1,5 @@
 import { ValidationError } from '@/shared/domain/errors/validation-error';
-import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technicalEntry.entity';
+import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry.entity';
 import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
 import {
   TechnicalEntryType as PrismaTechnicalEntryType,
@@ -16,7 +16,7 @@ export class TechnicalEntryModelMapper {
       context: model.context,
       conclusion: model.conclusion ?? undefined,
       type,
-      resolvedAt: model.resolvedAt as Date,
+      resolvedAt: model.resolvedAt ?? undefined,
       archivedAt: model.archivedAt ?? undefined,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
@@ -38,7 +38,7 @@ export class TechnicalEntryModelMapper {
       context: entity.context,
       conclusion: entity.conclusion ?? null,
       type: this.toPrismaType(entity.type),
-      resolvedAt: entity.resolvedAt,
+      resolvedAt: entity.resolvedAt ?? null,
       archivedAt: entity.archivedAt ?? null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

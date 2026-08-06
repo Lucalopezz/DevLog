@@ -6,7 +6,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ClassValidatorFields } from '@/shared/domain/validators/class-validator-fields';
-import type { TechnicalEntryProps } from '../entities/technicalEntry.entity';
+import type { TechnicalEntryProps } from '../entities/technical-entry.entity';
 import { TechnicalEntryType } from '../entities/technical-entry-type.enum';
 
 export class TechnicalEntryRules {
@@ -36,7 +36,8 @@ export class TechnicalEntryRules {
   type: TechnicalEntryType;
 
   @IsDate({ message: 'A data de resolução deve ser válida' })
-  resolvedAt: Date;
+  @IsOptional()
+  resolvedAt?: Date;
 
   @IsOptional()
   @IsDate({ message: 'A data de arquivamento deve ser válida' })

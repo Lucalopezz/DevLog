@@ -12,7 +12,7 @@ export type TechnicalEntryProps = {
   context: string;
   conclusion?: string;
   type: TechnicalEntryType;
-  resolvedAt: Date;
+  resolvedAt?: Date;
   archivedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -109,7 +109,7 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     return this.props.type;
   }
 
-  get resolvedAt(): Date {
+  get resolvedAt(): Date | undefined {
     return this.props.resolvedAt;
   }
 

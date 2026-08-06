@@ -1,4 +1,4 @@
-import { TechnicalEntryEntity } from '../entities/technicalEntry.entity';
+import { TechnicalEntryEntity } from '../entities/technical-entry.entity';
 import { TechnicalEntryType } from '../entities/technical-entry-type.enum';
 import {
   SearchableRepositoryInterface,
