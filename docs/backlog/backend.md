@@ -1,20 +1,23 @@
 # Backlog do backend — DevLog
 
-Este documento lista as tarefas necessárias para implementar o backend do DevLog, seguindo os casos de uso e a ordem de implementação descritos em [`docs/usecases/cases.md`](../docs/usecases/cases.md).
+Este documento lista as tarefas necessárias para implementar o backend do DevLog, seguindo os casos de uso e a ordem de implementação descritos em [`docs/usecases/cases.md`](../usecases/cases.md).
 
 Escopo deste arquivo: API NestJS, camada de aplicação, domínio, persistência, autenticação, autorização e testes. O backlog do frontend será criado separadamente.
 
 O passo a passo da autenticação está em [`docs/guides/authentication_workflow.md`](../guides/authentication_workflow.md).
+
+> [!NOTE]
+> Uma tarefa só deve ser marcada como concluída quando existir implementação verificável no backend. A presença de uma tabela no Prisma, por exemplo, não significa que o caso de uso e os endpoints correspondentes já estejam prontos.
 
 ## Regras transversais
 
 - [ ] Garantir que todo recurso tenha `userId` e pertença ao usuário autenticado.
 - [ ] Impedir leitura, alteração ou exclusão lógica de recursos pertencentes a outro usuário.
 - [ ] Definir os estados e tipos documentados:
-  - [ ] `TechnicalEntry.type`: `ISSUE` ou `LEARNING`.
+  - [x] `TechnicalEntry.type`: `ISSUE` ou `LEARNING`.
   - [ ] Status de problema: `OPEN` ou `RESOLVED`.
-  - [ ] Status de projeto: `ACTIVE` ou `ARCHIVED`.
-  - [ ] Resultado de tentativa: `FAILED`, `PARTIAL` ou `SUCCESSFUL`.
+  - [ ] Status de projeto: `ACTIVE`, `PAUSED` ou `FINISHED`; definir como isso se relaciona ao arquivamento lógico por `archivedAt`.
+  - [x] Resultado de tentativa: `FAILED`, `PARTIAL` ou `SUCCESSFUL` no schema Prisma.
 - [ ] Padronizar erros de validação, autenticação, autorização e recurso não encontrado.
 - [ ] Definir DTOs, validações de entrada, respostas HTTP e contratos de cada endpoint.
 - [ ] Criar testes unitários para regras de domínio e casos de uso.
@@ -22,13 +25,14 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ## 1. Fundação compartilhada
 
-- [x] Definir a estrutura dos módulos por feature em `apps/api/src/modules/`. -> shared, user, project, technical-entry, tag, solution-attempt.
+- [x] Definir a estrutura dos módulos por feature em `apps/api/src/`. -> shared, user, auth e technicalEntry.
 - [ ] Definir entidades, identificadores, datas de criação/atualização e estratégia de arquivamento lógico.
-- [ ] Configurar o schema do banco e as migrations para usuários, projetos, entradas, tags e seus relacionamentos.
-- [ ] Definir as interfaces de repositório usadas pela camada de aplicação.
-- [ ] Implementar os adaptadores de persistência para os repositórios.
-- [ ] Configurar tratamento global de exceções e validação de DTOs.
-- [ ] Configurar a estratégia de autenticação escolhida: JWT ou sessão, sempre com cookie HttpOnly.
+- [x] Configurar o schema do banco e a migration inicial para usuários, projetos, entradas, tags e seus relacionamentos.
+- [x] Definir as interfaces de repositório compartilhadas e as de usuário/entrada técnica.
+- [x] Implementar os adaptadores Prisma para usuário e entrada técnica.
+- [ ] Implementar tratamento global de exceções.
+- [x] Configurar `ValidationPipe` global com `whitelist` e `transform`.
+- [x] Configurar JWT em cookie HttpOnly; o logout atual remove o cookie porque a estratégia é stateless.
 
 ## 2. Usuários e autenticação
 
@@ -44,19 +48,19 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### AuthenticateUser
 
-- [ ] Criar o caso de uso `AuthenticateUser`.
-- [ ] Buscar o usuário por email.
-- [ ] Comparar a senha informada com o hash armazenado.
-- [ ] Retornar erro sem revelar se o email ou a senha está incorreto.
-- [ ] Gerar sessão ou JWT após autenticação válida.
-- [ ] Enviar o token por cookie HttpOnly com as configurações de segurança adequadas.
-- [ ] Criar o endpoint de login.
+- [x] Criar o caso de uso `AuthenticateUser`.
+- [x] Buscar o usuário por email.
+- [x] Comparar a senha informada com o hash armazenado.
+- [x] Retornar erro sem revelar se o email ou a senha está incorreto.
+- [x] Gerar JWT após autenticação válida.
+- [x] Enviar o token por cookie HttpOnly com `secure`, `sameSite`, `maxAge` e `path` configurados.
+- [x] Criar o endpoint `POST /auth/login`.
 - [ ] Testar login válido, usuário inexistente, senha incorreta e criação do cookie.
 
 ### GetCurrentUser
 
 - [x] Criar o caso de uso `GetCurrentUser`.
-- [ ] Criar o guard ou middleware que identifica o usuário autenticado.
+- [x] Criar o guard que identifica o usuário autenticado pelo cookie JWT.
 - [x] Criar `GET /users/me`.
 - [x] Retornar apenas os dados públicos do usuário atual.
 - [ ] Testar acesso autenticado e acesso sem autenticação.
@@ -67,7 +71,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Permitir a alteração somente do nome do usuário.
 - [x] Manter o e-mail imutável após o cadastro.
 - [x] Criar `PATCH /users/:id`.
-- [ ] Garantir que somente o usuário autenticado possa alterar o próprio perfil.
+- [ ] Garantir que o `:id` seja o mesmo usuário identificado pelo guard.
 - [ ] Testar atualização válida, usuário inexistente e tentativa de alteração sem autenticação.
 
 ### UpdateUserPassword
@@ -76,25 +80,26 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Validar a confirmação da nova senha.
 - [x] Fazer hash da nova senha antes de persistir.
 - [x] Criar `PATCH /users/:id/password`.
-- [ ] Exigir autenticação e validar a senha atual obrigatoriamente.
+- [ ] Exigir autenticação e validar a senha atual obrigatoriamente (hoje `currentPassword` é opcional).
 - [ ] Testar atualização válida, senha atual inválida, confirmação divergente e usuário inexistente.
 
 ### LogoutUser
 
-- [ ] Criar o caso de uso `LogoutUser`.
-- [ ] Invalidar a sessão, quando a estratégia escolhida exigir isso.
-- [ ] Remover ou expirar o cookie de autenticação.
-- [ ] Criar o endpoint de logout.
+- [x] Criar o fluxo de logout stateless; não há sessão persistida para invalidar.
+- [x] Remover o cookie de autenticação.
+- [x] Criar o endpoint `POST /auth/logout`.
 - [ ] Testar encerramento da autenticação e comportamento de uma sessão inválida.
 
 ## 3. Entradas técnicas — MVP inicial
 
+> A camada de domínio já possui entidade, enum, validação, contrato de repositório, mapper e repositório Prisma com busca paginada, ordenação e filtros por usuário, projeto, título, tipo e arquivamento. Ainda não existem os casos de uso nem os endpoints de entradas técnicas.
+
 ### CreateTechnicalEntry
 
-- [ ] Criar a entidade de entrada técnica.
+- [x] Criar a entidade de entrada técnica.
 - [ ] Criar o caso de uso `CreateTechnicalEntry`.
 - [ ] Validar `title`, `type`, `context`, `conclusion?`, `projectId?` e `tags?`.
-- [ ] Aceitar somente os tipos `ISSUE` e `LEARNING`.
+- [x] Aceitar somente os tipos `ISSUE` e `LEARNING` na entidade e no schema Prisma.
 - [ ] Criar entradas como `OPEN` quando forem do tipo `ISSUE`.
 - [ ] Permitir conclusão opcional na criação, conforme o caso de uso.
 - [ ] Associar opcionalmente a entrada a um projeto do mesmo usuário.
@@ -105,6 +110,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 ### GetTechnicalEntry
 
 - [ ] Criar o caso de uso `GetTechnicalEntry`.
+- [x] Disponibilizar busca por identificador no contrato e no repositório Prisma.
 - [ ] Retornar a entrada completa com projeto, tags e, para `ISSUE`, tentativas e status.
 - [ ] Garantir que uma entrada de outro usuário não seja encontrada pelo usuário atual.
 - [ ] Criar o endpoint de consulta por identificador.
@@ -113,10 +119,11 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 ### ListTechnicalEntries
 
 - [ ] Criar o caso de uso `ListTechnicalEntries`.
+- [x] Disponibilizar paginação e ordenação no repositório Prisma.
 - [ ] Listar somente entradas do usuário autenticado.
-- [ ] Implementar busca textual por `search`.
-- [ ] Implementar filtros por `projectId`, `tagId`, `type` e `status`.
-- [ ] Definir paginação e ordenação para evitar consultas sem limite.
+- [ ] Implementar busca textual por `search` no caso de uso/API.
+- [ ] Implementar filtros por `projectId`, `tagId`, `type` e `status` no caso de uso/API.
+- [ ] Expor paginação e ordenação do repositório no caso de uso/API para evitar consultas sem limite.
 - [ ] Criar o endpoint de listagem.
 - [ ] Testar combinações de filtros e garantir que resultados de outros usuários nunca sejam retornados.
 
@@ -270,7 +277,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 ### ArchiveProject
 
 - [ ] Criar o caso de uso `ArchiveProject`.
-- [ ] Alterar o projeto de `ACTIVE` para `ARCHIVED` sem exclusão física.
+- [ ] Alterar o projeto para arquivado sem exclusão física, preenchendo `archivedAt` e definindo sua relação com `ProjectStatus` (`ACTIVE`, `PAUSED` ou `FINISHED`).
 - [ ] Impedir operações incompatíveis com projeto arquivado conforme as regras do domínio.
 - [ ] Preservar tecnologias, comandos, recursos e entradas relacionadas.
 - [ ] Criar o endpoint de arquivamento.
