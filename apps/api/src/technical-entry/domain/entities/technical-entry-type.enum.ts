@@ -1,4 +1,4 @@
 export enum TechnicalEntryType {
-  ISSUE,
-  LEARNING,
+  ISSUE = 'ISSUE',
+  LEARNING = 'LEARNING',
 }

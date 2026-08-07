@@ -53,6 +53,8 @@ export class TechnicalEntryModelMapper {
         return TechnicalEntryType.ISSUE;
       case PrismaTechnicalEntryType.LEARNING:
         return TechnicalEntryType.LEARNING;
+      default:
+        throw new ValidationError('Invalid technical entry type');
     }
   }
 
@@ -63,7 +65,7 @@ export class TechnicalEntryModelMapper {
       case TechnicalEntryType.LEARNING:
         return PrismaTechnicalEntryType.LEARNING;
       default:
-        throw new Error('Invalid technical entry type');
+        throw new ValidationError('Invalid technical entry type');
     }
   }
 }
