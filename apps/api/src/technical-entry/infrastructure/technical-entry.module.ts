@@ -5,6 +5,9 @@ import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
 import { UserPrismaRepository } from '@/user/infrastructure/database/prisma/repositories/user-prisma.repository';
 import { TechnicalEntryPrismaRepository } from './database/prisma/repositories/technicalEntry-prisma.repository';
 import { CreateTechnicalEntryUseCase } from '../application/usecases/create-technical-entry.usecase';
+import { GetTechnicalEntryUseCase } from '../application/usecases/get-technical-entry.usecase';
+import { UpdateTechnicalEntryUseCase } from '../application/usecases/update-technical-entry.usecase';
+import { DeleteTechnicalEntryUseCase } from '../application/usecases/delete-technical-entry.usecase';
 import { TechnicalEntryRepository } from '../domain/repositories/technicalEntry.repository';
 
 @Module({
@@ -41,6 +44,27 @@ import { TechnicalEntryRepository } from '../domain/repositories/technicalEntry.
         );
       },
       inject: ['TechnicalEntryRepository', 'UserRepository'],
+    },
+    {
+      provide: GetTechnicalEntryUseCase,
+      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
+        return new GetTechnicalEntryUseCase(technicalEntryRepository);
+      },
+      inject: ['TechnicalEntryRepository'],
+    },
+    {
+      provide: UpdateTechnicalEntryUseCase,
+      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
+        return new UpdateTechnicalEntryUseCase(technicalEntryRepository);
+      },
+      inject: ['TechnicalEntryRepository'],
+    },
+    {
+      provide: DeleteTechnicalEntryUseCase,
+      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
+        return new DeleteTechnicalEntryUseCase(technicalEntryRepository);
+      },
+      inject: ['TechnicalEntryRepository'],
     },
   ],
 })

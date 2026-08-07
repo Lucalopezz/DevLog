@@ -61,6 +61,7 @@ export class TechnicalEntryPrismaRepository implements TechnicalEntryRepository 
     await this.prismaService.technicalEntry.update({
       where: { id: entity.id },
       data: {
+        projectId: entity.projectId ?? null,
         title: entity.title,
         context: entity.context,
         conclusion: entity.conclusion ?? null,

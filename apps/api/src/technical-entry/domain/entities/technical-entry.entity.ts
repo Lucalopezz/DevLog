@@ -76,6 +76,23 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
       this.updateUpdatedAt();
     }
   }
+
+  changeConclusion(conclusion: string | null): void {
+    const updatedConclusion = conclusion ?? undefined;
+
+    TechnicalEntryEntity.validate({
+      ...this.props,
+      conclusion: updatedConclusion,
+    });
+
+    this.props.conclusion = updatedConclusion;
+    this.updateUpdatedAt();
+  }
+
+  changeProject(projectId: string | null): void {
+    this.props.projectId = projectId ?? undefined;
+    this.updateUpdatedAt();
+  }
   conclude(): void {
     this.resolvedAt = new Date();
     this.updateUpdatedAt();
