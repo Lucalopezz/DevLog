@@ -2,7 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import { SearchResult } from '@/shared/domain/repositories/searchable.repository';
 import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry.entity';
 import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
-import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technicalEntry.repository';
+import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technical-entry.repository';
 import { DeleteTechnicalEntryUseCase } from '../delete-technical-entry.usecase';
 import { GetTechnicalEntryUseCase } from '../get-technical-entry.usecase';
 import { UpdateTechnicalEntryUseCase } from '../update-technical-entry.usecase';

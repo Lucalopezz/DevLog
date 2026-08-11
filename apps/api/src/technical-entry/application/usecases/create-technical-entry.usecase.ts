@@ -4,7 +4,7 @@ import {
   TechnicalEntryOutputMapper,
 } from '../dto/technical-entry.dto';
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
-import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technicalEntry.repository';
+import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technical-entry.repository';
 import { UserRepository } from '@/user/domain/repositories/user.repository';
 import { NotFoundException } from '@nestjs/common';
 import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry.entity';

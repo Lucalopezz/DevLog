@@ -1,5 +1,5 @@
 import { UpdateTechnicalEntryUseCaseInput } from '@/technical-entry/application/usecases/update-technical-entry.usecase';
-import { IsOptional, IsString, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 
 export class UpdateTechnicalEntryDto implements Omit<
   UpdateTechnicalEntryUseCaseInput,
@@ -21,5 +21,6 @@ export class UpdateTechnicalEntryDto implements Omit<
 
   @IsOptional()
   @IsString({ message: 'Parametro inválido' })
+  @IsUUID('4', { message: 'Parametro inválido' })
   projectId?: string | null;
 }

@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
 } from 'class-validator';
 import { ClassValidatorFields } from '@/shared/domain/validators/class-validator-fields';
 import type { TechnicalEntryProps } from '../entities/technical-entry.entity';
@@ -12,10 +13,12 @@ import { TechnicalEntryType } from '../entities/technical-entry-type.enum';
 export class TechnicalEntryRules {
   @IsString({ message: 'O ID do usuário deve ser um texto' })
   @IsNotEmpty({ message: 'O ID do usuário é obrigatório' })
+  @IsUUID('4', { message: 'O ID do usuário deve ser um UUID válido' })
   userId: string;
 
   @IsOptional()
   @IsString({ message: 'O ID do projeto deve ser um texto' })
+  @IsUUID('4', { message: 'O ID do usuário deve ser um UUID válido' })
   projectId?: string;
 
   @IsString({ message: 'O título deve ser um texto' })

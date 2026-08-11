@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
-import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technicalEntry.repository';
+import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technical-entry.repository';
 
 export type DeleteTechnicalEntryUseCaseInput = {
   id: string;

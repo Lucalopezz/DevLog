@@ -170,10 +170,8 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [ ] Remover o `TODO` de `UpdateTechnicalEntryUseCase`: consultar um `ProjectRepository` e rejeitar projeto inexistente ou pertencente a outro usuário antes de alterar `projectId`.
 - [ ] Restringir consultas de repositório por `userId` sempre que possível; `findAll()` não possui escopo de usuário e não deve alimentar endpoints autenticados.
 - [x] Corrigir o teste de saída paginada de `SearchTechnicalEntryUseCase` para sempre informar o `userId` obrigatório.
-- [ ] Trocar o filtro HTTP `archivedAt` por uma intenção de domínio, como `archived=true|false`; aceitar uma data exata expõe um detalhe de persistência e dificilmente representa a consulta desejada pelo usuário.
-- [ ] Reutilizar o `PrismaService` exportado pelo `DatabaseModule` em vez de registrar outra instância com o token textual `PrismaService` dentro de `TechnicalEntryModule`.
-- [ ] Encapsular as transições de domínio: `conclude()` deve aceitar somente `ISSUE` e exigir conclusão, enquanto alteração de tipo, resolução e arquivamento não devem ficar disponíveis como atualizações genéricas.
-- [ ] Padronizar os nomes de arquivos e símbolos que ainda usam `technicalEntry`/`techinicalEntry` para kebab-case e corrigir o typo, sem misturar essa refatoração com uma feature nova.
+- [x] Encapsular as transições de domínio: `conclude()` deve aceitar somente `ISSUE` e exigir conclusão, enquanto alteração de tipo, resolução e arquivamento não devem ficar disponíveis como atualizações genéricas.
+- [x] Padronizar os nomes de arquivos e símbolos que ainda usam `technicalEntry`/`techinicalEntry` para kebab-case e corrigir o typo, sem misturar essa refatoração com uma feature nova.
 
 ## 4. Tags
 

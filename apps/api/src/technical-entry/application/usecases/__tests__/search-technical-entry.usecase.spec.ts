@@ -5,7 +5,7 @@ import {
   TechnicalEntryRepository,
   TechnicalEntrySearchParams,
   TechnicalEntrySearchResult,
-} from '@/technical-entry/domain/repositories/technicalEntry.repository';
+} from '@/technical-entry/domain/repositories/technical-entry.repository';
 import { SearchTechnicalEntryUseCase } from '../search-technical-entry.usecase';
 import { UnprocessableEntityException } from '@nestjs/common';
 

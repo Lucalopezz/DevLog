@@ -3,12 +3,12 @@ import { TechnicalEntryController } from './technical-entry.controller';
 import { AuthModule } from '@/auth/infrastructure/auth.module';
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
 import { UserPrismaRepository } from '@/user/infrastructure/database/prisma/repositories/user-prisma.repository';
-import { TechnicalEntryPrismaRepository } from './database/prisma/repositories/technicalEntry-prisma.repository';
+import { TechnicalEntryPrismaRepository } from './database/prisma/repositories/technical-entry-prisma.repository';
 import { CreateTechnicalEntryUseCase } from '../application/usecases/create-technical-entry.usecase';
 import { GetTechnicalEntryUseCase } from '../application/usecases/get-technical-entry.usecase';
 import { UpdateTechnicalEntryUseCase } from '../application/usecases/update-technical-entry.usecase';
 import { DeleteTechnicalEntryUseCase } from '../application/usecases/delete-technical-entry.usecase';
-import { TechnicalEntryRepository } from '../domain/repositories/technicalEntry.repository';
+import { TechnicalEntryRepository } from '../domain/repositories/technical-entry.repository';
 import { SearchTechnicalEntryUseCase } from '../application/usecases/search-technical-entry.usecase';
 
 @Module({

@@ -9,7 +9,7 @@ import {
   TechnicalEntryRepository,
   TechnicalEntrySearchParams,
   TechnicalEntrySearchResult,
-} from '@/technical-entry/domain/repositories/technicalEntry.repository';
+} from '@/technical-entry/domain/repositories/technical-entry.repository';
 import {
   TechnicalEntryOutput,
   TechnicalEntryOutputMapper,

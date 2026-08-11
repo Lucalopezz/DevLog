@@ -5,7 +5,7 @@ import {
   type TechnicalEntryFilter,
   TechnicalEntrySearchParams,
   TechnicalEntrySearchResult,
-} from '@/technical-entry/domain/repositories/technicalEntry.repository';
+} from '@/technical-entry/domain/repositories/technical-entry.repository';
 import { SearchResult } from '@/shared/domain/repositories/searchable.repository';
 import { Prisma } from '@generated/prisma/client';
 import { TechnicalEntryModelMapper } from './models/technical-entry-model.mapper';

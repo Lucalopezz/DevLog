@@ -1,9 +1,9 @@
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
 import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry-status.enum';
 import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
-import { TechnicalEntrySearchParams } from '@/technical-entry/domain/repositories/technicalEntry.repository';
+import { TechnicalEntrySearchParams } from '@/technical-entry/domain/repositories/technical-entry.repository';
 import { TechnicalEntryType as PrismaTechnicalEntryType } from '@generated/prisma/client';
-import { TechnicalEntryPrismaRepository } from './technicalEntry-prisma.repository';
+import { TechnicalEntryPrismaRepository } from './technical-entry-prisma.repository';
 
 describe('TechnicalEntryPrismaRepository', () => {
   const count = jest.fn().mockResolvedValue(0);

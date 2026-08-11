@@ -1,6 +1,6 @@
 import { Entity } from '@/shared/domain/entities/entity';
 import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
-import { TechnicalEntryValidatorFactory } from '../validators/techinicalEntry.validator';
+import { TechnicalEntryValidatorFactory } from '../validators/technical-entry.validator';
 import { TechnicalEntryType } from './technical-entry-type.enum';
 import { TechnicalEntryStatus } from './technical-entry-status.enum';
 
@@ -27,22 +27,11 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     TechnicalEntryEntity.validate(props);
     super(props, id);
   }
-  update(
-    title?: string,
-    context?: string,
-    conclusion?: string,
-    type?: TechnicalEntryType,
-    resolvedAt?: Date,
-    archivedAt?: Date,
-  ): void {
+  update(title?: string, context?: string): void {
     const updatedProps = {
       ...this.props,
       ...(title !== undefined && { title }),
       ...(context !== undefined && { context }),
-      ...(conclusion !== undefined && { conclusion }),
-      ...(type !== undefined && { type }),
-      ...(resolvedAt !== undefined && { resolvedAt }),
-      ...(archivedAt !== undefined && { archivedAt }),
     };
 
     TechnicalEntryEntity.validate(updatedProps);
@@ -53,27 +42,7 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     if (context !== undefined) {
       this.context = context;
     }
-    if (conclusion !== undefined) {
-      this.conclusion = conclusion;
-    }
-    if (type !== undefined) {
-      this.type = type;
-    }
-    if (resolvedAt !== undefined) {
-      this.resolvedAt = resolvedAt;
-    }
-    if (archivedAt !== undefined) {
-      this.archivedAt = archivedAt;
-    }
-
-    if (
-      title !== undefined ||
-      context !== undefined ||
-      conclusion !== undefined ||
-      type !== undefined ||
-      resolvedAt !== undefined ||
-      archivedAt !== undefined
-    ) {
+    if (title !== undefined || context !== undefined) {
       this.updateUpdatedAt();
     }
   }
@@ -94,7 +63,22 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     this.props.projectId = projectId ?? undefined;
     this.updateUpdatedAt();
   }
-  conclude(): void {
+  conclude(conclusion: string): void {
+    if (this.type !== TechnicalEntryType.ISSUE) {
+      throw new EntityValidationError({
+        type: ['Somente entradas do tipo ISSUE podem ser concluídas'],
+      });
+    }
+
+    TechnicalEntryEntity.validate({ ...this.props, conclusion });
+
+    if (!conclusion?.trim()) {
+      throw new EntityValidationError({
+        conclusion: ['A conclusão é obrigatória para concluir uma entrada'],
+      });
+    }
+
+    this.conclusion = conclusion;
     this.resolvedAt = new Date();
     this.updateUpdatedAt();
   }
@@ -162,10 +146,6 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
 
   private set conclusion(conclusion: string) {
     this.props.conclusion = conclusion;
-  }
-
-  private set type(type: TechnicalEntryType) {
-    this.props.type = type;
   }
 
   private set resolvedAt(resolvedAt: Date) {
