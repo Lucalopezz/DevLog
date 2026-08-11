@@ -9,6 +9,7 @@ import { GetTechnicalEntryUseCase } from '../application/usecases/get-technical-
 import { UpdateTechnicalEntryUseCase } from '../application/usecases/update-technical-entry.usecase';
 import { DeleteTechnicalEntryUseCase } from '../application/usecases/delete-technical-entry.usecase';
 import { TechnicalEntryRepository } from '../domain/repositories/technicalEntry.repository';
+import { SearchTechnicalEntryUseCase } from '../application/usecases/search-technical-entry.usecase';
 
 @Module({
   controllers: [TechnicalEntryController],
@@ -49,6 +50,13 @@ import { TechnicalEntryRepository } from '../domain/repositories/technicalEntry.
       provide: GetTechnicalEntryUseCase,
       useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
         return new GetTechnicalEntryUseCase(technicalEntryRepository);
+      },
+      inject: ['TechnicalEntryRepository'],
+    },
+    {
+      provide: SearchTechnicalEntryUseCase,
+      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
+        return new SearchTechnicalEntryUseCase(technicalEntryRepository);
       },
       inject: ['TechnicalEntryRepository'],
     },

@@ -9,12 +9,12 @@ export type PaginationPresenterProps = {
 
 export class PaginationPresenter {
   @Transform(({ value }: TransformFnParams) =>
-    Number.parseInt(String(value), 1),
+    Number.parseInt(String(value), 10),
   )
   currentPage: number;
 
   @Transform(({ value }: TransformFnParams) =>
-    Number.parseInt(String(value), 15),
+    Number.parseInt(String(value), 10),
   )
   perPage: number;
 

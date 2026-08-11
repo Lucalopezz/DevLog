@@ -10,6 +10,8 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  ClassSerializerInterceptor,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreateTechnicalEntryDto } from './dto/create-technical-entry.dto';
 import { UpdateTechnicalEntryDto } from './dto/update-technical-entry.dto';
@@ -20,6 +22,15 @@ import { DeleteTechnicalEntryUseCase } from '../application/usecases/delete-tech
 import { AuthGuard } from '@/auth/infrastructure/auth.guard';
 import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '@/auth/types/authenticated-user';
+import {
+  SearchTechnicalEntryUseCase,
+  type SearchTechnicalEntryUseCaseOutput,
+} from '../application/usecases/search-technical-entry.usecase';
+import type { TechnicalEntryOutput } from '../application/dto/technical-entry.dto';
+import {
+  TechnicalEntryCollectionPresenter,
+  TechnicalEntryPresenter,
+} from './presenters/technical-entry.presenter';
 
 @Controller('technical-entry')
 export class TechnicalEntryController {
@@ -35,43 +46,71 @@ export class TechnicalEntryController {
   @Inject(DeleteTechnicalEntryUseCase)
   private deleteTechnicalEntryUseCase: DeleteTechnicalEntryUseCase;
 
+  @Inject(SearchTechnicalEntryUseCase)
+  private searchTechnicalEntryUseCase: SearchTechnicalEntryUseCase;
+
+  static technicalEntryToResponse(output: TechnicalEntryOutput) {
+    return new TechnicalEntryPresenter(output);
+  }
+
+  static listTechnicalEntriesToResponse(
+    output: SearchTechnicalEntryUseCaseOutput,
+  ) {
+    return new TechnicalEntryCollectionPresenter(output);
+  }
+
   @Post()
   @UseGuards(AuthGuard)
-  create(
+  async create(
     @Body() createTechnicalEntryDto: CreateTechnicalEntryDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.createTechnicalEntryUseCase.execute({
+    const output = await this.createTechnicalEntryUseCase.execute({
       ...createTechnicalEntryDto,
       userId: user.id,
     });
+
+    return TechnicalEntryController.technicalEntryToResponse(output);
   }
 
   @Get()
   @UseGuards(AuthGuard)
-  findAll() {}
+  async search(@CurrentUser() user: AuthenticatedUser) {
+    const output = await this.searchTechnicalEntryUseCase.execute({
+      userId: user.id,
+    });
+
+    return TechnicalEntryController.listTechnicalEntriesToResponse(output);
+  }
 
   @Get(':id')
   @UseGuards(AuthGuard)
-  findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
-    return this.getTechnicalEntryUseCase.execute({
+  async findOne(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.getTechnicalEntryUseCase.execute({
       id,
       userId: user.id,
     });
+
+    return TechnicalEntryController.technicalEntryToResponse(output);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard)
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateTechnicalEntryDto: UpdateTechnicalEntryDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.updateTechnicalEntryUseCase.execute({
+    const output = await this.updateTechnicalEntryUseCase.execute({
       ...updateTechnicalEntryDto,
       id,
       userId: user.id,
     });
+
+    return TechnicalEntryController.technicalEntryToResponse(output);
   }
 
   @Delete(':id')

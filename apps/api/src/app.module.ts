@@ -6,7 +6,13 @@ import { AuthModule } from './auth/infrastructure/auth.module';
 import { TechnicalEntryModule } from './technical-entry/infrastructure/technical-entry.module';
 
 @Module({
-  imports: [EnvConfigModule, DatabaseModule, UserModule, AuthModule, TechnicalEntryModule],
+  imports: [
+    EnvConfigModule,
+    DatabaseModule,
+    UserModule,
+    AuthModule,
+    TechnicalEntryModule,
+  ],
   controllers: [],
   providers: [],
 })
