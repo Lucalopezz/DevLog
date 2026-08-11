@@ -9,6 +9,7 @@ export type TechnicalEntryOutput = {
   context: string;
   conclusion?: string;
   type: TechnicalEntryType;
+  // Status infereido a partir do campo resolvedAt. Se resolvedAt for nulo, o status é 'OPEN', caso contrário, é 'RESOLVED'.
   status?: 'OPEN' | 'RESOLVED';
   resolvedAt?: Date;
   archivedAt?: Date;
@@ -26,9 +27,7 @@ export class TechnicalEntryOutputMapper {
       context: technicalEntry.context,
       conclusion: technicalEntry.conclusion,
       type: technicalEntry.type,
-      ...(technicalEntry.type === TechnicalEntryType.ISSUE && {
-        status: technicalEntry.resolvedAt ? 'RESOLVED' : 'OPEN',
-      }),
+      status: technicalEntry.status,
       resolvedAt: technicalEntry.resolvedAt,
       archivedAt: technicalEntry.archivedAt,
       createdAt: technicalEntry.createdAt,

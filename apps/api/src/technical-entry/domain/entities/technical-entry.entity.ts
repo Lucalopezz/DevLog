@@ -2,6 +2,7 @@ import { Entity } from '@/shared/domain/entities/entity';
 import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
 import { TechnicalEntryValidatorFactory } from '../validators/techinicalEntry.validator';
 import { TechnicalEntryType } from './technical-entry-type.enum';
+import { TechnicalEntryStatus } from './technical-entry-status.enum';
 
 export { TechnicalEntryType } from './technical-entry-type.enum';
 
@@ -100,6 +101,15 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   archive(): void {
     this.archivedAt = new Date();
     this.updateUpdatedAt();
+  }
+  get status(): TechnicalEntryStatus | undefined {
+    if (this.type !== TechnicalEntryType.ISSUE) {
+      return undefined;
+    }
+
+    return this.resolvedAt
+      ? TechnicalEntryStatus.RESOLVED
+      : TechnicalEntryStatus.OPEN;
   }
 
   get userId(): string {
