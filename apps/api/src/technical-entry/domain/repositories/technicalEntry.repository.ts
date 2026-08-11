@@ -14,12 +14,12 @@ export type TechnicalEntryFilter = {
   archivedAt?: Date | null;
 };
 
-export type TechnicalEntrySearchParams = SearchParams<TechnicalEntryFilter>;
+export class TechnicalEntrySearchParams extends SearchParams<TechnicalEntryFilter> {}
 
-export type TechnicalEntrySearchResult = SearchResult<
+export class TechnicalEntrySearchResult extends SearchResult<
   TechnicalEntryEntity,
   TechnicalEntryFilter
->;
+> {}
 
 export interface TechnicalEntryRepository extends SearchableRepositoryInterface<
   TechnicalEntryEntity,
