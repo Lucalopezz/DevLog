@@ -128,9 +128,10 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Listar somente entradas do usuário autenticado, sobrescrevendo qualquer dado externo com o `userId` obtido pelo guard.
 - [x] Definir `title` como o parâmetro oficial de busca textual e aplicar correspondência parcial case-insensitive no repositório.
 - [x] Implementar filtros por `projectId` e `type` no caso de uso/API.
-- [ ] Implementar filtros por `tagId` e `status` no caso de uso/API.
+- [ ] Implementar o filtro por `tagId` depois da feature de tags.
+- [x] Implementar o filtro por `status`, validando o enum e traduzindo `OPEN`/`RESOLVED` para condições sobre `resolvedAt` restritas a `ISSUE`.
 - [x] Expor paginação e ordenação através de DTO, caso de uso e presenter de coleção.
-- [ ] Definir um limite máximo para `perPage`, evitando que o cliente transforme uma consulta paginada em uma consulta praticamente sem limite.
+- [x] Manter `perPage` sem limite máximo por decisão de produto, preservando a liberdade do usuário sobre o tamanho da página.
 - [x] Criar o endpoint autenticado `GET /api/technical-entry`.
 - [x] Testar conversão/validação do DTO, mapeamento do caso de uso e formato `data`/`meta` do presenter.
 - [ ] Testar o repositório Prisma, combinações de filtros e garantir via HTTP que resultados de outros usuários nunca sejam retornados.
@@ -157,8 +158,10 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### Pendências encontradas na revisão da etapa
 
+> As pendências de testes e2e abaixo foram adiadas até a etapa dedicada a testes HTTP e não bloqueiam o início da feature de tags.
+
 - [ ] Criar testes unitários para `CreateTechnicalEntryUseCase`; atualmente ele não aparece na suíte de casos de uso de entradas.
-- [ ] Criar testes da entidade e do repositório Prisma; hoje existem testes dos casos de uso de consulta/atualização/exclusão e do mapper, mas as invariantes da entidade e os filtros de persistência não são exercitados diretamente.
+- [ ] Criar testes da entidade e ampliar os testes do repositório Prisma; a tradução do filtro de status está coberta, mas as demais invariantes e combinações de persistência ainda não são exercitadas diretamente.
 - [ ] Corrigir a configuração do Jest e2e para resolver os imports relativos `.js` do cliente Prisma gerado; atualmente a suíte falha antes de executar qualquer teste.
 - [ ] Aplicar `applyGlobalConfig` também no bootstrap dos testes e2e, garantindo que eles exercitem o prefixo `/api`, validação, cookies e serialização usados em produção.
 - [ ] Substituir o teste e2e legado de `GET /` pelos fluxos de criação, listagem, consulta, atualização e exclusão de entradas técnicas.
@@ -166,7 +169,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [ ] Validar os limites persistidos pelo banco, especialmente `title` com no máximo 200 caracteres, para retornar erro de entrada em vez de erro de persistência.
 - [ ] Remover o `TODO` de `UpdateTechnicalEntryUseCase`: consultar um `ProjectRepository` e rejeitar projeto inexistente ou pertencente a outro usuário antes de alterar `projectId`.
 - [ ] Restringir consultas de repositório por `userId` sempre que possível; `findAll()` não possui escopo de usuário e não deve alimentar endpoints autenticados.
-- [ ] Corrigir o teste de saída paginada de `SearchTechnicalEntryUseCase`, que chama o caso de uso sem o `userId` obrigatório e, portanto, não exercita o isolamento nessa variação.
+- [x] Corrigir o teste de saída paginada de `SearchTechnicalEntryUseCase` para sempre informar o `userId` obrigatório.
 - [ ] Trocar o filtro HTTP `archivedAt` por uma intenção de domínio, como `archived=true|false`; aceitar uma data exata expõe um detalhe de persistência e dificilmente representa a consulta desejada pelo usuário.
 - [ ] Reutilizar o `PrismaService` exportado pelo `DatabaseModule` em vez de registrar outra instância com o token textual `PrismaService` dentro de `TechnicalEntryModule`.
 - [ ] Encapsular as transições de domínio: `conclude()` deve aceitar somente `ISSUE` e exigir conclusão, enquanto alteração de tipo, resolução e arquivamento não devem ficar disponíveis como atualizações genéricas.
