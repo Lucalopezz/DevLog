@@ -1,4 +1,5 @@
 import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
+import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry-status.enum';
 import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry.entity';
 import {
   TechnicalEntryRepository,
@@ -6,6 +7,7 @@ import {
   TechnicalEntrySearchResult,
 } from '@/technical-entry/domain/repositories/technicalEntry.repository';
 import { SearchTechnicalEntryUseCase } from '../search-technical-entry.usecase';
+import { UnprocessableEntityException } from '@nestjs/common';
 
 describe('SearchTechnicalEntryUseCase', () => {
   let repository: jest.Mocked<TechnicalEntryRepository>;
@@ -36,7 +38,8 @@ describe('SearchTechnicalEntryUseCase', () => {
       userId: 'user-1',
       projectId: 'project-1',
       title: 'NestJS',
-      type: TechnicalEntryType.LEARNING,
+      type: TechnicalEntryType.ISSUE,
+      status: TechnicalEntryStatus.RESOLVED,
       archivedAt: null,
     });
 
@@ -52,10 +55,23 @@ describe('SearchTechnicalEntryUseCase', () => {
         userId: 'user-1',
         projectId: 'project-1',
         title: 'NestJS',
-        type: TechnicalEntryType.LEARNING,
+        type: TechnicalEntryType.ISSUE,
+        status: TechnicalEntryStatus.RESOLVED,
         archivedAt: null,
       },
     });
+  });
+
+  it('rejeita filtro de status para entradas do tipo LEARNING', async () => {
+    await expect(
+      useCase.execute({
+        userId: 'user-1',
+        type: TechnicalEntryType.LEARNING,
+        status: TechnicalEntryStatus.OPEN,
+      }),
+    ).rejects.toBeInstanceOf(UnprocessableEntityException);
+
+    expect(repository.search.mock.calls).toHaveLength(0);
   });
 
   it('converte o resultado do repositório em uma saída paginada', async () => {
@@ -80,7 +96,11 @@ describe('SearchTechnicalEntryUseCase', () => {
       }),
     );
 
-    const output = await useCase.execute({ page: 2, perPage: 1 });
+    const output = await useCase.execute({
+      userId: 'user-1',
+      page: 2,
+      perPage: 1,
+    });
 
     expect(output).toEqual({
       items: [

@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
+import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry-status.enum';
 import { SearchTechnicalEntryDto } from './search-technical-entry.dto';
 
 describe('SearchTechnicalEntryDto', () => {
@@ -12,7 +13,8 @@ describe('SearchTechnicalEntryDto', () => {
       sort: 'title',
       sortDir: 'desc',
       archivedAt: 'null',
-      type: TechnicalEntryType.LEARNING,
+      type: TechnicalEntryType.ISSUE,
+      status: TechnicalEntryStatus.OPEN,
       projectId: '5ab0c050-5050-4d2b-b0a0-44247985de2b',
       title: 'NestJS',
     });
@@ -32,6 +34,7 @@ describe('SearchTechnicalEntryDto', () => {
       sortDir: 'up',
       archivedAt: 'invalid-date',
       type: 'INVALID',
+      status: 'INVALID',
       projectId: 'invalid-id',
       title: 123,
     });
@@ -45,6 +48,7 @@ describe('SearchTechnicalEntryDto', () => {
         'sortDir',
         'archivedAt',
         'type',
+        'status',
         'projectId',
         'title',
       ]),

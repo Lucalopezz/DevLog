@@ -5,6 +5,7 @@ import {
   SearchParams,
   SearchResult,
 } from '@/shared/domain/repositories/searchable.repository';
+import { TechnicalEntryStatus } from '../entities/technical-entry-status.enum';
 
 export type TechnicalEntryFilter = {
   userId?: string;
@@ -12,6 +13,7 @@ export type TechnicalEntryFilter = {
   title?: string;
   type?: TechnicalEntryType;
   archivedAt?: Date | null;
+  status?: TechnicalEntryStatus;
 };
 
 export class TechnicalEntrySearchParams extends SearchParams<TechnicalEntryFilter> {}

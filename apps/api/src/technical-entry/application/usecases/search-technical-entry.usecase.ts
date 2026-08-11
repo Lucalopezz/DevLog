@@ -14,6 +14,8 @@ import {
   TechnicalEntryOutput,
   TechnicalEntryOutputMapper,
 } from '../dto/technical-entry.dto';
+import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry-status.enum';
+import { UnprocessableEntityException } from '@nestjs/common';
 
 export type SearchTechnicalEntryUseCaseInput = {
   userId: string;
@@ -26,6 +28,7 @@ export type SearchTechnicalEntryUseCaseInput = {
   title?: string;
   type?: TechnicalEntryType;
   archivedAt?: Date | null;
+  status?: TechnicalEntryStatus;
 };
 
 export type SearchTechnicalEntryUseCaseOutput =
@@ -42,11 +45,24 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
   async execute(
     input: SearchTechnicalEntryUseCaseInput,
   ): Promise<SearchTechnicalEntryUseCaseOutput> {
+    // Valida se o tipo de entrada é LEARNING e se o status foi fornecido
+    // As entradas do tipo LEARNING não possuem status, então se o status for fornecido para esse tipo,
+    //  lançamos uma exceção
+    if (
+      input.type === TechnicalEntryType.LEARNING &&
+      input.status !== undefined
+    ) {
+      throw new UnprocessableEntityException(
+        'Entradas do tipo LEARNING não possuem status',
+      );
+    }
+
     const filter: TechnicalEntryFilter = { userId: input.userId };
 
     if (input.projectId) filter.projectId = input.projectId;
     if (input.title) filter.title = input.title;
     if (input.type) filter.type = input.type;
+    if (input.status) filter.status = input.status;
     if (input.archivedAt !== undefined) filter.archivedAt = input.archivedAt;
 
     const params = new TechnicalEntrySearchParams({

@@ -9,6 +9,8 @@ import {
 import { SearchResult } from '@/shared/domain/repositories/searchable.repository';
 import { Prisma } from '@generated/prisma/client';
 import { TechnicalEntryModelMapper } from './models/technical-entry-model.mapper';
+import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry-status.enum';
+import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
 
 export class TechnicalEntryPrismaRepository implements TechnicalEntryRepository {
   sortableFields = [
@@ -124,6 +126,17 @@ export class TechnicalEntryPrismaRepository implements TechnicalEntryRepository 
     }
     if (filter.archivedAt !== undefined) {
       where.archivedAt = filter.archivedAt;
+    }
+    if (filter.status !== undefined) {
+      where.AND = [
+        {
+          type: TechnicalEntryModelMapper.toPrismaType(
+            TechnicalEntryType.ISSUE,
+          ),
+          resolvedAt:
+            filter.status === TechnicalEntryStatus.OPEN ? null : { not: null },
+        },
+      ];
     }
 
     return where;

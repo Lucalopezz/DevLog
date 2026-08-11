@@ -1,4 +1,5 @@
 import { SearchTechnicalEntryUseCaseInput } from '@/technical-entry/application/usecases/search-technical-entry.usecase';
+import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry-status.enum';
 import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
 import { Transform, Type, type TransformFnParams } from 'class-transformer';
 import {
@@ -50,6 +51,10 @@ export class SearchTechnicalEntryDto implements Omit<
   @IsOptional()
   @IsEnum(TechnicalEntryType, { message: 'Parametro inválido' })
   type?: TechnicalEntryType | undefined;
+
+  @IsOptional()
+  @IsEnum(TechnicalEntryStatus, { message: 'Parametro inválido' })
+  status?: TechnicalEntryStatus | undefined;
 
   @IsOptional()
   @IsUUID('4', { message: 'Parametro inválido' })
