@@ -25,6 +25,7 @@ export function applyGlobalConfig(
   );
   app.enableCors({
     origin: corsAllowedOrigins.length > 0 ? corsAllowedOrigins : false,
+    credentials: true,
     methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization',
   });
