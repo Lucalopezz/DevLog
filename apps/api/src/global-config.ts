@@ -13,7 +13,7 @@ export function applyGlobalConfig(
 ) {
   const corsAllowedOrigins = envConfigService.getCorsAllowedOrigins();
 
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api');
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({

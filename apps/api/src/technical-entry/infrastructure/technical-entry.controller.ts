@@ -10,8 +10,10 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { CreateTechnicalEntryDto } from './dto/create-technical-entry.dto';
+import { SearchTechnicalEntryDto } from './dto/search-technical-entry.dto';
 import { UpdateTechnicalEntryDto } from './dto/update-technical-entry.dto';
 import { CreateTechnicalEntryUseCase } from '../application/usecases/create-technical-entry.usecase';
 import { GetTechnicalEntryUseCase } from '../application/usecases/get-technical-entry.usecase';
@@ -73,8 +75,12 @@ export class TechnicalEntryController {
 
   @Get()
   @UseGuards(AuthGuard)
-  async search(@CurrentUser() user: AuthenticatedUser) {
+  async search(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() searchParams: SearchTechnicalEntryDto,
+  ) {
     const output = await this.searchTechnicalEntryUseCase.execute({
+      ...searchParams,
       userId: user.id,
     });
 
