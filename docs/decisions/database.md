@@ -650,7 +650,7 @@ CREATE INDEX idx_resources_project
 ON project_resources (project_id);
 ```
 
-Para a pesquisa por título, contexto e conclusão, futuramente vale usar `tsvector` e índice GIN do PostgreSQL:
+O MVP usa o parâmetro `title` para fazer correspondência parcial case-insensitive somente no título. Se futuramente a busca também abranger contexto e conclusão, vale considerar `tsvector` e índice GIN do PostgreSQL:
 
 ```sql
 CREATE INDEX idx_entries_full_text
@@ -665,7 +665,7 @@ USING GIN (
 );
 ```
 
-O MVP exige pesquisa por título, conteúdo, projeto e tag.
+No MVP, o filtro textual é feito por título. Projeto, tag, tipo e status permanecem filtros estruturados separados.
 
 ---
 

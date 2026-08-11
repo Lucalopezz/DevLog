@@ -15,7 +15,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [ ] Impedir leitura, alteração ou exclusão lógica de recursos pertencentes a outro usuário.
 - [ ] Definir os estados e tipos documentados:
   - [x] `TechnicalEntry.type`: `ISSUE` ou `LEARNING`.
-  - [ ] Status de problema: `OPEN` ou `RESOLVED`.
+  - [x] Status de problema: a entidade retorna `OPEN` quando `resolvedAt` está vazio e `RESOLVED` quando está preenchido; no MVP, o status não possui coluna própria.
   - [ ] Status de projeto: `ACTIVE`, `PAUSED` ou `FINISHED`; definir como isso se relaciona ao arquivamento lógico por `archivedAt`.
   - [x] Resultado de tentativa: `FAILED`, `PARTIAL` ou `SUCCESSFUL` no schema Prisma.
 - [ ] Padronizar erros de validação, autenticação, autorização e recurso não encontrado.
@@ -31,7 +31,9 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Definir as interfaces de repositório compartilhadas e as de usuário/entrada técnica.
 - [x] Implementar os adaptadores Prisma para usuário e entrada técnica.
 - [ ] Implementar tratamento global de exceções.
-- [x] Configurar `ValidationPipe` global com `whitelist` e `transform`.
+- [x] Centralizar as configurações globais da API em `applyGlobalConfig`, incluindo prefixo `/api`, cookie parser, CORS, serialização e validação.
+- [x] Configurar `ValidationPipe` global com status `422`, `whitelist`, `forbidNonWhitelisted` e `transform`.
+- [x] Habilitar `credentials: true` no CORS para permitir o envio do cookie de autenticação nas requisições do frontend em outra origem.
 - [x] Configurar JWT em cookie HttpOnly; o logout atual remove o cookie porque a estratégia é stateless.
 
 ## 2. Usuários e autenticação
@@ -54,14 +56,14 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Retornar erro sem revelar se o email ou a senha está incorreto.
 - [x] Gerar JWT após autenticação válida.
 - [x] Enviar o token por cookie HttpOnly com `secure`, `sameSite`, `maxAge` e `path` configurados.
-- [x] Criar o endpoint `POST /auth/login`.
+- [x] Criar o endpoint `POST /api/auth/login`.
 - [ ] Testar login válido, usuário inexistente, senha incorreta e criação do cookie.
 
 ### GetCurrentUser
 
 - [x] Criar o caso de uso `GetCurrentUser`.
 - [x] Criar o guard que identifica o usuário autenticado pelo cookie JWT.
-- [x] Criar `GET /users/me`.
+- [x] Criar `GET /api/users/me`.
 - [x] Retornar apenas os dados públicos do usuário atual.
 - [ ] Testar acesso autenticado e acesso sem autenticação.
 
@@ -70,7 +72,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o caso de uso `UpdateUser`.
 - [x] Permitir a alteração somente do nome do usuário.
 - [x] Manter o e-mail imutável após o cadastro.
-- [x] Criar `PATCH /users/me`, usando o usuário identificado pelo guard.
+- [x] Criar `PATCH /api/users/me`, usando o usuário identificado pelo guard.
 - [ ] Testar atualização válida, usuário inexistente e tentativa de alteração sem autenticação.
 
 ### UpdateUserPassword
@@ -78,7 +80,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o caso de uso `UpdateUserPassword`.
 - [x] Validar a confirmação da nova senha.
 - [x] Fazer hash da nova senha antes de persistir.
-- [x] Criar `PATCH /users/me/password`, usando o usuário identificado pelo guard.
+- [x] Criar `PATCH /api/users/me/password`, usando o usuário identificado pelo guard.
 - [x] Exigir autenticação e tornar `currentPassword` obrigatório para validar a senha atual; esse valor deve ser usado somente na validação e nunca persistido no banco.
 - [ ] Testar atualização válida, senha atual inválida, confirmação divergente e usuário inexistente.
 
@@ -86,54 +88,89 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 - [x] Criar o fluxo de logout stateless; não há sessão persistida para invalidar.
 - [x] Remover o cookie de autenticação.
-- [x] Criar o endpoint `POST /auth/logout`.
+- [x] Criar o endpoint `POST /api/auth/logout`.
 - [ ] Testar encerramento da autenticação e comportamento de uma sessão inválida.
 
 ## 3. Entradas técnicas — MVP inicial
 
-> A camada de domínio já possui entidade, enum, validação, contrato de repositório, mapper e repositório Prisma com busca paginada, ordenação e filtros por usuário, projeto, título, tipo e arquivamento. Ainda não existem os casos de uso nem os endpoints de entradas técnicas.
+> A camada de domínio possui entidade, enum, validação, contrato de repositório, mapper e repositório Prisma. Criação, listagem paginada, consulta individual, atualização e exclusão física já possuem casos de uso, presenters e endpoints protegidos pelo `AuthGuard`. A etapa ainda não está concluída: faltam filtros previstos no caso de uso, agregação das relações, validação de propriedade de projeto/tags e testes HTTP.
 
 ### CreateTechnicalEntry
 
 - [x] Criar a entidade de entrada técnica.
-- [ ] Criar o caso de uso `CreateTechnicalEntry`.
-- [ ] Validar `title`, `type`, `context`, `conclusion?`, `projectId?` e `tags?`.
+- [x] Criar o caso de uso `CreateTechnicalEntry`.
+- [x] Validar `title`, `type`, `context` e `conclusion?` no DTO e no domínio.
+- [ ] Adicionar `projectId?` e `tags?` ao fluxo de criação e validar suas referências.
 - [x] Aceitar somente os tipos `ISSUE` e `LEARNING` na entidade e no schema Prisma.
-- [ ] Criar entradas como `OPEN` quando forem do tipo `ISSUE`.
-- [ ] Permitir conclusão opcional na criação, conforme o caso de uso.
+- [x] Criar entradas do tipo `ISSUE` sem `resolvedAt`; a entidade considera a entrada `OPEN` enquanto essa data não estiver preenchida.
+- [x] Definir `TechnicalEntryStatus` no domínio e calcular o status na entidade, deixando o mapper responsável apenas por expor o valor na saída.
+- [x] Permitir conclusão opcional na criação, conforme o caso de uso.
 - [ ] Associar opcionalmente a entrada a um projeto do mesmo usuário.
 - [ ] Associar as tags informadas somente se elas pertencerem ao mesmo usuário.
-- [ ] Criar o endpoint de criação.
+- [x] Criar o endpoint autenticado `POST /api/technical-entry`.
 - [ ] Testar criação de `ISSUE`, criação de `LEARNING`, dados inválidos e referências de outro usuário.
 
 ### GetTechnicalEntry
 
-- [ ] Criar o caso de uso `GetTechnicalEntry`.
+- [x] Criar o caso de uso `GetTechnicalEntry`.
 - [x] Disponibilizar busca por identificador no contrato e no repositório Prisma.
 - [ ] Retornar a entrada completa com projeto, tags e, para `ISSUE`, tentativas e status.
-- [ ] Garantir que uma entrada de outro usuário não seja encontrada pelo usuário atual.
-- [ ] Criar o endpoint de consulta por identificador.
-- [ ] Testar retorno completo, entrada inexistente e isolamento entre usuários.
+- [x] Garantir que uma entrada de outro usuário não seja encontrada pelo usuário atual.
+- [x] Criar o endpoint autenticado `GET /api/technical-entry/:id`.
+- [x] Testar a consulta básica e o isolamento entre usuários em teste unitário.
+- [ ] Testar entrada inexistente e o retorno completo com suas relações.
 
 ### ListTechnicalEntries
 
-- [ ] Criar o caso de uso `ListTechnicalEntries`.
+- [x] Criar o caso de uso de listagem, implementado como `SearchTechnicalEntryUseCase`.
 - [x] Disponibilizar paginação e ordenação no repositório Prisma.
-- [ ] Listar somente entradas do usuário autenticado.
-- [ ] Implementar busca textual por `search` no caso de uso/API.
-- [ ] Implementar filtros por `projectId`, `tagId`, `type` e `status` no caso de uso/API.
-- [ ] Expor paginação e ordenação do repositório no caso de uso/API para evitar consultas sem limite.
-- [ ] Criar o endpoint de listagem.
-- [ ] Testar combinações de filtros e garantir que resultados de outros usuários nunca sejam retornados.
+- [x] Disponibilizar no repositório filtros por `userId`, `projectId`, título, tipo e arquivamento.
+- [x] Listar somente entradas do usuário autenticado, sobrescrevendo qualquer dado externo com o `userId` obtido pelo guard.
+- [x] Definir `title` como o parâmetro oficial de busca textual e aplicar correspondência parcial case-insensitive no repositório.
+- [x] Implementar filtros por `projectId` e `type` no caso de uso/API.
+- [ ] Implementar filtros por `tagId` e `status` no caso de uso/API.
+- [x] Expor paginação e ordenação através de DTO, caso de uso e presenter de coleção.
+- [ ] Definir um limite máximo para `perPage`, evitando que o cliente transforme uma consulta paginada em uma consulta praticamente sem limite.
+- [x] Criar o endpoint autenticado `GET /api/technical-entry`.
+- [x] Testar conversão/validação do DTO, mapeamento do caso de uso e formato `data`/`meta` do presenter.
+- [ ] Testar o repositório Prisma, combinações de filtros e garantir via HTTP que resultados de outros usuários nunca sejam retornados.
 
 ### UpdateTechnicalEntry
 
-- [ ] Criar o caso de uso `UpdateTechnicalEntry`.
-- [ ] Permitir alterar `title`, `context`, `conclusion`, `project` e `tags`.
-- [ ] Impedir alteração livre de `type` depois da criação.
+- [x] Criar o caso de uso `UpdateTechnicalEntry`.
+- [x] Permitir alterar `title`, `context` e `conclusion`, inclusive remover a conclusão.
+- [x] Impedir alteração de `type` pela API depois da criação, omitindo o campo do DTO e do input do caso de uso.
+- [ ] Permitir alterar ou remover o projeto somente depois de validar sua propriedade.
+- [ ] Permitir substituir ou remover as tags da entrada.
 - [ ] Validar que o novo projeto e as novas tags pertençam ao usuário.
-- [ ] Criar o endpoint de atualização.
-- [ ] Testar atualização válida, entrada inexistente, recurso de outro usuário e tentativa de troca de tipo.
+- [x] Criar o endpoint autenticado `PATCH /api/technical-entry/:id`.
+- [x] Testar atualização de conteúdo, remoção de conclusão/projeto e isolamento entre usuários em teste unitário.
+- [ ] Testar entrada inexistente, projeto/tags de outro usuário, validação do DTO e tentativa de troca de tipo pela API.
+
+### DeleteTechnicalEntry — implementação atual a revisar
+
+- [x] Criar o caso de uso `DeleteTechnicalEntry` com verificação do proprietário.
+- [x] Criar o endpoint autenticado `DELETE /api/technical-entry/:id` com resposta `204 No Content`.
+- [x] Testar exclusão e isolamento entre usuários em teste unitário.
+- [ ] Decidir se a exclusão física faz parte do produto ou se deve ser substituída por `ArchiveTechnicalEntry`, como definido nos casos de uso e na seção de arquivamento deste backlog.
+- [ ] Se a exclusão física for mantida, documentar explicitamente que ela também remove tentativas e relações com tags por `ON DELETE CASCADE`.
+
+### Pendências encontradas na revisão da etapa
+
+- [ ] Criar testes unitários para `CreateTechnicalEntryUseCase`; atualmente ele não aparece na suíte de casos de uso de entradas.
+- [ ] Criar testes da entidade e do repositório Prisma; hoje existem testes dos casos de uso de consulta/atualização/exclusão e do mapper, mas as invariantes da entidade e os filtros de persistência não são exercitados diretamente.
+- [ ] Corrigir a configuração do Jest e2e para resolver os imports relativos `.js` do cliente Prisma gerado; atualmente a suíte falha antes de executar qualquer teste.
+- [ ] Aplicar `applyGlobalConfig` também no bootstrap dos testes e2e, garantindo que eles exercitem o prefixo `/api`, validação, cookies e serialização usados em produção.
+- [ ] Substituir o teste e2e legado de `GET /` pelos fluxos de criação, listagem, consulta, atualização e exclusão de entradas técnicas.
+- [ ] Validar UUIDs recebidos em `projectId` na criação/atualização e nos parâmetros `:id`; somente o `projectId` da busca já utiliza `@IsUUID`.
+- [ ] Validar os limites persistidos pelo banco, especialmente `title` com no máximo 200 caracteres, para retornar erro de entrada em vez de erro de persistência.
+- [ ] Remover o `TODO` de `UpdateTechnicalEntryUseCase`: consultar um `ProjectRepository` e rejeitar projeto inexistente ou pertencente a outro usuário antes de alterar `projectId`.
+- [ ] Restringir consultas de repositório por `userId` sempre que possível; `findAll()` não possui escopo de usuário e não deve alimentar endpoints autenticados.
+- [ ] Corrigir o teste de saída paginada de `SearchTechnicalEntryUseCase`, que chama o caso de uso sem o `userId` obrigatório e, portanto, não exercita o isolamento nessa variação.
+- [ ] Trocar o filtro HTTP `archivedAt` por uma intenção de domínio, como `archived=true|false`; aceitar uma data exata expõe um detalhe de persistência e dificilmente representa a consulta desejada pelo usuário.
+- [ ] Reutilizar o `PrismaService` exportado pelo `DatabaseModule` em vez de registrar outra instância com o token textual `PrismaService` dentro de `TechnicalEntryModule`.
+- [ ] Encapsular as transições de domínio: `conclude()` deve aceitar somente `ISSUE` e exigir conclusão, enquanto alteração de tipo, resolução e arquivamento não devem ficar disponíveis como atualizações genéricas.
+- [ ] Padronizar os nomes de arquivos e símbolos que ainda usam `technicalEntry`/`techinicalEntry` para kebab-case e corrigir o typo, sem misturar essa refatoração com uma feature nova.
 
 ## 4. Tags
 

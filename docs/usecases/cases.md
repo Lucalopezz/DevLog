@@ -630,7 +630,7 @@ Essa será provavelmente a consulta mais utilizada da aplicação.
 flowchart LR
     Entries[Technical Entries]
 
-    Entries --> Search[Text Search]
+    Entries --> Title[Filter Title]
     Entries --> Project[Filter Project]
     Entries --> Tag[Filter Tag]
     Entries --> Type[Filter Type]
@@ -640,19 +640,21 @@ flowchart LR
 Filtros possíveis:
 
 ```text
-search
+title
 projectId
 tagId
 type
 status
 ```
 
+O filtro `title` procura correspondências parciais sem diferenciar letras maiúsculas e minúsculas.
+
 Exemplo:
 
 ```text
-search = cookie
-project = devlog
-tag = nestjs
+title = cookie
+projectId = 5ab0c050-5050-4d2b-b0a0-44247985de2b
+tagId = 6bc1d161-6161-4e3c-a1b1-55358096ef3c
 type = ISSUE
 status = RESOLVED
 ```
