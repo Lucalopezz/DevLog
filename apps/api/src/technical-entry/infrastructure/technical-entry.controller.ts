@@ -10,8 +10,6 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  ClassSerializerInterceptor,
-  UseInterceptors,
 } from '@nestjs/common';
 import { CreateTechnicalEntryDto } from './dto/create-technical-entry.dto';
 import { UpdateTechnicalEntryDto } from './dto/update-technical-entry.dto';
