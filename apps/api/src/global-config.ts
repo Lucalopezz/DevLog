@@ -6,6 +6,7 @@ import {
 import { EnvConfigService } from './shared/infrastructure/env-config/env-config.service';
 import { Reflector } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
+import { UuidParamValidationPipe } from './shared/infrastructure/pipes/uuid-param-validation.pipe';
 
 export function applyGlobalConfig(
   app: INestApplication,
@@ -16,6 +17,7 @@ export function applyGlobalConfig(
   app.setGlobalPrefix('api');
   app.use(cookieParser());
   app.useGlobalPipes(
+    new UuidParamValidationPipe(),
     new ValidationPipe({
       errorHttpStatusCode: 422,
       whitelist: true,

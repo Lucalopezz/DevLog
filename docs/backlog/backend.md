@@ -167,7 +167,6 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [ ] Substituir o teste e2e legado de `GET /` pelos fluxos de criação, listagem, consulta, atualização e exclusão de entradas técnicas.
 - [x] Validar UUIDs recebidos em `projectId` na criação/atualização e nos parâmetros `:id`; somente o `projectId` da busca já utiliza `@IsUUID`.
 - [x] Validar os limites persistidos pelo banco, especialmente `title` com no máximo 200 caracteres, para retornar erro de entrada em vez de erro de persistência.
-- [ ] Remover o `TODO` de `UpdateTechnicalEntryUseCase`: consultar um `ProjectRepository` e rejeitar projeto inexistente ou pertencente a outro usuário antes de alterar `projectId`.
 - [ ] Restringir consultas de repositório por `userId` sempre que possível; `findAll()` não possui escopo de usuário e não deve alimentar endpoints autenticados.
 - [x] Corrigir o teste de saída paginada de `SearchTechnicalEntryUseCase` para sempre informar o `userId` obrigatório.
 - [x] Encapsular as transições de domínio: `conclude()` deve aceitar somente `ISSUE` e exigir conclusão, enquanto alteração de tipo, resolução e arquivamento não devem ficar disponíveis como atualizações genéricas.

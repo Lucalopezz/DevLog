@@ -43,7 +43,7 @@ export class UpdateTechnicalEntryUseCase implements UseCaseContract<
     }
 
     if (Object.prototype.hasOwnProperty.call(input, 'projectId')) {
-      // TODO: validar a propriedade do projeto através do ProjectRepository.
+      // TODO: validar a propriedade do projeto através do ProjectRepository e se o projeto for do usuário.
       technicalEntry.changeProject(input.projectId ?? null);
     }
 
