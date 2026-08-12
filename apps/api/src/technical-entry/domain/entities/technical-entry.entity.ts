@@ -60,8 +60,19 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   }
 
   changeProject(projectId: string | null): void {
-    this.props.projectId = projectId ?? undefined;
+    const updatedProjectId = projectId ?? undefined;
+
+    TechnicalEntryEntity.validate({
+      ...this.props,
+      projectId: updatedProjectId,
+    });
+
+    this.props.projectId = updatedProjectId;
     this.updateUpdatedAt();
+  }
+
+  linkProject(projectId: string): void {
+    this.changeProject(projectId);
   }
   conclude(conclusion: string): void {
     if (this.type !== TechnicalEntryType.ISSUE) {

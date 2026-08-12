@@ -12,6 +12,7 @@ import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technica
 export type CreateTechnicalEntryUseCaseInput = {
   userId: string;
   title: string;
+  projectId?: string | null;
   context: string;
   conclusion?: string;
   type: TechnicalEntryType;
@@ -31,7 +32,7 @@ export class CreateTechnicalEntryUseCase implements UseCaseContract<
   async execute(
     input: CreateTechnicalEntryUseCaseInput,
   ): Promise<TechnicalEntryOutput> {
-    const { userId, title, context, conclusion, type } = input;
+    const { userId, title, projectId, context, conclusion, type } = input;
     const user = userId ? await this.userRepository.findById(userId) : null;
 
     if (user === null) {
@@ -41,6 +42,7 @@ export class CreateTechnicalEntryUseCase implements UseCaseContract<
     const entity = new TechnicalEntryEntity({
       userId,
       title,
+      projectId: projectId ?? undefined,
       context,
       ...(conclusion !== undefined && { conclusion }),
       type,

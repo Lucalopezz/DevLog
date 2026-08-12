@@ -9,6 +9,9 @@ import {
 import { SearchTechnicalEntryUseCase } from '../search-technical-entry.usecase';
 import { UnprocessableEntityException } from '@nestjs/common';
 
+const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
+const PROJECT_ID = '123e4567-e89b-42d3-a456-426614174010';
+
 describe('SearchTechnicalEntryUseCase', () => {
   let repository: jest.Mocked<TechnicalEntryRepository>;
   let useCase: SearchTechnicalEntryUseCase;
@@ -35,8 +38,8 @@ describe('SearchTechnicalEntryUseCase', () => {
       perPage: 10,
       sort: 'title',
       sortDir: 'desc',
-      userId: 'user-1',
-      projectId: 'project-1',
+      userId: USER_ID,
+      projectId: PROJECT_ID,
       title: 'NestJS',
       type: TechnicalEntryType.ISSUE,
       status: TechnicalEntryStatus.RESOLVED,
@@ -52,8 +55,8 @@ describe('SearchTechnicalEntryUseCase', () => {
       sort: 'title',
       sortDir: 'desc',
       filter: {
-        userId: 'user-1',
-        projectId: 'project-1',
+        userId: USER_ID,
+        projectId: PROJECT_ID,
         title: 'NestJS',
         type: TechnicalEntryType.ISSUE,
         status: TechnicalEntryStatus.RESOLVED,
@@ -65,7 +68,7 @@ describe('SearchTechnicalEntryUseCase', () => {
   it('rejeita filtro de status para entradas do tipo LEARNING', async () => {
     await expect(
       useCase.execute({
-        userId: 'user-1',
+        userId: USER_ID,
         type: TechnicalEntryType.LEARNING,
         status: TechnicalEntryStatus.OPEN,
       }),
@@ -77,7 +80,7 @@ describe('SearchTechnicalEntryUseCase', () => {
   it('converte o resultado do repositório em uma saída paginada', async () => {
     const entry = new TechnicalEntryEntity(
       {
-        userId: 'user-1',
+        userId: USER_ID,
         title: 'Paginação no NestJS',
         context: 'Implementando uma busca paginada',
         type: TechnicalEntryType.ISSUE,
@@ -97,7 +100,7 @@ describe('SearchTechnicalEntryUseCase', () => {
     );
 
     const output = await useCase.execute({
-      userId: 'user-1',
+      userId: USER_ID,
       page: 2,
       perPage: 1,
     });

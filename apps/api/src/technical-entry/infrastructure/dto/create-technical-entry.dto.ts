@@ -5,6 +5,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 
@@ -15,7 +17,14 @@ export class CreateTechnicalEntryDto implements Omit<
   @IsNotEmpty({ message: 'O título é obrigatório' })
   @IsString({ message: 'Parametro inválido' })
   @MinLength(3, { message: 'O título deve ter no mínimo 3 caracteres' })
+  @MaxLength(200, {
+    message: 'O título deve ter no máximo 200 caracteres',
+  })
   title: string;
+
+  @IsOptional()
+  @IsUUID('4', { message: 'O ID do projeto deve ser um UUID válido' })
+  projectId?: string | null;
 
   @IsNotEmpty({ message: 'O contexto é obrigatório' })
   @IsString({ message: 'Parametro inválido' })

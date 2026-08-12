@@ -1,5 +1,11 @@
 import { UpdateTechnicalEntryUseCaseInput } from '@/technical-entry/application/usecases/update-technical-entry.usecase';
-import { IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class UpdateTechnicalEntryDto implements Omit<
   UpdateTechnicalEntryUseCaseInput,
@@ -8,6 +14,9 @@ export class UpdateTechnicalEntryDto implements Omit<
   @IsOptional()
   @IsString({ message: 'Parametro inválido' })
   @MinLength(3, { message: 'O título deve ter no mínimo 3 caracteres' })
+  @MaxLength(200, {
+    message: 'O título deve ter no máximo 200 caracteres',
+  })
   title?: string;
 
   @IsOptional()

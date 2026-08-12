@@ -5,11 +5,14 @@ import {
 } from '../technical-entry.entity';
 import { TechnicalEntryType } from '../technical-entry-type.enum';
 
+const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
+const PROJECT_ID = '123e4567-e89b-42d3-a456-426614174010';
+
 function makeProps(
   overrides: Partial<TechnicalEntryProps> = {},
 ): TechnicalEntryProps {
   return {
-    userId: 'user-1',
+    userId: USER_ID,
     title: 'Falha ao iniciar a API',
     context: 'A porta configurada já estava em uso',
     type: TechnicalEntryType.ISSUE,
@@ -76,5 +79,39 @@ describe('TechnicalEntryEntity', () => {
     expect(entry.type).toBe(TechnicalEntryType.ISSUE);
     expect(entry.resolvedAt).toEqual(resolvedAt);
     expect(entry.archivedAt).toEqual(archivedAt);
+  });
+
+  it('aceita título com exatamente 200 caracteres', () => {
+    expect(
+      () => new TechnicalEntryEntity(makeProps({ title: 'a'.repeat(200) })),
+    ).not.toThrow();
+  });
+
+  it('rejeita título com mais de 200 caracteres', () => {
+    expect(
+      () => new TechnicalEntryEntity(makeProps({ title: 'a'.repeat(201) })),
+    ).toThrow(EntityValidationError);
+  });
+
+  it('rejeita título acima do limite durante a atualização', () => {
+    const entry = new TechnicalEntryEntity(makeProps());
+
+    expect(() => entry.update('a'.repeat(201))).toThrow(EntityValidationError);
+    expect(entry.title).toBe('Falha ao iniciar a API');
+  });
+
+  it('vincula um projeto válido através da entidade', () => {
+    const entry = new TechnicalEntryEntity(makeProps());
+
+    entry.linkProject(PROJECT_ID);
+
+    expect(entry.projectId).toBe(PROJECT_ID);
+  });
+
+  it('não vincula um projeto com UUID inválido', () => {
+    const entry = new TechnicalEntryEntity(makeProps());
+
+    expect(() => entry.linkProject('project-1')).toThrow(EntityValidationError);
+    expect(entry.projectId).toBeUndefined();
   });
 });

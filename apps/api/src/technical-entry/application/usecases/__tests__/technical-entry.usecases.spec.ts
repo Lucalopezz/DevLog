@@ -7,6 +7,11 @@ import { DeleteTechnicalEntryUseCase } from '../delete-technical-entry.usecase';
 import { GetTechnicalEntryUseCase } from '../get-technical-entry.usecase';
 import { UpdateTechnicalEntryUseCase } from '../update-technical-entry.usecase';
 
+const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
+const OTHER_USER_ID = '123e4567-e89b-42d3-a456-426614174001';
+const PROJECT_ID = '123e4567-e89b-42d3-a456-426614174010';
+const OTHER_PROJECT_ID = '123e4567-e89b-42d3-a456-426614174011';
+
 class InMemoryTechnicalEntryRepository implements TechnicalEntryRepository {
   sortableFields = ['createdAt', 'updatedAt', 'title'];
   entries: TechnicalEntryEntity[] = [];
@@ -64,7 +69,7 @@ function makeEntry(
 
   return new TechnicalEntryEntity(
     {
-      userId: overrides.userId ?? 'user-1',
+      userId: overrides.userId ?? USER_ID,
       projectId: overrides.projectId,
       title: overrides.title ?? 'Título da entrada',
       context: overrides.context ?? 'Contexto da entrada',
@@ -82,28 +87,28 @@ describe('Casos de uso de entrada técnica', () => {
   describe('GetTechnicalEntryUseCase', () => {
     it('retorna a entrada completa do usuário autenticado', async () => {
       const repository = new InMemoryTechnicalEntryRepository();
-      const entry = makeEntry({ projectId: 'project-1' });
+      const entry = makeEntry({ projectId: PROJECT_ID });
       repository.entries.push(entry);
       const useCase = new GetTechnicalEntryUseCase(repository);
 
       await expect(
-        useCase.execute({ id: entry.id, userId: 'user-1' }),
+        useCase.execute({ id: entry.id, userId: USER_ID }),
       ).resolves.toMatchObject({
         id: entry.id,
-        userId: 'user-1',
-        projectId: 'project-1',
+        userId: USER_ID,
+        projectId: PROJECT_ID,
         status: 'OPEN',
       });
     });
 
     it('não encontra uma entrada de outro usuário', async () => {
       const repository = new InMemoryTechnicalEntryRepository();
-      const entry = makeEntry({ userId: 'user-2' });
+      const entry = makeEntry({ userId: OTHER_USER_ID });
       repository.entries.push(entry);
       const useCase = new GetTechnicalEntryUseCase(repository);
 
       await expect(
-        useCase.execute({ id: entry.id, userId: 'user-1' }),
+        useCase.execute({ id: entry.id, userId: USER_ID }),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
@@ -117,18 +122,18 @@ describe('Casos de uso de entrada técnica', () => {
 
       const output = await useCase.execute({
         id: entry.id,
-        userId: 'user-1',
+        userId: USER_ID,
         title: 'Novo título',
         context: 'Novo contexto',
         conclusion: 'Nova conclusão',
-        projectId: 'project-2',
+        projectId: OTHER_PROJECT_ID,
       });
 
       expect(output).toMatchObject({
         title: 'Novo título',
         context: 'Novo contexto',
         conclusion: 'Nova conclusão',
-        projectId: 'project-2',
+        projectId: OTHER_PROJECT_ID,
         type: TechnicalEntryType.ISSUE,
       });
     });
@@ -137,14 +142,14 @@ describe('Casos de uso de entrada técnica', () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({
         conclusion: 'Conclusão antiga',
-        projectId: 'project-1',
+        projectId: PROJECT_ID,
       });
       repository.entries.push(entry);
       const useCase = new UpdateTechnicalEntryUseCase(repository);
 
       const output = await useCase.execute({
         id: entry.id,
-        userId: 'user-1',
+        userId: USER_ID,
         conclusion: null,
         projectId: null,
       });
@@ -155,14 +160,14 @@ describe('Casos de uso de entrada técnica', () => {
 
     it('não atualiza uma entrada de outro usuário', async () => {
       const repository = new InMemoryTechnicalEntryRepository();
-      const entry = makeEntry({ userId: 'user-2' });
+      const entry = makeEntry({ userId: OTHER_USER_ID });
       repository.entries.push(entry);
       const useCase = new UpdateTechnicalEntryUseCase(repository);
 
       await expect(
         useCase.execute({
           id: entry.id,
-          userId: 'user-1',
+          userId: USER_ID,
           title: 'Tentativa indevida',
         }),
       ).rejects.toBeInstanceOf(NotFoundException);
@@ -176,19 +181,19 @@ describe('Casos de uso de entrada técnica', () => {
       repository.entries.push(entry);
       const useCase = new DeleteTechnicalEntryUseCase(repository);
 
-      await useCase.execute({ id: entry.id, userId: 'user-1' });
+      await useCase.execute({ id: entry.id, userId: USER_ID });
 
       expect(repository.entries).toHaveLength(0);
     });
 
     it('não remove uma entrada de outro usuário', async () => {
       const repository = new InMemoryTechnicalEntryRepository();
-      const entry = makeEntry({ userId: 'user-2' });
+      const entry = makeEntry({ userId: OTHER_USER_ID });
       repository.entries.push(entry);
       const useCase = new DeleteTechnicalEntryUseCase(repository);
 
       await expect(
-        useCase.execute({ id: entry.id, userId: 'user-1' }),
+        useCase.execute({ id: entry.id, userId: USER_ID }),
       ).rejects.toBeInstanceOf(NotFoundException);
       expect(repository.entries).toHaveLength(1);
     });

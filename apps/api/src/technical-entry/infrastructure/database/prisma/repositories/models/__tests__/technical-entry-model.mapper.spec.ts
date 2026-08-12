@@ -15,7 +15,7 @@ describe('TechnicalEntryModelMapper', () => {
   it('converte o tipo do Prisma para o tipo de domínio', () => {
     const model = {
       id: '123e4567-e89b-12d3-a456-426614174000',
-      userId: '123e4567-e89b-12d3-a456-426614174001',
+      userId: '123e4567-e89b-42d3-a456-426614174001',
       projectId: null,
       title: 'Título válido',
       context: 'Contexto válido',

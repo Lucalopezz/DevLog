@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
 } from 'class-validator';
 import { ClassValidatorFields } from '@/shared/domain/validators/class-validator-fields';
 import type { TechnicalEntryProps } from '../entities/technical-entry.entity';
@@ -18,9 +19,12 @@ export class TechnicalEntryRules {
 
   @IsOptional()
   @IsString({ message: 'O ID do projeto deve ser um texto' })
-  @IsUUID('4', { message: 'O ID do usuário deve ser um UUID válido' })
+  @IsUUID('4', { message: 'O ID do projeto deve ser um UUID válido' })
   projectId?: string;
 
+  @MaxLength(200, {
+    message: 'O título deve ter no máximo 200 caracteres',
+  })
   @IsString({ message: 'O título deve ser um texto' })
   @IsNotEmpty({ message: 'O título é obrigatório' })
   title: string;
