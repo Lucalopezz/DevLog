@@ -1,5 +1,5 @@
 import { ValidationError } from '@/shared/domain/errors/validation-error';
-import { TagEntity } from '@/tags/domain/entities/tag.entity';
+import { TagEntity } from '@/tag/domain/entities/tag.entity';
 import { Tag } from '@generated/prisma/client';
 
 export class TagModelMapper {

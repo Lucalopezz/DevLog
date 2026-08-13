@@ -1,16 +1,16 @@
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
-import { TagEntity } from '@/tags/domain/entities/tag.entity';
+import { TagEntity } from '@/tag/domain/entities/tag.entity';
 import {
   TagFilter,
   TagRepository,
   TagSearchParams,
   TagSearchResult,
-} from '@/tags/domain/repositories/tag.repository';
+} from '@/tag/domain/repositories/tag.repository';
 import { TagModelMapper } from './models/tag-model.mapper';
 import { Prisma } from '@generated/prisma/client';
 
 export class TagPrismaRepository implements TagRepository {
-  sortableFields: string[] = ['name', 'userid', 'createdAt'];
+  sortableFields: string[] = ['name', 'createdAt', 'updatedAt'];
 
   constructor(private readonly prismaService: PrismaService) {}
 
@@ -47,7 +47,7 @@ export class TagPrismaRepository implements TagRepository {
   }
   private _buildOrderBy(
     props: TagSearchParams,
-  ): Prisma.TechnicalEntryOrderByWithRelationInput {
+  ): Prisma.TagOrderByWithRelationInput {
     if (props.sort && this.sortableFields.includes(props.sort)) {
       return { [props.sort]: props.sortDir ?? 'asc' };
     }

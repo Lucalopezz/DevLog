@@ -1,5 +1,6 @@
-// import { CollectionPresenter } from '@/shared/infrastructure/presenter/collection.presenter';
+import { CollectionPresenter } from '@/shared/infrastructure/presenter/collection.presenter';
 import { TagOutput } from '@/tag/application/dto/tag.dto';
+import { SearchTagUseCaseOutput } from '@/tag/application/usecases/search-tag.usecase';
 
 export class TagPresenter {
   id: string;
@@ -15,12 +16,12 @@ export class TagPresenter {
   }
 }
 
-// export class TagCollectionPresenter extends CollectionPresenter<TagPresenter> {
-//   data: TagPresenter[];
+export class TagCollectionPresenter extends CollectionPresenter<TagPresenter> {
+  data: TagPresenter[];
 
-//   constructor(output: SearchTechnicalEntryUseCaseOutput) {
-//     const { items, ...paginationProps } = output;
-//     super(paginationProps);
-//     this.data = items.map((item) => new TechnicalEntryPresenter(item));
-//   }
-// }
+  constructor(output: SearchTagUseCaseOutput) {
+    const { items, ...paginationProps } = output;
+    super(paginationProps);
+    this.data = items.map((item) => new TagPresenter(item));
+  }
+}
