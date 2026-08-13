@@ -5,7 +5,6 @@ import type { TechnicalEntryType } from '@/technical-entry/domain/entities/techn
 
 export class TechnicalEntryPresenter {
   id: string;
-  userId: string;
   projectId?: string;
   title: string;
   context: string;
@@ -19,7 +18,6 @@ export class TechnicalEntryPresenter {
 
   constructor(output: TechnicalEntryOutput) {
     this.id = output.id;
-    this.userId = output.userId;
     this.projectId = output.projectId;
     this.title = output.title;
     this.context = output.context;

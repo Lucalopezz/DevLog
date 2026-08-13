@@ -95,7 +95,6 @@ describe('Casos de uso de entrada técnica', () => {
         useCase.execute({ id: entry.id, userId: USER_ID }),
       ).resolves.toMatchObject({
         id: entry.id,
-        userId: USER_ID,
         projectId: PROJECT_ID,
         status: 'OPEN',
       });

@@ -3,7 +3,6 @@ import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technica
 
 export type TechnicalEntryOutput = {
   id: string;
-  userId: string;
   projectId?: string;
   title: string;
   context: string;
@@ -21,7 +20,6 @@ export class TechnicalEntryOutputMapper {
   static toOutput(technicalEntry: TechnicalEntryEntity): TechnicalEntryOutput {
     return {
       id: technicalEntry.id,
-      userId: technicalEntry.userId,
       projectId: technicalEntry.projectId,
       title: technicalEntry.title,
       context: technicalEntry.context,

@@ -9,7 +9,6 @@ import {
 describe('TechnicalEntryPresenter', () => {
   const technicalEntry: TechnicalEntryOutput = {
     id: 'technical-entry-id',
-    userId: 'user-id',
     projectId: 'project-id',
     title: 'NestJS presenters',
     context: 'Separating application output from the HTTP response',
