@@ -56,5 +56,6 @@ import { AuthModule } from '@/auth/infrastructure/auth.module';
       inject: ['TagRepository'],
     },
   ],
+  exports: ['TagRepository'],
 })
 export class TagModule {}

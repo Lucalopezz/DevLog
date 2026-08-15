@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TechnicalEntryController } from './technical-entry.controller';
 import { AuthModule } from '@/auth/infrastructure/auth.module';
+import { TagModule } from '@/tag/infrastructure/tag.module';
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
 import { UserPrismaRepository } from '@/user/infrastructure/database/prisma/repositories/user-prisma.repository';
 import { TechnicalEntryPrismaRepository } from './database/prisma/repositories/technical-entry-prisma.repository';
@@ -11,10 +12,13 @@ import { UpdateTechnicalEntryUseCase } from '../application/usecases/update-tech
 import { DeleteTechnicalEntryUseCase } from '../application/usecases/delete-technical-entry.usecase';
 import { TechnicalEntryRepository } from '../domain/repositories/technical-entry.repository';
 import { SearchTechnicalEntryUseCase } from '../application/usecases/search-technical-entry.usecase';
+import { AssignTagToTechnicalEntryUseCase } from '../application/usecases/assign-tag-to-technical-entry.usecase';
+import { TechnicalEntryTagRepository } from '../domain/repositories/technical-entry-tag.repository';
+import { TagRepository } from '@/tag/domain/repositories/tag.repository';
 
 @Module({
   controllers: [TechnicalEntryController],
-  imports: [AuthModule],
+  imports: [AuthModule, TagModule],
   providers: [
     {
       provide: 'PrismaService',
@@ -81,6 +85,25 @@ import { SearchTechnicalEntryUseCase } from '../application/usecases/search-tech
         return new DeleteTechnicalEntryUseCase(technicalEntryRepository);
       },
       inject: ['TechnicalEntryRepository'],
+    },
+    {
+      provide: AssignTagToTechnicalEntryUseCase,
+      useFactory: (
+        entryRepository: TechnicalEntryRepository,
+        tagRepository: TagRepository,
+        entryTagRepository: TechnicalEntryTagRepository,
+      ) => {
+        return new AssignTagToTechnicalEntryUseCase(
+          entryRepository,
+          tagRepository,
+          entryTagRepository,
+        );
+      },
+      inject: [
+        'TechnicalEntryRepository',
+        'TagRepository',
+        'TechnicalEntryTagRepository',
+      ],
     },
   ],
 })
