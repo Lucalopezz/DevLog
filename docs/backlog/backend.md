@@ -175,24 +175,24 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### CreateTag e ListTags
 
-- [ ] Criar a entidade e o repositório de tags.
-- [ ] Criar o caso de uso `CreateTag`.
-- [ ] Validar `name`.
-- [ ] Impedir duas tags com o mesmo nome para o mesmo usuário.
-- [ ] Criar o caso de uso `ListTags`.
-- [ ] Listar somente tags do usuário autenticado.
-- [ ] Criar os endpoints de criação e listagem.
+- [x] Criar a entidade e o repositório de tags.
+- [x] Criar o caso de uso `CreateTag`.
+- [x] Validar `name`.
+- [x] Impedir duas tags com o mesmo nome para o mesmo usuário.
+- [x] Criar o caso de uso `ListTags`.
+- [x] Listar somente tags do usuário autenticado.
+- [x] Criar os endpoints de criação e listagem.
 - [ ] Testar duplicidade, isolamento por usuário e listagem.
 
 ### Relacionar tags e entradas
 
-- [ ] Criar a relação entre tags e entradas técnicas.
-- [ ] Criar o caso de uso `AddTagToTechnicalEntry`.
-- [ ] Validar que a tag e a entrada pertençam ao usuário autenticado.
-- [ ] Impedir relação duplicada entre a mesma tag e a mesma entrada.
-- [ ] Criar o caso de uso `RemoveTagFromTechnicalEntry`.
-- [ ] Remover somente a relação, sem excluir a tag.
-- [ ] Criar os endpoints de adicionar e remover relação.
+- [x] Criar a relação entre tags e entradas técnicas.
+- [x] Criar o caso de uso `AddTagToTechnicalEntry`.
+- [x] Validar que a tag e a entrada pertençam ao usuário autenticado.
+- [x] Impedir relação duplicada entre a mesma tag e a mesma entrada.
+- [x] Criar o caso de uso `RemoveTagFromTechnicalEntry`.
+- [x] Remover somente a relação, sem excluir a tag.
+- [x] Criar os endpoints de adicionar e remover relação.
 - [ ] Testar relação válida, referências de outro usuário e remoção sem apagar a tag.
 
 ## 5. Projetos — MVP inicial
