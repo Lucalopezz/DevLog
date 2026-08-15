@@ -13,6 +13,7 @@ import { DeleteTechnicalEntryUseCase } from '../application/usecases/delete-tech
 import { TechnicalEntryRepository } from '../domain/repositories/technical-entry.repository';
 import { SearchTechnicalEntryUseCase } from '../application/usecases/search-technical-entry.usecase';
 import { AssignTagToTechnicalEntryUseCase } from '../application/usecases/assign-tag-to-technical-entry.usecase';
+import { RemoveTagFromTechnicalEntryUseCase } from '../application/usecases/remove-tag-from-technical-entry.usecase';
 import { TechnicalEntryTagRepository } from '../domain/repositories/technical-entry-tag.repository';
 import { TagRepository } from '@/tag/domain/repositories/tag.repository';
 
@@ -94,6 +95,25 @@ import { TagRepository } from '@/tag/domain/repositories/tag.repository';
         entryTagRepository: TechnicalEntryTagRepository,
       ) => {
         return new AssignTagToTechnicalEntryUseCase(
+          entryRepository,
+          tagRepository,
+          entryTagRepository,
+        );
+      },
+      inject: [
+        'TechnicalEntryRepository',
+        'TagRepository',
+        'TechnicalEntryTagRepository',
+      ],
+    },
+    {
+      provide: RemoveTagFromTechnicalEntryUseCase,
+      useFactory: (
+        entryRepository: TechnicalEntryRepository,
+        tagRepository: TagRepository,
+        entryTagRepository: TechnicalEntryTagRepository,
+      ) => {
+        return new RemoveTagFromTechnicalEntryUseCase(
           entryRepository,
           tagRepository,
           entryTagRepository,

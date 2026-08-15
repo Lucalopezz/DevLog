@@ -20,6 +20,7 @@ import { GetTechnicalEntryUseCase } from '../application/usecases/get-technical-
 import { UpdateTechnicalEntryUseCase } from '../application/usecases/update-technical-entry.usecase';
 import { DeleteTechnicalEntryUseCase } from '../application/usecases/delete-technical-entry.usecase';
 import { AssignTagToTechnicalEntryUseCase } from '../application/usecases/assign-tag-to-technical-entry.usecase';
+import { RemoveTagFromTechnicalEntryUseCase } from '../application/usecases/remove-tag-from-technical-entry.usecase';
 import { AuthGuard } from '@/auth/infrastructure/auth.guard';
 import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '@/auth/types/authenticated-user';
@@ -50,6 +51,9 @@ export class TechnicalEntryController {
 
   @Inject(AssignTagToTechnicalEntryUseCase)
   private assignTagToTechnicalEntryUseCase: AssignTagToTechnicalEntryUseCase;
+
+  @Inject(RemoveTagFromTechnicalEntryUseCase)
+  private removeTagFromTechnicalEntryUseCase: RemoveTagFromTechnicalEntryUseCase;
 
   @Inject(SearchTechnicalEntryUseCase)
   private searchTechnicalEntryUseCase: SearchTechnicalEntryUseCase;
@@ -146,6 +150,21 @@ export class TechnicalEntryController {
     await this.assignTagToTechnicalEntryUseCase.execute({
       technicalEntryId: entryId,
       tagId: assignTagDto.tagId,
+      userId: user.id,
+    });
+  }
+
+  @Delete(':entryId/tags/:tagId')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeTag(
+    @Param('entryId') entryId: string,
+    @Param('tagId') tagId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    await this.removeTagFromTechnicalEntryUseCase.execute({
+      technicalEntryId: entryId,
+      tagId,
       userId: user.id,
     });
   }
