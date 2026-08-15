@@ -4,6 +4,7 @@ import { AuthModule } from '@/auth/infrastructure/auth.module';
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
 import { UserPrismaRepository } from '@/user/infrastructure/database/prisma/repositories/user-prisma.repository';
 import { TechnicalEntryPrismaRepository } from './database/prisma/repositories/technical-entry-prisma.repository';
+import { TechnicalEntryTagPrismaRepository } from './database/prisma/repositories/technical-entry-tag-prisma.repository';
 import { CreateTechnicalEntryUseCase } from '../application/usecases/create-technical-entry.usecase';
 import { GetTechnicalEntryUseCase } from '../application/usecases/get-technical-entry.usecase';
 import { UpdateTechnicalEntryUseCase } from '../application/usecases/update-technical-entry.usecase';
@@ -30,6 +31,13 @@ import { SearchTechnicalEntryUseCase } from '../application/usecases/search-tech
       provide: 'TechnicalEntryRepository',
       useFactory: (prismaService: PrismaService) => {
         return new TechnicalEntryPrismaRepository(prismaService);
+      },
+      inject: ['PrismaService'],
+    },
+    {
+      provide: 'TechnicalEntryTagRepository',
+      useFactory: (prismaService: PrismaService) => {
+        return new TechnicalEntryTagPrismaRepository(prismaService);
       },
       inject: ['PrismaService'],
     },
