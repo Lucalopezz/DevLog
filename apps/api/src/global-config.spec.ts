@@ -7,12 +7,14 @@ import { applyGlobalConfig } from './global-config';
 describe('applyGlobalConfig', () => {
   it('registra a validação global de UUIDs nos parâmetros de rota', () => {
     const useGlobalPipes = jest.fn();
+    const useGlobalFilters = jest.fn();
     const app = {
       setGlobalPrefix: jest.fn(),
       use: jest.fn(),
       useGlobalPipes,
       enableCors: jest.fn(),
       useGlobalInterceptors: jest.fn(),
+      useGlobalFilters,
       get: jest.fn().mockReturnValue(new Reflector()),
     } as unknown as INestApplication;
     const envConfigService = {
@@ -25,5 +27,6 @@ describe('applyGlobalConfig', () => {
       expect.any(UuidParamValidationPipe),
       expect.any(ValidationPipe),
     );
+    expect(useGlobalFilters).toHaveBeenCalledWith(expect.anything());
   });
 });

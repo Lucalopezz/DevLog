@@ -1,7 +1,6 @@
 import {
-  ConflictException,
   NotFoundException,
-  UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { HashProvider } from '@/shared/application/providers/hash-provaider';
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
@@ -34,7 +33,7 @@ export class UpdateUserPasswordUseCase implements UseCaseContract<
     }
 
     if (input.password !== input.confirmPassword) {
-      throw new ConflictException('As senhas não conferem');
+      throw new UnprocessableEntityException('As senhas não conferem');
     }
 
     const currentPasswordMatches = await this.hashProvider.compareHash(
@@ -43,7 +42,7 @@ export class UpdateUserPasswordUseCase implements UseCaseContract<
     );
 
     if (!currentPasswordMatches) {
-      throw new UnauthorizedException('Senha atual inválida');
+      throw new UnprocessableEntityException('Senha atual inválida');
     }
 
     const passwordHash = await this.hashProvider.generateHash(input.password);

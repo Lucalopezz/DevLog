@@ -25,7 +25,7 @@ export class CreateTagUseCase implements UseCaseContract<
     const user = await this.userRepository.findById(userId);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Usuário não encontrado');
     }
 
     const entity = new TagEntity({

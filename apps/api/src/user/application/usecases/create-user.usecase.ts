@@ -1,7 +1,10 @@
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
 import { UserOutput, UserOutputMapper } from '../dto/user-output.dto';
 import { UserRepository } from '@/user/domain/repositories/user.repository';
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { HashProvider } from '@/shared/application/providers/hash-provaider';
 import { UserEntity } from '@/user/domain/entities/user.entity';
 
@@ -27,16 +30,13 @@ export class CreateUserUseCase implements UseCaseContract<
     const { name, email, password, confirmPassword } = input;
 
     if (password !== confirmPassword) {
-      throw new ConflictException('As senhas não conferem');
-    }
-    if (!name) {
-      throw new BadRequestException('O nome é obrigatório');
+      throw new UnprocessableEntityException('As senhas não conferem');
     }
 
     const emailExists = await this.userRepository.findByEmail(email);
 
     if (emailExists !== null) {
-      throw new ConflictException('Email ja cadastrado');
+      throw new ConflictException('E-mail já cadastrado');
     }
     const hashPass = await this.hashProvider.generateHash(password);
 

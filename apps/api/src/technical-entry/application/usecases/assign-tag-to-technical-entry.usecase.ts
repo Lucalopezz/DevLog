@@ -29,9 +29,7 @@ export class AssignTagToTechnicalEntryUseCase implements UseCaseContract<
     const entry = await this.entryRepository.findById(technicalEntryId);
 
     if (!entry || entry.userId !== userId) {
-      throw new NotFoundException(
-        'Technical entry not found or does not belong to the user.',
-      );
+      throw new NotFoundException('Entrada técnica não encontrada');
     }
     const tag = await this.tagRepository.findById(input.tagId);
 

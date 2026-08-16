@@ -1,5 +1,6 @@
 import {
   ClassSerializerInterceptor,
+  HttpStatus,
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
@@ -7,6 +8,7 @@ import { EnvConfigService } from './shared/infrastructure/env-config/env-config.
 import { Reflector } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { UuidParamValidationPipe } from './shared/infrastructure/pipes/uuid-param-validation.pipe';
+import { EntityValidationErrorFilter } from './shared/infrastructure/filters/entity-validation-error.filter';
 
 export function applyGlobalConfig(
   app: INestApplication,
@@ -19,7 +21,7 @@ export function applyGlobalConfig(
   app.useGlobalPipes(
     new UuidParamValidationPipe(),
     new ValidationPipe({
-      errorHttpStatusCode: 422,
+      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
@@ -31,6 +33,7 @@ export function applyGlobalConfig(
     methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization',
   });
+  app.useGlobalFilters(new EntityValidationErrorFilter());
   app.useGlobalInterceptors(
     // new WrapperDataInterceptor(),
     new ClassSerializerInterceptor(app.get(Reflector)),

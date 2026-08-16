@@ -1,7 +1,7 @@
 import {
   ConflictException,
   NotFoundException,
-  UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { HashProvider } from '@/shared/application/providers/hash-provaider';
 import { UserEntity } from '@/user/domain/entities/user.entity';
@@ -108,6 +108,22 @@ describe('Casos de uso de usuário', () => {
         }),
       ).rejects.toBeInstanceOf(ConflictException);
     });
+
+    it('rejeita senhas de confirmação diferentes como entrada inválida', async () => {
+      const useCase = new CreateUserUseCase(
+        new InMemoryUserRepository(),
+        new StubHashProvider(),
+      );
+
+      await expect(
+        useCase.execute({
+          name: 'Lucas Lopes',
+          email: 'lucas@example.com',
+          password: 'secret',
+          confirmPassword: 'different-secret',
+        }),
+      ).rejects.toBeInstanceOf(UnprocessableEntityException);
+    });
   });
 
   describe('GetCurrentUserUseCase', () => {
@@ -172,7 +188,6 @@ describe('Casos de uso de usuário', () => {
       expect(user.name).toBe('Updated User');
       expect(user.email).toBe('lucas@example.com');
     });
-
   });
 
   describe('UpdateUserPasswordUseCase', () => {
@@ -211,8 +226,26 @@ describe('Casos de uso de usuário', () => {
           password: 'new-secret',
           confirmPassword: 'new-secret',
         }),
-      ).rejects.toBeInstanceOf(UnauthorizedException);
+      ).rejects.toBeInstanceOf(UnprocessableEntityException);
     });
 
+    it('rejeita senhas de confirmação diferentes como entrada inválida', async () => {
+      const repository = new InMemoryUserRepository();
+      const user = makeUser();
+      repository.users.push(user);
+      const useCase = new UpdateUserPasswordUseCase(
+        repository,
+        new StubHashProvider(),
+      );
+
+      await expect(
+        useCase.execute({
+          userId: user.id,
+          currentPassword: 'secret',
+          password: 'new-secret',
+          confirmPassword: 'different-secret',
+        }),
+      ).rejects.toBeInstanceOf(UnprocessableEntityException);
+    });
   });
 });
