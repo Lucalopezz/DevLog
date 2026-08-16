@@ -34,6 +34,7 @@ import {
   TechnicalEntryCollectionPresenter,
   TechnicalEntryPresenter,
 } from './presenters/technical-entry.presenter';
+import { TagPresenter } from '@/tag/infrastructure/presenter/tag.presenter';
 
 @Controller('technical-entry')
 export class TechnicalEntryController {
@@ -141,17 +142,18 @@ export class TechnicalEntryController {
 
   @Post(':entryId/tags')
   @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
   async assignTag(
     @Param('entryId') entryId: string,
     @Body() assignTagDto: AssignTagToTechnicalEntryDto,
     @CurrentUser() user: AuthenticatedUser,
-  ): Promise<void> {
-    await this.assignTagToTechnicalEntryUseCase.execute({
+  ) {
+    const output = await this.assignTagToTechnicalEntryUseCase.execute({
       technicalEntryId: entryId,
       tagId: assignTagDto.tagId,
       userId: user.id,
     });
+
+    return new TagPresenter(output);
   }
 
   @Delete(':entryId/tags/:tagId')
