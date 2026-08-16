@@ -2,7 +2,7 @@ import { UseCaseContract } from '@/shared/application/usecases/use-case-contract
 import { TagOutput, TagOutputMapper } from '../dto/tag.dto';
 import { TagRepository } from '@/tag/domain/repositories/tag.repository';
 import { UserRepository } from '@/user/domain/repositories/user.repository';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { TagEntity } from '@/tag/domain/entities/tag.entity';
 
 export type CreateTagUseCaseInput = {
@@ -32,6 +32,15 @@ export class CreateTagUseCase implements UseCaseContract<
       name,
       userId,
     });
+
+    const tagExists = await this.tagRepository.findByNormalizedName(
+      entity.normalizedName,
+      userId,
+    );
+
+    if (tagExists) {
+      throw new ConflictException('Tag já cadastrada');
+    }
 
     await this.tagRepository.insert(entity);
 
