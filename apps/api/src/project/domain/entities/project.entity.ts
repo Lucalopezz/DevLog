@@ -14,10 +14,17 @@ export type ProjectProps = {
   updatedAt: Date;
 };
 
+type ProjectInputProps = Omit<ProjectProps, 'createdAt' | 'updatedAt'> &
+  Partial<Pick<ProjectProps, 'createdAt' | 'updatedAt'>>;
+
 export class ProjectEntity extends Entity<ProjectProps> {
-  constructor(props: ProjectProps, id?: string) {
-    ProjectEntity.validate(props);
-    super(props, id);
+  constructor(props: ProjectInputProps, id?: string) {
+    const createdAt = props.createdAt ?? new Date();
+    const updatedAt = props.updatedAt ?? createdAt;
+    const completeProps: ProjectProps = { ...props, createdAt, updatedAt };
+
+    ProjectEntity.validate(completeProps);
+    super(completeProps, id);
   }
 
   update(

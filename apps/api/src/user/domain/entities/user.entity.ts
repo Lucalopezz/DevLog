@@ -10,13 +10,17 @@ export type UserProps = {
   updatedAt: Date;
 };
 
+type UserInputProps = Omit<UserProps, 'createdAt' | 'updatedAt'> &
+  Partial<Pick<UserProps, 'createdAt' | 'updatedAt'>>;
+
 export class UserEntity extends Entity<UserProps> {
-  constructor(
-    public readonly props: UserProps,
-    id?: string,
-  ) {
-    UserEntity.validate(props);
-    super(props, id);
+  constructor(props: UserInputProps, id?: string) {
+    const createdAt = props.createdAt ?? new Date();
+    const updatedAt = props.updatedAt ?? createdAt;
+    const completeProps: UserProps = { ...props, createdAt, updatedAt };
+
+    UserEntity.validate(completeProps);
+    super(completeProps, id);
   }
 
   updateName(name?: string): void {

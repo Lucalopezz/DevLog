@@ -11,14 +11,24 @@ export type TagProps = {
   updatedAt: Date;
 };
 
-// Omite o campo normalizedName, pois ele será gerado automaticamente a partir do name
-export type TagCreationProps = Omit<TagProps, 'normalizedName'>;
+export type TagCreationProps = Omit<
+  TagProps,
+  'normalizedName' | 'createdAt' | 'updatedAt'
+> &
+  Partial<Pick<TagProps, 'createdAt' | 'updatedAt'>>;
 
 export class TagEntity extends Entity<TagProps> {
-  constructor(props: TagCreationProps, id?: string) {
+  constructor(
+    props: TagCreationProps & Partial<Pick<TagProps, 'normalizedName'>>,
+    id?: string,
+  ) {
+    const createdAt = props.createdAt ?? new Date();
+    const updatedAt = props.updatedAt ?? createdAt;
     const completeProps: TagProps = {
       ...props,
-      normalizedName: TagName.normalize(props.name),
+      normalizedName: props.normalizedName ?? TagName.normalize(props.name),
+      createdAt,
+      updatedAt,
     };
 
     TagEntity.validate(completeProps);

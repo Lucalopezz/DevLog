@@ -46,8 +46,6 @@ export class CreateTechnicalEntryUseCase implements UseCaseContract<
       context,
       ...(conclusion !== undefined && { conclusion }),
       type,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     await this.technicalEntryRepository.insert(entity);

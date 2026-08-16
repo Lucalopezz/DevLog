@@ -44,8 +44,6 @@ export class CreateUserUseCase implements UseCaseContract<
       name,
       email,
       password: hashPass,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     await this.userRepository.insert(entity);

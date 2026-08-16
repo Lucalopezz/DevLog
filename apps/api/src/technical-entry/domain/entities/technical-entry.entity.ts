@@ -19,13 +19,24 @@ export type TechnicalEntryProps = {
   updatedAt: Date;
 };
 
+type TechnicalEntryInputProps = Omit<
+  TechnicalEntryProps,
+  'createdAt' | 'updatedAt'
+> &
+  Partial<Pick<TechnicalEntryProps, 'createdAt' | 'updatedAt'>>;
+
 export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
-  constructor(
-    public readonly props: TechnicalEntryProps,
-    id?: string,
-  ) {
-    TechnicalEntryEntity.validate(props);
-    super(props, id);
+  constructor(props: TechnicalEntryInputProps, id?: string) {
+    const createdAt = props.createdAt ?? new Date();
+    const updatedAt = props.updatedAt ?? createdAt;
+    const completeProps: TechnicalEntryProps = {
+      ...props,
+      createdAt,
+      updatedAt,
+    };
+
+    TechnicalEntryEntity.validate(completeProps);
+    super(completeProps, id);
   }
   update(title?: string, context?: string): void {
     const updatedProps = {

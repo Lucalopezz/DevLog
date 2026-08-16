@@ -31,8 +31,6 @@ export class CreateTagUseCase implements UseCaseContract<
     const entity = new TagEntity({
       name,
       userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     await this.tagRepository.insert(entity);
