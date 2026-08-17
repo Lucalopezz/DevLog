@@ -16,6 +16,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "test:integration": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-integration.json --runInBand",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "NODE_ENV=test jest --config ./test/jest-e2e.json --runInBand",
     "db:test:up": "docker compose --env-file ../../.env -f ../../docker/compose.yaml up -d --wait database-test && NODE_ENV=test prisma migrate deploy",
@@ -86,6 +87,10 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/integration/"
+    ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
       "^@generated/(.*)$": "<rootDir>/../generated/$1",
