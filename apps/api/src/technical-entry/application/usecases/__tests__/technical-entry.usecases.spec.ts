@@ -6,6 +6,7 @@ import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/
 import { DeleteTechnicalEntryUseCase } from '../delete-technical-entry.usecase';
 import { GetTechnicalEntryUseCase } from '../get-technical-entry.usecase';
 import { UpdateTechnicalEntryUseCase } from '../update-technical-entry.usecase';
+import { TechnicalEntryTagRepository } from '@/technical-entry/domain/repositories/technical-entry-tag.repository';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const OTHER_USER_ID = '123e4567-e89b-42d3-a456-426614174001';
@@ -89,7 +90,13 @@ describe('Casos de uso de entrada técnica', () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({ projectId: PROJECT_ID });
       repository.entries.push(entry);
-      const useCase = new GetTechnicalEntryUseCase(repository);
+      const technicalEntryTagRepository = {
+        findTags: jest.fn().mockResolvedValue(new Map()),
+      } as unknown as TechnicalEntryTagRepository;
+      const useCase = new GetTechnicalEntryUseCase(
+        repository,
+        technicalEntryTagRepository,
+      );
 
       await expect(
         useCase.execute({ id: entry.id, userId: USER_ID }),
@@ -97,6 +104,7 @@ describe('Casos de uso de entrada técnica', () => {
         id: entry.id,
         projectId: PROJECT_ID,
         status: 'OPEN',
+        tags: [],
       });
     });
 
@@ -104,7 +112,13 @@ describe('Casos de uso de entrada técnica', () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({ userId: OTHER_USER_ID });
       repository.entries.push(entry);
-      const useCase = new GetTechnicalEntryUseCase(repository);
+      const technicalEntryTagRepository = {
+        findTags: jest.fn().mockResolvedValue(new Map()),
+      } as unknown as TechnicalEntryTagRepository;
+      const useCase = new GetTechnicalEntryUseCase(
+        repository,
+        technicalEntryTagRepository,
+      );
 
       await expect(
         useCase.execute({ id: entry.id, userId: USER_ID }),

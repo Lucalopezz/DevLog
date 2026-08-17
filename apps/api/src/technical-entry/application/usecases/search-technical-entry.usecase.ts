@@ -16,6 +16,8 @@ import {
 } from '../dto/technical-entry.dto';
 import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry-status.enum';
 import { UnprocessableEntityException } from '@nestjs/common';
+import { TagEntity } from '@/tag/domain/entities/tag.entity';
+import { TechnicalEntryTagRepository } from '@/technical-entry/domain/repositories/technical-entry-tag.repository';
 
 export type SearchTechnicalEntryUseCaseInput = {
   userId: string;
@@ -40,6 +42,7 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
 > {
   constructor(
     private readonly technicalEntryRepository: TechnicalEntryRepository,
+    private readonly technicalEntryTagRepository: TechnicalEntryTagRepository,
   ) {}
 
   async execute(
@@ -74,15 +77,21 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
     });
 
     const result = await this.technicalEntryRepository.search(params);
+    const tagsByEntry = await this.technicalEntryTagRepository.findTags({
+      // Passa os IDs das entradas técnicas encontradas para buscar as tags associadas
+      technicalEntryIds: result.items.map((item) => item.id),
+      userId: input.userId,
+    });
 
-    return this.toOutput(result);
+    return this.toOutput(result, tagsByEntry);
   }
 
   private toOutput(
     result: TechnicalEntrySearchResult,
+    tagsByEntry: Map<string, TagEntity[]>,
   ): SearchTechnicalEntryUseCaseOutput {
     const items = result.items.map((item) =>
-      TechnicalEntryOutputMapper.toOutput(item),
+      TechnicalEntryOutputMapper.toOutput(item, tagsByEntry.get(item.id) ?? []),
     );
 
     return PaginationOutputMapper.toOutout(items, result);

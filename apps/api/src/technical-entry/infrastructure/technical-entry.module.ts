@@ -61,17 +61,29 @@ import { TagRepository } from '@/tag/domain/repositories/tag.repository';
     },
     {
       provide: GetTechnicalEntryUseCase,
-      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
-        return new GetTechnicalEntryUseCase(technicalEntryRepository);
+      useFactory: (
+        technicalEntryRepository: TechnicalEntryRepository,
+        technicalEntryTagRepository: TechnicalEntryTagRepository,
+      ) => {
+        return new GetTechnicalEntryUseCase(
+          technicalEntryRepository,
+          technicalEntryTagRepository,
+        );
       },
-      inject: ['TechnicalEntryRepository'],
+      inject: ['TechnicalEntryRepository', 'TechnicalEntryTagRepository'],
     },
     {
       provide: SearchTechnicalEntryUseCase,
-      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
-        return new SearchTechnicalEntryUseCase(technicalEntryRepository);
+      useFactory: (
+        technicalEntryRepository: TechnicalEntryRepository,
+        technicalEntryTagRepository: TechnicalEntryTagRepository,
+      ) => {
+        return new SearchTechnicalEntryUseCase(
+          technicalEntryRepository,
+          technicalEntryTagRepository,
+        );
       },
-      inject: ['TechnicalEntryRepository'],
+      inject: ['TechnicalEntryRepository', 'TechnicalEntryTagRepository'],
     },
     {
       provide: UpdateTechnicalEntryUseCase,

@@ -5,6 +5,7 @@ import {
   TechnicalEntryOutput,
   TechnicalEntryOutputMapper,
 } from '../dto/technical-entry.dto';
+import { TechnicalEntryTagRepository } from '@/technical-entry/domain/repositories/technical-entry-tag.repository';
 
 export type GetTechnicalEntryUseCaseInput = {
   id: string;
@@ -19,6 +20,7 @@ export class GetTechnicalEntryUseCase implements UseCaseContract<
 > {
   constructor(
     private readonly technicalEntryRepository: TechnicalEntryRepository,
+    private readonly technicalEntryTagRepository: TechnicalEntryTagRepository,
   ) {}
 
   async execute(
@@ -32,6 +34,14 @@ export class GetTechnicalEntryUseCase implements UseCaseContract<
       throw new NotFoundException('Entrada técnica não encontrada');
     }
 
-    return TechnicalEntryOutputMapper.toOutput(technicalEntry);
+    const tagsByEntry = await this.technicalEntryTagRepository.findTags({
+      technicalEntryIds: [technicalEntry.id],
+      userId: input.userId,
+    });
+
+    return TechnicalEntryOutputMapper.toOutput(
+      technicalEntry,
+      tagsByEntry.get(technicalEntry.id) ?? [],
+    );
   }
 }
