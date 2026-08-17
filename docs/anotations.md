@@ -1,133 +1,139 @@
-A recomendação, seguindo DDD, é:
+Project deve ser o aggregate root,
+enquanto ProjectTechnology e ProjectCommand devem ser
+entidades próprias pertencentes ao projeto.
 
-- TechnicalEntry continua sendo uma entidade/agregado.
-- Tag também é uma entidade/agregado próprio.
-- TechnicalEntryTag inicialmente deve ser apenas uma
-  tabela de associação, não necessariamente uma
-  entidade de domínio.
+Em outras palavras:
 
-- A ação de associar uma tag deve ser executada por um
-  use case.
+> Entidade separada: sim.
+> Recurso independente como Tag: não.
 
-Uma organização possível:
+A diferença para Tag é:
 
-´´´txt
-src/
-├── tag/
-│ ├── domain/
-│ │ ├── entities/tag.entity.ts
-│ │ └── repositories/tag.repository.ts
-│ ├── application/
-│ │ └── usecases/
-│ │ ├── create-tag.usecase.ts
-│ │ └── list-tags.usecase.ts
-│ └── infrastructure/
-│ ├── database/prisma/repositories/tag-
-prisma.repository.ts
-│ ├── tag.controller.ts
-│ └── tag.module.ts
-│
-└── technical-entry/
+Recurso Pertencimento Reutilização
+━━━━━━━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━
+Tag pertence ao usuário pode ser usada
+em várias
+entradas
+─────────────────── ───────────────────── ──────────────────
+ProjectTechnology pertence a um não existe fora
+projeto do projeto
+─────────────────── ───────────────────── ──────────────────
+ProjectCommand pertence a um não existe fora
+projeto do projeto
+
+Como o schema já possui id, createdAt, updatedAt e tabelas
+próprias, eu criaria entidades separadas:
+
+project/
 ├── domain/
+│ ├── entities/
+│ │ ├── project.entity.ts
+│ │ ├── project-technology.entity.ts
+│ │ ├── project-command.entity.ts
+│ │ └── project-resource.entity.ts
 │ └── repositories/
-│ └── technical-entry-tag.repository.ts
-└── application/
-└── usecases/
-├── assign-tag-to-technical-
-entry.usecase.ts
-└── remove-tag-from-technical-
-entry.usecase.ts
-´´´
-O use case de associação poderia fazer algo assim:
+│ ├── project.repository.ts
+│ ├── project-technology.repository.ts
+│ ├── project-command.repository.ts
+│ └── project-resource.repository.ts
+├── application/
+│ └── usecases/
+│ ├── create-project.usecase.ts
+│ ├── get-project.usecase.ts
+│ ├── list-projects.usecase.ts
+│ ├── update-project.usecase.ts
+│ ├── add-project-technology.usecase.ts
+│ ├── update-project-technology.usecase.ts
+│ ├── remove-project-technology.usecase.ts
+│ ├── add-project-command.usecase.ts
+│ ├── update-project-command.usecase.ts
+│ └── remove-project-command.usecase.ts
+└── infrastructure/
+├── project.controller.ts
+├── project.module.ts
+└── database/
 
-async execute(input: {
-userId: string;
-technicalEntryId: string;
-tagId: string;
-}) {
-const entry = await this.entryRepository.findById(
-input.technicalEntryId,
-);
+Eu não colocaria technology como um módulo global neste
+momento, porque a tecnologia, no seu modelo atual, só faz
+sentido dentro de um projeto:
 
-    const tag = await
-    this.tagRepository.findById(input.tagId);
-
-    if (!entry || entry.userId !== input.userId) {
-      throw new NotFoundException('Entrada não
-      encontrada');
-    }
-
-    if (!tag || tag.userId !== input.userId) {
-      throw new NotFoundException('Tag não encontrada');
-    }
-
-    await this.entryTagRepository.add({
-      technicalEntryId: entry.id,
-      tagId: tag.id,
-    });
-
+model ProjectTechnology {
+projectId String
+name String
+version String?
 }
 
-O ponto importante é que o use case coordena os dois
-agregados:
+Isso permite, por exemplo:
 
-1. Verifica se a entrada pertence ao usuário.
-2. Verifica se a tag pertence ao usuário.
-3. Cria o registro em TechnicalEntryTag.
+Projeto A
+└── NestJS 11
 
-Eu não colocaria tagIds diretamente dentro de
-TechnicalEntryEntity neste momento, porque a entidade
-não deveria saber como validar se uma tag existe ou
-pertence ao usuário. Isso é responsabilidade da camada
-de aplicação.
+Projeto B
+└── NestJS 10
 
-Também não criaria uma pasta technical-entry-tag agora.
-A tabela tem apenas:
+Portanto, version é uma característica do uso daquela
+tecnologia naquele projeto.
 
-technicalEntryId
-tagId
-createdAt
+Os casos de uso poderiam ser:
 
-Ela não possui comportamento próprio. Portanto, é uma
-associação de persistência.
+POST /projects
+GET /projects
+GET /projects/:projectId
+PATCH /projects/:projectId
 
-Você pode expor endpoints como:
+POST /projects/:projectId/technologies
+PATCH /projects/:projectId/technologies/:technologyId
+DELETE /projects/:projectId/technologies/:technologyId
 
-POST /technical-entry/:entryId/tags
-DELETE /technical-entry/:entryId/tags/:tagId
-GET /tag
+POST /projects/:projectId/commands
+PATCH /projects/:projectId/commands/:commandId
+DELETE /projects/:projectId/commands/:commandId
 
-Com o corpo:
+Para cada operação filha, o caso de uso deve:
 
-{
-"tagId": "..."
-}
+1. Buscar o projeto pelo projectId e pelo userId autenticado.
+2. Garantir que o projeto pertence ao usuário.
+3. Buscar a tecnologia ou comando.
+4. Garantir que o recurso pertence àquele projeto.
+5. Executar a alteração.
 
-A entidade TechnicalEntryTag só deveria existir no
-domínio se a associação ganhasse regras próprias, por
-exemplo:
+Assim você evita que alguém altere um comando de outro projeto
+apenas conhecendo o ID.
 
-prioridade da tag
-ordem das tags
-quem adicionou a tag
-data de expiração
-origem da associação
+Eu também evitaria colocar arrays como technologies e commands
+dentro de ProjectEntity inicialmente. O ProjectEntity
+representa o projeto e suas regras próprias; as relações podem
+ser carregadas pelos repositórios e montadas no output do caso
+de uso. Isso evita transformar todo projeto em um objeto
+enorme sempre que ele for atualizado.
 
-Nesse caso, ela deixaria de ser apenas uma tabela
-intermediária e passaria a ter comportamento real.
+A relação conceitual fica assim:
 
-No seu projeto atual, eu faria estes próximos passos:
+Project
+├── ProjectTechnology
+├── ProjectCommand
+├── ProjectResource
+└── TechnicalEntry
 
-- Renomearia tags.entity.ts para tag.entity.ts.
-- Criaria TagRepository.
-- Criaria TagModule.
-- Criaria um repositório para TechnicalEntryTag.
-- Criaria AssignTagToTechnicalEntryUseCase.
-- Faria TechnicalEntryModule importar TagModule.
-- Retornaria as tags no DTO de uma entrada quando
-  necessário.
+As três primeiras são dependentes do projeto e usam onDelete:
+Cascade, como já está definido no apps/api/prisma/
+schema.prisma. Já TechnicalEntry possui uma relação opcional
+com o projeto e não deve ser removida quando o projeto for
+arquivado.
 
-A ideia principal é: Tag pertence ao contexto de tags;
-TechnicalEntry pertence ao contexto de entradas; a
-associação entre eles pertence à camada de aplicação e
-é persistida pela tabela intermediária.
+Há ainda duas inconsistências importantes para corrigir antes
+de implementar os casos de uso:
+
+- O schema/documentação usa ACTIVE, PAUSED e FINISHED, mas o
+  apps/api/src/project/domain/entities/project-status-enum.ts
+  usa ACTIVE, INACTIVE e ARCHIVED.
+
+- A documentação define archivedAt como conceito separado do
+  status, mas o método archive() atualmente muda o status para
+  ARCHIVED. O ideal seria arquivar preenchendo apenas
+  archivedAt, mantendo o status funcional do projeto.
+
+A modelagem atual do Prisma já está próxima dessa arquitetura.
+O principal agora é implementar essas entidades como filhos do
+contexto project, e não copiá-las exatamente como Tag, que é
+um recurso independente do usuário.
