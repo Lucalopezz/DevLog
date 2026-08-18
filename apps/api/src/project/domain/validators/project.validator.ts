@@ -24,9 +24,9 @@ export class ProjectRules {
   @IsNotEmpty({ message: 'O nome do projeto é obrigatório' })
   name: string;
 
+  @IsOptional()
   @IsString({ message: 'A descrição do projeto deve ser um texto' })
-  @IsNotEmpty({ message: 'A descrição do projeto é obrigatória' })
-  description: string;
+  description?: string;
 
   @IsEnum(ProjectStatusEnum, {
     message: 'O status do projeto deve ser válido',

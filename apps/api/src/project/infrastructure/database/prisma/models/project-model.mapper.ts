@@ -11,7 +11,7 @@ export class ProjectModelMapper {
     const data = {
       userId: model.userId,
       name: model.name,
-      description: model.description ?? '',
+      description: model.description ?? undefined,
       status: this.toDomainStatus(model.status),
       localPath: model.localPath ?? undefined,
       archivedAt: model.archivedAt ?? undefined,

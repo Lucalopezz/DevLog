@@ -6,7 +6,7 @@ import { ProjectValidatorFactory } from '../validators/project.validator';
 export type ProjectProps = {
   userId: string;
   name: string;
-  description: string;
+  description?: string;
   status: ProjectStatusEnum;
   localPath?: string;
   archivedAt?: Date;
@@ -60,7 +60,7 @@ export class ProjectEntity extends Entity<ProjectProps> {
     this.updatedAt = updatedProps.updatedAt;
   }
 
-  updateDescription(description: string) {
+  updateDescription(description?: string) {
     const updatedProps = {
       ...this.props,
       description,
@@ -130,7 +130,7 @@ export class ProjectEntity extends Entity<ProjectProps> {
     return this.props.name;
   }
 
-  get description(): string {
+  get description(): string | undefined {
     return this.props.description;
   }
 
@@ -158,7 +158,7 @@ export class ProjectEntity extends Entity<ProjectProps> {
     this.props.name = name;
   }
 
-  private set description(description: string) {
+  private set description(description: string | undefined) {
     this.props.description = description;
   }
 

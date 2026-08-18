@@ -74,4 +74,16 @@ describe('ProjectEntity', () => {
     expect(project.archivedAt).toBeDefined();
     expect(project.status).toBe(ProjectStatusEnum.ACTIVE);
   });
+
+  it('permite remover a descrição durante a atualização', () => {
+    const project = new ProjectEntity(makeProps());
+
+    project.updateDescription();
+
+    expect(project.description).toBeUndefined();
+
+    project.update({ description: 'Descrição restaurada' });
+
+    expect(project.description).toBe('Descrição restaurada');
+  });
 });
