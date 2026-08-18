@@ -33,10 +33,12 @@ export class ProjectEntity extends Entity<ProjectProps> {
       'userId' | 'createdAt' | 'updatedAt' | 'archivedAt'
     >,
   ) {
+    const now = new Date();
+
     const updatedProps = {
       ...this.props,
       ...props,
-      updatedAt: new Date(),
+      updatedAt: now,
     };
     ProjectEntity.validate(updatedProps);
     if (props.name !== undefined) {
@@ -58,20 +60,58 @@ export class ProjectEntity extends Entity<ProjectProps> {
     this.updatedAt = updatedProps.updatedAt;
   }
 
-  archive() {
+  updateDescription(description: string) {
     const updatedProps = {
       ...this.props,
-      status: ProjectStatusEnum.ARCHIVED,
-      archivedAt: new Date(),
+      description,
       updatedAt: new Date(),
     };
+
     ProjectEntity.validate(updatedProps);
-    this.status = ProjectStatusEnum.ARCHIVED;
-    this.archivedAt = updatedProps.archivedAt;
+
+    this.description = description;
     this.updatedAt = updatedProps.updatedAt;
   }
 
-  addPath(localPath: string) {
+  archive() {
+    if (this.archivedAt !== undefined) {
+      return;
+    }
+
+    const now = new Date();
+
+    const updatedProps = {
+      ...this.props,
+      archivedAt: now,
+      updatedAt: now,
+    };
+
+    ProjectEntity.validate(updatedProps);
+
+    this.archivedAt = now;
+    this.updatedAt = now;
+  }
+
+  restore() {
+    if (this.archivedAt === undefined) {
+      return;
+    }
+
+    const now = new Date();
+
+    const updatedProps = {
+      ...this.props,
+      archivedAt: undefined,
+      updatedAt: now,
+    };
+
+    ProjectEntity.validate(updatedProps);
+
+    this.archivedAt = undefined;
+    this.updatedAt = now;
+  }
+
+  updatePath(localPath?: string) {
     const updatedProps = {
       ...this.props,
       localPath,

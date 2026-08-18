@@ -121,17 +121,10 @@ schema.prisma. Já TechnicalEntry possui uma relação opcional
 com o projeto e não deve ser removida quando o projeto for
 arquivado.
 
-Há ainda duas inconsistências importantes para corrigir antes
-de implementar os casos de uso:
-
-- O schema/documentação usa ACTIVE, PAUSED e FINISHED, mas o
-  apps/api/src/project/domain/entities/project-status-enum.ts
-  usa ACTIVE, INACTIVE e ARCHIVED.
-
-- A documentação define archivedAt como conceito separado do
-  status, mas o método archive() atualmente muda o status para
-  ARCHIVED. O ideal seria arquivar preenchendo apenas
-  archivedAt, mantendo o status funcional do projeto.
+O schema/documentação usa ACTIVE, PAUSED e FINISHED, enquanto a
+aplicação usa ACTIVE, INACTIVE e FINISHED, traduzindo PAUSED para
+INACTIVE no mapper. O campo archivedAt permanece separado do
+status: archive() e restore() alteram apenas o arquivamento.
 
 A modelagem atual do Prisma já está próxima dessa arquitetura.
 O principal agora é implementar essas entidades como filhos do

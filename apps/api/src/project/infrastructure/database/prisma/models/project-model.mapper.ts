@@ -49,7 +49,7 @@ export class ProjectModelMapper {
       case PrismaProjectStatus.PAUSED:
         return ProjectStatusEnum.INACTIVE;
       case PrismaProjectStatus.FINISHED:
-        return ProjectStatusEnum.ARCHIVED;
+        return ProjectStatusEnum.FINISHED;
       default:
         throw new ValidationError('Invalid project status');
     }
@@ -61,7 +61,7 @@ export class ProjectModelMapper {
         return PrismaProjectStatus.ACTIVE;
       case ProjectStatusEnum.INACTIVE:
         return PrismaProjectStatus.PAUSED;
-      case ProjectStatusEnum.ARCHIVED:
+      case ProjectStatusEnum.FINISHED:
         return PrismaProjectStatus.FINISHED;
       default:
         throw new ValidationError('Invalid project status');
