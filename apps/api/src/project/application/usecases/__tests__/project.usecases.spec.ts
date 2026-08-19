@@ -105,7 +105,8 @@ describe('Project use cases', () => {
     expect(repository.delete.mock.calls).toHaveLength(0);
   });
 
-  it('busca somente projetos do usuário informado no filtro', async () => {
+  it('monta o filtro de busca com os parâmetros recebidos', async () => {
+    const archivedAt = new Date('2026-08-01T00:00:00.000Z');
     const repository = {
       search: jest.fn().mockResolvedValue(
         new ProjectSearchResult({
@@ -119,10 +120,30 @@ describe('Project use cases', () => {
     } as unknown as jest.Mocked<ProjectRepository>;
     const useCase = new SearchProjectUseCase(repository);
 
-    await useCase.execute({ filter: { userId: USER_ID } });
+    await useCase.execute({
+      userId: USER_ID,
+      page: 2,
+      perPage: 10,
+      sort: 'name',
+      sortDir: 'desc',
+      name: 'DevLog',
+      status: ProjectStatusEnum.ACTIVE,
+      archivedAt,
+    });
 
     expect(repository.search.mock.calls[0]?.[0]).toEqual(
-      expect.objectContaining({ filter: { userId: USER_ID } }),
+      expect.objectContaining({
+        page: 2,
+        perPage: 10,
+        sort: 'name',
+        sortDir: 'desc',
+        filter: {
+          userId: USER_ID,
+          name: 'DevLog',
+          status: ProjectStatusEnum.ACTIVE,
+          archivedAt,
+        },
+      }),
     );
   });
 });

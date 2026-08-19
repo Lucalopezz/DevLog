@@ -75,15 +75,7 @@ export class ProjectController {
   ) {
     const output = await this.searchProjectUseCase.execute({
       ...searchParams,
-      filter: {
-        userId: user.id,
-        // Evitar erro de null
-        ...(searchParams.name ? { name: searchParams.name } : {}),
-        ...(searchParams.status ? { status: searchParams.status } : {}),
-        ...(searchParams.archivedAt !== undefined
-          ? { archivedAt: searchParams.archivedAt }
-          : {}),
-      },
+      userId: user.id,
     });
 
     return ProjectController.listProjectsToResponse(output);

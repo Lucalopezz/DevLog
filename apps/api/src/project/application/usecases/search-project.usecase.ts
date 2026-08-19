@@ -12,7 +12,13 @@ import {
 } from '@/project/domain/repositories/project.repository';
 import { ProjectOutput, ProjectOutputMapper } from '../dto/project.dto';
 
-export type SearchProjectUseCaseInput = SearchInput<ProjectFilter>;
+export type SearchProjectUseCaseInput = Omit<
+  SearchInput<ProjectFilter>,
+  'filter'
+> &
+  Omit<ProjectFilter, 'userId'> & {
+    userId: string;
+  };
 
 export type SearchProjectUseCaseOutput = PaginationOutput<ProjectOutput>;
 
@@ -24,7 +30,18 @@ export class SearchProjectUseCase implements UseCaseContract<
   async execute(
     input: SearchProjectUseCaseInput,
   ): Promise<SearchProjectUseCaseOutput> {
-    const params = new ProjectSearchParams(input);
+    const { userId, name, archivedAt, status, ...searchProps } = input;
+
+    const filter: ProjectFilter = { userId };
+
+    if (name) filter.name = name;
+    if (status) filter.status = status;
+    if (archivedAt !== undefined) filter.archivedAt = archivedAt;
+
+    const params = new ProjectSearchParams({
+      ...searchProps,
+      filter,
+    });
     const result = await this.projectRepository.search(params);
     return this.toOutput(result);
   }
