@@ -8,7 +8,7 @@ import { ProjectEntity } from '../entities/project.entity';
 
 export type ProjectFilter = {
   userId?: string;
-  title?: string;
+  name?: string;
   archivedAt?: Date | null;
   status?: ProjectStatusEnum;
 };

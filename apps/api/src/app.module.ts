@@ -5,6 +5,7 @@ import { UserModule } from './user/infrastructure/user.module';
 import { AuthModule } from './auth/infrastructure/auth.module';
 import { TechnicalEntryModule } from './technical-entry/infrastructure/technical-entry.module';
 import { TagModule } from './tag/infrastructure/tag.module';
+import { ProjectModule } from './project/infrastructure/project.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { TagModule } from './tag/infrastructure/tag.module';
     AuthModule,
     TechnicalEntryModule,
     TagModule,
+    ProjectModule,
   ],
   controllers: [],
   providers: [],

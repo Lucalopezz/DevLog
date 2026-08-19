@@ -93,8 +93,8 @@ export class ProjectPrismaRepository implements ProjectRepository {
     if (filter.userId !== undefined) {
       where.userId = filter.userId;
     }
-    if (filter.title) {
-      where.name = { contains: filter.title, mode: 'insensitive' };
+    if (filter.name) {
+      where.name = { contains: filter.name, mode: 'insensitive' };
     }
     if (filter.archivedAt !== undefined) {
       where.archivedAt = filter.archivedAt;
