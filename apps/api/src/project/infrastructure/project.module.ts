@@ -10,6 +10,8 @@ import { UpdateProjectUseCase } from '../application/usecases/update-project.use
 import { UpdateProjectDescriptionUseCase } from '../application/usecases/update-project-description.usecase';
 import { UpdateProjectPathUseCase } from '../application/usecases/update-project-path.usecase';
 import { DeleteProjectUseCase } from '../application/usecases/delete-project.usecase';
+import { ArchiveProjectUseCase } from '../application/usecases/archive-project.usecase';
+import { RestoreProjectUseCase } from '../application/usecases/restore-project.usecase';
 import { AuthModule } from '@/auth/infrastructure/auth.module';
 
 @Module({
@@ -83,6 +85,20 @@ import { AuthModule } from '@/auth/infrastructure/auth.module';
       provide: DeleteProjectUseCase,
       useFactory: (projectRepository: ProjectPrismaRepository) => {
         return new DeleteProjectUseCase(projectRepository);
+      },
+      inject: ['ProjectRepository'],
+    },
+    {
+      provide: ArchiveProjectUseCase,
+      useFactory: (projectRepository: ProjectPrismaRepository) => {
+        return new ArchiveProjectUseCase(projectRepository);
+      },
+      inject: ['ProjectRepository'],
+    },
+    {
+      provide: RestoreProjectUseCase,
+      useFactory: (projectRepository: ProjectPrismaRepository) => {
+        return new RestoreProjectUseCase(projectRepository);
       },
       inject: ['ProjectRepository'],
     },

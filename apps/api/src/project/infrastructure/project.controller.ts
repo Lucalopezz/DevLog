@@ -27,6 +27,8 @@ import { UpdateProjectPathDto } from './dto/update-project-path.dto';
 import { UpdateProjectDescriptionUseCase } from '../application/usecases/update-project-description.usecase';
 import { UpdateProjectPathUseCase } from '../application/usecases/update-project-path.usecase';
 import { DeleteProjectUseCase } from '../application/usecases/delete-project.usecase';
+import { ArchiveProjectUseCase } from '../application/usecases/archive-project.usecase';
+import { RestoreProjectUseCase } from '../application/usecases/restore-project.usecase';
 import type { ProjectOutput } from '../application/dto/project.dto';
 import type { SearchProjectUseCaseOutput } from '../application/usecases/search-project.usecase';
 import {
@@ -57,6 +59,12 @@ export class ProjectController {
 
   @Inject(DeleteProjectUseCase)
   private readonly deleteProjectUseCase: DeleteProjectUseCase;
+
+  @Inject(ArchiveProjectUseCase)
+  private readonly archiveProjectUseCase: ArchiveProjectUseCase;
+
+  @Inject(RestoreProjectUseCase)
+  private readonly restoreProjectUseCase: RestoreProjectUseCase;
 
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
@@ -142,6 +150,32 @@ export class ProjectController {
   ) {
     const output = await this.updateProjectPathUseCase.execute({
       ...updateProjectPathDto,
+      id,
+      userId: user.id,
+    });
+
+    return ProjectController.projectToResponse(output);
+  }
+
+  @Patch(':id/archive')
+  async archive(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.archiveProjectUseCase.execute({
+      id,
+      userId: user.id,
+    });
+
+    return ProjectController.projectToResponse(output);
+  }
+
+  @Patch(':id/restore')
+  async restore(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.restoreProjectUseCase.execute({
       id,
       userId: user.id,
     });
