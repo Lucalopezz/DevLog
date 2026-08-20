@@ -8,9 +8,7 @@ export type UpdateProjectUseCaseInput = {
   id: string;
   userId: string;
   name?: string;
-  description?: string | null;
   status?: ProjectStatusEnum;
-  localPath?: string | null;
 };
 
 export type UpdateProjectUseCaseOutput = ProjectOutput;
@@ -34,14 +32,6 @@ export class UpdateProjectUseCase implements UseCaseContract<
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(input.status !== undefined ? { status: input.status } : {}),
     });
-
-    if (Object.prototype.hasOwnProperty.call(input, 'description')) {
-      project.updateDescription(input.description || undefined);
-    }
-
-    if (Object.prototype.hasOwnProperty.call(input, 'localPath')) {
-      project.updatePath(input.localPath || undefined);
-    }
 
     await this.projectRepository.update(project);
 
