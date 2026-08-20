@@ -36,11 +36,11 @@ export class UpdateProjectUseCase implements UseCaseContract<
     });
 
     if (Object.prototype.hasOwnProperty.call(input, 'description')) {
-      project.updateDescription(input.description ?? undefined);
+      project.updateDescription(input.description || undefined);
     }
 
     if (Object.prototype.hasOwnProperty.call(input, 'localPath')) {
-      project.updatePath(input.localPath ?? undefined);
+      project.updatePath(input.localPath || undefined);
     }
 
     await this.projectRepository.update(project);

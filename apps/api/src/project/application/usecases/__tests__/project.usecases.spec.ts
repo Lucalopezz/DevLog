@@ -9,6 +9,8 @@ import { DeleteProjectUseCase } from '../delete-project.usecase';
 import { GetProjectUseCase } from '../get-project.usecase';
 import { SearchProjectUseCase } from '../search-project.usecase';
 import { UpdateProjectUseCase } from '../update-project.usecase';
+import { UpdateProjectDescriptionUseCase } from '../update-project-description.usecase';
+import { UpdateProjectPathUseCase } from '../update-project-path.usecase';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const OTHER_USER_ID = '123e4567-e89b-42d3-a456-426614174001';
@@ -83,6 +85,38 @@ describe('Project use cases', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
 
     expect(repository.update.mock.calls).toHaveLength(0);
+  });
+
+  it('atualiza e remove a descrição pelo caso de uso específico', async () => {
+    const project = makeProject();
+    project.updateDescription('Descrição atual');
+    const { repository } = makeRepository(project);
+    const useCase = new UpdateProjectDescriptionUseCase(repository);
+
+    const output = await useCase.execute({
+      id: PROJECT_ID,
+      userId: USER_ID,
+      description: '',
+    });
+
+    expect(repository.update.mock.calls[0]?.[0]).toBe(project);
+    expect(output.description).toBeUndefined();
+  });
+
+  it('atualiza e remove o caminho local pelo caso de uso específico', async () => {
+    const project = makeProject();
+    project.updatePath('/workspace/devlog');
+    const { repository } = makeRepository(project);
+    const useCase = new UpdateProjectPathUseCase(repository);
+
+    const output = await useCase.execute({
+      id: PROJECT_ID,
+      userId: USER_ID,
+      localPath: '',
+    });
+
+    expect(repository.update.mock.calls[0]?.[0]).toBe(project);
+    expect(output.localPath).toBeUndefined();
   });
 
   it('remove o projeto somente quando ele pertence ao usuário', async () => {

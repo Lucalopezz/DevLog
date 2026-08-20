@@ -199,33 +199,32 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### CreateProject
 
-- [ ] Criar a entidade de projeto.
-- [ ] Criar o caso de uso `CreateProject`.
-- [ ] Validar `name`, `description?`, `repositoryUrl?`, `localPath?` e `status?`.
-- [ ] Tornar o nome obrigatório.
-- [ ] Validar `repositoryUrl` quando informado.
-- [ ] Associar o projeto ao usuário autenticado.
-- [ ] Definir o status inicial do projeto como `ACTIVE` quando não informado.
-- [ ] Criar o endpoint de criação.
+- [x] Criar a entidade de projeto.
+- [x] Criar o caso de uso `CreateProject`.
+- [x] Validar `name`, `description?`, `repositoryUrl?`, `localPath?` e `status?`. -> na criaçao status vem como ativo e nao tem localPath
+- [x] Tornar o nome obrigatório.
+- [x] Associar o projeto ao usuário autenticado.
+- [x] Definir o status inicial do projeto como `ACTIVE` quando não informado.
+- [x] Criar o endpoint de criação.
 - [ ] Testar criação válida, nome ausente, URL inválida e associação ao usuário correto.
 
 ### GetProject e ListProjects
 
-- [ ] Criar o caso de uso `GetProject`.
+- [x] Criar o caso de uso `GetProject`.
 - [ ] Retornar o projeto do usuário com tecnologias, comandos, recursos e entradas relacionadas.
-- [ ] Criar o caso de uso `ListProjects`.
-- [ ] Listar somente projetos do usuário autenticado.
-- [ ] Implementar inicialmente filtros por `name` e `status`.
-- [ ] Manter filtros futuros (`archived` e `technology`) como extensão planejada.
-- [ ] Criar os endpoints de consulta individual e listagem.
+- [x] Criar o caso de uso `ListProjects`.
+- [x] Listar somente projetos do usuário autenticado.
+- [x] Implementar inicialmente filtros por `name` e `status`.
+- [x] Manter filtros futuros (`archived` e `technology`) como extensão planejada.
+- [x] Criar os endpoints de consulta individual e listagem.
 - [ ] Testar agregação do projeto, filtros e isolamento entre usuários.
 
 ### UpdateProject
 
-- [ ] Criar o caso de uso `UpdateProject`.
-- [ ] Permitir atualizar nome, descrição, repositório, caminho local e status.
-- [ ] Garantir que somente o proprietário possa alterar o projeto.
-- [ ] Criar o endpoint de atualização.
+- [x] Criar o caso de uso `UpdateProject`.
+- [x] Permitir atualizar nome, descrição, repositório, caminho local e status.
+- [x] Garantir que somente o proprietário possa alterar o projeto.
+- [x] Criar o endpoint de atualização.
 - [ ] Testar atualização válida, URL inválida e tentativa de alteração por outro usuário.
 
 ## 6. Relação projeto × entrada técnica

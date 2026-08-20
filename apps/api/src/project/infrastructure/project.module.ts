@@ -7,6 +7,8 @@ import { CreateProjectUseCase } from '../application/usecases/create-project.use
 import { SearchProjectUseCase } from '../application/usecases/search-project.usecase';
 import { GetProjectUseCase } from '../application/usecases/get-project.usecase';
 import { UpdateProjectUseCase } from '../application/usecases/update-project.usecase';
+import { UpdateProjectDescriptionUseCase } from '../application/usecases/update-project-description.usecase';
+import { UpdateProjectPathUseCase } from '../application/usecases/update-project-path.usecase';
 import { DeleteProjectUseCase } from '../application/usecases/delete-project.usecase';
 import { AuthModule } from '@/auth/infrastructure/auth.module';
 
@@ -60,6 +62,20 @@ import { AuthModule } from '@/auth/infrastructure/auth.module';
       provide: UpdateProjectUseCase,
       useFactory: (projectRepository: ProjectPrismaRepository) => {
         return new UpdateProjectUseCase(projectRepository);
+      },
+      inject: ['ProjectRepository'],
+    },
+    {
+      provide: UpdateProjectDescriptionUseCase,
+      useFactory: (projectRepository: ProjectPrismaRepository) => {
+        return new UpdateProjectDescriptionUseCase(projectRepository);
+      },
+      inject: ['ProjectRepository'],
+    },
+    {
+      provide: UpdateProjectPathUseCase,
+      useFactory: (projectRepository: ProjectPrismaRepository) => {
+        return new UpdateProjectPathUseCase(projectRepository);
       },
       inject: ['ProjectRepository'],
     },
