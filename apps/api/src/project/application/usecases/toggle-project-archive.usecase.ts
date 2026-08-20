@@ -3,29 +3,29 @@ import { UseCaseContract } from '@/shared/application/usecases/use-case-contract
 import { ProjectRepository } from '@/project/domain/repositories/project.repository';
 import { ProjectOutput, ProjectOutputMapper } from '../dto/project.dto';
 
-export type RestoreProjectUseCaseInput = {
+export type ToggleProjectArchiveUseCaseInput = {
   id: string;
   userId: string;
 };
 
-export type RestoreProjectUseCaseOutput = ProjectOutput;
+export type ToggleProjectArchiveUseCaseOutput = ProjectOutput;
 
-export class RestoreProjectUseCase implements UseCaseContract<
-  RestoreProjectUseCaseInput,
-  RestoreProjectUseCaseOutput
+export class ToggleProjectArchiveUseCase implements UseCaseContract<
+  ToggleProjectArchiveUseCaseInput,
+  ToggleProjectArchiveUseCaseOutput
 > {
   constructor(private readonly projectRepository: ProjectRepository) {}
 
   async execute(
-    input: RestoreProjectUseCaseInput,
-  ): Promise<RestoreProjectUseCaseOutput> {
+    input: ToggleProjectArchiveUseCaseInput,
+  ): Promise<ToggleProjectArchiveUseCaseOutput> {
     const project = await this.projectRepository.findById(input.id);
 
     if (project === null || project.userId !== input.userId) {
       throw new NotFoundException('Projeto não encontrado');
     }
 
-    project.restore();
+    project.toggleArchive();
 
     await this.projectRepository.update(project);
 

@@ -73,41 +73,21 @@ export class ProjectEntity extends Entity<ProjectProps> {
     this.updatedAt = updatedProps.updatedAt;
   }
 
-  archive() {
-    if (this.archivedAt !== undefined) {
-      return;
-    }
-
+  toggleArchive() {
     const now = new Date();
+    // Se archivedAt for undefined, significa que o projeto não está arquivado, então arquiva.
+    // Caso contrário, vamos desarquiva.
+    const archivedAt = this.archivedAt === undefined ? now : undefined;
 
     const updatedProps = {
       ...this.props,
-      archivedAt: now,
+      archivedAt,
       updatedAt: now,
     };
 
     ProjectEntity.validate(updatedProps);
 
-    this.archivedAt = now;
-    this.updatedAt = now;
-  }
-
-  restore() {
-    if (this.archivedAt === undefined) {
-      return;
-    }
-
-    const now = new Date();
-
-    const updatedProps = {
-      ...this.props,
-      archivedAt: undefined,
-      updatedAt: now,
-    };
-
-    ProjectEntity.validate(updatedProps);
-
-    this.archivedAt = undefined;
+    this.archivedAt = archivedAt;
     this.updatedAt = now;
   }
 

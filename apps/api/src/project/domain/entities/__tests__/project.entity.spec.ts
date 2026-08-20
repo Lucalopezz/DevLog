@@ -38,7 +38,7 @@ describe('ProjectEntity', () => {
     jest.setSystemTime(archivedAt);
     const project = new ProjectEntity(makeProps());
 
-    project.archive();
+    project.toggleArchive();
 
     expect(project.status).toBe(ProjectStatusEnum.ACTIVE);
     expect(project.archivedAt).toEqual(archivedAt);
@@ -46,7 +46,7 @@ describe('ProjectEntity', () => {
 
     const restoredAt = new Date('2026-08-03T12:00:00.000Z');
     jest.setSystemTime(restoredAt);
-    project.restore();
+    project.toggleArchive();
 
     expect(project.status).toBe(ProjectStatusEnum.ACTIVE);
     expect(project.archivedAt).toBeUndefined();
@@ -68,7 +68,7 @@ describe('ProjectEntity', () => {
     expect(project.status).toBe(ProjectStatusEnum.FINISHED);
     expect(project.localPath).toBe('/workspace/devlog');
 
-    project.archive();
+    project.toggleArchive();
     project.update({ status: ProjectStatusEnum.ACTIVE });
 
     expect(project.archivedAt).toBeDefined();

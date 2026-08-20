@@ -11,8 +11,7 @@ import { SearchProjectUseCase } from '../search-project.usecase';
 import { UpdateProjectUseCase } from '../update-project.usecase';
 import { UpdateProjectDescriptionUseCase } from '../update-project-description.usecase';
 import { UpdateProjectPathUseCase } from '../update-project-path.usecase';
-import { ArchiveProjectUseCase } from '../archive-project.usecase';
-import { RestoreProjectUseCase } from '../restore-project.usecase';
+import { ToggleProjectArchiveUseCase } from '../toggle-project-archive.usecase';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const OTHER_USER_ID = '123e4567-e89b-42d3-a456-426614174001';
@@ -141,45 +140,28 @@ describe('Project use cases', () => {
     expect(repository.delete.mock.calls).toHaveLength(0);
   });
 
-  it('arquiva o projeto do usuário autenticado', async () => {
+  it('alterna o arquivamento do projeto do usuário autenticado', async () => {
     const project = makeProject();
     const { repository } = makeRepository(project);
-    const useCase = new ArchiveProjectUseCase(repository);
+    const useCase = new ToggleProjectArchiveUseCase(repository);
 
     const output = await useCase.execute({ id: PROJECT_ID, userId: USER_ID });
 
     expect(repository.update.mock.calls[0]?.[0]).toBe(project);
     expect(output.archivedAt).toBeDefined();
+
+    const restoredOutput = await useCase.execute({
+      id: PROJECT_ID,
+      userId: USER_ID,
+    });
+
+    expect(restoredOutput.archivedAt).toBeUndefined();
   });
 
-  it('não arquiva um projeto de outro usuário', async () => {
-    const { repository } = makeRepository(makeProject(OTHER_USER_ID));
-    const useCase = new ArchiveProjectUseCase(repository);
-
-    await expect(
-      useCase.execute({ id: PROJECT_ID, userId: USER_ID }),
-    ).rejects.toBeInstanceOf(NotFoundException);
-
-    expect(repository.update.mock.calls).toHaveLength(0);
-  });
-
-  it('desarquiva o projeto do usuário autenticado', async () => {
-    const project = makeProject();
-    project.archive();
-    const { repository } = makeRepository(project);
-    const useCase = new RestoreProjectUseCase(repository);
-
-    const output = await useCase.execute({ id: PROJECT_ID, userId: USER_ID });
-
-    expect(repository.update.mock.calls[0]?.[0]).toBe(project);
-    expect(output.archivedAt).toBeUndefined();
-  });
-
-  it('não desarquiva um projeto de outro usuário', async () => {
+  it('não alterna o arquivamento de um projeto de outro usuário', async () => {
     const project = makeProject(OTHER_USER_ID);
-    project.archive();
     const { repository } = makeRepository(project);
-    const useCase = new RestoreProjectUseCase(repository);
+    const useCase = new ToggleProjectArchiveUseCase(repository);
 
     await expect(
       useCase.execute({ id: PROJECT_ID, userId: USER_ID }),
