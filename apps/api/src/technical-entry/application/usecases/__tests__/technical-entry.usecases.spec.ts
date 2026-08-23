@@ -7,6 +7,7 @@ import { DeleteTechnicalEntryUseCase } from '../delete-technical-entry.usecase';
 import { GetTechnicalEntryUseCase } from '../get-technical-entry.usecase';
 import { UpdateTechnicalEntryUseCase } from '../update-technical-entry.usecase';
 import { TechnicalEntryTagRepository } from '@/technical-entry/domain/repositories/technical-entry-tag.repository';
+import { ProjectRepository } from '@/project/domain/repositories/project.repository';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const OTHER_USER_ID = '123e4567-e89b-42d3-a456-426614174001';
@@ -84,6 +85,16 @@ function makeEntry(
   );
 }
 
+function makeProjectRepository(
+  project: { userId: string; archivedAt?: Date } | null = {
+    userId: USER_ID,
+  },
+) {
+  return {
+    findById: jest.fn().mockResolvedValue(project),
+  } as unknown as jest.Mocked<ProjectRepository>;
+}
+
 describe('Casos de uso de entrada técnica', () => {
   describe('GetTechnicalEntryUseCase', () => {
     it('retorna a entrada completa do usuário autenticado', async () => {
@@ -131,7 +142,10 @@ describe('Casos de uso de entrada técnica', () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({ type: TechnicalEntryType.ISSUE });
       repository.entries.push(entry);
-      const useCase = new UpdateTechnicalEntryUseCase(repository);
+      const useCase = new UpdateTechnicalEntryUseCase(
+        repository,
+        makeProjectRepository(),
+      );
 
       const output = await useCase.execute({
         id: entry.id,
@@ -158,7 +172,10 @@ describe('Casos de uso de entrada técnica', () => {
         projectId: PROJECT_ID,
       });
       repository.entries.push(entry);
-      const useCase = new UpdateTechnicalEntryUseCase(repository);
+      const useCase = new UpdateTechnicalEntryUseCase(
+        repository,
+        makeProjectRepository(),
+      );
 
       const output = await useCase.execute({
         id: entry.id,
@@ -175,7 +192,10 @@ describe('Casos de uso de entrada técnica', () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({ userId: OTHER_USER_ID });
       repository.entries.push(entry);
-      const useCase = new UpdateTechnicalEntryUseCase(repository);
+      const useCase = new UpdateTechnicalEntryUseCase(
+        repository,
+        makeProjectRepository(),
+      );
 
       await expect(
         useCase.execute({
@@ -184,6 +204,26 @@ describe('Casos de uso de entrada técnica', () => {
           title: 'Tentativa indevida',
         }),
       ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('não vincula a entrada a um projeto de outro usuário', async () => {
+      const repository = new InMemoryTechnicalEntryRepository();
+      const entry = makeEntry();
+      repository.entries.push(entry);
+      const useCase = new UpdateTechnicalEntryUseCase(
+        repository,
+        makeProjectRepository({ userId: OTHER_USER_ID }),
+      );
+
+      await expect(
+        useCase.execute({
+          id: entry.id,
+          userId: USER_ID,
+          projectId: OTHER_PROJECT_ID,
+        }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+
+      expect(entry.projectId).toBeUndefined();
     });
   });
 

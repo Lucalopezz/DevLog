@@ -95,5 +95,6 @@ import { AuthModule } from '@/auth/infrastructure/auth.module';
       inject: ['ProjectRepository'],
     },
   ],
+  exports: ['ProjectRepository'],
 })
 export class ProjectModule {}

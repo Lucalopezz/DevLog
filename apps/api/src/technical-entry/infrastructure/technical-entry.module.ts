@@ -16,10 +16,12 @@ import { AssignTagToTechnicalEntryUseCase } from '../application/usecases/assign
 import { RemoveTagFromTechnicalEntryUseCase } from '../application/usecases/remove-tag-from-technical-entry.usecase';
 import { TechnicalEntryTagRepository } from '../domain/repositories/technical-entry-tag.repository';
 import { TagRepository } from '@/tag/domain/repositories/tag.repository';
+import { ProjectModule } from '@/project/infrastructure/project.module';
+import { ProjectRepository } from '@/project/domain/repositories/project.repository';
 
 @Module({
   controllers: [TechnicalEntryController],
-  imports: [AuthModule, TagModule],
+  imports: [AuthModule, TagModule, ProjectModule],
   providers: [
     {
       provide: 'PrismaService',
@@ -50,14 +52,20 @@ import { TagRepository } from '@/tag/domain/repositories/tag.repository';
       provide: CreateTechnicalEntryUseCase,
       useFactory: (
         technicalEntryRepository: TechnicalEntryRepository,
+        projectRepository: ProjectRepository,
         userRepository: UserPrismaRepository,
       ) => {
         return new CreateTechnicalEntryUseCase(
           technicalEntryRepository,
+          projectRepository,
           userRepository,
         );
       },
-      inject: ['TechnicalEntryRepository', 'UserRepository'],
+      inject: [
+        'TechnicalEntryRepository',
+        'ProjectRepository',
+        'UserRepository',
+      ],
     },
     {
       provide: GetTechnicalEntryUseCase,
@@ -87,10 +95,16 @@ import { TagRepository } from '@/tag/domain/repositories/tag.repository';
     },
     {
       provide: UpdateTechnicalEntryUseCase,
-      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
-        return new UpdateTechnicalEntryUseCase(technicalEntryRepository);
+      useFactory: (
+        technicalEntryRepository: TechnicalEntryRepository,
+        projectRepository: ProjectRepository,
+      ) => {
+        return new UpdateTechnicalEntryUseCase(
+          technicalEntryRepository,
+          projectRepository,
+        );
       },
-      inject: ['TechnicalEntryRepository'],
+      inject: ['TechnicalEntryRepository', 'ProjectRepository'],
     },
     {
       provide: DeleteTechnicalEntryUseCase,

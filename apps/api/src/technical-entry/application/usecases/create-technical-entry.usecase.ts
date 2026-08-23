@@ -8,6 +8,7 @@ import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/
 import { UserRepository } from '@/user/domain/repositories/user.repository';
 import { NotFoundException } from '@nestjs/common';
 import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry.entity';
+import { ProjectRepository } from '@/project/domain/repositories/project.repository';
 
 export type CreateTechnicalEntryUseCaseInput = {
   userId: string;
@@ -26,6 +27,7 @@ export class CreateTechnicalEntryUseCase implements UseCaseContract<
 > {
   constructor(
     private readonly technicalEntryRepository: TechnicalEntryRepository,
+    private readonly projectRepository: ProjectRepository,
     private readonly userRepository: UserRepository,
   ) {}
 
@@ -34,6 +36,18 @@ export class CreateTechnicalEntryUseCase implements UseCaseContract<
   ): Promise<TechnicalEntryOutput> {
     const { userId, title, projectId, context, conclusion, type } = input;
     const user = userId ? await this.userRepository.findById(userId) : null;
+
+    if (projectId) {
+      const project = await this.projectRepository.findById(projectId);
+
+      if (
+        project === null ||
+        project.userId !== input.userId ||
+        project.archivedAt !== undefined
+      ) {
+        throw new NotFoundException('Projeto não encontrado');
+      }
+    }
 
     if (user === null) {
       throw new NotFoundException('Usuário não encontrado');

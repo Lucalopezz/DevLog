@@ -5,6 +5,7 @@ import {
   TechnicalEntryOutput,
   TechnicalEntryOutputMapper,
 } from '../dto/technical-entry.dto';
+import { ProjectRepository } from '@/project/domain/repositories/project.repository';
 
 export type UpdateTechnicalEntryUseCaseInput = {
   id: string;
@@ -23,6 +24,7 @@ export class UpdateTechnicalEntryUseCase implements UseCaseContract<
 > {
   constructor(
     private readonly technicalEntryRepository: TechnicalEntryRepository,
+    private readonly projectRepository: ProjectRepository,
   ) {}
 
   async execute(
@@ -36,14 +38,27 @@ export class UpdateTechnicalEntryUseCase implements UseCaseContract<
       throw new NotFoundException('Entrada técnica não encontrada');
     }
 
+    const shouldUpdateProject = input.projectId !== undefined;
+    // Valida o tipo, pois se nao for string e for nulo ele desvincula, undefined fica inalterado
+    if (shouldUpdateProject && typeof input.projectId === 'string') {
+      const project = await this.projectRepository.findById(input.projectId);
+
+      if (
+        project === null ||
+        project.userId !== input.userId ||
+        project.archivedAt !== undefined
+      ) {
+        throw new NotFoundException('Projeto não encontrado');
+      }
+    }
+
     technicalEntry.update(input.title, input.context);
 
-    if (Object.prototype.hasOwnProperty.call(input, 'conclusion')) {
+    if (input.conclusion !== undefined) {
       technicalEntry.changeConclusion(input.conclusion ?? null);
     }
 
-    if (Object.prototype.hasOwnProperty.call(input, 'projectId')) {
-      // TODO: validar a propriedade do projeto através do ProjectRepository e se o projeto for do usuário.
+    if (shouldUpdateProject) {
       technicalEntry.changeProject(input.projectId ?? null);
     }
 
