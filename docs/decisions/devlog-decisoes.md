@@ -179,6 +179,15 @@ SUCCESSFUL
 
 Tentativas existirão apenas para registros do tipo `ISSUE`.
 
+`SolutionAttempt` será uma entidade própria, persistida em uma tabela própria, mas não será um aggregate root independente. Ela pertencerá ao agregado de `TechnicalEntry`, que será responsável por permitir ou rejeitar a inclusão de uma nova tentativa.
+
+```text
+TechnicalEntry (aggregate root)
+└── SolutionAttempt
+```
+
+Uma tentativa não será um recurso global do usuário nem será modelada como filha de `Project`. Mesmo quando a `TechnicalEntry` estiver relacionada a um projeto, o histórico da resolução continuará pertencendo à entrada técnica.
+
 ### 4.5 Tag
 
 ```text
@@ -227,6 +236,8 @@ PostgreSQL 17
 Next.js 16
 ```
 
+`ProjectTechnology` é uma entidade própria pertencente ao agregado de `Project`. Não é uma tecnologia global reutilizável: seu nome e sua versão representam o uso da tecnologia naquele projeto.
+
 ### 4.7 ProjectCommand
 
 ```text
@@ -245,6 +256,8 @@ Exemplo:
 Título: Subir ambiente local
 Comando: docker compose up -d
 ```
+
+`ProjectCommand` é uma entidade própria pertencente ao agregado de `Project`. Seu ciclo de vida é controlado pelo projeto e o comando não deve ser acessado como um recurso independente.
 
 ### 4.8 ProjectResource
 
@@ -267,6 +280,8 @@ EXTERNAL_URL
 OTHER
 ```
 
+`ProjectResource` também é uma entidade própria pertencente ao agregado de `Project`, seguindo a mesma regra de ciclo de vida de tecnologias e comandos.
+
 ---
 
 ## 5. Relações
@@ -281,13 +296,102 @@ Project
  ├── Technologies
  ├── Commands
  ├── Resources
- └── TechnicalEntries
+ └── TechnicalEntries (relação opcional)
 
 TechnicalEntry
  ├── Project opcional
  ├── Tags
  └── SolutionAttempts
 ```
+
+### 5.1 Limites dos agregados
+
+A existência de uma relação entre duas entidades não significa que elas pertençam ao mesmo agregado. `Project` e `TechnicalEntry` são aggregate roots separados:
+
+```text
+Project (aggregate root)
+ ├── ProjectTechnology
+ ├── ProjectCommand
+ └── ProjectResource
+
+TechnicalEntry (aggregate root)
+ └── SolutionAttempt
+```
+
+A relação entre `Project` e `TechnicalEntry` é apenas contextual e opcional:
+
+```text
+Project ──────── relação opcional ──────── TechnicalEntry
+```
+
+Isso permite que uma entrada técnica exista sem projeto, seja vinculada ou desvinculada posteriormente e permaneça preservada quando o projeto for arquivado. Portanto, `TechnicalEntry` não deve ser tratada, modificada ou ter seu ciclo de vida gerenciado como parte do agregado de `Project`.
+
+As responsabilidades ficam separadas da seguinte forma:
+
+| Agregado | Entidades filhas | Regra de pertencimento |
+| --- | --- | --- |
+| `Project` | `ProjectTechnology`, `ProjectCommand`, `ProjectResource` | Cada entidade pertence a um único projeto e não existe fora dele. |
+| `TechnicalEntry` | `SolutionAttempt` | Cada tentativa pertence a uma única entrada e só existe para `ISSUE`. |
+| `Tag` | Nenhuma das entidades acima | É um recurso independente do usuário, relacionado às entradas por `TechnicalEntryTag`. |
+
+As entidades filhas podem ter classes, tabelas e repositórios próprios para representar sua persistência. Porém, os casos de uso devem entrar pelo aggregate root correspondente e respeitar suas invariantes. A existência de um repositório próprio não transforma a entidade filha em um aggregate root.
+
+### 5.2 Organização modular definida
+
+Os módulos devem refletir os limites dos agregados:
+
+```text
+project/
+├── domain/
+│   ├── entities/
+│   │   ├── project.entity.ts
+│   │   ├── project-technology.entity.ts
+│   │   ├── project-command.entity.ts
+│   │   └── project-resource.entity.ts
+│   └── repositories/
+│       ├── project.repository.ts
+│       ├── project-technology.repository.ts
+│       ├── project-command.repository.ts
+│       └── project-resource.repository.ts
+├── application/
+│   └── usecases/
+│       ├── add-project-technology.usecase.ts
+│       ├── update-project-technology.usecase.ts
+│       ├── remove-project-technology.usecase.ts
+│       ├── add-project-command.usecase.ts
+│       ├── update-project-command.usecase.ts
+│       └── remove-project-command.usecase.ts
+└── infrastructure/
+```
+
+```text
+technical-entry/
+├── domain/
+│   ├── entities/
+│   │   ├── technical-entry.entity.ts
+│   │   └── solution-attempt.entity.ts
+│   └── repositories/
+│       ├── technical-entry.repository.ts
+│       └── solution-attempt.repository.ts
+├── application/
+│   └── usecases/
+│       └── add-solution-attempt.usecase.ts
+└── infrastructure/
+    ├── dto/
+    │   └── add-solution-attempt.dto.ts
+    └── database/
+        └── prisma/
+            └── repositories/
+                └── solution-attempt-prisma.repository.ts
+```
+
+O `AddSolutionAttempt` deve buscar a `TechnicalEntry`, validar o usuário autenticado, o tipo `ISSUE` e o arquivamento, e somente então criar a entidade filha. O endpoint deve permanecer aninhado ao contexto da entrada:
+
+```text
+POST /technical-entry/:entryId/solution-attempts
+```
+
+Da mesma forma, operações sobre tecnologias, comandos e recursos devem validar o `projectId`, o proprietário do projeto e o pertencimento do recurso antes de executar a alteração.
 
 ---
 
