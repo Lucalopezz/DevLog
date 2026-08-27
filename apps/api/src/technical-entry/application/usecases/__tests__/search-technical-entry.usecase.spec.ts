@@ -7,16 +7,26 @@ import {
   TechnicalEntrySearchResult,
 } from '@/technical-entry/domain/repositories/technical-entry.repository';
 import { SearchTechnicalEntryUseCase } from '../search-technical-entry.usecase';
-import { UnprocessableEntityException } from '@nestjs/common';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { TagEntity } from '@/tag/domain/entities/tag.entity';
 import { TechnicalEntryTagRepository } from '@/technical-entry/domain/repositories/technical-entry-tag.repository';
+import { ProjectRepository } from '@/project/domain/repositories/project.repository';
+import { ProjectEntity } from '@/project/domain/entities/project.entity';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const PROJECT_ID = '123e4567-e89b-42d3-a456-426614174010';
 
+function makeProject(userId: string): ProjectEntity {
+  return { userId } as ProjectEntity;
+}
+
 describe('SearchTechnicalEntryUseCase', () => {
   let repository: jest.Mocked<TechnicalEntryRepository>;
   let technicalEntryTagRepository: jest.Mocked<TechnicalEntryTagRepository>;
+  let projectRepository: jest.Mocked<ProjectRepository>;
   let useCase: SearchTechnicalEntryUseCase;
 
   beforeEach(() => {
@@ -26,9 +36,13 @@ describe('SearchTechnicalEntryUseCase', () => {
     technicalEntryTagRepository = {
       findTags: jest.fn().mockResolvedValue(new Map()),
     } as unknown as jest.Mocked<TechnicalEntryTagRepository>;
+    projectRepository = {
+      findById: jest.fn().mockResolvedValue(makeProject(USER_ID)),
+    } as unknown as jest.Mocked<ProjectRepository>;
     useCase = new SearchTechnicalEntryUseCase(
       repository,
       technicalEntryTagRepository,
+      projectRepository,
     );
   });
 
@@ -84,6 +98,19 @@ describe('SearchTechnicalEntryUseCase', () => {
     ).rejects.toBeInstanceOf(UnprocessableEntityException);
 
     expect(repository.search.mock.calls).toHaveLength(0);
+  });
+
+  it.each([
+    ['quando o projeto não existe', null],
+    ['quando o projeto pertence a outro usuário', makeProject('other-user-id')],
+  ])('rejeita o filtro de projeto %s', async (_description, project) => {
+    projectRepository.findById.mockResolvedValue(project);
+
+    await expect(
+      useCase.execute({ userId: USER_ID, projectId: PROJECT_ID }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+
+    expect(repository.search).not.toHaveBeenCalled();
   });
 
   it('converte o resultado do repositório em uma saída paginada', async () => {

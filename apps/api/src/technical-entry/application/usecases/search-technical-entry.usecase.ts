@@ -15,9 +15,13 @@ import {
   TechnicalEntryOutputMapper,
 } from '../dto/technical-entry.dto';
 import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry-status.enum';
-import { UnprocessableEntityException } from '@nestjs/common';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { TagEntity } from '@/tag/domain/entities/tag.entity';
 import { TechnicalEntryTagRepository } from '@/technical-entry/domain/repositories/technical-entry-tag.repository';
+import { ProjectRepository } from '@/project/domain/repositories/project.repository';
 
 export type SearchTechnicalEntryUseCaseInput = {
   userId: string;
@@ -43,6 +47,7 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
   constructor(
     private readonly technicalEntryRepository: TechnicalEntryRepository,
     private readonly technicalEntryTagRepository: TechnicalEntryTagRepository,
+    private readonly projectRepository: ProjectRepository,
   ) {}
 
   async execute(
@@ -62,7 +67,14 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
 
     const filter: TechnicalEntryFilter = { userId: input.userId };
 
-    if (input.projectId) filter.projectId = input.projectId;
+    if (input.projectId !== undefined) {
+      const project = await this.projectRepository.findById(input.projectId);
+      if (!project || project.userId !== input.userId) {
+        throw new NotFoundException('Projeto não encontrado');
+      }
+      filter.projectId = input.projectId;
+    }
+
     if (input.title) filter.title = input.title;
     if (input.type) filter.type = input.type;
     if (input.status) filter.status = input.status;

@@ -85,13 +85,19 @@ import { ProjectRepository } from '@/project/domain/repositories/project.reposit
       useFactory: (
         technicalEntryRepository: TechnicalEntryRepository,
         technicalEntryTagRepository: TechnicalEntryTagRepository,
+        projectRepository: ProjectRepository,
       ) => {
         return new SearchTechnicalEntryUseCase(
           technicalEntryRepository,
           technicalEntryTagRepository,
+          projectRepository,
         );
       },
-      inject: ['TechnicalEntryRepository', 'TechnicalEntryTagRepository'],
+      inject: [
+        'TechnicalEntryRepository',
+        'TechnicalEntryTagRepository',
+        'ProjectRepository',
+      ],
     },
     {
       provide: UpdateTechnicalEntryUseCase,
