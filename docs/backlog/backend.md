@@ -16,7 +16,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [ ] Definir os estados e tipos documentados:
   - [x] `TechnicalEntry.type`: `ISSUE` ou `LEARNING`.
   - [x] Status de problema: a entidade retorna `OPEN` quando `resolvedAt` está vazio e `RESOLVED` quando está preenchido; no MVP, o status não possui coluna própria.
-  - [ ] Status de projeto: `ACTIVE`, `PAUSED` ou `FINISHED`; definir como isso se relaciona ao arquivamento lógico por `archivedAt`.
+  - [x] Status de projeto: `ACTIVE`, `INACTIVE` ou `FINISHED`; o enum, a validação e a atualização já existem. Ainda falta definir como esses estados se relacionam ao arquivamento lógico por `archivedAt`.
   - [x] Resultado de tentativa: `FAILED`, `PARTIAL` ou `SUCCESSFUL` no schema Prisma.
 - [ ] Padronizar erros de validação, autenticação, autorização e recurso não encontrado.
 - [ ] Definir DTOs, validações de entrada, respostas HTTP e contratos de cada endpoint.
@@ -28,8 +28,8 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Definir a estrutura dos módulos por feature em `apps/api/src/`. -> shared, user, auth e technicalEntry.
 - [ ] Definir entidades, identificadores, datas de criação/atualização e estratégia de arquivamento lógico.
 - [x] Configurar o schema do banco e a migration inicial para usuários, projetos, entradas, tags e seus relacionamentos.
-- [x] Definir as interfaces de repositório compartilhadas e as de usuário/entrada técnica.
-- [x] Implementar os adaptadores Prisma para usuário e entrada técnica.
+- [x] Definir as interfaces de repositório compartilhadas e as de usuário, projeto, entrada técnica e tag.
+- [x] Implementar os adaptadores Prisma para usuário, projeto, entrada técnica, relação entrada × tag e tag.
 - [ ] Implementar tratamento global de exceções.
 - [x] Centralizar as configurações globais da API em `applyGlobalConfig`, incluindo prefixo `/api`, cookie parser, CORS, serialização e validação.
 - [x] Configurar `ValidationPipe` global com status `422`, `whitelist`, `forbidNonWhitelisted` e `transform`.
@@ -93,28 +93,31 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ## 3. Entradas técnicas — MVP inicial
 
-> A camada de domínio possui entidade, enum, validação, contrato de repositório, mapper e repositório Prisma. Criação, listagem paginada, consulta individual, atualização e exclusão física já possuem casos de uso, presenters e endpoints protegidos pelo `AuthGuard`. A etapa ainda não está concluída: faltam filtros previstos no caso de uso, agregação das relações, validação de propriedade de projeto/tags e testes HTTP.
+> A camada de domínio possui entidade, enum, validação, contrato de repositório, mapper e repositório Prisma. Criação, listagem paginada, consulta individual, atualização e exclusão física já possuem casos de uso, presenters e endpoints protegidos pelo `AuthGuard`. A relação com projetos e tags já possui validações e agregação de tags nas respostas. A etapa ainda não está concluída: faltam tags na criação/alteração, tentativas, resolução, arquivamento e testes HTTP completos.
 
 ### CreateTechnicalEntry
 
 - [x] Criar a entidade de entrada técnica.
 - [x] Criar o caso de uso `CreateTechnicalEntry`.
 - [x] Validar `title`, `type`, `context` e `conclusion?` no DTO e no domínio.
-- [ ] Adicionar `projectId?` e `tags?` ao fluxo de criação e validar suas referências.
+- [x] Adicionar `projectId?` ao fluxo de criação e validar sua referência.
+- [ ] Adicionar `tags?` ao fluxo de criação e validar suas referências.
 - [x] Aceitar somente os tipos `ISSUE` e `LEARNING` na entidade e no schema Prisma.
 - [x] Criar entradas do tipo `ISSUE` sem `resolvedAt`; a entidade considera a entrada `OPEN` enquanto essa data não estiver preenchida.
 - [x] Definir `TechnicalEntryStatus` no domínio e calcular o status na entidade, deixando o mapper responsável apenas por expor o valor na saída.
 - [x] Permitir conclusão opcional na criação, conforme o caso de uso.
-- [ ] Associar opcionalmente a entrada a um projeto do mesmo usuário.
+- [x] Associar opcionalmente a entrada a um projeto do mesmo usuário, rejeitando projeto inexistente, de outro usuário ou arquivado.
 - [ ] Associar as tags informadas somente se elas pertencerem ao mesmo usuário.
 - [x] Criar o endpoint autenticado `POST /api/technical-entry`.
-- [ ] Testar criação de `ISSUE`, criação de `LEARNING`, dados inválidos e referências de outro usuário.
+- [x] Testar criação de `ISSUE`, entrada sem projeto, projeto de outro usuário e projeto arquivado.
+- [ ] Completar testes de criação de `LEARNING`, dados inválidos, projeto inexistente e tags.
 
 ### GetTechnicalEntry
 
 - [x] Criar o caso de uso `GetTechnicalEntry`.
 - [x] Disponibilizar busca por identificador no contrato e no repositório Prisma.
-- [ ] Retornar a entrada completa com projeto, tags e, para `ISSUE`, tentativas e status.
+- [x] Retornar a entrada com `projectId`, tags associadas e status derivado para `ISSUE`.
+- [ ] Retornar detalhes do projeto e, para `ISSUE`, tentativas e histórico de resolução.
 - [x] Garantir que uma entrada de outro usuário não seja encontrada pelo usuário atual.
 - [x] Criar o endpoint autenticado `GET /api/technical-entry/:id`.
 - [x] Testar a consulta básica e o isolamento entre usuários em teste unitário.
@@ -128,12 +131,15 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Listar somente entradas do usuário autenticado, sobrescrevendo qualquer dado externo com o `userId` obtido pelo guard.
 - [x] Definir `title` como o parâmetro oficial de busca textual e aplicar correspondência parcial case-insensitive no repositório.
 - [x] Implementar filtros por `projectId` e `type` no caso de uso/API.
-- [ ] Implementar o filtro por `tagId` depois da feature de tags.
+- [x] Validar, quando `projectId` é informado, que o projeto existe e pertence ao usuário autenticado.
+- [ ] Implementar o filtro por `tagId`; a relação com tags já existe, mas o filtro ainda não foi implementado.
 - [x] Implementar o filtro por `status`, validando o enum e traduzindo `OPEN`/`RESOLVED` para condições sobre `resolvedAt` restritas a `ISSUE`.
 - [x] Expor paginação e ordenação através de DTO, caso de uso e presenter de coleção.
 - [x] Manter `perPage` sem limite máximo por decisão de produto, preservando a liberdade do usuário sobre o tamanho da página.
 - [x] Criar o endpoint autenticado `GET /api/technical-entry`.
+- [x] Criar o endpoint autenticado `GET /api/project/:id/technical-entries`, reutilizando o caso de uso paginado de entradas.
 - [x] Testar conversão/validação do DTO, mapeamento do caso de uso e formato `data`/`meta` do presenter.
+- [x] Testar projeto inexistente ou pertencente a outro usuário no filtro de busca.
 - [ ] Testar o repositório Prisma, combinações de filtros e garantir via HTTP que resultados de outros usuários nunca sejam retornados.
 
 ### UpdateTechnicalEntry
@@ -141,9 +147,10 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o caso de uso `UpdateTechnicalEntry`.
 - [x] Permitir alterar `title`, `context` e `conclusion`, inclusive remover a conclusão.
 - [x] Impedir alteração de `type` pela API depois da criação, omitindo o campo do DTO e do input do caso de uso.
-- [ ] Permitir alterar ou remover o projeto somente depois de validar sua propriedade.
-- [ ] Permitir substituir ou remover as tags da entrada.
-- [ ] Validar que o novo projeto e as novas tags pertençam ao usuário.
+- [x] Permitir alterar ou remover o projeto somente depois de validar sua propriedade e seu estado não arquivado.
+- [ ] Permitir substituir ou remover tags pelo próprio `UpdateTechnicalEntry`; atualmente essa responsabilidade pertence aos casos de uso específicos de associação e remoção.
+- [x] Validar que o novo projeto pertença ao usuário e não esteja arquivado.
+- [x] Validar a propriedade das tags nos casos de uso de associação e remoção; `UpdateTechnicalEntry` não recebe tags diretamente.
 - [x] Criar o endpoint autenticado `PATCH /api/technical-entry/:id`.
 - [x] Testar atualização de conteúdo, remoção de conclusão/projeto e isolamento entre usuários em teste unitário.
 - [ ] Testar entrada inexistente, projeto/tags de outro usuário, validação do DTO e tentativa de troca de tipo pela API.
@@ -158,10 +165,11 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### Pendências encontradas na revisão da etapa
 
-> As pendências de testes e2e abaixo foram adiadas até a etapa dedicada a testes HTTP e não bloqueiam o início da feature de tags.
+> As pendências de testes e2e abaixo foram adiadas até a etapa dedicada a testes HTTP; os fluxos unitários e de integração das tags já estão implementados.
 
-- [ ] Criar testes unitários para `CreateTechnicalEntryUseCase`; atualmente ele não aparece na suíte de casos de uso de entradas.
-- [ ] Criar testes da entidade e ampliar os testes do repositório Prisma; a tradução do filtro de status está coberta, mas as demais invariantes e combinações de persistência ainda não são exercitadas diretamente.
+- [x] Criar testes unitários para `CreateTechnicalEntryUseCase`.
+- [x] Criar testes da entidade técnica.
+- [ ] Ampliar os testes do repositório Prisma; a tradução do filtro de status e alguns fluxos de persistência estão cobertos, mas as demais combinações de filtros ainda não são exercitadas diretamente.
 - [ ] Corrigir a configuração do Jest e2e para resolver os imports relativos `.js` do cliente Prisma gerado; atualmente a suíte falha antes de executar qualquer teste.
 - [ ] Aplicar `applyGlobalConfig` também no bootstrap dos testes e2e, garantindo que eles exercitem o prefixo `/api`, validação, cookies e serialização usados em produção.
 - [ ] Substituir o teste e2e legado de `GET /` pelos fluxos de criação, listagem, consulta, atualização e exclusão de entradas técnicas.
@@ -182,7 +190,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o caso de uso `ListTags`.
 - [x] Listar somente tags do usuário autenticado.
 - [x] Criar os endpoints de criação e listagem.
-- [ ] Testar duplicidade, isolamento por usuário e listagem.
+- [x] Testar duplicidade, isolamento por usuário e listagem em testes unitários e de integração.
 
 ### Relacionar tags e entradas
 
@@ -193,7 +201,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o caso de uso `RemoveTagFromTechnicalEntry`.
 - [x] Remover somente a relação, sem excluir a tag.
 - [x] Criar os endpoints de adicionar e remover relação.
-- [ ] Testar relação válida, referências de outro usuário e remoção sem apagar a tag.
+- [x] Testar relação válida, referências de outro usuário, idempotência e remoção sem apagar a tag.
 
 ## 5. Projetos — MVP inicial
 
@@ -201,40 +209,46 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 - [x] Criar a entidade de projeto.
 - [x] Criar o caso de uso `CreateProject`.
-- [x] Validar `name`, `description?`, `repositoryUrl?`, `localPath?` e `status?`. -> na criaçao status vem como ativo e nao tem localPath
+- [x] Validar `name` e `description?`; na criação o status é definido como `ACTIVE` e `localPath` ainda não faz parte do fluxo.
 - [x] Tornar o nome obrigatório.
 - [x] Associar o projeto ao usuário autenticado.
 - [x] Definir o status inicial do projeto como `ACTIVE` quando não informado.
 - [x] Criar o endpoint de criação.
-- [ ] Testar criação válida, nome ausente, URL inválida e associação ao usuário correto.
+- [x] Testar criação válida, ausência de descrição e associação ao usuário correto.
+- [ ] Testar validações de entrada do DTO, incluindo nome ausente.
 
 ### GetProject e ListProjects
 
 - [x] Criar o caso de uso `GetProject`.
-- [ ] Retornar o projeto do usuário com tecnologias, comandos, recursos e entradas relacionadas.
+- [ ] Retornar o projeto do usuário com tecnologias, comandos e recursos relacionados.
+- [x] Disponibilizar as entradas técnicas relacionadas por endpoint separado e paginado: `GET /api/project/:id/technical-entries`.
 - [x] Criar o caso de uso `ListProjects`.
 - [x] Listar somente projetos do usuário autenticado.
 - [x] Implementar inicialmente filtros por `name` e `status`.
-- [x] Manter filtros futuros (`archived` e `technology`) como extensão planejada.
+- [x] Implementar o filtro `archivedAt`.
+- [ ] Implementar o filtro por tecnologia como extensão planejada.
 - [x] Criar os endpoints de consulta individual e listagem.
-- [ ] Testar agregação do projeto, filtros e isolamento entre usuários.
+- [x] Testar regras dos casos de uso, filtros e isolamento entre usuários.
+- [ ] Testar os endpoints HTTP e a agregação das relações ainda não implementadas.
 
 ### UpdateProject
 
 - [x] Criar o caso de uso `UpdateProject`.
-- [x] Permitir atualizar nome, descrição, repositório, caminho local e status.
+- [x] Permitir atualizar nome e status pelo caso de uso principal.
+- [x] Permitir atualizar ou remover descrição e caminho local pelos casos de uso específicos.
 - [x] Garantir que somente o proprietário possa alterar o projeto.
 - [x] Criar o endpoint de atualização.
-- [ ] Testar atualização válida, URL inválida e tentativa de alteração por outro usuário.
+- [x] Testar atualização válida, descrição/caminho e tentativa de alteração por outro usuário.
+- [ ] Testar validações de entrada do DTO.
 
 ## 6. Relação projeto × entrada técnica
 
-- [ ] Permitir criar entrada sem projeto.
-- [ ] Permitir vincular uma entrada a um projeto do mesmo usuário.
-- [ ] Permitir alterar ou remover o projeto relacionado durante `UpdateTechnicalEntry`.
-- [ ] Incluir entradas relacionadas na consulta de um projeto.
-- [ ] Garantir que arquivar um projeto não remova nem desvincule suas entradas.
-- [ ] Testar o fluxo: criar projeto → criar entrada → relacionar entrada → consultar projeto.
+- [x] Permitir criar entrada sem projeto.
+- [x] Permitir vincular uma entrada a um projeto do mesmo usuário.
+- [x] Permitir alterar ou remover o projeto relacionado durante `UpdateTechnicalEntry`.
+- [x] Disponibilizar entradas relacionadas na rota paginada `GET /api/project/:id/technical-entries`.
+- [x] Arquivar um projeto altera somente o projeto e não remove nem desvincula suas entradas.
+- [ ] Testar o fluxo HTTP completo: criar projeto → criar entrada → relacionar entrada → consultar entradas do projeto.
 
 ## 7. Problemas e tentativas de solução
 
@@ -308,14 +322,16 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ## 9. Arquivamento
 
-### ArchiveProject
+### ArchiveProject — implementação atual: `ToggleProjectArchive`
 
-- [ ] Criar o caso de uso `ArchiveProject`.
-- [ ] Alterar o projeto para arquivado sem exclusão física, preenchendo `archivedAt` e definindo sua relação com `ProjectStatus` (`ACTIVE`, `PAUSED` ou `FINISHED`).
+- [x] Criar o caso de uso de arquivamento/restauração, implementado como `ToggleProjectArchive`.
+- [x] Alterar o projeto para arquivado sem exclusão física, preenchendo `archivedAt`.
+- [ ] Definir a relação entre `archivedAt` e `ProjectStatus` (`ACTIVE`, `INACTIVE` ou `FINISHED`).
 - [ ] Impedir operações incompatíveis com projeto arquivado conforme as regras do domínio.
-- [ ] Preservar tecnologias, comandos, recursos e entradas relacionadas.
-- [ ] Criar o endpoint de arquivamento.
-- [ ] Testar transição de status, persistência dos relacionamentos e autorização.
+- [ ] Preservar tecnologias, comandos e recursos relacionados; a preservação das entradas técnicas já está coberta na relação projeto × entrada.
+- [x] Criar o endpoint autenticado `PATCH /api/project/:id/archive`.
+- [x] Testar arquivamento, restauração e autorização no caso de uso.
+- [ ] Testar a preservação dos relacionamentos por HTTP.
 
 ### ArchiveTechnicalEntry
 
