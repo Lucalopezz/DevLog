@@ -76,4 +76,18 @@ pnpm db:logs                  # Exibe os logs do banco
 
 ## Documentação
 
-As decisões de produto e arquitetura estão em [`docs/`](docs/), especialmente em [`docs/decisions/devlog-decisoes.md`](docs/decisions/devlog-decisoes.md).
+A documentação está organizada por tipo e possui um índice para ajudar a
+encontrar a resposta de uma dúvida:
+
+- [`docs/README.md`](docs/README.md): ponto de entrada da documentação, com o
+  mapa de dúvidas e arquivos correspondentes;
+- [`docs/decisions/`](docs/decisions/): decisões de produto, arquitetura e
+  banco de dados;
+- [`docs/guides/`](docs/guides/): explicações e fluxos técnicos;
+- [`docs/usecases/`](docs/usecases/): comportamento esperado e regras do
+  sistema;
+- [`docs/backlog/`](docs/backlog/): tarefas e pendências conhecidas.
+
+Se você é novo no projeto, comece pelo
+[`docs/README.md`](docs/README.md) depois de ler as instruções de execução
+acima.
