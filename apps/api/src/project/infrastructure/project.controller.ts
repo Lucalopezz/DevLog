@@ -34,6 +34,9 @@ import {
   ProjectCollectionPresenter,
   ProjectPresenter,
 } from './presenter/project.presenter';
+import { SearchTechnicalEntryDto } from '@/technical-entry/infrastructure/dto/search-technical-entry.dto';
+import { SearchTechnicalEntryUseCase } from '@/technical-entry/application/usecases/search-technical-entry.usecase';
+import { TechnicalEntryCollectionPresenter } from '@/technical-entry/infrastructure/presenters/technical-entry.presenter';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -46,6 +49,9 @@ export class ProjectController {
 
   @Inject(GetProjectUseCase)
   private readonly getProjectUseCase: GetProjectUseCase;
+
+  @Inject(SearchTechnicalEntryUseCase)
+  private readonly searchTechnicalEntryUseCase: SearchTechnicalEntryUseCase;
 
   @Inject(UpdateProjectUseCase)
   private readonly updateProjectUseCase: UpdateProjectUseCase;
@@ -93,6 +99,21 @@ export class ProjectController {
     });
 
     return ProjectController.listProjectsToResponse(output);
+  }
+
+  @Get(':id/technical-entries')
+  async searchTechnicalEntries(
+    @Param('id') projectId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() searchParams: SearchTechnicalEntryDto,
+  ) {
+    const output = await this.searchTechnicalEntryUseCase.execute({
+      ...searchParams,
+      projectId,
+      userId: user.id,
+    });
+
+    return new TechnicalEntryCollectionPresenter(output);
   }
 
   @Get(':id')
