@@ -1,4 +1,4 @@
-import { SolutionAttemptResult } from '@generated/prisma/enums';
+import type { SolutionAttemptResult } from '../../entities/solution-attempt/solution-attempt-result.enum';
 import { SolutionAttemptEntity } from '../../entities/solution-attempt/solution-attempt.entity';
 import {
   SearchableRepositoryInterface,
@@ -7,6 +7,7 @@ import {
 } from '@/shared/domain/repositories/searchable.repository';
 
 export type SolutionAttemptFilter = {
+  technicalEntryId?: string;
   result?: SolutionAttemptResult;
 };
 

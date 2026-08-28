@@ -96,7 +96,11 @@ export class SolutionAttemptPrismaRepository implements SolutionAttemptRepositor
     const where: Prisma.SolutionAttemptWhereInput = {};
 
     if (filter.result !== undefined) {
-      where.result = filter.result;
+      where.result = SolutionAttemptModelMapper.toPrismaResult(filter.result);
+    }
+
+    if (filter.technicalEntryId !== undefined) {
+      where.technicalEntryId = filter.technicalEntryId;
     }
 
     return where;

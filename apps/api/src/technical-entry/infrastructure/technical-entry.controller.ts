@@ -40,7 +40,15 @@ import {
   AddSolutionAttemptUseCase,
   type AddSolutionAttemptUseCaseOutput,
 } from '../application/usecases/add-solution-attempt.usecase';
-import { SolutionAttemptPresenter } from './presenters/solution-attempt.presenter';
+import {
+  SolutionAttemptCollectionPresenter,
+  SolutionAttemptPresenter,
+} from './presenters/solution-attempt.presenter';
+import { ListSolutionAttemptsDto } from './dto/list-solution-attempts.dto';
+import {
+  ListSolutionAttemptsUseCase,
+  type ListSolutionAttemptsUseCaseOutput,
+} from '../application/usecases/list-solution-attempts.usecase';
 
 @Controller('technical-entry')
 export class TechnicalEntryController {
@@ -68,6 +76,9 @@ export class TechnicalEntryController {
   @Inject(AddSolutionAttemptUseCase)
   private addSolutionAttemptUseCase: AddSolutionAttemptUseCase;
 
+  @Inject(ListSolutionAttemptsUseCase)
+  private listSolutionAttemptsUseCase: ListSolutionAttemptsUseCase;
+
   static technicalEntryToResponse(output: TechnicalEntryOutput) {
     return new TechnicalEntryPresenter(output);
   }
@@ -80,6 +91,12 @@ export class TechnicalEntryController {
 
   static solutionAttemptToResponse(output: AddSolutionAttemptUseCaseOutput) {
     return new SolutionAttemptPresenter(output);
+  }
+
+  static listSolutionAttemptsToResponse(
+    output: ListSolutionAttemptsUseCaseOutput,
+  ) {
+    return new SolutionAttemptCollectionPresenter(output);
   }
 
   @Post()
@@ -198,5 +215,21 @@ export class TechnicalEntryController {
     });
 
     return TechnicalEntryController.solutionAttemptToResponse(output);
+  }
+
+  @Get(':entryId/solution-attempts')
+  @UseGuards(AuthGuard)
+  async listSolutionAttempts(
+    @Param('entryId') entryId: string,
+    @Query() listSolutionAttemptsDto: ListSolutionAttemptsDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.listSolutionAttemptsUseCase.execute({
+      ...listSolutionAttemptsDto,
+      technicalEntryId: entryId,
+      userId: user.id,
+    });
+
+    return TechnicalEntryController.listSolutionAttemptsToResponse(output);
   }
 }
