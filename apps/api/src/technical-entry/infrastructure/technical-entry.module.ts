@@ -23,6 +23,7 @@ import { SolutionAttemptRepository } from '../domain/repositories/solution-attem
 import { AddSolutionAttemptUseCase } from '../application/usecases/add-solution-attempt.usecase';
 import { ListSolutionAttemptsUseCase } from '../application/usecases/list-solution-attempts.usecase';
 import { ResolveTechnicalIssueUseCase } from '../application/usecases/resolve-technical-issue.usecase';
+import { ReopenTechnicalIssueUseCase } from '../application/usecases/reopen-technical-issue.usecase';
 
 @Module({
   controllers: [TechnicalEntryController],
@@ -199,6 +200,13 @@ import { ResolveTechnicalIssueUseCase } from '../application/usecases/resolve-te
       provide: ResolveTechnicalIssueUseCase,
       useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
         return new ResolveTechnicalIssueUseCase(technicalEntryRepository);
+      },
+      inject: ['TechnicalEntryRepository'],
+    },
+    {
+      provide: ReopenTechnicalIssueUseCase,
+      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
+        return new ReopenTechnicalIssueUseCase(technicalEntryRepository);
       },
       inject: ['TechnicalEntryRepository'],
     },

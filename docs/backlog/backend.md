@@ -285,11 +285,11 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### ReopenTechnicalIssue
 
-- [ ] Criar o caso de uso `ReopenTechnicalIssue`.
-- [ ] Alterar o status de `RESOLVED` para `OPEN`.
-- [ ] Preservar tentativas, conclusão anterior e histórico necessário.
-- [ ] Criar o endpoint de reabertura.
-- [ ] Testar reabertura e preservação dos dados anteriores.
+- [x] Criar o caso de uso `ReopenTechnicalIssue`.
+- [x] Alterar o status de `RESOLVED` para `OPEN`.
+- [x] Preservar tentativas, conclusão anterior e histórico necessário.
+- [x] Criar o endpoint `PATCH /api/technical-entry/:id/reopen`.
+- [x] Testar reabertura e preservação dos dados anteriores.
 
 ## 8. Detalhes de projetos
 

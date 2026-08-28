@@ -130,6 +130,25 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     this.resolvedAt = new Date();
     this.updateUpdatedAt();
   }
+
+  reopen(): void {
+    if (this.type !== TechnicalEntryType.ISSUE) {
+      throw new EntityValidationError({
+        type: ['Somente entradas do tipo ISSUE podem ser reabertas'],
+      });
+    }
+
+    if (!this.resolvedAt) {
+      throw new EntityValidationError({
+        resolvedAt: ['Somente entradas resolvidas podem ser reabertas'],
+      });
+    }
+
+    // A conclusão e as tentativas fazem parte do histórico e são preservadas.
+    this.props.resolvedAt = undefined;
+    this.updateUpdatedAt();
+  }
+
   archive(): void {
     this.archivedAt = new Date();
     this.updateUpdatedAt();

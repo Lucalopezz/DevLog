@@ -51,6 +51,7 @@ import {
 } from '../application/usecases/list-solution-attempts.usecase';
 import { ResolveTechnicalIssueDto } from './dto/resolve-technical-issue.dto';
 import { ResolveTechnicalIssueUseCase } from '../application/usecases/resolve-technical-issue.usecase';
+import { ReopenTechnicalIssueUseCase } from '../application/usecases/reopen-technical-issue.usecase';
 
 @Controller('technical-entry')
 export class TechnicalEntryController {
@@ -83,6 +84,9 @@ export class TechnicalEntryController {
 
   @Inject(ResolveTechnicalIssueUseCase)
   private resolveTechnicalIssueUseCase: ResolveTechnicalIssueUseCase;
+
+  @Inject(ReopenTechnicalIssueUseCase)
+  private reopenTechnicalIssueUseCase: ReopenTechnicalIssueUseCase;
 
   static technicalEntryToResponse(output: TechnicalEntryOutput) {
     return new TechnicalEntryPresenter(output);
@@ -171,6 +175,20 @@ export class TechnicalEntryController {
   ) {
     const output = await this.resolveTechnicalIssueUseCase.execute({
       ...resolveTechnicalIssueDto,
+      id,
+      userId: user.id,
+    });
+
+    return TechnicalEntryController.technicalEntryToResponse(output);
+  }
+
+  @Patch(':id/reopen')
+  @UseGuards(AuthGuard)
+  async reopen(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.reopenTechnicalIssueUseCase.execute({
       id,
       userId: user.id,
     });
