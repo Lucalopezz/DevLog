@@ -278,16 +278,3 @@ Para manter o primeiro fluxo pequeno e coerente com os casos de uso já document
 
 Assim, a decisão final é: `SolutionAttempt` é uma entidade persistida separadamente, mas pertence ao agregado de `TechnicalEntry`. O padrão é o mesmo de tecnologias e comandos em relação a `Project`, mudando apenas o aggregate root: `ProjectTechnology` e `ProjectCommand` pertencem a `Project`; `SolutionAttempt` pertence a `TechnicalEntry`.
 
-== rascunho ==
-
-A tentativa herda indiretamente o proprietário da TechnicalEntry. O caso de uso deve:
-
-1. Buscar a TechnicalEntry pelo entryId.
-2. Conferir technicalEntry.userId === currentUser.id.
-3. Validar se é uma ISSUE não arquivada.
-4. Criar a tentativa apenas com technicalEntryId.
-
-Isso evita duplicar o userId e criar inconsistências, por exemplo:
-
-TechnicalEntry.userId = usuário A
-SolutionAttempt.userId = usuário B

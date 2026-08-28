@@ -35,6 +35,12 @@ import {
   TechnicalEntryPresenter,
 } from './presenters/technical-entry.presenter';
 import { TagPresenter } from '@/tag/infrastructure/presenter/tag.presenter';
+import { AddSolutionAttemptDto } from './dto/add-solution-attempt.dto';
+import {
+  AddSolutionAttemptUseCase,
+  type AddSolutionAttemptUseCaseOutput,
+} from '../application/usecases/add-solution-attempt.usecase';
+import { SolutionAttemptPresenter } from './presenters/solution-attempt.presenter';
 
 @Controller('technical-entry')
 export class TechnicalEntryController {
@@ -59,6 +65,9 @@ export class TechnicalEntryController {
   @Inject(SearchTechnicalEntryUseCase)
   private searchTechnicalEntryUseCase: SearchTechnicalEntryUseCase;
 
+  @Inject(AddSolutionAttemptUseCase)
+  private addSolutionAttemptUseCase: AddSolutionAttemptUseCase;
+
   static technicalEntryToResponse(output: TechnicalEntryOutput) {
     return new TechnicalEntryPresenter(output);
   }
@@ -67,6 +76,10 @@ export class TechnicalEntryController {
     output: SearchTechnicalEntryUseCaseOutput,
   ) {
     return new TechnicalEntryCollectionPresenter(output);
+  }
+
+  static solutionAttemptToResponse(output: AddSolutionAttemptUseCaseOutput) {
+    return new SolutionAttemptPresenter(output);
   }
 
   @Post()
@@ -169,5 +182,21 @@ export class TechnicalEntryController {
       tagId,
       userId: user.id,
     });
+  }
+
+  @Post(':entryId/solution-attempts')
+  @UseGuards(AuthGuard)
+  async addSolutionAttempt(
+    @Param('entryId') entryId: string,
+    @Body() addSolutionAttemptDto: AddSolutionAttemptDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.addSolutionAttemptUseCase.execute({
+      ...addSolutionAttemptDto,
+      technicalEntryId: entryId,
+      userId: user.id,
+    });
+
+    return TechnicalEntryController.solutionAttemptToResponse(output);
   }
 }

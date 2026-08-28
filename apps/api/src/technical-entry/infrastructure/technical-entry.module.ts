@@ -18,6 +18,9 @@ import { TechnicalEntryTagRepository } from '../domain/repositories/technical-en
 import { TagRepository } from '@/tag/domain/repositories/tag.repository';
 import { ProjectModule } from '@/project/infrastructure/project.module';
 import { ProjectRepository } from '@/project/domain/repositories/project.repository';
+import { SolutionAttemptPrismaRepository } from './database/prisma/repositories/solution-attempt/solution-attempt-prisma.repository';
+import { SolutionAttemptRepository } from '../domain/repositories/solution-attempt/solution-attempt.repositoty';
+import { AddSolutionAttemptUseCase } from '../application/usecases/add-solution-attempt.usecase';
 
 @Module({
   controllers: [TechnicalEntryController],
@@ -45,6 +48,13 @@ import { ProjectRepository } from '@/project/domain/repositories/project.reposit
       provide: 'TechnicalEntryTagRepository',
       useFactory: (prismaService: PrismaService) => {
         return new TechnicalEntryTagPrismaRepository(prismaService);
+      },
+      inject: ['PrismaService'],
+    },
+    {
+      provide: 'SolutionAttemptRepository',
+      useFactory: (prismaService: PrismaService) => {
+        return new SolutionAttemptPrismaRepository(prismaService);
       },
       inject: ['PrismaService'],
     },
@@ -156,6 +166,19 @@ import { ProjectRepository } from '@/project/domain/repositories/project.reposit
         'TagRepository',
         'TechnicalEntryTagRepository',
       ],
+    },
+    {
+      provide: AddSolutionAttemptUseCase,
+      useFactory: (
+        technicalEntryRepository: TechnicalEntryRepository,
+        solutionAttemptRepository: SolutionAttemptRepository,
+      ) => {
+        return new AddSolutionAttemptUseCase(
+          technicalEntryRepository,
+          solutionAttemptRepository,
+        );
+      },
+      inject: ['TechnicalEntryRepository', 'SolutionAttemptRepository'],
     },
   ],
 })

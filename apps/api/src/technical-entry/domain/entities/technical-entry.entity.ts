@@ -3,6 +3,8 @@ import { EntityValidationError } from '@/shared/domain/errors/entity-validation-
 import { TechnicalEntryValidatorFactory } from '../validators/technical-entry.validator';
 import { TechnicalEntryType } from './technical-entry-type.enum';
 import { TechnicalEntryStatus } from './technical-entry-status.enum';
+import { SolutionAttemptEntity } from './solution-attempt/solution-attempt.entity';
+import { SolutionAttemptResult } from './solution-attempt/solution-attempt-result.enum';
 
 export { TechnicalEntryType } from './technical-entry-type.enum';
 
@@ -38,6 +40,30 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     TechnicalEntryEntity.validate(completeProps);
     super(completeProps, id);
   }
+
+  addSolutionAttempt(
+    description: string,
+    result: SolutionAttemptResult,
+  ): SolutionAttemptEntity {
+    if (this.type !== TechnicalEntryType.ISSUE) {
+      throw new EntityValidationError({
+        type: ['Somente ISSUE pode possuir tentativas de solução'],
+      });
+    }
+
+    if (this.archivedAt) {
+      throw new EntityValidationError({
+        archivedAt: ['Entradas arquivadas não podem receber tentativas'],
+      });
+    }
+    // Retorna uma nova instância de SolutionAttemptEntity associada a este TechnicalEntryEntity
+    return new SolutionAttemptEntity({
+      technicalEntryId: this.id,
+      description,
+      result,
+    });
+  }
+
   update(title?: string, context?: string): void {
     const updatedProps = {
       ...this.props,
