@@ -369,7 +369,9 @@ technical-entry/
 ├── domain/
 │   ├── entities/
 │   │   ├── technical-entry.entity.ts
-│   │   └── solution-attempt.entity.ts
+│   │   └── solution-attempt/
+│   │       ├── solution-attempt.entity.ts
+│   │       └── solution-attempt-result.enum.ts
 │   └── repositories/
 │       ├── technical-entry.repository.ts
 │       └── solution-attempt.repository.ts

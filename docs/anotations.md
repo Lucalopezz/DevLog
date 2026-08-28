@@ -11,11 +11,11 @@ Em outras palavras:
 
 A diferença para Tag é:
 
-| Recurso | Pertencimento | Reutilização |
-| --- | --- | --- |
-| Tag | pertence ao usuário | pode ser usada em várias entradas |
-| ProjectTechnology | pertence a um projeto | não existe fora do projeto |
-| ProjectCommand | pertence a um projeto | não existe fora do projeto |
+| Recurso           | Pertencimento         | Reutilização                      |
+| ----------------- | --------------------- | --------------------------------- |
+| Tag               | pertence ao usuário   | pode ser usada em várias entradas |
+| ProjectTechnology | pertence a um projeto | não existe fora do projeto        |
+| ProjectCommand    | pertence a um projeto | não existe fora do projeto        |
 
 Como o schema já possui id, createdAt, updatedAt e tabelas próprias, eu criaria entidades separadas:
 
@@ -150,13 +150,13 @@ Isso significa que a tentativa não deve ser modelada como filha de `Project`. O
 
 ### Comparação com as outras entidades
 
-| Recurso | Entidade/tabela própria | Aggregate root | Dependente de |
-| --- | --- | --- | --- |
-| Project | sim | sim | usuário |
-| ProjectTechnology | sim | não | `Project` |
-| ProjectCommand | sim | não | `Project` |
-| Tag | sim | sim, no contexto do usuário | usuário |
-| SolutionAttempt | sim | não | `TechnicalEntry` |
+| Recurso           | Entidade/tabela própria | Aggregate root              | Dependente de    |
+| ----------------- | ----------------------- | --------------------------- | ---------------- |
+| Project           | sim                     | sim                         | usuário          |
+| ProjectTechnology | sim                     | não                         | `Project`        |
+| ProjectCommand    | sim                     | não                         | `Project`        |
+| Tag               | sim                     | sim, no contexto do usuário | usuário          |
+| SolutionAttempt   | sim                     | não                         | `TechnicalEntry` |
 
 `SolutionAttempt` precisa de identidade própria porque uma entrada pode ter várias tentativas, cada uma com sua descrição, resultado e timestamps. Porém, ela não faz sentido sozinha: não deve existir sem uma `TechnicalEntry`, não é reutilizada por outras entradas e não precisa ser acessada como um recurso global do usuário.
 
@@ -171,7 +171,9 @@ technical-entry/
 ├── domain/
 │   ├── entities/
 │   │   ├── technical-entry.entity.ts
-│   │   └── solution-attempt.entity.ts
+│   │   └── solution-attempt/
+│   │       ├── solution-attempt.entity.ts
+│   │       └── solution-attempt-result.enum.ts
 │   └── repositories/
 │       ├── technical-entry.repository.ts
 │       └── solution-attempt.repository.ts
@@ -275,3 +277,17 @@ Para manter o primeiro fluxo pequeno e coerente com os casos de uso já document
 - no MVP, o caso de uso necessário é `AddSolutionAttempt`; edição e remoção só devem ser adicionadas se houver uma regra de negócio explícita para corrigir o histórico.
 
 Assim, a decisão final é: `SolutionAttempt` é uma entidade persistida separadamente, mas pertence ao agregado de `TechnicalEntry`. O padrão é o mesmo de tecnologias e comandos em relação a `Project`, mudando apenas o aggregate root: `ProjectTechnology` e `ProjectCommand` pertencem a `Project`; `SolutionAttempt` pertence a `TechnicalEntry`.
+
+== rascunho ==
+
+A tentativa herda indiretamente o proprietário da TechnicalEntry. O caso de uso deve:
+
+1. Buscar a TechnicalEntry pelo entryId.
+2. Conferir technicalEntry.userId === currentUser.id.
+3. Validar se é uma ISSUE não arquivada.
+4. Criar a tentativa apenas com technicalEntryId.
+
+Isso evita duplicar o userId e criar inconsistências, por exemplo:
+
+TechnicalEntry.userId = usuário A
+SolutionAttempt.userId = usuário B
