@@ -22,6 +22,7 @@ import { SolutionAttemptPrismaRepository } from './database/prisma/repositories/
 import { SolutionAttemptRepository } from '../domain/repositories/solution-attempt/solution-attempt.repositoty';
 import { AddSolutionAttemptUseCase } from '../application/usecases/add-solution-attempt.usecase';
 import { ListSolutionAttemptsUseCase } from '../application/usecases/list-solution-attempts.usecase';
+import { ResolveTechnicalIssueUseCase } from '../application/usecases/resolve-technical-issue.usecase';
 
 @Module({
   controllers: [TechnicalEntryController],
@@ -193,6 +194,13 @@ import { ListSolutionAttemptsUseCase } from '../application/usecases/list-soluti
         );
       },
       inject: ['SolutionAttemptRepository', 'TechnicalEntryRepository'],
+    },
+    {
+      provide: ResolveTechnicalIssueUseCase,
+      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
+        return new ResolveTechnicalIssueUseCase(technicalEntryRepository);
+      },
+      inject: ['TechnicalEntryRepository'],
     },
   ],
 })

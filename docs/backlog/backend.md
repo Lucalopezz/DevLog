@@ -93,7 +93,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ## 3. Entradas técnicas — MVP inicial
 
-> A camada de domínio possui entidade, enum, validação, contrato de repositório, mapper e repositório Prisma. Criação, listagem paginada, consulta individual, atualização e exclusão física já possuem casos de uso, presenters e endpoints protegidos pelo `AuthGuard`. A relação com projetos e tags já possui validações e agregação de tags nas respostas. A etapa ainda não está concluída: faltam tags na criação/alteração, tentativas, resolução, arquivamento e testes HTTP completos.
+> A camada de domínio possui entidade, enum, validação, contrato de repositório, mapper e repositório Prisma. Criação, listagem paginada, consulta individual, atualização, exclusão física, tentativas de solução e resolução já possuem casos de uso, presenters e endpoints protegidos pelo `AuthGuard`. A relação com projetos e tags já possui validações e agregação de tags nas respostas. A etapa ainda não está concluída: faltam tags na criação/alteração, arquivamento e testes HTTP completos.
 
 ### CreateTechnicalEntry
 
@@ -254,26 +254,34 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### AddSolutionAttempt
 
-- [ ] Criar a entidade de tentativa de solução.
-- [ ] Criar o caso de uso `AddSolutionAttempt`.
-- [ ] Validar `entryId`, `description` e `result`.
-- [ ] Permitir tentativas somente para entradas do tipo `ISSUE`.
-- [ ] Aceitar somente `FAILED`, `PARTIAL` ou `SUCCESSFUL`.
-- [ ] Impedir novas tentativas em entradas arquivadas.
-- [ ] Garantir que a entrada pertença ao usuário autenticado.
-- [ ] Criar o endpoint de inclusão de tentativa.
+- [x] Criar a entidade de tentativa de solução.
+- [x] Criar o caso de uso `AddSolutionAttempt`.
+- [x] Validar `entryId`, `description` e `result`.
+- [x] Permitir tentativas somente para entradas do tipo `ISSUE`.
+- [x] Aceitar somente `FAILED`, `PARTIAL` ou `SUCCESSFUL`.
+- [x] Impedir novas tentativas em entradas arquivadas.
+- [x] Garantir que a entrada pertença ao usuário autenticado.
+- [x] Criar o endpoint de inclusão de tentativa.
 - [ ] Testar tentativa em `ISSUE`, rejeição em `LEARNING`, resultado inválido e entrada arquivada.
+
+### ListSolutionAttempts
+
+- [x] Criar o caso de uso de listagem paginada de tentativas.
+- [x] Permitir filtrar tentativas por resultado.
+- [x] Garantir que a entrada pertença ao usuário autenticado antes da consulta.
+- [x] Criar o endpoint `GET /api/technical-entry/:entryId/solution-attempts`.
+- [x] Testar listagem, filtro por resultado e isolamento por usuário.
 
 ### ResolveTechnicalIssue
 
-- [ ] Criar o caso de uso `ResolveTechnicalIssue`.
-- [ ] Permitir resolução somente para entradas do tipo `ISSUE`.
-- [ ] Exigir `conclusion`.
-- [ ] Alterar o status de `OPEN` para `RESOLVED`.
-- [ ] Registrar `resolvedAt`.
-- [ ] Permitir resolução mesmo sem uma tentativa `SUCCESSFUL`, conforme o caso de uso.
-- [ ] Criar o endpoint de resolução.
-- [ ] Testar conclusão obrigatória, tipo inválido, transição de status e isolamento por usuário.
+- [x] Criar o caso de uso `ResolveTechnicalIssue`.
+- [x] Permitir resolução somente para entradas do tipo `ISSUE`.
+- [x] Exigir `conclusion`.
+- [x] Alterar o status de `OPEN` para `RESOLVED`.
+- [x] Registrar `resolvedAt`.
+- [x] Permitir resolução mesmo sem uma tentativa `SUCCESSFUL`, conforme o caso de uso.
+- [x] Criar o endpoint `PATCH /api/technical-entry/:id/resolve`.
+- [x] Testar conclusão obrigatória, tipo inválido, transição de status e isolamento por usuário.
 
 ### ReopenTechnicalIssue
 
