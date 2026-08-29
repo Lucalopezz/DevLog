@@ -52,6 +52,8 @@ import {
 import { ResolveTechnicalIssueDto } from './dto/resolve-technical-issue.dto';
 import { ResolveTechnicalIssueUseCase } from '../application/usecases/resolve-technical-issue.usecase';
 import { ReopenTechnicalIssueUseCase } from '../application/usecases/reopen-technical-issue.usecase';
+import { UpdateSolutionAttemptUseCase } from '../application/usecases/update-solution-attempt.usecase';
+import { UpdateSolutionAttemptDto } from './dto/update-solution-attempt.dto';
 
 @Controller('technical-entry')
 export class TechnicalEntryController {
@@ -78,6 +80,9 @@ export class TechnicalEntryController {
 
   @Inject(AddSolutionAttemptUseCase)
   private addSolutionAttemptUseCase: AddSolutionAttemptUseCase;
+
+  @Inject(UpdateSolutionAttemptUseCase)
+  private updateSolutionAttemptUseCase: UpdateSolutionAttemptUseCase;
 
   @Inject(ListSolutionAttemptsUseCase)
   private listSolutionAttemptsUseCase: ListSolutionAttemptsUseCase;
@@ -250,6 +255,24 @@ export class TechnicalEntryController {
     const output = await this.addSolutionAttemptUseCase.execute({
       ...addSolutionAttemptDto,
       technicalEntryId: entryId,
+      userId: user.id,
+    });
+
+    return TechnicalEntryController.solutionAttemptToResponse(output);
+  }
+
+  @Patch(':entryId/solution-attempts/:attemptId')
+  @UseGuards(AuthGuard)
+  async updateSolutionAttempt(
+    @Param('entryId') entryId: string,
+    @Param('attemptId') attemptId: string,
+    @Body() updateSolutionAttemptDto: UpdateSolutionAttemptDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.updateSolutionAttemptUseCase.execute({
+      ...updateSolutionAttemptDto,
+      technicalEntryId: entryId,
+      attemptId,
       userId: user.id,
     });
 

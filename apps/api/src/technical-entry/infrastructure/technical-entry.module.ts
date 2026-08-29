@@ -24,6 +24,7 @@ import { AddSolutionAttemptUseCase } from '../application/usecases/add-solution-
 import { ListSolutionAttemptsUseCase } from '../application/usecases/list-solution-attempts.usecase';
 import { ResolveTechnicalIssueUseCase } from '../application/usecases/resolve-technical-issue.usecase';
 import { ReopenTechnicalIssueUseCase } from '../application/usecases/reopen-technical-issue.usecase';
+import { UpdateSolutionAttemptUseCase } from '../application/usecases/update-solution-attempt.usecase';
 
 @Module({
   controllers: [TechnicalEntryController],
@@ -177,6 +178,19 @@ import { ReopenTechnicalIssueUseCase } from '../application/usecases/reopen-tech
         solutionAttemptRepository: SolutionAttemptRepository,
       ) => {
         return new AddSolutionAttemptUseCase(
+          technicalEntryRepository,
+          solutionAttemptRepository,
+        );
+      },
+      inject: ['TechnicalEntryRepository', 'SolutionAttemptRepository'],
+    },
+    {
+      provide: UpdateSolutionAttemptUseCase,
+      useFactory: (
+        technicalEntryRepository: TechnicalEntryRepository,
+        solutionAttemptRepository: SolutionAttemptRepository,
+      ) => {
+        return new UpdateSolutionAttemptUseCase(
           technicalEntryRepository,
           solutionAttemptRepository,
         );

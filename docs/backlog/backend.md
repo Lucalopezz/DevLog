@@ -264,6 +264,22 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o endpoint de inclusão de tentativa.
 - [ ] Testar tentativa em `ISSUE`, rejeição em `LEARNING`, resultado inválido e entrada arquivada.
 
+### UpdateSolutionAttempt
+
+- [x] Criar o caso de uso `UpdateSolutionAttempt`.
+- [x] Permitir editar somente a descrição (`description`) de uma tentativa existente.
+- [x] Manter o resultado/status (`result`) imutável; para alterar o status, registrar uma nova tentativa.
+- [x] Garantir que a tentativa e a entrada técnica pertençam ao usuário autenticado.
+- [x] Criar o endpoint autenticado `PATCH /api/technical-entry/:entryId/solution-attempts/:attemptId`.
+- [x] Testar atualização da descrição, preservação do resultado e isolamento entre usuários.
+
+### RemoveSolutionAttempt
+
+- [ ] Criar o caso de uso `RemoveSolutionAttempt`.
+- [ ] Permitir remover uma tentativa de solução existente somente pelo proprietário da entrada técnica.
+- [ ] Criar o endpoint autenticado `DELETE /api/technical-entry/:entryId/solution-attempts/:id`.
+- [ ] Testar remoção, tentativa de remover uma tentativa inexistente e isolamento entre usuários.
+
 ### ListSolutionAttempts
 
 - [x] Criar o caso de uso de listagem paginada de tentativas.
