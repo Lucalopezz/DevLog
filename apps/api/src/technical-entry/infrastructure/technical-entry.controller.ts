@@ -54,6 +54,7 @@ import { ResolveTechnicalIssueUseCase } from '../application/usecases/resolve-te
 import { ReopenTechnicalIssueUseCase } from '../application/usecases/reopen-technical-issue.usecase';
 import { UpdateSolutionAttemptUseCase } from '../application/usecases/update-solution-attempt.usecase';
 import { UpdateSolutionAttemptDto } from './dto/update-solution-attempt.dto';
+import { RemoveSolutionAttemptUseCase } from '../application/usecases/remove-solution-attempt.usecase';
 
 @Controller('technical-entry')
 export class TechnicalEntryController {
@@ -83,6 +84,9 @@ export class TechnicalEntryController {
 
   @Inject(UpdateSolutionAttemptUseCase)
   private updateSolutionAttemptUseCase: UpdateSolutionAttemptUseCase;
+
+  @Inject(RemoveSolutionAttemptUseCase)
+  private removeSolutionAttemptUseCase: RemoveSolutionAttemptUseCase;
 
   @Inject(ListSolutionAttemptsUseCase)
   private listSolutionAttemptsUseCase: ListSolutionAttemptsUseCase;
@@ -277,6 +281,21 @@ export class TechnicalEntryController {
     });
 
     return TechnicalEntryController.solutionAttemptToResponse(output);
+  }
+
+  @Delete(':entryId/solution-attempts/:attemptId')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeSolutionAttempt(
+    @Param('entryId') entryId: string,
+    @Param('attemptId') attemptId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    await this.removeSolutionAttemptUseCase.execute({
+      technicalEntryId: entryId,
+      attemptId,
+      userId: user.id,
+    });
   }
 
   @Get(':entryId/solution-attempts')

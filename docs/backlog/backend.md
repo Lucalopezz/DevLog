@@ -275,10 +275,10 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### RemoveSolutionAttempt
 
-- [ ] Criar o caso de uso `RemoveSolutionAttempt`.
-- [ ] Permitir remover uma tentativa de solução existente somente pelo proprietário da entrada técnica.
-- [ ] Criar o endpoint autenticado `DELETE /api/technical-entry/:entryId/solution-attempts/:id`.
-- [ ] Testar remoção, tentativa de remover uma tentativa inexistente e isolamento entre usuários.
+- [x] Criar o caso de uso `RemoveSolutionAttempt`.
+- [x] Permitir remover uma tentativa de solução existente somente pelo proprietário da entrada técnica.
+- [x] Criar o endpoint autenticado `DELETE /api/technical-entry/:entryId/solution-attempts/:attemptId`.
+- [x] Testar remoção, tentativa de remover uma tentativa inexistente e isolamento entre usuários.
 
 ### ListSolutionAttempts
 

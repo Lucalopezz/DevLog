@@ -25,6 +25,7 @@ import { ListSolutionAttemptsUseCase } from '../application/usecases/list-soluti
 import { ResolveTechnicalIssueUseCase } from '../application/usecases/resolve-technical-issue.usecase';
 import { ReopenTechnicalIssueUseCase } from '../application/usecases/reopen-technical-issue.usecase';
 import { UpdateSolutionAttemptUseCase } from '../application/usecases/update-solution-attempt.usecase';
+import { RemoveSolutionAttemptUseCase } from '../application/usecases/remove-solution-attempt.usecase';
 
 @Module({
   controllers: [TechnicalEntryController],
@@ -191,6 +192,19 @@ import { UpdateSolutionAttemptUseCase } from '../application/usecases/update-sol
         solutionAttemptRepository: SolutionAttemptRepository,
       ) => {
         return new UpdateSolutionAttemptUseCase(
+          technicalEntryRepository,
+          solutionAttemptRepository,
+        );
+      },
+      inject: ['TechnicalEntryRepository', 'SolutionAttemptRepository'],
+    },
+    {
+      provide: RemoveSolutionAttemptUseCase,
+      useFactory: (
+        technicalEntryRepository: TechnicalEntryRepository,
+        solutionAttemptRepository: SolutionAttemptRepository,
+      ) => {
+        return new RemoveSolutionAttemptUseCase(
           technicalEntryRepository,
           solutionAttemptRepository,
         );
