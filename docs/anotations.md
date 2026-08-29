@@ -39,7 +39,6 @@ project/
 │       ├── list-projects.usecase.ts
 │       ├── update-project.usecase.ts
 │       ├── add-project-technology.usecase.ts
-│       ├── update-project-technology.usecase.ts
 │       ├── remove-project-technology.usecase.ts
 │       ├── add-project-command.usecase.ts
 │       ├── update-project-command.usecase.ts
@@ -81,7 +80,6 @@ GET /projects/:projectId
 PATCH /projects/:projectId
 
 POST /projects/:projectId/technologies
-PATCH /projects/:projectId/technologies/:technologyId
 DELETE /projects/:projectId/technologies/:technologyId
 
 POST /projects/:projectId/commands
@@ -116,6 +114,10 @@ As três primeiras são dependentes do projeto e usam onDelete: Cascade, como j�
 O schema/documentação usa ACTIVE, PAUSED e FINISHED, enquanto a aplicação usa ACTIVE, INACTIVE e FINISHED, traduzindo PAUSED para INACTIVE no mapper. O campo archivedAt permanece separado do status: archive() e restore() alteram apenas o arquivamento.
 
 A modelagem atual do Prisma já está próxima dessa arquitetura. O principal agora é implementar essas entidades como filhos do contexto project, e não copiá-las exatamente como Tag, que é um recurso independente do usuário.
+
+### Escopo do MVP
+
+No MVP, tecnologias de projeto podem ser adicionadas, listadas e removidas. A edição de `name` ou `version` ficará para o pós-MVP; por isso, a entidade não expõe uma operação `update()` neste momento.
 
 ---
 
@@ -277,4 +279,3 @@ Para manter o primeiro fluxo pequeno e coerente com os casos de uso já document
 - no MVP, o caso de uso necessário é `AddSolutionAttempt`; edição e remoção só devem ser adicionadas se houver uma regra de negócio explícita para corrigir o histórico.
 
 Assim, a decisão final é: `SolutionAttempt` é uma entidade persistida separadamente, mas pertence ao agregado de `TechnicalEntry`. O padrão é o mesmo de tecnologias e comandos em relação a `Project`, mudando apenas o aggregate root: `ProjectTechnology` e `ProjectCommand` pertencem a `Project`; `SolutionAttempt` pertence a `TechnicalEntry`.
-

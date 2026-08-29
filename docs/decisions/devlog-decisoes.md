@@ -356,7 +356,6 @@ project/
 ├── application/
 │   └── usecases/
 │       ├── add-project-technology.usecase.ts
-│       ├── update-project-technology.usecase.ts
 │       ├── remove-project-technology.usecase.ts
 │       ├── add-project-command.usecase.ts
 │       ├── update-project-command.usecase.ts
@@ -455,6 +454,10 @@ AddProjectTechnology
 AddProjectCommand
 AddProjectResource
 ```
+
+### Escopo de tecnologias no MVP
+
+No MVP, `ProjectTechnology` será criada, listada e removida. A alteração de `name` ou `version` não fará parte da primeira versão e fica registrada como funcionalidade de pós-MVP. Consequentemente, a entidade de domínio não precisa expor uma operação de atualização agora.
 
 ### Diário técnico
 
