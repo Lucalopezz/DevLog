@@ -312,15 +312,15 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 ### Project Technologies
 
 - [x] Criar a entidade ou relação de tecnologia do projeto.
-- [ ] Criar o caso de uso `AddProjectTechnology`.
+- [x] Criar o caso de uso `AddProjectTechnology`.
 - [x] Validar `projectId`, `name` e `version?` no domínio.
-- [ ] Garantir que o projeto pertença ao usuário.
-- [ ] Impedir a mesma tecnologia duas vezes no mesmo projeto.
-- [ ] Criar o caso de uso `RemoveProjectTechnology`.
-- [ ] Remover a tecnologia sem remover tags ou entradas técnicas com o mesmo nome.
-- [ ] Criar os endpoints de adicionar e remover tecnologia.
-- [ ] Testar duplicidade, autorização e independência entre tecnologia e tag.
-- [ ] **Pós-MVP:** permitir atualizar `name` e `version` de uma tecnologia do projeto.
+- [x] Garantir que o projeto pertença ao usuário.
+- [x] Impedir a mesma tecnologia duas vezes no mesmo projeto.
+- [x] Criar o caso de uso `RemoveProjectTechnology`.
+- [x] Remover a tecnologia sem remover tags ou entradas técnicas com o mesmo nome.
+- [x] Criar os endpoints de adicionar e remover tecnologia.
+- [x] Testar duplicidade, autorização e independência entre tecnolo- 
+- [ ] **Pós-MVP:** permitir atualizar `name` e `version` de uma tecnologia do projeto do projeto.
 
 ### Project Commands
 
