@@ -27,6 +27,8 @@ import { ProjectCommandPrismaRepository } from './database/prisma/project-comman
 import { AddProjectCommandUseCase } from '../application/usecases/add-project-command.usecase';
 import { UpdateProjectCommandUseCase } from '../application/usecases/update-project-command.usecase';
 import { RemoveProjectCommandUseCase } from '../application/usecases/remove-project-command.usecase';
+import { SearchProjectCommandUseCase } from '../application/usecases/search-project-command.usecase';
+import { GetProjectCommandUseCase } from '../application/usecases/get-project-command.usecase';
 
 @Module({
   controllers: [ProjectController],
@@ -215,6 +217,32 @@ import { RemoveProjectCommandUseCase } from '../application/usecases/remove-proj
         projectCommandRepository: ProjectCommandRepository,
       ) => {
         return new RemoveProjectCommandUseCase(
+          projectRepository,
+          projectCommandRepository,
+        );
+      },
+      inject: ['ProjectRepository', 'ProjectCommandRepository'],
+    },
+    {
+      provide: SearchProjectCommandUseCase,
+      useFactory: (
+        projectRepository: ProjectRepository,
+        projectCommandRepository: ProjectCommandRepository,
+      ) => {
+        return new SearchProjectCommandUseCase(
+          projectRepository,
+          projectCommandRepository,
+        );
+      },
+      inject: ['ProjectRepository', 'ProjectCommandRepository'],
+    },
+    {
+      provide: GetProjectCommandUseCase,
+      useFactory: (
+        projectRepository: ProjectRepository,
+        projectCommandRepository: ProjectCommandRepository,
+      ) => {
+        return new GetProjectCommandUseCase(
           projectRepository,
           projectCommandRepository,
         );

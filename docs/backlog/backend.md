@@ -324,14 +324,16 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### Project Commands
 
-- [ ] Criar a entidade de comando do projeto.
-- [ ] Criar o caso de uso `AddProjectCommand`.
-- [ ] Validar `projectId`, `title`, `command` e `description?`.
-- [ ] Criar o caso de uso `UpdateProjectCommand`.
-- [ ] Criar o caso de uso `RemoveProjectCommand`.
-- [ ] Garantir propriedade do projeto em todas as operações.
-- [ ] Criar os endpoints de adicionar, atualizar e remover comando.
-- [ ] Testar ciclo completo e tentativa de acesso por outro usuário.
+- [x] Criar a entidade de comando do projeto.
+- [x] Criar o caso de uso `AddProjectCommand`.
+- [x] Criar o caso de uso `SearchProjectCommand`.
+- [x] Criar o caso de uso `GetProjectCommand`.
+- [x] Validar `projectId`, `title`, `command` e `description?`.
+- [x] Criar o caso de uso `UpdateProjectCommand`.
+- [x] Criar o caso de uso `RemoveProjectCommand`.
+- [x] Garantir propriedade do projeto em todas as operações.
+- [x] Criar os endpoints de adicionar, listar, consultar, atualizar e remover comando.
+- [x] Testar ciclo completo e tentativa de acesso por outro usuário.
 
 ### Project Resources
 

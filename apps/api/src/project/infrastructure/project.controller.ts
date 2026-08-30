@@ -42,10 +42,18 @@ import { AddProjectTechnologyUseCase } from '../application/usecases/add-project
 import { RemoveProjectTechnologyUseCase } from '../application/usecases/remove-project-technology.usecase';
 import { AddProjectCommandDto } from './dto/add-project-command.dto';
 import { AddProjectCommandUseCase } from '../application/usecases/add-project-command.usecase';
-import { ProjectCommandPresenter } from './presenter/project-command.presenter';
+import {
+  ProjectCommandCollectionPresenter,
+  ProjectCommandPresenter,
+} from './presenter/project-command.presenter';
 import { UpdateProjectCommandDto } from './dto/update-project-command.dto';
 import { UpdateProjectCommandUseCase } from '../application/usecases/update-project-command.usecase';
 import { RemoveProjectCommandUseCase } from '../application/usecases/remove-project-command.usecase';
+import { SearchProjectCommandDto } from './dto/search-project-command.dto';
+import { SearchProjectCommandUseCase } from '../application/usecases/search-project-command.usecase';
+import { GetProjectCommandUseCase } from '../application/usecases/get-project-command.usecase';
+import type { ProjectCommandOutput } from '../application/dto/project-command.dto';
+import type { SearchProjectCommandUseCaseOutput } from '../application/usecases/search-project-command.usecase';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -92,12 +100,26 @@ export class ProjectController {
   @Inject(RemoveProjectCommandUseCase)
   private readonly removeProjectCommandUseCase: RemoveProjectCommandUseCase;
 
+  @Inject(SearchProjectCommandUseCase)
+  private readonly searchProjectCommandUseCase: SearchProjectCommandUseCase;
+
+  @Inject(GetProjectCommandUseCase)
+  private readonly getProjectCommandUseCase: GetProjectCommandUseCase;
+
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
   }
 
   static listProjectsToResponse(output: SearchProjectUseCaseOutput) {
     return new ProjectCollectionPresenter(output);
+  }
+
+  static commandToResponse(output: ProjectCommandOutput) {
+    return new ProjectCommandPresenter(output);
+  }
+
+  static listCommandsToResponse(output: SearchProjectCommandUseCaseOutput) {
+    return new ProjectCommandCollectionPresenter(output);
   }
 
   @Post()
@@ -139,6 +161,36 @@ export class ProjectController {
     });
 
     return new TechnicalEntryCollectionPresenter(output);
+  }
+
+  @Get(':projectId/commands')
+  async searchCommands(
+    @Param('projectId') projectId: string,
+    @Query() searchParams: SearchProjectCommandDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.searchProjectCommandUseCase.execute({
+      ...searchParams,
+      projectId,
+      userId: user.id,
+    });
+
+    return ProjectController.listCommandsToResponse(output);
+  }
+
+  @Get(':projectId/commands/:commandId')
+  async findCommand(
+    @Param('projectId') projectId: string,
+    @Param('commandId') commandId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.getProjectCommandUseCase.execute({
+      projectId,
+      commandId,
+      userId: user.id,
+    });
+
+    return ProjectController.commandToResponse(output);
   }
 
   @Get(':id')
@@ -265,7 +317,7 @@ export class ProjectController {
       userId: user.id,
     });
 
-    return new ProjectCommandPresenter(output);
+    return ProjectController.commandToResponse(output);
   }
 
   @Patch(':projectId/commands/:commandId')
@@ -282,7 +334,7 @@ export class ProjectController {
       userId: user.id,
     });
 
-    return new ProjectCommandPresenter(output);
+    return ProjectController.commandToResponse(output);
   }
 
   @Delete(':projectId/commands/:commandId')

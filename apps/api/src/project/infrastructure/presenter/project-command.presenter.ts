@@ -1,4 +1,6 @@
 import type { ProjectCommandOutput } from '@/project/application/dto/project-command.dto';
+import type { SearchProjectCommandUseCaseOutput } from '@/project/application/usecases/search-project-command.usecase';
+import { CollectionPresenter } from '@/shared/infrastructure/presenter/collection.presenter';
 
 export class ProjectCommandPresenter {
   id: string;
@@ -19,5 +21,15 @@ export class ProjectCommandPresenter {
     this.executionOrder = output.executionOrder;
     this.createdAt = output.createdAt;
     this.updatedAt = output.updatedAt;
+  }
+}
+
+export class ProjectCommandCollectionPresenter extends CollectionPresenter<ProjectCommandPresenter> {
+  data: ProjectCommandPresenter[];
+
+  constructor(output: SearchProjectCommandUseCaseOutput) {
+    const { items, ...paginationProps } = output;
+    super(paginationProps);
+    this.data = items.map((item) => new ProjectCommandPresenter(item));
   }
 }
