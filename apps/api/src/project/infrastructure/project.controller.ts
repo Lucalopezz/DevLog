@@ -45,6 +45,7 @@ import { AddProjectCommandUseCase } from '../application/usecases/add-project-co
 import { ProjectCommandPresenter } from './presenter/project-command.presenter';
 import { UpdateProjectCommandDto } from './dto/update-project-command.dto';
 import { UpdateProjectCommandUseCase } from '../application/usecases/update-project-command.usecase';
+import { RemoveProjectCommandUseCase } from '../application/usecases/remove-project-command.usecase';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -87,6 +88,9 @@ export class ProjectController {
 
   @Inject(UpdateProjectCommandUseCase)
   private readonly updateProjectCommandUseCase: UpdateProjectCommandUseCase;
+
+  @Inject(RemoveProjectCommandUseCase)
+  private readonly removeProjectCommandUseCase: RemoveProjectCommandUseCase;
 
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
@@ -279,5 +283,19 @@ export class ProjectController {
     });
 
     return new ProjectCommandPresenter(output);
+  }
+
+  @Delete(':projectId/commands/:commandId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeCommand(
+    @Param('projectId') projectId: string,
+    @Param('commandId') commandId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    await this.removeProjectCommandUseCase.execute({
+      projectId,
+      commandId,
+      userId: user.id,
+    });
   }
 }
