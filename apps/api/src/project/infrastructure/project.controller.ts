@@ -40,6 +40,9 @@ import { TechnicalEntryCollectionPresenter } from '@/technical-entry/infrastruct
 import { AddProjectTechnologyDto } from './dto/add-project-technology.dto';
 import { AddProjectTechnologyUseCase } from '../application/usecases/add-project-technology.usecase';
 import { RemoveProjectTechnologyUseCase } from '../application/usecases/remove-project-technology.usecase';
+import { AddProjectCommandDto } from './dto/add-project-command.dto';
+import { AddProjectCommandUseCase } from '../application/usecases/add-project-command.usecase';
+import { ProjectCommandPresenter } from './presenter/project-command.presenter';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -76,6 +79,9 @@ export class ProjectController {
 
   @Inject(RemoveProjectTechnologyUseCase)
   private readonly removeProjectTechnologyUseCase: RemoveProjectTechnologyUseCase;
+
+  @Inject(AddProjectCommandUseCase)
+  private readonly addProjectCommandUseCase: AddProjectCommandUseCase;
 
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
@@ -236,5 +242,20 @@ export class ProjectController {
       technologyId,
       userId: user.id,
     });
+  }
+
+  @Post(':id/commands')
+  async addCommand(
+    @Param('id') projectId: string,
+    @Body() addProjectCommandDto: AddProjectCommandDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.addProjectCommandUseCase.execute({
+      ...addProjectCommandDto,
+      projectId,
+      userId: user.id,
+    });
+
+    return new ProjectCommandPresenter(output);
   }
 }

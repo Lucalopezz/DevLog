@@ -1,5 +1,6 @@
 import { ProjectEntity, type ProjectProps } from '../project.entity';
 import { ProjectStatusEnum } from '../project-status-enum';
+import { ProjectCommandEntity } from '../project-command.entity';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 
@@ -85,5 +86,23 @@ describe('ProjectEntity', () => {
     project.update({ description: 'Descrição restaurada' });
 
     expect(project.description).toBe('Descrição restaurada');
+  });
+
+  it('cria um comando vinculado ao próprio projeto', () => {
+    const project = new ProjectEntity(makeProps());
+
+    const command = project.addCommand(
+      'Subir ambiente local',
+      'docker compose up -d',
+      'Inicia os serviços',
+      1,
+    );
+
+    expect(command).toBeInstanceOf(ProjectCommandEntity);
+    expect(command.projectId).toBe(project.id);
+    expect(command.title).toBe('Subir ambiente local');
+    expect(command.command).toBe('docker compose up -d');
+    expect(command.description).toBe('Inicia os serviços');
+    expect(command.executionOrder).toBe(1);
   });
 });

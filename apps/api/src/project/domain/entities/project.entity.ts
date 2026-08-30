@@ -3,6 +3,7 @@ import { EntityValidationError } from '@/shared/domain/errors/entity-validation-
 import { ProjectStatusEnum } from './project-status-enum';
 import { ProjectValidatorFactory } from '../validators/project.validator';
 import { ProjectTechnologyEntity } from './project-technology.entity';
+import { ProjectCommandEntity } from './project-command.entity';
 
 export type ProjectProps = {
   userId: string;
@@ -32,6 +33,21 @@ export class ProjectEntity extends Entity<ProjectProps> {
       projectId: this.id,
       name,
       version,
+    });
+  }
+
+  addCommand(
+    title: string,
+    command: string,
+    description?: string,
+    executionOrder?: number,
+  ): ProjectCommandEntity {
+    return new ProjectCommandEntity({
+      projectId: this.id,
+      title,
+      command,
+      description,
+      executionOrder,
     });
   }
 
