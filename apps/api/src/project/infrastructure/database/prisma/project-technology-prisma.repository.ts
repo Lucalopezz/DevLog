@@ -1,7 +1,7 @@
 import { ProjectTechnologyEntity } from '@/project/domain/entities/project-technology.entity';
 import { ProjectTechnologyRepository } from '@/project/domain/repositories/project-technology.repository';
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
-import { ProjectTechnologyModelMapper } from './models/project-technology-model';
+import { ProjectTechnologyModelMapper } from './models/project-technology-model.mapper';
 
 export class ProjectTechnologyPrismaRepository implements ProjectTechnologyRepository {
   constructor(private readonly prismaService: PrismaService) {}
