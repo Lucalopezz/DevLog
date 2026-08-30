@@ -1,11 +1,21 @@
 import { ProjectStatusEnum } from '@/project/domain/entities/project-status-enum';
+import { ProjectTechnologyEntity } from '@/project/domain/entities/project-technology.entity';
 import { ProjectEntity } from '@/project/domain/entities/project.entity';
+
+export type ProjectTechnologyOutput = {
+  id: string;
+  name: string;
+  version?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export type ProjectOutput = {
   id: string;
   name: string;
   description?: string;
   status: ProjectStatusEnum;
+  technologies?: ProjectTechnologyOutput[];
   localPath?: string;
   archivedAt?: Date;
   createdAt: Date;
@@ -13,8 +23,11 @@ export type ProjectOutput = {
 };
 
 export class ProjectOutputMapper {
-  static toOutput(project: ProjectEntity): ProjectOutput {
-    return {
+  static toOutput(
+    project: ProjectEntity,
+    technologies?: ProjectTechnologyEntity[],
+  ): ProjectOutput {
+    const output: ProjectOutput = {
       id: project.id,
       name: project.name,
       description: project.description,
@@ -24,5 +37,17 @@ export class ProjectOutputMapper {
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
     };
+
+    if (technologies !== undefined) {
+      output.technologies = technologies.map((technology) => ({
+        id: technology.id,
+        name: technology.name,
+        version: technology.version,
+        createdAt: technology.createdAt,
+        updatedAt: technology.updatedAt,
+      }));
+    }
+
+    return output;
   }
 }

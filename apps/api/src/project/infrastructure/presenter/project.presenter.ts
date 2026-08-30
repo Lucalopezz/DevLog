@@ -1,5 +1,8 @@
 import { CollectionPresenter } from '@/shared/infrastructure/presenter/collection.presenter';
-import { ProjectOutput } from '@/project/application/dto/project.dto';
+import {
+  ProjectOutput,
+  ProjectTechnologyOutput,
+} from '@/project/application/dto/project.dto';
 import { SearchProjectUseCaseOutput } from '@/project/application/usecases/search-project.usecase';
 import { ProjectStatusEnum } from '@/project/domain/entities/project-status-enum';
 
@@ -8,6 +11,7 @@ export class ProjectPresenter {
   name: string;
   description?: string;
   status: ProjectStatusEnum;
+  technologies?: ProjectTechnologyOutput[];
   localPath?: string;
   archivedAt?: Date;
   createdAt: Date;
@@ -18,6 +22,7 @@ export class ProjectPresenter {
     this.name = output.name;
     this.description = output.description;
     this.status = output.status;
+    this.technologies = output.technologies;
     this.localPath = output.localPath;
     this.archivedAt = output.archivedAt;
     this.createdAt = output.createdAt;

@@ -18,6 +18,9 @@ import { TechnicalEntryTagRepository } from '@/technical-entry/domain/repositori
 import { TechnicalEntryPrismaRepository } from '@/technical-entry/infrastructure/database/prisma/repositories/technical-entry-prisma.repository';
 import { TechnicalEntryTagPrismaRepository } from '@/technical-entry/infrastructure/database/prisma/repositories/technical-entry-tag-prisma.repository';
 import { ProjectRepository } from '@/project/domain/repositories/project.repository';
+import { AddProjectTechnologyUseCase } from '../application/usecases/add-project-technology.usecase';
+import { ProjectTechnologyRepository } from '../domain/repositories/project-technology.repository';
+import { ProjectTechnologyPrismaRepository } from './database/prisma/project-technology-prisma.repository';
 
 @Module({
   controllers: [ProjectController],
@@ -52,6 +55,13 @@ import { ProjectRepository } from '@/project/domain/repositories/project.reposit
       provide: 'TechnicalEntryTagRepository',
       useFactory: (prismaService: PrismaService) => {
         return new TechnicalEntryTagPrismaRepository(prismaService);
+      },
+      inject: ['PrismaService'],
+    },
+    {
+      provide: 'ProjectTechnologyRepository',
+      useFactory: (prismaService: PrismaService) => {
+        return new ProjectTechnologyPrismaRepository(prismaService);
       },
       inject: ['PrismaService'],
     },
@@ -132,6 +142,19 @@ import { ProjectRepository } from '@/project/domain/repositories/project.reposit
         return new ToggleProjectArchiveUseCase(projectRepository);
       },
       inject: ['ProjectRepository'],
+    },
+    {
+      provide: AddProjectTechnologyUseCase,
+      useFactory: (
+        projectRepository: ProjectPrismaRepository,
+        projectTechnologyRepository: ProjectTechnologyRepository,
+      ) => {
+        return new AddProjectTechnologyUseCase(
+          projectRepository,
+          projectTechnologyRepository,
+        );
+      },
+      inject: ['ProjectRepository', 'ProjectTechnologyRepository'],
     },
   ],
   exports: ['ProjectRepository'],

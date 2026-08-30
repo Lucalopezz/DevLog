@@ -2,6 +2,7 @@ import { Entity } from '@/shared/domain/entities/entity';
 import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
 import { ProjectStatusEnum } from './project-status-enum';
 import { ProjectValidatorFactory } from '../validators/project.validator';
+import { ProjectTechnologyEntity } from './project-technology.entity';
 
 export type ProjectProps = {
   userId: string;
@@ -25,6 +26,13 @@ export class ProjectEntity extends Entity<ProjectProps> {
 
     ProjectEntity.validate(completeProps);
     super(completeProps, id);
+  }
+  addTechnology(name: string, version?: string): ProjectTechnologyEntity {
+    return new ProjectTechnologyEntity({
+      projectId: this.id,
+      name,
+      version,
+    });
   }
 
   update(

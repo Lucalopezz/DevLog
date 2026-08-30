@@ -37,6 +37,8 @@ import {
 import { SearchTechnicalEntryDto } from '@/technical-entry/infrastructure/dto/search-technical-entry.dto';
 import { SearchTechnicalEntryUseCase } from '@/technical-entry/application/usecases/search-technical-entry.usecase';
 import { TechnicalEntryCollectionPresenter } from '@/technical-entry/infrastructure/presenters/technical-entry.presenter';
+import { AddProjectTechnologyDto } from './dto/add-project-technology.dto';
+import { AddProjectTechnologyUseCase } from '../application/usecases/add-project-technology.usecase';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -68,6 +70,9 @@ export class ProjectController {
   @Inject(ToggleProjectArchiveUseCase)
   private readonly toggleProjectArchiveUseCase: ToggleProjectArchiveUseCase;
 
+  @Inject(AddProjectTechnologyUseCase)
+  private readonly addProjectTechnologyUseCase: AddProjectTechnologyUseCase;
+
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
   }
@@ -75,6 +80,7 @@ export class ProjectController {
   static listProjectsToResponse(output: SearchProjectUseCaseOutput) {
     return new ProjectCollectionPresenter(output);
   }
+
   @Post()
   async create(
     @Body() createProjectDto: CreateProjectDto,
@@ -197,5 +203,20 @@ export class ProjectController {
       id,
       userId: user.id,
     });
+  }
+
+  @Post(':id/technologies')
+  async addTechnology(
+    @Param('id') projectId: string,
+    @Body() addTechnologyDto: AddProjectTechnologyDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.addProjectTechnologyUseCase.execute({
+      ...addTechnologyDto,
+      projectId,
+      userId: user.id,
+    });
+
+    return ProjectController.projectToResponse(output);
   }
 }
