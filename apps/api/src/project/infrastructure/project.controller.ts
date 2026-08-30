@@ -43,6 +43,8 @@ import { RemoveProjectTechnologyUseCase } from '../application/usecases/remove-p
 import { AddProjectCommandDto } from './dto/add-project-command.dto';
 import { AddProjectCommandUseCase } from '../application/usecases/add-project-command.usecase';
 import { ProjectCommandPresenter } from './presenter/project-command.presenter';
+import { UpdateProjectCommandDto } from './dto/update-project-command.dto';
+import { UpdateProjectCommandUseCase } from '../application/usecases/update-project-command.usecase';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -82,6 +84,9 @@ export class ProjectController {
 
   @Inject(AddProjectCommandUseCase)
   private readonly addProjectCommandUseCase: AddProjectCommandUseCase;
+
+  @Inject(UpdateProjectCommandUseCase)
+  private readonly updateProjectCommandUseCase: UpdateProjectCommandUseCase;
 
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
@@ -253,6 +258,23 @@ export class ProjectController {
     const output = await this.addProjectCommandUseCase.execute({
       ...addProjectCommandDto,
       projectId,
+      userId: user.id,
+    });
+
+    return new ProjectCommandPresenter(output);
+  }
+
+  @Patch(':projectId/commands/:commandId')
+  async updateCommand(
+    @Param('projectId') projectId: string,
+    @Param('commandId') commandId: string,
+    @Body() updateProjectCommandDto: UpdateProjectCommandDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.updateProjectCommandUseCase.execute({
+      ...updateProjectCommandDto,
+      projectId,
+      commandId,
       userId: user.id,
     });
 
