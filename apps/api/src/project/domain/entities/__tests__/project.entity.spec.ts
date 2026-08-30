@@ -1,6 +1,8 @@
 import { ProjectEntity, type ProjectProps } from '../project.entity';
 import { ProjectStatusEnum } from '../project-status-enum';
 import { ProjectCommandEntity } from '../project-command.entity';
+import { ProjectResourceEntity } from '../project-resource.entity';
+import { ProjectResourceType } from '../project-resource-type.enum';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 
@@ -104,5 +106,21 @@ describe('ProjectEntity', () => {
     expect(command.command).toBe('docker compose up -d');
     expect(command.description).toBe('Inicia os serviços');
     expect(command.executionOrder).toBe(1);
+  });
+
+  it('cria um recurso vinculado ao próprio projeto', () => {
+    const project = new ProjectEntity(makeProps());
+
+    const resource = project.addResource(
+      'Repositório principal',
+      'https://github.com/example/devlog',
+      ProjectResourceType.REPOSITORY,
+    );
+
+    expect(resource).toBeInstanceOf(ProjectResourceEntity);
+    expect(resource.projectId).toBe(project.id);
+    expect(resource.label).toBe('Repositório principal');
+    expect(resource.url).toBe('https://github.com/example/devlog');
+    expect(resource.type).toBe(ProjectResourceType.REPOSITORY);
   });
 });

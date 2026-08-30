@@ -1,0 +1,7 @@
+export enum ProjectResourceType {
+  REPOSITORY = 'REPOSITORY',
+  DOCUMENTATION = 'DOCUMENTATION',
+  LOCAL_URL = 'LOCAL_URL',
+  EXTERNAL_URL = 'EXTERNAL_URL',
+  OTHER = 'OTHER',
+}

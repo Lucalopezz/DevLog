@@ -4,6 +4,8 @@ import { ProjectStatusEnum } from './project-status-enum';
 import { ProjectValidatorFactory } from '../validators/project.validator';
 import { ProjectTechnologyEntity } from './project-technology.entity';
 import { ProjectCommandEntity } from './project-command.entity';
+import { ProjectResourceEntity } from './project-resource.entity';
+import { ProjectResourceType } from './project-resource-type.enum';
 
 export type ProjectProps = {
   userId: string;
@@ -48,6 +50,19 @@ export class ProjectEntity extends Entity<ProjectProps> {
       command,
       description,
       executionOrder,
+    });
+  }
+
+  addResource(
+    label: string,
+    url: string,
+    type: ProjectResourceType,
+  ): ProjectResourceEntity {
+    return new ProjectResourceEntity({
+      projectId: this.id,
+      label,
+      url,
+      type,
     });
   }
 
