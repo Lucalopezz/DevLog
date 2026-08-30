@@ -39,6 +39,7 @@ import { SearchTechnicalEntryUseCase } from '@/technical-entry/application/useca
 import { TechnicalEntryCollectionPresenter } from '@/technical-entry/infrastructure/presenters/technical-entry.presenter';
 import { AddProjectTechnologyDto } from './dto/add-project-technology.dto';
 import { AddProjectTechnologyUseCase } from '../application/usecases/add-project-technology.usecase';
+import { RemoveProjectTechnologyUseCase } from '../application/usecases/remove-project-technology.usecase';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -72,6 +73,9 @@ export class ProjectController {
 
   @Inject(AddProjectTechnologyUseCase)
   private readonly addProjectTechnologyUseCase: AddProjectTechnologyUseCase;
+
+  @Inject(RemoveProjectTechnologyUseCase)
+  private readonly removeProjectTechnologyUseCase: RemoveProjectTechnologyUseCase;
 
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
@@ -218,5 +222,19 @@ export class ProjectController {
     });
 
     return ProjectController.projectToResponse(output);
+  }
+
+  @Delete(':id/technologies/:technologyId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeTechnology(
+    @Param('id') projectId: string,
+    @Param('technologyId') technologyId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    await this.removeProjectTechnologyUseCase.execute({
+      projectId,
+      technologyId,
+      userId: user.id,
+    });
   }
 }

@@ -21,6 +21,7 @@ import { ProjectRepository } from '@/project/domain/repositories/project.reposit
 import { AddProjectTechnologyUseCase } from '../application/usecases/add-project-technology.usecase';
 import { ProjectTechnologyRepository } from '../domain/repositories/project-technology.repository';
 import { ProjectTechnologyPrismaRepository } from './database/prisma/project-technology-prisma.repository';
+import { RemoveProjectTechnologyUseCase } from '../application/usecases/remove-project-technology.usecase';
 
 @Module({
   controllers: [ProjectController],
@@ -150,6 +151,19 @@ import { ProjectTechnologyPrismaRepository } from './database/prisma/project-tec
         projectTechnologyRepository: ProjectTechnologyRepository,
       ) => {
         return new AddProjectTechnologyUseCase(
+          projectRepository,
+          projectTechnologyRepository,
+        );
+      },
+      inject: ['ProjectRepository', 'ProjectTechnologyRepository'],
+    },
+    {
+      provide: RemoveProjectTechnologyUseCase,
+      useFactory: (
+        projectRepository: ProjectPrismaRepository,
+        projectTechnologyRepository: ProjectTechnologyRepository,
+      ) => {
+        return new RemoveProjectTechnologyUseCase(
           projectRepository,
           projectTechnologyRepository,
         );
