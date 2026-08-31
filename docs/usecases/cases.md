@@ -254,6 +254,10 @@ status
 
 Somente o proprietário pode alterar o projeto.
 
+O update é parcial: propriedades ausentes permanecem inalteradas. Para os
+campos opcionais `description` e `localPath`, o valor `null` remove o conteúdo
+existente. Uma requisição sem nenhum campo editável é inválida.
+
 ---
 
 ## GetProject
@@ -312,6 +316,13 @@ ARCHIVED
 ```
 
 Registros técnicos existentes continuam relacionados ao projeto.
+
+O arquivamento e a restauração são comandos explícitos e idempotentes:
+
+```text
+ArchiveProject -> preenche archivedAt
+RestoreProject -> remove archivedAt
+```
 
 ---
 
@@ -596,6 +607,11 @@ LEARNING
 sem tratamento explícito.
 
 Para o MVP, pode ser mais simples impedir a alteração do `type` após criação.
+
+Uma entrada com `resolvedAt` preenchido deve sempre manter uma conclusão não
+vazia. Por isso, o update comum não pode remover a conclusão de uma entrada
+resolvida; a transição de estado continua pertencendo a `ResolveTechnicalIssue`
+e `ReopenTechnicalIssue`.
 
 ---
 

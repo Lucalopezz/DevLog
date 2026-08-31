@@ -83,7 +83,7 @@ describe('ReopenTechnicalIssueUseCase', () => {
   });
 
   it('rejeita entradas LEARNING', async () => {
-    const entry = makeEntry({ type: TechnicalEntryType.LEARNING });
+    const entry = makeEntry({ type: TechnicalEntryType.LEARNING, open: true });
     const { repository } = makeRepository(entry);
     const useCase = new ReopenTechnicalIssueUseCase(repository);
 

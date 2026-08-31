@@ -30,4 +30,17 @@ describe('UpdateTechnicalEntryDto', () => {
 
     expect(properties).toEqual(expect.arrayContaining(['projectId', 'title']));
   });
+
+  it('rejeita null em campos não anuláveis', async () => {
+    const dto = plainToInstance(UpdateTechnicalEntryDto, {
+      title: null,
+      context: null,
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors.map((error) => error.property)).toEqual(
+      expect.arrayContaining(['title', 'context']),
+    );
+  });
 });

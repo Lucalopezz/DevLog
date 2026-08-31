@@ -1,4 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
 import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technical-entry.repository';
 import {
@@ -38,8 +41,20 @@ export class UpdateTechnicalEntryUseCase implements UseCaseContract<
       throw new NotFoundException('Entrada técnica não encontrada');
     }
 
+    if (
+      input.title === undefined &&
+      input.context === undefined &&
+      input.conclusion === undefined &&
+      input.projectId === undefined
+    ) {
+      throw new UnprocessableEntityException(
+        'Informe ao menos um campo para atualizar a entrada técnica',
+      );
+    }
+
     const shouldUpdateProject = input.projectId !== undefined;
-    // Valida o tipo, pois se nao for string e for nulo ele desvincula, undefined fica inalterado
+    // undefined preserva o projeto atual, null desvincula e string exige validar
+    // a existência, a propriedade e o arquivamento do novo projeto.
     if (shouldUpdateProject && typeof input.projectId === 'string') {
       const project = await this.projectRepository.findById(input.projectId);
 
@@ -52,15 +67,14 @@ export class UpdateTechnicalEntryUseCase implements UseCaseContract<
       }
     }
 
-    technicalEntry.update(input.title, input.context);
-
-    if (input.conclusion !== undefined) {
-      technicalEntry.changeConclusion(input.conclusion ?? null);
-    }
-
-    if (shouldUpdateProject) {
-      technicalEntry.changeProject(input.projectId ?? null);
-    }
+    technicalEntry.update({
+      ...(input.title !== undefined ? { title: input.title } : {}),
+      ...(input.context !== undefined ? { context: input.context } : {}),
+      ...(input.conclusion !== undefined
+        ? { conclusion: input.conclusion }
+        : {}),
+      ...(shouldUpdateProject ? { projectId: input.projectId } : {}),
+    });
 
     await this.technicalEntryRepository.update(technicalEntry);
 

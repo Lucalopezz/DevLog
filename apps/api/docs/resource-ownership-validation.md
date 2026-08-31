@@ -58,9 +58,8 @@ casos de uso devem consultar o recurso e conferir seu `userId`.
 Essa é a estratégia usada atualmente em:
 
 - `UpdateProjectUseCase`;
-- `UpdateProjectDescriptionUseCase`;
-- `UpdateProjectPathUseCase`;
-- `ToggleProjectArchiveUseCase`;
+- `ArchiveProjectUseCase`;
+- `RestoreProjectUseCase`;
 - `GetProjectUseCase`;
 - `DeleteProjectUseCase`;
 - `UpdateTechnicalEntryUseCase`;
@@ -108,4 +107,3 @@ autenticação).
 | Atualizar, consultar ou excluir | Buscar recurso e conferir `resource.userId` |
 | Listar | Filtrar por `userId` |
 | Invalidar usuário/token imediatamente | Validar usuário no fluxo de autenticação |
-

@@ -27,6 +27,13 @@ type TechnicalEntryInputProps = Omit<
 > &
   Partial<Pick<TechnicalEntryProps, 'createdAt' | 'updatedAt'>>;
 
+export type TechnicalEntryUpdateProps = {
+  title?: string;
+  context?: string;
+  conclusion?: string | null;
+  projectId?: string | null;
+};
+
 export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   constructor(props: TechnicalEntryInputProps, id?: string) {
     const createdAt = props.createdAt ?? new Date();
@@ -64,53 +71,52 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     });
   }
 
-  update(title?: string, context?: string): void {
+  update(props: TechnicalEntryUpdateProps): void {
+    // Object.values transforma as propriedades em uma lista; every garante que
+    // pelo menos um campo tenha sido enviado antes de alterar a entidade.
+    if (Object.values(props).every((value) => value === undefined)) {
+      throw new EntityValidationError({
+        update: ['Informe ao menos um campo para atualizar a entrada técnica'],
+      });
+    }
+
+    const now = new Date();
+    // Os spreads condicionais diferenciam campo ausente de campo nulo:
+    // ausente preserva o valor atual; null remove uma associação ou conclusão.
     const updatedProps = {
       ...this.props,
-      ...(title !== undefined && { title }),
-      ...(context !== undefined && { context }),
+      ...(props.title !== undefined ? { title: props.title } : {}),
+      ...(props.context !== undefined ? { context: props.context } : {}),
+      ...(props.conclusion !== undefined
+        ? { conclusion: props.conclusion ?? undefined }
+        : {}),
+      ...(props.projectId !== undefined
+        ? { projectId: props.projectId ?? undefined }
+        : {}),
+      updatedAt: now,
     };
 
     TechnicalEntryEntity.validate(updatedProps);
 
-    if (title !== undefined) {
-      this.title = title;
+    if (props.title !== undefined) {
+      this.title = props.title;
     }
-    if (context !== undefined) {
-      this.context = context;
+    if (props.context !== undefined) {
+      this.context = props.context;
     }
-    if (title !== undefined || context !== undefined) {
-      this.updateUpdatedAt();
+    if (props.conclusion !== undefined) {
+      this.conclusion = props.conclusion ?? undefined;
     }
-  }
-
-  changeConclusion(conclusion: string | null): void {
-    const updatedConclusion = conclusion ?? undefined;
-
-    TechnicalEntryEntity.validate({
-      ...this.props,
-      conclusion: updatedConclusion,
-    });
-
-    this.props.conclusion = updatedConclusion;
-    this.updateUpdatedAt();
-  }
-
-  changeProject(projectId: string | null): void {
-    const updatedProjectId = projectId ?? undefined;
-
-    TechnicalEntryEntity.validate({
-      ...this.props,
-      projectId: updatedProjectId,
-    });
-
-    this.props.projectId = updatedProjectId;
-    this.updateUpdatedAt();
+    if (props.projectId !== undefined) {
+      this.projectId = props.projectId ?? undefined;
+    }
+    this.updatedAt = now;
   }
 
   linkProject(projectId: string): void {
-    this.changeProject(projectId);
+    this.update({ projectId });
   }
+
   conclude(conclusion: string): void {
     if (this.type !== TechnicalEntryType.ISSUE) {
       throw new EntityValidationError({
@@ -118,17 +124,25 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
       });
     }
 
-    TechnicalEntryEntity.validate({ ...this.props, conclusion });
-
-    if (!conclusion?.trim()) {
+    if (this.resolvedAt !== undefined) {
       throw new EntityValidationError({
-        conclusion: ['A conclusão é obrigatória para concluir uma entrada'],
+        resolvedAt: ['Somente entradas abertas podem ser concluídas'],
       });
     }
 
+    const now = new Date();
+    const updatedProps = {
+      ...this.props,
+      conclusion,
+      resolvedAt: now,
+      updatedAt: now,
+    };
+
+    TechnicalEntryEntity.validate(updatedProps);
+
     this.conclusion = conclusion;
-    this.resolvedAt = new Date();
-    this.updateUpdatedAt();
+    this.resolvedAt = now;
+    this.updatedAt = now;
   }
 
   reopen(): void {
@@ -144,9 +158,18 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
       });
     }
 
+    const now = new Date();
+    const updatedProps = {
+      ...this.props,
+      resolvedAt: undefined,
+      updatedAt: now,
+    };
+
+    TechnicalEntryEntity.validate(updatedProps);
+
     // A conclusão e as tentativas fazem parte do histórico e são preservadas.
-    this.props.resolvedAt = undefined;
-    this.updateUpdatedAt();
+    this.resolvedAt = undefined;
+    this.updatedAt = now;
   }
 
   archive(): void {
@@ -211,16 +234,24 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     this.props.context = context;
   }
 
-  private set conclusion(conclusion: string) {
+  private set conclusion(conclusion: string | undefined) {
     this.props.conclusion = conclusion;
   }
 
-  private set resolvedAt(resolvedAt: Date) {
+  private set projectId(projectId: string | undefined) {
+    this.props.projectId = projectId;
+  }
+
+  private set resolvedAt(resolvedAt: Date | undefined) {
     this.props.resolvedAt = resolvedAt;
   }
 
   private set archivedAt(archivedAt: Date) {
     this.props.archivedAt = archivedAt;
+  }
+
+  private set updatedAt(updatedAt: Date) {
+    this.props.updatedAt = updatedAt;
   }
 
   private updateUpdatedAt(): void {
@@ -233,6 +264,25 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
 
     if (!isValid) {
       throw new EntityValidationError(technicalEntryValidator.errors ?? {});
+    }
+
+    // Essa regra cruzada não cabe em um validador de campo isolado: somente ISSUE
+    // participa do ciclo OPEN/RESOLVED.
+    if (
+      props.type !== TechnicalEntryType.ISSUE &&
+      props.resolvedAt !== undefined
+    ) {
+      throw new EntityValidationError({
+        resolvedAt: ['Somente entradas do tipo ISSUE podem ser resolvidas'],
+      });
+    }
+
+    // resolvedAt e conclusion formam uma invariável: uma entrada resolvida nunca
+    // pode existir sem uma conclusão textual.
+    if (props.resolvedAt !== undefined && !props.conclusion?.trim()) {
+      throw new EntityValidationError({
+        conclusion: ['Uma entrada resolvida deve possuir uma conclusão'],
+      });
     }
   }
 }

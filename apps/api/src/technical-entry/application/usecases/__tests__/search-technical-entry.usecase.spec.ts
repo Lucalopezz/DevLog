@@ -110,7 +110,7 @@ describe('SearchTechnicalEntryUseCase', () => {
       useCase.execute({ userId: USER_ID, projectId: PROJECT_ID }),
     ).rejects.toBeInstanceOf(NotFoundException);
 
-    expect(repository.search).not.toHaveBeenCalled();
+    expect(repository.search.mock.calls).toHaveLength(0);
   });
 
   it('converte o resultado do repositório em uma saída paginada', async () => {

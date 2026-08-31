@@ -83,7 +83,7 @@ describe('CreateTechnicalEntryUseCase', () => {
       type: TechnicalEntryType.ISSUE,
     });
 
-    expect(projectRepository.findById).not.toHaveBeenCalled();
+    expect(projectRepository.findById.mock.calls).toHaveLength(0);
   });
 
   it('rejeita projeto de outro usuário', async () => {

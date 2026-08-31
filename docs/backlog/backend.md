@@ -145,13 +145,14 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 ### UpdateTechnicalEntry
 
 - [x] Criar o caso de uso `UpdateTechnicalEntry`.
-- [x] Permitir alterar `title`, `context` e `conclusion`, inclusive remover a conclusão.
+- [x] Permitir alterar `title`, `context` e `conclusion`; a conclusão só pode ser removida enquanto a entrada não estiver resolvida.
 - [x] Impedir alteração de `type` pela API depois da criação, omitindo o campo do DTO e do input do caso de uso.
 - [x] Permitir alterar ou remover o projeto somente depois de validar sua propriedade e seu estado não arquivado.
 - [ ] Permitir substituir ou remover tags pelo próprio `UpdateTechnicalEntry`; atualmente essa responsabilidade pertence aos casos de uso específicos de associação e remoção.
 - [x] Validar que o novo projeto pertença ao usuário e não esteja arquivado.
 - [x] Validar a propriedade das tags nos casos de uso de associação e remoção; `UpdateTechnicalEntry` não recebe tags diretamente.
 - [x] Criar o endpoint autenticado `PATCH /api/technical-entry/:id`.
+- [x] Rejeitar atualizações sem nenhum campo editável.
 - [x] Testar atualização de conteúdo, remoção de conclusão/projeto e isolamento entre usuários em teste unitário.
 - [ ] Testar entrada inexistente, projeto/tags de outro usuário, validação do DTO e tentativa de troca de tipo pela API.
 
@@ -234,12 +235,13 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 ### UpdateProject
 
 - [x] Criar o caso de uso `UpdateProject`.
-- [x] Permitir atualizar nome e status pelo caso de uso principal.
-- [x] Permitir atualizar ou remover descrição e caminho local pelos casos de uso específicos.
+- [x] Centralizar nome, descrição, status e caminho local no caso de uso principal.
+- [x] Usar campos opcionais para atualização parcial e `null` para remover descrição ou caminho local.
+- [x] Rejeitar atualizações sem nenhum campo editável.
 - [x] Garantir que somente o proprietário possa alterar o projeto.
 - [x] Criar o endpoint de atualização.
 - [x] Testar atualização válida, descrição/caminho e tentativa de alteração por outro usuário.
-- [ ] Testar validações de entrada do DTO.
+- [x] Testar validações de entrada do DTO.
 
 ## 6. Relação projeto × entrada técnica
 
@@ -349,14 +351,14 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ## 9. Arquivamento
 
-### ArchiveProject — implementação atual: `ToggleProjectArchive`
+### ArchiveProject e RestoreProject
 
-- [x] Criar o caso de uso de arquivamento/restauração, implementado como `ToggleProjectArchive`.
+- [x] Criar casos de uso explícitos e idempotentes para arquivamento e restauração.
 - [x] Alterar o projeto para arquivado sem exclusão física, preenchendo `archivedAt`.
 - [ ] Definir a relação entre `archivedAt` e `ProjectStatus` (`ACTIVE`, `INACTIVE` ou `FINISHED`).
 - [ ] Impedir operações incompatíveis com projeto arquivado conforme as regras do domínio.
 - [ ] Preservar tecnologias, comandos e recursos relacionados; a preservação das entradas técnicas já está coberta na relação projeto × entrada.
-- [x] Criar o endpoint autenticado `PATCH /api/project/:id/archive`.
+- [x] Criar os endpoints autenticados `PATCH /api/project/:id/archive` e `PATCH /api/project/:id/restore`.
 - [x] Testar arquivamento, restauração e autorização no caso de uso.
 - [ ] Testar a preservação dos relacionamentos por HTTP.
 

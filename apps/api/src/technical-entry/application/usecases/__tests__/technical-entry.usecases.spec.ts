@@ -1,4 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { SearchResult } from '@/shared/domain/repositories/searchable.repository';
 import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry.entity';
 import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry-type.enum';
@@ -186,6 +189,20 @@ describe('Casos de uso de entrada técnica', () => {
 
       expect(output.conclusion).toBeUndefined();
       expect(output.projectId).toBeUndefined();
+    });
+
+    it('rejeita atualização sem campos', async () => {
+      const repository = new InMemoryTechnicalEntryRepository();
+      const entry = makeEntry();
+      repository.entries.push(entry);
+      const useCase = new UpdateTechnicalEntryUseCase(
+        repository,
+        makeProjectRepository(),
+      );
+
+      await expect(
+        useCase.execute({ id: entry.id, userId: USER_ID }),
+      ).rejects.toBeInstanceOf(UnprocessableEntityException);
     });
 
     it('não atualiza uma entrada de outro usuário', async () => {

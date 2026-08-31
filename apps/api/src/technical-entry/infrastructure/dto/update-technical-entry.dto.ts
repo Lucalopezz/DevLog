@@ -5,13 +5,16 @@ import {
   IsUUID,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class UpdateTechnicalEntryDto implements Omit<
   UpdateTechnicalEntryUseCaseInput,
   'id' | 'userId'
 > {
-  @IsOptional()
+  // ValidateIf diferencia ausência de null: o campo pode ser omitido, mas null
+  // não é aceito onde o contrato exige uma string.
+  @ValidateIf((_, value) => value !== undefined)
   @IsString({ message: 'Parametro inválido' })
   @MinLength(3, { message: 'O título deve ter no mínimo 3 caracteres' })
   @MaxLength(200, {
@@ -19,7 +22,7 @@ export class UpdateTechnicalEntryDto implements Omit<
   })
   title?: string;
 
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsString({ message: 'Parametro inválido' })
   @MinLength(3, { message: 'O contexto deve ter no mínimo 3 caracteres' })
   context?: string;

@@ -47,17 +47,16 @@ describe('SolutionAttemptEntity', () => {
     );
   });
 
-  it('atualiza a descrição e o resultado', () => {
+  it('atualiza a descrição e preserva o resultado', () => {
     jest.useFakeTimers();
     const updatedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(updatedAt);
     const attempt = new SolutionAttemptEntity(makeProps());
 
     attempt.updateDescription('Corrigir o cabeçalho da requisição');
-    attempt.updateResult(SolutionAttemptResult.SUCCESSFUL);
 
     expect(attempt.description).toBe('Corrigir o cabeçalho da requisição');
-    expect(attempt.result).toBe(SolutionAttemptResult.SUCCESSFUL);
+    expect(attempt.result).toBe(SolutionAttemptResult.PARTIAL);
     expect(attempt.updatedAt).toEqual(updatedAt);
   });
 
@@ -68,16 +67,6 @@ describe('SolutionAttemptEntity', () => {
     expect(attempt.description).toBe(
       'Adicionar credentials: include na requisição',
     );
-    expect(attempt.updatedAt).toEqual(new Date('2026-08-01T00:00:00.000Z'));
-  });
-
-  it('não altera o resultado quando a atualização é inválida', () => {
-    const attempt = new SolutionAttemptEntity(makeProps());
-
-    expect(() =>
-      attempt.updateResult('UNKNOWN' as SolutionAttemptResult),
-    ).toThrow(EntityValidationError);
-    expect(attempt.result).toBe(SolutionAttemptResult.PARTIAL);
     expect(attempt.updatedAt).toEqual(new Date('2026-08-01T00:00:00.000Z'));
   });
 });

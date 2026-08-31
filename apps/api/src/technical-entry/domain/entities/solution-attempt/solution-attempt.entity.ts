@@ -42,18 +42,6 @@ export class SolutionAttemptEntity extends Entity<SolutionAttemptProps> {
     this.updatedAt = updatedProps.updatedAt;
   }
 
-  updateResult(result: SolutionAttemptResult) {
-    const updatedProps = {
-      ...this.props,
-      result,
-      updatedAt: new Date(),
-    };
-
-    SolutionAttemptEntity.validate(updatedProps);
-    this.result = result;
-    this.updatedAt = updatedProps.updatedAt;
-  }
-
   get technicalEntryId(): string {
     return this.props.technicalEntryId;
   }
@@ -76,10 +64,6 @@ export class SolutionAttemptEntity extends Entity<SolutionAttemptProps> {
 
   private set description(value: string) {
     this.props.description = value;
-  }
-
-  private set result(value: SolutionAttemptResult) {
-    this.props.result = value;
   }
 
   private set updatedAt(value: Date) {

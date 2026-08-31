@@ -74,7 +74,10 @@ describe('TechnicalEntryEntity', () => {
       makeProps({ resolvedAt, archivedAt, conclusion: 'Resolvido' }),
     );
 
-    entry.update('Título atualizado', 'Contexto atualizado');
+    entry.update({
+      title: 'Título atualizado',
+      context: 'Contexto atualizado',
+    });
 
     expect(entry.type).toBe(TechnicalEntryType.ISSUE);
     expect(entry.resolvedAt).toEqual(resolvedAt);
@@ -96,7 +99,9 @@ describe('TechnicalEntryEntity', () => {
   it('rejeita título acima do limite durante a atualização', () => {
     const entry = new TechnicalEntryEntity(makeProps());
 
-    expect(() => entry.update('a'.repeat(201))).toThrow(EntityValidationError);
+    expect(() => entry.update({ title: 'a'.repeat(201) })).toThrow(
+      EntityValidationError,
+    );
     expect(entry.title).toBe('Falha ao iniciar a API');
   });
 
@@ -113,5 +118,36 @@ describe('TechnicalEntryEntity', () => {
 
     expect(() => entry.linkProject('project-1')).toThrow(EntityValidationError);
     expect(entry.projectId).toBeUndefined();
+  });
+
+  it('não permite remover a conclusão de uma entrada resolvida', () => {
+    const entry = new TechnicalEntryEntity(
+      makeProps({
+        conclusion: 'A porta foi liberada',
+        resolvedAt: new Date('2026-08-02T12:00:00.000Z'),
+      }),
+    );
+
+    expect(() => entry.update({ conclusion: null })).toThrow(
+      EntityValidationError,
+    );
+    expect(entry.conclusion).toBe('A porta foi liberada');
+  });
+
+  it('rejeita estado resolvido sem conclusão durante a criação', () => {
+    expect(
+      () =>
+        new TechnicalEntryEntity(
+          makeProps({ resolvedAt: new Date('2026-08-02T12:00:00.000Z') }),
+        ),
+    ).toThrow(EntityValidationError);
+  });
+
+  it('rejeita atualização sem campos e preserva updatedAt', () => {
+    const entry = new TechnicalEntryEntity(makeProps());
+    const originalUpdatedAt = entry.updatedAt;
+
+    expect(() => entry.update({})).toThrow(EntityValidationError);
+    expect(entry.updatedAt).toEqual(originalUpdatedAt);
   });
 });
