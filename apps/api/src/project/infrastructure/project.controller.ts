@@ -51,6 +51,20 @@ import { SearchProjectCommandUseCase } from '../application/usecases/search-proj
 import { GetProjectCommandUseCase } from '../application/usecases/get-project-command.usecase';
 import type { ProjectCommandOutput } from '../application/dto/project-command.dto';
 import type { SearchProjectCommandUseCaseOutput } from '../application/usecases/search-project-command.usecase';
+import { AddProjectResourceDto } from './dto/add-project-resource.dto';
+import { UpdateProjectResourceDto } from './dto/update-project-resource.dto';
+import { SearchProjectResourceDto } from './dto/search-project-resource.dto';
+import { AddProjectResourceUseCase } from '../application/usecases/add-project-resource.usecase';
+import { UpdateProjectResourceUseCase } from '../application/usecases/update-project-resource.usecase';
+import { RemoveProjectResourceUseCase } from '../application/usecases/remove-project-resource.usecase';
+import { SearchProjectResourceUseCase } from '../application/usecases/search-project-resource.usecase';
+import { GetProjectResourceUseCase } from '../application/usecases/get-project-resource.usecase';
+import type { ProjectResourceOutput } from '../application/dto/project-resource.dto';
+import type { SearchProjectResourceUseCaseOutput } from '../application/usecases/search-project-resource.usecase';
+import {
+  ProjectResourceCollectionPresenter,
+  ProjectResourcePresenter,
+} from './presenter/project-resource.presenter';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -100,6 +114,21 @@ export class ProjectController {
   @Inject(GetProjectCommandUseCase)
   private readonly getProjectCommandUseCase: GetProjectCommandUseCase;
 
+  @Inject(AddProjectResourceUseCase)
+  private readonly addProjectResourceUseCase: AddProjectResourceUseCase;
+
+  @Inject(UpdateProjectResourceUseCase)
+  private readonly updateProjectResourceUseCase: UpdateProjectResourceUseCase;
+
+  @Inject(RemoveProjectResourceUseCase)
+  private readonly removeProjectResourceUseCase: RemoveProjectResourceUseCase;
+
+  @Inject(SearchProjectResourceUseCase)
+  private readonly searchProjectResourceUseCase: SearchProjectResourceUseCase;
+
+  @Inject(GetProjectResourceUseCase)
+  private readonly getProjectResourceUseCase: GetProjectResourceUseCase;
+
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
   }
@@ -114,6 +143,14 @@ export class ProjectController {
 
   static listCommandsToResponse(output: SearchProjectCommandUseCaseOutput) {
     return new ProjectCommandCollectionPresenter(output);
+  }
+
+  static resourceToResponse(output: ProjectResourceOutput) {
+    return new ProjectResourcePresenter(output);
+  }
+
+  static listResourcesToResponse(output: SearchProjectResourceUseCaseOutput) {
+    return new ProjectResourceCollectionPresenter(output);
   }
 
   @Post()
@@ -185,6 +222,36 @@ export class ProjectController {
     });
 
     return ProjectController.commandToResponse(output);
+  }
+
+  @Get(':projectId/resources')
+  async searchResources(
+    @Param('projectId') projectId: string,
+    @Query() searchParams: SearchProjectResourceDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.searchProjectResourceUseCase.execute({
+      ...searchParams,
+      projectId,
+      userId: user.id,
+    });
+
+    return ProjectController.listResourcesToResponse(output);
+  }
+
+  @Get(':projectId/resources/:resourceId')
+  async findResource(
+    @Param('projectId') projectId: string,
+    @Param('resourceId') resourceId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.getProjectResourceUseCase.execute({
+      projectId,
+      resourceId,
+      userId: user.id,
+    });
+
+    return ProjectController.resourceToResponse(output);
   }
 
   @Get(':id')
@@ -324,6 +391,52 @@ export class ProjectController {
     await this.removeProjectCommandUseCase.execute({
       projectId,
       commandId,
+      userId: user.id,
+    });
+  }
+
+  @Post(':projectId/resources')
+  async addResource(
+    @Param('projectId') projectId: string,
+    @Body() addProjectResourceDto: AddProjectResourceDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.addProjectResourceUseCase.execute({
+      ...addProjectResourceDto,
+      projectId,
+      userId: user.id,
+    });
+
+    return ProjectController.resourceToResponse(output);
+  }
+
+  @Patch(':projectId/resources/:resourceId')
+  async updateResource(
+    @Param('projectId') projectId: string,
+    @Param('resourceId') resourceId: string,
+    @Body() updateProjectResourceDto: UpdateProjectResourceDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.updateProjectResourceUseCase.execute({
+      ...updateProjectResourceDto,
+      projectId,
+      resourceId,
+      userId: user.id,
+    });
+
+    return ProjectController.resourceToResponse(output);
+  }
+
+  @Delete(':projectId/resources/:resourceId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeResource(
+    @Param('projectId') projectId: string,
+    @Param('resourceId') resourceId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    await this.removeProjectResourceUseCase.execute({
+      projectId,
+      resourceId,
       userId: user.id,
     });
   }

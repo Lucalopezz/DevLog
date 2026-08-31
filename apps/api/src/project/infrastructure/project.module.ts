@@ -28,6 +28,13 @@ import { UpdateProjectCommandUseCase } from '../application/usecases/update-proj
 import { RemoveProjectCommandUseCase } from '../application/usecases/remove-project-command.usecase';
 import { SearchProjectCommandUseCase } from '../application/usecases/search-project-command.usecase';
 import { GetProjectCommandUseCase } from '../application/usecases/get-project-command.usecase';
+import { ProjectResourceRepository } from '../domain/repositories/project-resource.repository';
+import { ProjectResourcePrismaRepository } from './database/prisma/project-resource-prisma.repository';
+import { AddProjectResourceUseCase } from '../application/usecases/add-project-resource.usecase';
+import { UpdateProjectResourceUseCase } from '../application/usecases/update-project-resource.usecase';
+import { RemoveProjectResourceUseCase } from '../application/usecases/remove-project-resource.usecase';
+import { SearchProjectResourceUseCase } from '../application/usecases/search-project-resource.usecase';
+import { GetProjectResourceUseCase } from '../application/usecases/get-project-resource.usecase';
 
 @Module({
   controllers: [ProjectController],
@@ -76,6 +83,13 @@ import { GetProjectCommandUseCase } from '../application/usecases/get-project-co
       provide: 'ProjectCommandRepository',
       useFactory: (prismaService: PrismaService) => {
         return new ProjectCommandPrismaRepository(prismaService);
+      },
+      inject: ['PrismaService'],
+    },
+    {
+      provide: 'ProjectResourceRepository',
+      useFactory: (prismaService: PrismaService) => {
+        return new ProjectResourcePrismaRepository(prismaService);
       },
       inject: ['PrismaService'],
     },
@@ -240,6 +254,71 @@ import { GetProjectCommandUseCase } from '../application/usecases/get-project-co
         );
       },
       inject: ['ProjectRepository', 'ProjectCommandRepository'],
+    },
+    {
+      provide: AddProjectResourceUseCase,
+      useFactory: (
+        projectRepository: ProjectRepository,
+        projectResourceRepository: ProjectResourceRepository,
+      ) => {
+        return new AddProjectResourceUseCase(
+          projectRepository,
+          projectResourceRepository,
+        );
+      },
+      inject: ['ProjectRepository', 'ProjectResourceRepository'],
+    },
+    {
+      provide: UpdateProjectResourceUseCase,
+      useFactory: (
+        projectRepository: ProjectRepository,
+        projectResourceRepository: ProjectResourceRepository,
+      ) => {
+        return new UpdateProjectResourceUseCase(
+          projectRepository,
+          projectResourceRepository,
+        );
+      },
+      inject: ['ProjectRepository', 'ProjectResourceRepository'],
+    },
+    {
+      provide: RemoveProjectResourceUseCase,
+      useFactory: (
+        projectRepository: ProjectRepository,
+        projectResourceRepository: ProjectResourceRepository,
+      ) => {
+        return new RemoveProjectResourceUseCase(
+          projectRepository,
+          projectResourceRepository,
+        );
+      },
+      inject: ['ProjectRepository', 'ProjectResourceRepository'],
+    },
+    {
+      provide: SearchProjectResourceUseCase,
+      useFactory: (
+        projectRepository: ProjectRepository,
+        projectResourceRepository: ProjectResourceRepository,
+      ) => {
+        return new SearchProjectResourceUseCase(
+          projectRepository,
+          projectResourceRepository,
+        );
+      },
+      inject: ['ProjectRepository', 'ProjectResourceRepository'],
+    },
+    {
+      provide: GetProjectResourceUseCase,
+      useFactory: (
+        projectRepository: ProjectRepository,
+        projectResourceRepository: ProjectResourceRepository,
+      ) => {
+        return new GetProjectResourceUseCase(
+          projectRepository,
+          projectResourceRepository,
+        );
+      },
+      inject: ['ProjectRepository', 'ProjectResourceRepository'],
     },
   ],
   exports: ['ProjectRepository'],

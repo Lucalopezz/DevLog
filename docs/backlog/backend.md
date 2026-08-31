@@ -339,15 +339,17 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 ### Project Resources
 
-- [ ] Criar a entidade de recurso do projeto.
-- [ ] Criar o caso de uso `AddProjectResource`.
-- [ ] Validar `projectId`, `label`, `url` e `type?`.
-- [ ] Validar a URL do recurso.
-- [ ] Criar o caso de uso `UpdateProjectResource`.
-- [ ] Criar o caso de uso `RemoveProjectResource`.
-- [ ] Garantir propriedade do projeto em todas as operações.
-- [ ] Criar os endpoints de adicionar, atualizar e remover recurso.
-- [ ] Testar ciclo completo, URL inválida e autorização.
+- [x] Criar a entidade de recurso do projeto.
+- [x] Criar o caso de uso `AddProjectResource`.
+- [x] Criar o caso de uso `SearchProjectResource`.
+- [x] Criar o caso de uso `GetProjectResource`.
+- [x] Validar `projectId`, `label`, `url` e `type?`.
+- [x] Validar a URL do recurso.
+- [x] Criar o caso de uso `UpdateProjectResource`.
+- [x] Criar o caso de uso `RemoveProjectResource`.
+- [x] Garantir propriedade do projeto em todas as operações.
+- [x] Criar os endpoints de adicionar, listar, consultar, atualizar e remover recurso.
+- [x] Testar ciclo completo, URL inválida e autorização.
 
 ## 9. Arquivamento
 
