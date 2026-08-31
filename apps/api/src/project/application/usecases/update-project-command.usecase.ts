@@ -1,4 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
 import { ProjectCommandRepository } from '@/project/domain/repositories/project-command.repository';
 import { ProjectRepository } from '@/project/domain/repositories/project.repository';
@@ -13,8 +16,8 @@ export type UpdateProjectCommandUseCaseInput = {
   projectId: string;
   title?: string;
   command?: string;
-  description?: string;
-  executionOrder?: number;
+  description?: string | null;
+  executionOrder?: number | null;
 };
 
 export type UpdateProjectCommandUseCaseOutput = ProjectCommandOutput;
@@ -44,6 +47,17 @@ export class UpdateProjectCommandUseCase implements UseCaseContract<
     );
     if (!entity || entity.projectId !== projectId) {
       throw new NotFoundException('Comando do projeto não encontrado');
+    }
+
+    if (
+      title === undefined &&
+      command === undefined &&
+      description === undefined &&
+      executionOrder === undefined
+    ) {
+      throw new UnprocessableEntityException(
+        'Informe ao menos um campo para atualizar o comando',
+      );
     }
 
     entity.update({

@@ -70,4 +70,21 @@ describe('ProjectCommandEntity', () => {
     expect(command.description).toBe('Encerra os serviços do projeto');
     expect(command.executionOrder).toBe(1);
   });
+
+  it('remove descrição e ordem com null', () => {
+    const command = new ProjectCommandEntity(makeProps());
+
+    command.update({ description: null, executionOrder: null });
+
+    expect(command.description).toBeUndefined();
+    expect(command.executionOrder).toBeUndefined();
+  });
+
+  it('rejeita atualização sem campos e preserva updatedAt', () => {
+    const command = new ProjectCommandEntity(makeProps());
+    const originalUpdatedAt = command.updatedAt;
+
+    expect(() => command.update({})).toThrow(EntityValidationError);
+    expect(command.updatedAt).toEqual(originalUpdatedAt);
+  });
 });

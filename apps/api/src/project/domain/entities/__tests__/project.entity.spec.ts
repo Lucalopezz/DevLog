@@ -3,6 +3,7 @@ import { ProjectStatusEnum } from '../project-status-enum';
 import { ProjectCommandEntity } from '../project-command.entity';
 import { ProjectResourceEntity } from '../project-resource.entity';
 import { ProjectResourceType } from '../project-resource-type.enum';
+import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 
@@ -25,23 +26,24 @@ describe('ProjectEntity', () => {
     jest.useRealTimers();
   });
 
-  it('atualiza e limpa o caminho local pelo mesmo método', () => {
+  it('atualiza e limpa campos opcionais pelo mesmo método', () => {
     const project = new ProjectEntity(makeProps());
 
-    project.updatePath('/workspace/devlog');
+    project.update({ localPath: '/workspace/devlog' });
     expect(project.localPath).toBe('/workspace/devlog');
 
-    project.updatePath();
+    project.update({ description: null, localPath: null });
+    expect(project.description).toBeUndefined();
     expect(project.localPath).toBeUndefined();
   });
 
-  it('arquiva e restaura o projeto mantendo status e data sincronizados', () => {
+  it('arquiva e restaura o projeto explicitamente', () => {
     jest.useFakeTimers();
     const archivedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(archivedAt);
     const project = new ProjectEntity(makeProps());
 
-    project.toggleArchive();
+    project.archive();
 
     expect(project.status).toBe(ProjectStatusEnum.ACTIVE);
     expect(project.archivedAt).toEqual(archivedAt);
@@ -49,7 +51,7 @@ describe('ProjectEntity', () => {
 
     const restoredAt = new Date('2026-08-03T12:00:00.000Z');
     jest.setSystemTime(restoredAt);
-    project.toggleArchive();
+    project.restore();
 
     expect(project.status).toBe(ProjectStatusEnum.ACTIVE);
     expect(project.archivedAt).toBeUndefined();
@@ -71,7 +73,7 @@ describe('ProjectEntity', () => {
     expect(project.status).toBe(ProjectStatusEnum.FINISHED);
     expect(project.localPath).toBe('/workspace/devlog');
 
-    project.toggleArchive();
+    project.archive();
     project.update({ status: ProjectStatusEnum.ACTIVE });
 
     expect(project.archivedAt).toBeDefined();
@@ -81,13 +83,46 @@ describe('ProjectEntity', () => {
   it('permite remover a descrição durante a atualização', () => {
     const project = new ProjectEntity(makeProps());
 
-    project.updateDescription();
+    project.update({ description: null });
 
     expect(project.description).toBeUndefined();
 
     project.update({ description: 'Descrição restaurada' });
 
     expect(project.description).toBe('Descrição restaurada');
+  });
+
+  it('mantém archive e restore idempotentes', () => {
+    jest.useFakeTimers();
+    const archivedAt = new Date('2026-08-02T12:00:00.000Z');
+    jest.setSystemTime(archivedAt);
+    const project = new ProjectEntity(makeProps());
+
+    project.archive();
+    const firstUpdatedAt = project.updatedAt;
+
+    jest.setSystemTime(new Date('2026-08-03T12:00:00.000Z'));
+    project.archive();
+
+    expect(project.archivedAt).toEqual(archivedAt);
+    expect(project.updatedAt).toEqual(firstUpdatedAt);
+
+    project.restore();
+    const restoredAt = project.updatedAt;
+
+    jest.setSystemTime(new Date('2026-08-04T12:00:00.000Z'));
+    project.restore();
+
+    expect(project.archivedAt).toBeUndefined();
+    expect(project.updatedAt).toEqual(restoredAt);
+  });
+
+  it('rejeita atualização sem campos e preserva updatedAt', () => {
+    const project = new ProjectEntity(makeProps());
+    const originalUpdatedAt = project.updatedAt;
+
+    expect(() => project.update({})).toThrow(EntityValidationError);
+    expect(project.updatedAt).toEqual(originalUpdatedAt);
   });
 
   it('cria um comando vinculado ao próprio projeto', () => {

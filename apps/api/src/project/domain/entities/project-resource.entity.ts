@@ -38,6 +38,14 @@ export class ProjectResourceEntity extends Entity<ProjectResourceProps> {
   }
 
   update(props: ProjectResourceUpdateProps): void {
+    // Object.values + every detecta quando nenhum campo foi informado e impede
+    // que uma atualização vazia avance apenas para modificar updatedAt.
+    if (Object.values(props).every((value) => value === undefined)) {
+      throw new EntityValidationError({
+        update: ['Informe ao menos um campo para atualizar o recurso'],
+      });
+    }
+
     const updatedProps = {
       ...this.props,
       ...props,

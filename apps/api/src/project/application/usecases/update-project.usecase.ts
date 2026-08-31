@@ -1,4 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
 import { ProjectRepository } from '@/project/domain/repositories/project.repository';
 import { ProjectStatusEnum } from '@/project/domain/entities/project-status-enum';
@@ -8,7 +11,9 @@ export type UpdateProjectUseCaseInput = {
   id: string;
   userId: string;
   name?: string;
+  description?: string | null;
   status?: ProjectStatusEnum;
+  localPath?: string | null;
 };
 
 export type UpdateProjectUseCaseOutput = ProjectOutput;
@@ -28,9 +33,24 @@ export class UpdateProjectUseCase implements UseCaseContract<
       throw new NotFoundException('Projeto não encontrado');
     }
 
+    if (
+      input.name === undefined &&
+      input.description === undefined &&
+      input.status === undefined &&
+      input.localPath === undefined
+    ) {
+      throw new UnprocessableEntityException(
+        'Informe ao menos um campo para atualizar o projeto',
+      );
+    }
+
     project.update({
       ...(input.name !== undefined ? { name: input.name } : {}),
+      ...(input.description !== undefined
+        ? { description: input.description }
+        : {}),
       ...(input.status !== undefined ? { status: input.status } : {}),
+      ...(input.localPath !== undefined ? { localPath: input.localPath } : {}),
     });
 
     await this.projectRepository.update(project);

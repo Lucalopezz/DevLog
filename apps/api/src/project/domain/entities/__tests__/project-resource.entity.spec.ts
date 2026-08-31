@@ -92,4 +92,12 @@ describe('ProjectResourceEntity', () => {
     expect(resource.url).toBe('https://github.com/example/devlog');
     expect(resource.updatedAt).toBe(originalUpdatedAt);
   });
+
+  it('rejeita atualização sem campos e preserva updatedAt', () => {
+    const resource = new ProjectResourceEntity(makeProps());
+    const originalUpdatedAt = resource.updatedAt;
+
+    expect(() => resource.update({})).toThrow(EntityValidationError);
+    expect(resource.updatedAt).toEqual(originalUpdatedAt);
+  });
 });

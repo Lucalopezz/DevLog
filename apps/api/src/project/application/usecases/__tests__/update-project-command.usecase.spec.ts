@@ -1,4 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ProjectCommandEntity } from '@/project/domain/entities/project-command.entity';
 import { ProjectCommandRepository } from '@/project/domain/repositories/project-command.repository';
 import { ProjectEntity } from '@/project/domain/entities/project.entity';
@@ -100,6 +103,36 @@ describe('UpdateProjectCommandUseCase', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
 
     expect(projectCommandRepository.findById.mock.calls).toHaveLength(0);
+    expect(projectCommandRepository.update.mock.calls).toHaveLength(0);
+  });
+
+  it('remove descrição e ordem quando recebe null', async () => {
+    const command = makeCommand();
+    const { useCase } = makeUseCase(makeProject(), command);
+
+    const output = await useCase.execute({
+      userId: USER_ID,
+      projectId: PROJECT_ID,
+      commandId: COMMAND_ID,
+      description: null,
+      executionOrder: null,
+    });
+
+    expect(output.description).toBeUndefined();
+    expect(output.executionOrder).toBeUndefined();
+  });
+
+  it('rejeita atualização sem campos', async () => {
+    const { useCase, projectCommandRepository } = makeUseCase();
+
+    await expect(
+      useCase.execute({
+        userId: USER_ID,
+        projectId: PROJECT_ID,
+        commandId: COMMAND_ID,
+      }),
+    ).rejects.toBeInstanceOf(UnprocessableEntityException);
+
     expect(projectCommandRepository.update.mock.calls).toHaveLength(0);
   });
 

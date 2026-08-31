@@ -1,4 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ProjectEntity } from '@/project/domain/entities/project.entity';
 import { ProjectStatusEnum } from '@/project/domain/entities/project-status-enum';
 import {
@@ -9,9 +12,8 @@ import { DeleteProjectUseCase } from '../delete-project.usecase';
 import { GetProjectUseCase } from '../get-project.usecase';
 import { SearchProjectUseCase } from '../search-project.usecase';
 import { UpdateProjectUseCase } from '../update-project.usecase';
-import { UpdateProjectDescriptionUseCase } from '../update-project-description.usecase';
-import { UpdateProjectPathUseCase } from '../update-project-path.usecase';
-import { ToggleProjectArchiveUseCase } from '../toggle-project-archive.usecase';
+import { ArchiveProjectUseCase } from '../archive-project.usecase';
+import { RestoreProjectUseCase } from '../restore-project.usecase';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const OTHER_USER_ID = '123e4567-e89b-42d3-a456-426614174001';
@@ -88,36 +90,36 @@ describe('Project use cases', () => {
     expect(repository.update.mock.calls).toHaveLength(0);
   });
 
-  it('atualiza e remove a descrição pelo caso de uso específico', async () => {
+  it('atualiza e remove campos opcionais pelo caso de uso principal', async () => {
     const project = makeProject();
-    project.updateDescription('Descrição atual');
+    project.update({
+      description: 'Descrição atual',
+      localPath: '/workspace/devlog',
+    });
     const { repository } = makeRepository(project);
-    const useCase = new UpdateProjectDescriptionUseCase(repository);
+    const useCase = new UpdateProjectUseCase(repository);
 
     const output = await useCase.execute({
       id: PROJECT_ID,
       userId: USER_ID,
-      description: '',
+      description: null,
+      localPath: null,
     });
 
     expect(repository.update.mock.calls[0]?.[0]).toBe(project);
     expect(output.description).toBeUndefined();
+    expect(output.localPath).toBeUndefined();
   });
 
-  it('atualiza e remove o caminho local pelo caso de uso específico', async () => {
-    const project = makeProject();
-    project.updatePath('/workspace/devlog');
-    const { repository } = makeRepository(project);
-    const useCase = new UpdateProjectPathUseCase(repository);
+  it('rejeita atualização de projeto sem campos', async () => {
+    const { repository } = makeRepository();
+    const useCase = new UpdateProjectUseCase(repository);
 
-    const output = await useCase.execute({
-      id: PROJECT_ID,
-      userId: USER_ID,
-      localPath: '',
-    });
+    await expect(
+      useCase.execute({ id: PROJECT_ID, userId: USER_ID }),
+    ).rejects.toBeInstanceOf(UnprocessableEntityException);
 
-    expect(repository.update.mock.calls[0]?.[0]).toBe(project);
-    expect(output.localPath).toBeUndefined();
+    expect(repository.update.mock.calls).toHaveLength(0);
   });
 
   it('remove o projeto somente quando ele pertence ao usuário', async () => {
@@ -140,17 +142,21 @@ describe('Project use cases', () => {
     expect(repository.delete.mock.calls).toHaveLength(0);
   });
 
-  it('alterna o arquivamento do projeto do usuário autenticado', async () => {
+  it('arquiva e restaura o projeto do usuário autenticado', async () => {
     const project = makeProject();
     const { repository } = makeRepository(project);
-    const useCase = new ToggleProjectArchiveUseCase(repository);
+    const archiveUseCase = new ArchiveProjectUseCase(repository);
+    const restoreUseCase = new RestoreProjectUseCase(repository);
 
-    const output = await useCase.execute({ id: PROJECT_ID, userId: USER_ID });
+    const output = await archiveUseCase.execute({
+      id: PROJECT_ID,
+      userId: USER_ID,
+    });
 
     expect(repository.update.mock.calls[0]?.[0]).toBe(project);
     expect(output.archivedAt).toBeDefined();
 
-    const restoredOutput = await useCase.execute({
+    const restoredOutput = await restoreUseCase.execute({
       id: PROJECT_ID,
       userId: USER_ID,
     });
@@ -158,10 +164,10 @@ describe('Project use cases', () => {
     expect(restoredOutput.archivedAt).toBeUndefined();
   });
 
-  it('não alterna o arquivamento de um projeto de outro usuário', async () => {
+  it('não arquiva um projeto de outro usuário', async () => {
     const project = makeProject(OTHER_USER_ID);
     const { repository } = makeRepository(project);
-    const useCase = new ToggleProjectArchiveUseCase(repository);
+    const useCase = new ArchiveProjectUseCase(repository);
 
     await expect(
       useCase.execute({ id: PROJECT_ID, userId: USER_ID }),

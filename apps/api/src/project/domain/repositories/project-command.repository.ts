@@ -19,9 +19,9 @@ export class ProjectCommandSearchResult extends SearchResult<
   ProjectCommandFilter
 > {}
 
-export interface ProjectCommandRepository extends SearchableRepositoryInterface<
+export type ProjectCommandRepository = SearchableRepositoryInterface<
   ProjectCommandEntity,
   ProjectCommandFilter,
   ProjectCommandSearchParams,
   ProjectCommandSearchResult
-> {}
+>;

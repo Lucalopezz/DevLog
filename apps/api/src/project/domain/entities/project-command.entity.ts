@@ -18,10 +18,12 @@ type ProjectCommandInputProps = Omit<
 > &
   Partial<Pick<ProjectCommandProps, 'createdAt' | 'updatedAt'>>;
 
-type ProjectCommandUpdateProps = Omit<
-  Partial<ProjectCommandProps>,
-  'projectId' | 'createdAt' | 'updatedAt'
->;
+export type ProjectCommandUpdateProps = {
+  title?: string;
+  command?: string;
+  description?: string | null;
+  executionOrder?: number | null;
+};
 
 export class ProjectCommandEntity extends Entity<ProjectCommandProps> {
   constructor(props: ProjectCommandInputProps, id?: string) {
@@ -37,12 +39,32 @@ export class ProjectCommandEntity extends Entity<ProjectCommandProps> {
     super(completeProps, id);
   }
   update(props: ProjectCommandUpdateProps): void {
+    // Object.values extrai os valores e every verifica se todos são undefined;
+    // assim, um PATCH sem campos não modifica artificialmente o updatedAt.
+    if (Object.values(props).every((value) => value === undefined)) {
+      throw new EntityValidationError({
+        update: ['Informe ao menos um campo para atualizar o comando'],
+      });
+    }
+
+    const now = new Date();
+    // Campos ausentes são preservados; null remove somente os campos cujo
+    // contrato permite remoção, convertendo-os para undefined no domínio.
     const updatedProps = {
       ...this.props,
-      ...props,
-      updatedAt: new Date(),
+      ...(props.title !== undefined ? { title: props.title } : {}),
+      ...(props.command !== undefined ? { command: props.command } : {}),
+      ...(props.description !== undefined
+        ? { description: props.description ?? undefined }
+        : {}),
+      ...(props.executionOrder !== undefined
+        ? { executionOrder: props.executionOrder ?? undefined }
+        : {}),
+      updatedAt: now,
     };
+
     ProjectCommandEntity.validate(updatedProps);
+
     if (props.command !== undefined) {
       this.command = props.command;
     }
@@ -50,12 +72,12 @@ export class ProjectCommandEntity extends Entity<ProjectCommandProps> {
       this.title = props.title;
     }
     if (props.description !== undefined) {
-      this.description = props.description;
+      this.description = props.description ?? undefined;
     }
     if (props.executionOrder !== undefined) {
-      this.executionOrder = props.executionOrder;
+      this.executionOrder = props.executionOrder ?? undefined;
     }
-    this.updatedAt = updatedProps.updatedAt;
+    this.updatedAt = now;
   }
   get projectId(): string {
     return this.props.projectId;

@@ -21,6 +21,13 @@ export type ProjectProps = {
 type ProjectInputProps = Omit<ProjectProps, 'createdAt' | 'updatedAt'> &
   Partial<Pick<ProjectProps, 'createdAt' | 'updatedAt'>>;
 
+export type ProjectUpdateProps = {
+  name?: string;
+  description?: string | null;
+  status?: ProjectStatusEnum;
+  localPath?: string | null;
+};
+
 export class ProjectEntity extends Entity<ProjectProps> {
   constructor(props: ProjectInputProps, id?: string) {
     const createdAt = props.createdAt ?? new Date();
@@ -66,26 +73,39 @@ export class ProjectEntity extends Entity<ProjectProps> {
     });
   }
 
-  update(
-    props: Omit<
-      Partial<ProjectProps>,
-      'userId' | 'createdAt' | 'updatedAt' | 'archivedAt'
-    >,
-  ) {
-    const now = new Date();
+  update(props: ProjectUpdateProps): void {
+    // Object.values cria uma lista com os valores do objeto; every confirma que
+    // todos foram omitidos, evitando um update vazio que alteraria updatedAt.
+    if (Object.values(props).every((value) => value === undefined)) {
+      throw new EntityValidationError({
+        update: ['Informe ao menos um campo para atualizar o projeto'],
+      });
+    }
 
+    const now = new Date();
+    // Os spreads condicionais preservam campos ausentes. Nos campos anuláveis,
+    // null é normalizado para undefined, que representa ausência no domínio.
     const updatedProps = {
       ...this.props,
-      ...props,
+      ...(props.name !== undefined ? { name: props.name } : {}),
+      ...(props.description !== undefined
+        ? { description: props.description ?? undefined }
+        : {}),
+      ...(props.status !== undefined ? { status: props.status } : {}),
+      ...(props.localPath !== undefined
+        ? { localPath: props.localPath ?? undefined }
+        : {}),
       updatedAt: now,
     };
+
     ProjectEntity.validate(updatedProps);
+
     if (props.name !== undefined) {
       this.name = props.name;
     }
 
     if (props.description !== undefined) {
-      this.description = props.description;
+      this.description = props.description ?? undefined;
     }
 
     if (props.status !== undefined) {
@@ -93,52 +113,50 @@ export class ProjectEntity extends Entity<ProjectProps> {
     }
 
     if (props.localPath !== undefined) {
-      this.localPath = props.localPath;
+      this.localPath = props.localPath ?? undefined;
     }
 
-    this.updatedAt = updatedProps.updatedAt;
+    this.updatedAt = now;
   }
 
-  updateDescription(description?: string) {
-    const updatedProps = {
-      ...this.props,
-      description,
-      updatedAt: new Date(),
-    };
+  archive(): void {
+    // O retorno antecipado torna o comando idempotente: arquivar duas vezes não
+    // restaura nem altera novamente a data de atualização.
+    if (this.archivedAt !== undefined) {
+      return;
+    }
 
-    ProjectEntity.validate(updatedProps);
-
-    this.description = description;
-    this.updatedAt = updatedProps.updatedAt;
-  }
-
-  toggleArchive() {
     const now = new Date();
-    // Se archivedAt for undefined, significa que o projeto não está arquivado, então arquiva.
-    // Caso contrário, vamos desarquiva.
-    const archivedAt = this.archivedAt === undefined ? now : undefined;
-
     const updatedProps = {
       ...this.props,
-      archivedAt,
+      archivedAt: now,
       updatedAt: now,
     };
 
     ProjectEntity.validate(updatedProps);
 
-    this.archivedAt = archivedAt;
+    this.archivedAt = now;
     this.updatedAt = now;
   }
 
-  updatePath(localPath?: string) {
+  restore(): void {
+    // Restaurar um projeto já ativo também é um no-op, mantendo a operação segura
+    // quando uma mesma requisição é repetida.
+    if (this.archivedAt === undefined) {
+      return;
+    }
+
+    const now = new Date();
     const updatedProps = {
       ...this.props,
-      localPath,
-      updatedAt: new Date(),
+      archivedAt: undefined,
+      updatedAt: now,
     };
+
     ProjectEntity.validate(updatedProps);
-    this.localPath = localPath;
-    this.updatedAt = updatedProps.updatedAt;
+
+    this.archivedAt = undefined;
+    this.updatedAt = now;
   }
 
   get userId(): string {

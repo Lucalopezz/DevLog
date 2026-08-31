@@ -22,12 +22,9 @@ import { CreateProjectUseCase } from '../application/usecases/create-project.use
 import { SearchProjectUseCase } from '../application/usecases/search-project.usecase';
 import { GetProjectUseCase } from '../application/usecases/get-project.usecase';
 import { UpdateProjectUseCase } from '../application/usecases/update-project.usecase';
-import { UpdateProjectDescriptionDto } from './dto/update-project-description.dto';
-import { UpdateProjectPathDto } from './dto/update-project-path.dto';
-import { UpdateProjectDescriptionUseCase } from '../application/usecases/update-project-description.usecase';
-import { UpdateProjectPathUseCase } from '../application/usecases/update-project-path.usecase';
 import { DeleteProjectUseCase } from '../application/usecases/delete-project.usecase';
-import { ToggleProjectArchiveUseCase } from '../application/usecases/toggle-project-archive.usecase';
+import { ArchiveProjectUseCase } from '../application/usecases/archive-project.usecase';
+import { RestoreProjectUseCase } from '../application/usecases/restore-project.usecase';
 import type { ProjectOutput } from '../application/dto/project.dto';
 import type { SearchProjectUseCaseOutput } from '../application/usecases/search-project.usecase';
 import {
@@ -73,17 +70,14 @@ export class ProjectController {
   @Inject(UpdateProjectUseCase)
   private readonly updateProjectUseCase: UpdateProjectUseCase;
 
-  @Inject(UpdateProjectDescriptionUseCase)
-  private readonly updateProjectDescriptionUseCase: UpdateProjectDescriptionUseCase;
-
-  @Inject(UpdateProjectPathUseCase)
-  private readonly updateProjectPathUseCase: UpdateProjectPathUseCase;
-
   @Inject(DeleteProjectUseCase)
   private readonly deleteProjectUseCase: DeleteProjectUseCase;
 
-  @Inject(ToggleProjectArchiveUseCase)
-  private readonly toggleProjectArchiveUseCase: ToggleProjectArchiveUseCase;
+  @Inject(ArchiveProjectUseCase)
+  private readonly archiveProjectUseCase: ArchiveProjectUseCase;
+
+  @Inject(RestoreProjectUseCase)
+  private readonly restoreProjectUseCase: RestoreProjectUseCase;
 
   @Inject(AddProjectTechnologyUseCase)
   private readonly addProjectTechnologyUseCase: AddProjectTechnologyUseCase;
@@ -221,42 +215,25 @@ export class ProjectController {
     return ProjectController.projectToResponse(output);
   }
 
-  @Patch(':id/description')
-  async updateDescription(
-    @Param('id') id: string,
-    @Body() updateProjectDescriptionDto: UpdateProjectDescriptionDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    const output = await this.updateProjectDescriptionUseCase.execute({
-      ...updateProjectDescriptionDto,
-      id,
-      userId: user.id,
-    });
-
-    return ProjectController.projectToResponse(output);
-  }
-
-  @Patch(':id/local-path')
-  async updatePath(
-    @Param('id') id: string,
-    @Body() updateProjectPathDto: UpdateProjectPathDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    const output = await this.updateProjectPathUseCase.execute({
-      ...updateProjectPathDto,
-      id,
-      userId: user.id,
-    });
-
-    return ProjectController.projectToResponse(output);
-  }
-
   @Patch(':id/archive')
-  async toggleArchive(
+  async archive(
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    const output = await this.toggleProjectArchiveUseCase.execute({
+    const output = await this.archiveProjectUseCase.execute({
+      id,
+      userId: user.id,
+    });
+
+    return ProjectController.projectToResponse(output);
+  }
+
+  @Patch(':id/restore')
+  async restore(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.restoreProjectUseCase.execute({
       id,
       userId: user.id,
     });

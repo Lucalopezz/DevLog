@@ -7,10 +7,9 @@ import { CreateProjectUseCase } from '../application/usecases/create-project.use
 import { SearchProjectUseCase } from '../application/usecases/search-project.usecase';
 import { GetProjectUseCase } from '../application/usecases/get-project.usecase';
 import { UpdateProjectUseCase } from '../application/usecases/update-project.usecase';
-import { UpdateProjectDescriptionUseCase } from '../application/usecases/update-project-description.usecase';
-import { UpdateProjectPathUseCase } from '../application/usecases/update-project-path.usecase';
 import { DeleteProjectUseCase } from '../application/usecases/delete-project.usecase';
-import { ToggleProjectArchiveUseCase } from '../application/usecases/toggle-project-archive.usecase';
+import { ArchiveProjectUseCase } from '../application/usecases/archive-project.usecase';
+import { RestoreProjectUseCase } from '../application/usecases/restore-project.usecase';
 import { AuthModule } from '@/auth/infrastructure/auth.module';
 import { SearchTechnicalEntryUseCase } from '@/technical-entry/application/usecases/search-technical-entry.usecase';
 import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technical-entry.repository';
@@ -131,20 +130,6 @@ import { GetProjectCommandUseCase } from '../application/usecases/get-project-co
       inject: ['ProjectRepository'],
     },
     {
-      provide: UpdateProjectDescriptionUseCase,
-      useFactory: (projectRepository: ProjectPrismaRepository) => {
-        return new UpdateProjectDescriptionUseCase(projectRepository);
-      },
-      inject: ['ProjectRepository'],
-    },
-    {
-      provide: UpdateProjectPathUseCase,
-      useFactory: (projectRepository: ProjectPrismaRepository) => {
-        return new UpdateProjectPathUseCase(projectRepository);
-      },
-      inject: ['ProjectRepository'],
-    },
-    {
       provide: DeleteProjectUseCase,
       useFactory: (projectRepository: ProjectPrismaRepository) => {
         return new DeleteProjectUseCase(projectRepository);
@@ -152,9 +137,16 @@ import { GetProjectCommandUseCase } from '../application/usecases/get-project-co
       inject: ['ProjectRepository'],
     },
     {
-      provide: ToggleProjectArchiveUseCase,
+      provide: ArchiveProjectUseCase,
       useFactory: (projectRepository: ProjectPrismaRepository) => {
-        return new ToggleProjectArchiveUseCase(projectRepository);
+        return new ArchiveProjectUseCase(projectRepository);
+      },
+      inject: ['ProjectRepository'],
+    },
+    {
+      provide: RestoreProjectUseCase,
+      useFactory: (projectRepository: ProjectPrismaRepository) => {
+        return new RestoreProjectUseCase(projectRepository);
       },
       inject: ['ProjectRepository'],
     },
