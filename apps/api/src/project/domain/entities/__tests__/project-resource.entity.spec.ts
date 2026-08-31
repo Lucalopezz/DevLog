@@ -93,11 +93,11 @@ describe('ProjectResourceEntity', () => {
     expect(resource.updatedAt).toBe(originalUpdatedAt);
   });
 
-  it('rejeita atualização sem campos e preserva updatedAt', () => {
+  it('trata atualização sem campos como no-op e preserva updatedAt', () => {
     const resource = new ProjectResourceEntity(makeProps());
     const originalUpdatedAt = resource.updatedAt;
 
-    expect(() => resource.update({})).toThrow(EntityValidationError);
+    expect(() => resource.update({})).not.toThrow();
     expect(resource.updatedAt).toEqual(originalUpdatedAt);
   });
 });

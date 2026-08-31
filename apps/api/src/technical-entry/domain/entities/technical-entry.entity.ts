@@ -72,12 +72,10 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   }
 
   update(props: TechnicalEntryUpdateProps): void {
-    // Object.values transforma as propriedades em uma lista; every garante que
-    // pelo menos um campo tenha sido enviado antes de alterar a entidade.
+    // A aplicação decide se um update vazio é uma entrada válida. No domínio,
+    // ele é apenas um no-op e não deve modificar artificialmente updatedAt.
     if (Object.values(props).every((value) => value === undefined)) {
-      throw new EntityValidationError({
-        update: ['Informe ao menos um campo para atualizar a entrada técnica'],
-      });
+      return;
     }
 
     const now = new Date();

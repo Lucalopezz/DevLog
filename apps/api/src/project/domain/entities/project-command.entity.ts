@@ -39,12 +39,10 @@ export class ProjectCommandEntity extends Entity<ProjectCommandProps> {
     super(completeProps, id);
   }
   update(props: ProjectCommandUpdateProps): void {
-    // Object.values extrai os valores e every verifica se todos são undefined;
-    // assim, um PATCH sem campos não modifica artificialmente o updatedAt.
+    // A aplicação decide se um update vazio é uma entrada válida. No domínio,
+    // ele é apenas um no-op e não deve modificar artificialmente updatedAt.
     if (Object.values(props).every((value) => value === undefined)) {
-      throw new EntityValidationError({
-        update: ['Informe ao menos um campo para atualizar o comando'],
-      });
+      return;
     }
 
     const now = new Date();

@@ -80,11 +80,11 @@ describe('ProjectCommandEntity', () => {
     expect(command.executionOrder).toBeUndefined();
   });
 
-  it('rejeita atualização sem campos e preserva updatedAt', () => {
+  it('trata atualização sem campos como no-op e preserva updatedAt', () => {
     const command = new ProjectCommandEntity(makeProps());
     const originalUpdatedAt = command.updatedAt;
 
-    expect(() => command.update({})).toThrow(EntityValidationError);
+    expect(() => command.update({})).not.toThrow();
     expect(command.updatedAt).toEqual(originalUpdatedAt);
   });
 });

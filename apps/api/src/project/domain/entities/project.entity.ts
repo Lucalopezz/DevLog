@@ -74,12 +74,10 @@ export class ProjectEntity extends Entity<ProjectProps> {
   }
 
   update(props: ProjectUpdateProps): void {
-    // Object.values cria uma lista com os valores do objeto; every confirma que
-    // todos foram omitidos, evitando um update vazio que alteraria updatedAt.
+    // A aplicação decide se um update vazio é uma entrada válida. No domínio,
+    // ele é apenas um no-op e não deve modificar artificialmente updatedAt.
     if (Object.values(props).every((value) => value === undefined)) {
-      throw new EntityValidationError({
-        update: ['Informe ao menos um campo para atualizar o projeto'],
-      });
+      return;
     }
 
     const now = new Date();

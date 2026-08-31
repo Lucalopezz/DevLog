@@ -143,11 +143,11 @@ describe('TechnicalEntryEntity', () => {
     ).toThrow(EntityValidationError);
   });
 
-  it('rejeita atualização sem campos e preserva updatedAt', () => {
+  it('trata atualização sem campos como no-op e preserva updatedAt', () => {
     const entry = new TechnicalEntryEntity(makeProps());
     const originalUpdatedAt = entry.updatedAt;
 
-    expect(() => entry.update({})).toThrow(EntityValidationError);
+    expect(() => entry.update({})).not.toThrow();
     expect(entry.updatedAt).toEqual(originalUpdatedAt);
   });
 });

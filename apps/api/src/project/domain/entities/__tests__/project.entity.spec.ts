@@ -3,7 +3,6 @@ import { ProjectStatusEnum } from '../project-status-enum';
 import { ProjectCommandEntity } from '../project-command.entity';
 import { ProjectResourceEntity } from '../project-resource.entity';
 import { ProjectResourceType } from '../project-resource-type.enum';
-import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 
@@ -117,11 +116,11 @@ describe('ProjectEntity', () => {
     expect(project.updatedAt).toEqual(restoredAt);
   });
 
-  it('rejeita atualização sem campos e preserva updatedAt', () => {
+  it('trata atualização sem campos como no-op e preserva updatedAt', () => {
     const project = new ProjectEntity(makeProps());
     const originalUpdatedAt = project.updatedAt;
 
-    expect(() => project.update({})).toThrow(EntityValidationError);
+    expect(() => project.update({})).not.toThrow();
     expect(project.updatedAt).toEqual(originalUpdatedAt);
   });
 
