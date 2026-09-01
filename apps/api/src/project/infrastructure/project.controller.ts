@@ -12,59 +12,59 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
-import { SearchProjectDto } from './dto/search-project.dto';
+import { CreateProjectDto } from './dto/project/create-project.dto';
+import { UpdateProjectDto } from './dto/project/update-project.dto';
+import { SearchProjectDto } from './dto/project/search-project.dto';
 import { AuthGuard } from '@/auth/infrastructure/auth.guard';
 import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '@/auth/types/authenticated-user';
-import { CreateProjectUseCase } from '../application/usecases/create-project.usecase';
-import { SearchProjectUseCase } from '../application/usecases/search-project.usecase';
-import { GetProjectUseCase } from '../application/usecases/get-project.usecase';
-import { UpdateProjectUseCase } from '../application/usecases/update-project.usecase';
-import { DeleteProjectUseCase } from '../application/usecases/delete-project.usecase';
-import { ArchiveProjectUseCase } from '../application/usecases/archive-project.usecase';
-import { RestoreProjectUseCase } from '../application/usecases/restore-project.usecase';
-import type { ProjectOutput } from '../application/dto/project.dto';
-import type { SearchProjectUseCaseOutput } from '../application/usecases/search-project.usecase';
+import { CreateProjectUseCase } from '../application/usecases/project/create-project.usecase';
+import { SearchProjectUseCase } from '../application/usecases/project/search-project.usecase';
+import { GetProjectUseCase } from '../application/usecases/project/get-project.usecase';
+import { UpdateProjectUseCase } from '../application/usecases/project/update-project.usecase';
+import { DeleteProjectUseCase } from '../application/usecases/project/delete-project.usecase';
+import { ArchiveProjectUseCase } from '../application/usecases/project/archive-project.usecase';
+import { RestoreProjectUseCase } from '../application/usecases/project/restore-project.usecase';
+import type { ProjectOutput } from '../application/dto/project/project.dto';
+import type { SearchProjectUseCaseOutput } from '../application/usecases/project/search-project.usecase';
 import {
   ProjectCollectionPresenter,
   ProjectPresenter,
-} from './presenter/project.presenter';
-import { SearchTechnicalEntryDto } from '@/technical-entry/infrastructure/dto/search-technical-entry.dto';
-import { SearchTechnicalEntryUseCase } from '@/technical-entry/application/usecases/search-technical-entry.usecase';
-import { TechnicalEntryCollectionPresenter } from '@/technical-entry/infrastructure/presenters/technical-entry.presenter';
-import { AddProjectTechnologyDto } from './dto/add-project-technology.dto';
-import { AddProjectTechnologyUseCase } from '../application/usecases/add-project-technology.usecase';
-import { RemoveProjectTechnologyUseCase } from '../application/usecases/remove-project-technology.usecase';
-import { AddProjectCommandDto } from './dto/add-project-command.dto';
-import { AddProjectCommandUseCase } from '../application/usecases/add-project-command.usecase';
+} from './presenter/project/project.presenter';
+import { SearchTechnicalEntryDto } from '@/technical-entry/infrastructure/dto/technical-entry/search-technical-entry.dto';
+import { SearchTechnicalEntryUseCase } from '@/technical-entry/application/usecases/technical-entry/search-technical-entry.usecase';
+import { TechnicalEntryCollectionPresenter } from '@/technical-entry/infrastructure/presenters/technical-entry/technical-entry.presenter';
+import { AddProjectTechnologyDto } from './dto/technology/add-project-technology.dto';
+import { AddProjectTechnologyUseCase } from '../application/usecases/technology/add-project-technology.usecase';
+import { RemoveProjectTechnologyUseCase } from '../application/usecases/technology/remove-project-technology.usecase';
+import { AddProjectCommandDto } from './dto/command/add-project-command.dto';
+import { AddProjectCommandUseCase } from '../application/usecases/command/add-project-command.usecase';
 import {
   ProjectCommandCollectionPresenter,
   ProjectCommandPresenter,
-} from './presenter/project-command.presenter';
-import { UpdateProjectCommandDto } from './dto/update-project-command.dto';
-import { UpdateProjectCommandUseCase } from '../application/usecases/update-project-command.usecase';
-import { RemoveProjectCommandUseCase } from '../application/usecases/remove-project-command.usecase';
-import { SearchProjectCommandDto } from './dto/search-project-command.dto';
-import { SearchProjectCommandUseCase } from '../application/usecases/search-project-command.usecase';
-import { GetProjectCommandUseCase } from '../application/usecases/get-project-command.usecase';
-import type { ProjectCommandOutput } from '../application/dto/project-command.dto';
-import type { SearchProjectCommandUseCaseOutput } from '../application/usecases/search-project-command.usecase';
-import { AddProjectResourceDto } from './dto/add-project-resource.dto';
-import { UpdateProjectResourceDto } from './dto/update-project-resource.dto';
-import { SearchProjectResourceDto } from './dto/search-project-resource.dto';
-import { AddProjectResourceUseCase } from '../application/usecases/add-project-resource.usecase';
-import { UpdateProjectResourceUseCase } from '../application/usecases/update-project-resource.usecase';
-import { RemoveProjectResourceUseCase } from '../application/usecases/remove-project-resource.usecase';
-import { SearchProjectResourceUseCase } from '../application/usecases/search-project-resource.usecase';
-import { GetProjectResourceUseCase } from '../application/usecases/get-project-resource.usecase';
-import type { ProjectResourceOutput } from '../application/dto/project-resource.dto';
-import type { SearchProjectResourceUseCaseOutput } from '../application/usecases/search-project-resource.usecase';
+} from './presenter/command/project-command.presenter';
+import { UpdateProjectCommandDto } from './dto/command/update-project-command.dto';
+import { UpdateProjectCommandUseCase } from '../application/usecases/command/update-project-command.usecase';
+import { RemoveProjectCommandUseCase } from '../application/usecases/command/remove-project-command.usecase';
+import { SearchProjectCommandDto } from './dto/command/search-project-command.dto';
+import { SearchProjectCommandUseCase } from '../application/usecases/command/search-project-command.usecase';
+import { GetProjectCommandUseCase } from '../application/usecases/command/get-project-command.usecase';
+import type { ProjectCommandOutput } from '../application/dto/command/project-command.dto';
+import type { SearchProjectCommandUseCaseOutput } from '../application/usecases/command/search-project-command.usecase';
+import { AddProjectResourceDto } from './dto/resource/add-project-resource.dto';
+import { UpdateProjectResourceDto } from './dto/resource/update-project-resource.dto';
+import { SearchProjectResourceDto } from './dto/resource/search-project-resource.dto';
+import { AddProjectResourceUseCase } from '../application/usecases/resource/add-project-resource.usecase';
+import { UpdateProjectResourceUseCase } from '../application/usecases/resource/update-project-resource.usecase';
+import { RemoveProjectResourceUseCase } from '../application/usecases/resource/remove-project-resource.usecase';
+import { SearchProjectResourceUseCase } from '../application/usecases/resource/search-project-resource.usecase';
+import { GetProjectResourceUseCase } from '../application/usecases/resource/get-project-resource.usecase';
+import type { ProjectResourceOutput } from '../application/dto/resource/project-resource.dto';
+import type { SearchProjectResourceUseCaseOutput } from '../application/usecases/resource/search-project-resource.usecase';
 import {
   ProjectResourceCollectionPresenter,
   ProjectResourcePresenter,
-} from './presenter/project-resource.presenter';
+} from './presenter/resource/project-resource.presenter';
 
 @UseGuards(AuthGuard)
 @Controller('project')

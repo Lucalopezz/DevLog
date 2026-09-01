@@ -1,7 +1,7 @@
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
 import { SolutionAttemptEntity } from '@/technical-entry/domain/entities/solution-attempt/solution-attempt.entity';
 import { SolutionAttemptResult } from '@/technical-entry/domain/entities/solution-attempt/solution-attempt-result.enum';
-import { SolutionAttemptSearchParams } from '@/technical-entry/domain/repositories/solution-attempt/solution-attempt.repositoty';
+import { SolutionAttemptSearchParams } from '@/technical-entry/domain/repositories/solution-attempt/solution-attempt.repository';
 import {
   SolutionAttempt,
   SolutionAttemptResult as PrismaSolutionAttemptResult,

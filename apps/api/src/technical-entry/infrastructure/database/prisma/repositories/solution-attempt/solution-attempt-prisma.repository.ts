@@ -5,9 +5,9 @@ import {
   SolutionAttemptRepository,
   SolutionAttemptSearchParams,
   SolutionAttemptSearchResult,
-} from '@/technical-entry/domain/repositories/solution-attempt/solution-attempt.repositoty';
+} from '@/technical-entry/domain/repositories/solution-attempt/solution-attempt.repository';
 import { Prisma } from '@generated/prisma/client';
-import { SolutionAttemptModelMapper } from '../models/solution-attempt-model.mapper';
+import { SolutionAttemptModelMapper } from './models/solution-attempt-model.mapper';
 
 export class SolutionAttemptPrismaRepository implements SolutionAttemptRepository {
   sortableFields: string[] = ['createdAt', 'result'];

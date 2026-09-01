@@ -12,49 +12,49 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { CreateTechnicalEntryDto } from './dto/create-technical-entry.dto';
-import { SearchTechnicalEntryDto } from './dto/search-technical-entry.dto';
-import { UpdateTechnicalEntryDto } from './dto/update-technical-entry.dto';
-import { CreateTechnicalEntryUseCase } from '../application/usecases/create-technical-entry.usecase';
-import { GetTechnicalEntryUseCase } from '../application/usecases/get-technical-entry.usecase';
-import { UpdateTechnicalEntryUseCase } from '../application/usecases/update-technical-entry.usecase';
-import { DeleteTechnicalEntryUseCase } from '../application/usecases/delete-technical-entry.usecase';
-import { AssignTagToTechnicalEntryUseCase } from '../application/usecases/assign-tag-to-technical-entry.usecase';
-import { RemoveTagFromTechnicalEntryUseCase } from '../application/usecases/remove-tag-from-technical-entry.usecase';
+import { CreateTechnicalEntryDto } from './dto/technical-entry/create-technical-entry.dto';
+import { SearchTechnicalEntryDto } from './dto/technical-entry/search-technical-entry.dto';
+import { UpdateTechnicalEntryDto } from './dto/technical-entry/update-technical-entry.dto';
+import { CreateTechnicalEntryUseCase } from '../application/usecases/technical-entry/create-technical-entry.usecase';
+import { GetTechnicalEntryUseCase } from '../application/usecases/technical-entry/get-technical-entry.usecase';
+import { UpdateTechnicalEntryUseCase } from '../application/usecases/technical-entry/update-technical-entry.usecase';
+import { DeleteTechnicalEntryUseCase } from '../application/usecases/technical-entry/delete-technical-entry.usecase';
+import { AssignTagToTechnicalEntryUseCase } from '../application/usecases/tag-assignment/assign-tag-to-technical-entry.usecase';
+import { RemoveTagFromTechnicalEntryUseCase } from '../application/usecases/tag-assignment/remove-tag-from-technical-entry.usecase';
 import { AuthGuard } from '@/auth/infrastructure/auth.guard';
 import { CurrentUser } from '@/auth/infrastructure/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '@/auth/types/authenticated-user';
-import { AssignTagToTechnicalEntryDto } from './dto/assign-tag-to-technical-entry.dto';
+import { AssignTagToTechnicalEntryDto } from './dto/tag-assignment/assign-tag-to-technical-entry.dto';
 import {
   SearchTechnicalEntryUseCase,
   type SearchTechnicalEntryUseCaseOutput,
-} from '../application/usecases/search-technical-entry.usecase';
-import type { TechnicalEntryOutput } from '../application/dto/technical-entry.dto';
+} from '../application/usecases/technical-entry/search-technical-entry.usecase';
+import type { TechnicalEntryOutput } from '../application/dto/technical-entry/technical-entry.dto';
 import {
   TechnicalEntryCollectionPresenter,
   TechnicalEntryPresenter,
-} from './presenters/technical-entry.presenter';
+} from './presenters/technical-entry/technical-entry.presenter';
 import { TagPresenter } from '@/tag/infrastructure/presenter/tag.presenter';
-import { AddSolutionAttemptDto } from './dto/add-solution-attempt.dto';
+import { AddSolutionAttemptDto } from './dto/solution-attempt/add-solution-attempt.dto';
 import {
   AddSolutionAttemptUseCase,
   type AddSolutionAttemptUseCaseOutput,
-} from '../application/usecases/add-solution-attempt.usecase';
+} from '../application/usecases/solution-attempt/add-solution-attempt.usecase';
 import {
   SolutionAttemptCollectionPresenter,
   SolutionAttemptPresenter,
-} from './presenters/solution-attempt.presenter';
-import { ListSolutionAttemptsDto } from './dto/list-solution-attempts.dto';
+} from './presenters/solution-attempt/solution-attempt.presenter';
+import { ListSolutionAttemptsDto } from './dto/solution-attempt/list-solution-attempts.dto';
 import {
   ListSolutionAttemptsUseCase,
   type ListSolutionAttemptsUseCaseOutput,
-} from '../application/usecases/list-solution-attempts.usecase';
-import { ResolveTechnicalIssueDto } from './dto/resolve-technical-issue.dto';
-import { ResolveTechnicalIssueUseCase } from '../application/usecases/resolve-technical-issue.usecase';
-import { ReopenTechnicalIssueUseCase } from '../application/usecases/reopen-technical-issue.usecase';
-import { UpdateSolutionAttemptUseCase } from '../application/usecases/update-solution-attempt.usecase';
-import { UpdateSolutionAttemptDto } from './dto/update-solution-attempt.dto';
-import { RemoveSolutionAttemptUseCase } from '../application/usecases/remove-solution-attempt.usecase';
+} from '../application/usecases/solution-attempt/list-solution-attempts.usecase';
+import { ResolveTechnicalIssueDto } from './dto/technical-entry/resolve-technical-issue.dto';
+import { ResolveTechnicalIssueUseCase } from '../application/usecases/technical-entry/resolve-technical-issue.usecase';
+import { ReopenTechnicalIssueUseCase } from '../application/usecases/technical-entry/reopen-technical-issue.usecase';
+import { UpdateSolutionAttemptUseCase } from '../application/usecases/solution-attempt/update-solution-attempt.usecase';
+import { UpdateSolutionAttemptDto } from './dto/solution-attempt/update-solution-attempt.dto';
+import { RemoveSolutionAttemptUseCase } from '../application/usecases/solution-attempt/remove-solution-attempt.usecase';
 
 @Controller('technical-entry')
 export class TechnicalEntryController {

@@ -1,6 +1,6 @@
 import { Entity } from '@/shared/domain/entities/entity';
 import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
-import { SolutionAttemptValidatorFactory } from '../../validators/solution-attempt.validator';
+import { SolutionAttemptValidatorFactory } from '../../validators/solution-attempt/solution-attempt.validator';
 import { SolutionAttemptResult } from './solution-attempt-result.enum';
 
 export type SolutionAttemptProps = {
