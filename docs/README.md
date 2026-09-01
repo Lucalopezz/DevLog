@@ -9,18 +9,19 @@ projeto quanto quem está estudando uma parte específica da aplicação.
 Use a tabela abaixo como ponto de entrada. Em geral, a resposta já está em um
 dos arquivos indicados:
 
-| Dúvida | Arquivo recomendado |
-| --- | --- |
-| Quero entender o objetivo, o escopo e as decisões gerais do produto | [`decisions/devlog-decisoes.md`](decisions/devlog-decisoes.md) |
-| Quero saber como o banco foi modelado e por que as tabelas se relacionam dessa forma | [`decisions/database.md`](decisions/database.md) |
-| Quero saber o que o sistema deve fazer | [`usecases/cases.md`](usecases/cases.md) |
-| Quero saber o que ainda falta implementar no backend | [`backlog/backend.md`](backlog/backend.md) |
-| Quero configurar o ambiente e conectar a API ao PostgreSQL | [`guides/configs_workflow.md`](guides/configs_workflow.md) |
-| Quero entender ou implementar autenticação | [`guides/authentication_workflow.md`](guides/authentication_workflow.md) |
-| Quero entender a validação das entidades | [`guides/entity_validation_workflow.md`](guides/entity_validation_workflow.md) |
-| Quero entender a estrutura do monorepo | [`guides/monorepo.md`](guides/monorepo.md) |
-| Procuro comandos usados com frequência | [`guides/utils.md`](guides/utils.md) |
-| Quero consultar anotações de modelagem feitas durante o estudo | [`anotations.md`](anotations.md) |
+| Dúvida                                                                               | Arquivo recomendado                                                            |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Quero entender o objetivo, o escopo e as decisões gerais do produto                  | [`decisions/devlog-decisoes.md`](decisions/devlog-decisoes.md)                 |
+| Quero saber como o banco foi modelado e por que as tabelas se relacionam dessa forma | [`decisions/database.md`](decisions/database.md)                               |
+| Quero saber o que o sistema deve fazer                                               | [`usecases/cases.md`](usecases/cases.md)                                       |
+| Quero saber o que ainda falta implementar no backend                                 | [`backlog/backend.md`](backlog/backend.md)                                     |
+| Quero configurar o ambiente e conectar a API ao PostgreSQL                           | [`guides/configs_workflow.md`](guides/configs_workflow.md)                     |
+| Quero entender ou implementar autenticação                                           | [`guides/authentication_workflow.md`](guides/authentication_workflow.md)       |
+| Quero entender a validação das entidades                                             | [`guides/entity_validation_workflow.md`](guides/entity_validation_workflow.md) |
+| Quero entender onde ficam e como executar os testes                                  | [`guides/testing.md`](guides/testing.md)                                       |
+| Quero entender a estrutura do monorepo                                               | [`guides/monorepo.md`](guides/monorepo.md)                                     |
+| Procuro comandos usados com frequência                                               | [`guides/utils.md`](guides/utils.md)                                           |
+| Quero consultar anotações de modelagem feitas durante o estudo                       | [`anotations.md`](anotations.md)                                               |
 
 Se a dúvida for sobre como iniciar o projeto, consulte primeiro o
 [README da raiz](../README.md). Ele contém os pré-requisitos, a instalação e

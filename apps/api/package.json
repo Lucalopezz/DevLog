@@ -78,18 +78,18 @@
       "ts"
     ],
     "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "testRegex": "/__tests__/unit/.*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/__tests__/**"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/__tests__/integration/"
+      "/node_modules/"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",

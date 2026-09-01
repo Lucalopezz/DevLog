@@ -69,7 +69,8 @@ Também é possível executá-las separadamente com `pnpm --filter api dev` e `p
 pnpm build                    # Gera a build dos projetos
 pnpm lint                     # Executa o lint
 pnpm test                     # Executa os testes disponíveis
-pnpm --filter api test:e2e    # Executa os testes de integração da API
+pnpm --filter api test:integration # Executa a integração da API com o banco de teste
+pnpm --filter api test:e2e    # Executa os testes HTTP end-to-end da API
 pnpm db:down                  # Encerra o banco de dados
 pnpm db:logs                  # Exibe os logs do banco
 ```
