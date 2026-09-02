@@ -27,6 +27,8 @@ export class RemoveProjectTechnologyUseCase implements UseCaseContract<
       throw new NotFoundException('Projeto não encontrado');
     }
 
+    project.ensureCanBeModified();
+
     const technology = await this.projectTechnologyRepository.findById(
       input.technologyId,
     );

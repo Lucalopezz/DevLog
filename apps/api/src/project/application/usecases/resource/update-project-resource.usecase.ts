@@ -40,6 +40,8 @@ export class UpdateProjectResourceUseCase implements UseCaseContract<
       throw new NotFoundException('Projeto não encontrado');
     }
 
+    project.ensureCanBeModified();
+
     const entity = await this.projectResourceRepository.findById(
       input.resourceId,
     );

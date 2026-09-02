@@ -27,6 +27,8 @@ export class RemoveProjectCommandUseCase implements UseCaseContract<
       throw new NotFoundException('Projeto não encontrado');
     }
 
+    project.ensureCanBeModified();
+
     const command = await this.projectCommandRepository.findById(
       input.commandId,
     );

@@ -14,6 +14,8 @@ import { SearchProjectUseCase } from '../../search-project.usecase';
 import { UpdateProjectUseCase } from '../../update-project.usecase';
 import { ArchiveProjectUseCase } from '../../archive-project.usecase';
 import { RestoreProjectUseCase } from '../../restore-project.usecase';
+import { ProjectTechnologyRepository } from '@/project/domain/repositories/technology/project-technology.repository';
+import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const OTHER_USER_ID = '123e4567-e89b-42d3-a456-426614174001';
@@ -40,10 +42,19 @@ function makeRepository(project: ProjectEntity | null = makeProject()) {
   };
 }
 
+function makeTechnologyRepository() {
+  return {
+    findByProjectId: jest.fn().mockResolvedValue([]),
+  } as unknown as jest.Mocked<ProjectTechnologyRepository>;
+}
+
 describe('Project use cases', () => {
   it('retorna o projeto quando ele pertence ao usuário', async () => {
     const { repository } = makeRepository();
-    const useCase = new GetProjectUseCase(repository);
+    const useCase = new GetProjectUseCase(
+      repository,
+      makeTechnologyRepository(),
+    );
 
     const output = await useCase.execute({ id: PROJECT_ID, userId: USER_ID });
 
@@ -52,7 +63,10 @@ describe('Project use cases', () => {
 
   it('não expõe projeto de outro usuário na consulta', async () => {
     const { repository } = makeRepository(makeProject(OTHER_USER_ID));
-    const useCase = new GetProjectUseCase(repository);
+    const useCase = new GetProjectUseCase(
+      repository,
+      makeTechnologyRepository(),
+    );
 
     await expect(
       useCase.execute({ id: PROJECT_ID, userId: USER_ID }),
@@ -86,6 +100,23 @@ describe('Project use cases', () => {
         name: 'Tentativa indevida',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
+
+    expect(repository.update.mock.calls).toHaveLength(0);
+  });
+
+  it('exige restauração antes de atualizar um projeto arquivado', async () => {
+    const project = makeProject();
+    project.archive();
+    const { repository } = makeRepository(project);
+    const useCase = new UpdateProjectUseCase(repository);
+
+    await expect(
+      useCase.execute({
+        id: PROJECT_ID,
+        userId: USER_ID,
+        name: 'Tentativa indevida',
+      }),
+    ).rejects.toBeInstanceOf(EntityValidationError);
 
     expect(repository.update.mock.calls).toHaveLength(0);
   });
@@ -139,6 +170,18 @@ describe('Project use cases', () => {
       useCase.execute({ id: PROJECT_ID, userId: USER_ID }),
     ).rejects.toBeInstanceOf(NotFoundException);
 
+    expect(repository.delete.mock.calls).toHaveLength(0);
+  });
+
+  it('exige restauração antes de excluir fisicamente um projeto', async () => {
+    const project = makeProject();
+    project.archive();
+    const { repository } = makeRepository(project);
+    const useCase = new DeleteProjectUseCase(repository);
+
+    await expect(
+      useCase.execute({ id: PROJECT_ID, userId: USER_ID }),
+    ).rejects.toBeInstanceOf(EntityValidationError);
     expect(repository.delete.mock.calls).toHaveLength(0);
   });
 

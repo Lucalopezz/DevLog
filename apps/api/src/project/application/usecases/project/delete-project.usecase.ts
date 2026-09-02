@@ -22,6 +22,8 @@ export class DeleteProjectUseCase implements UseCaseContract<
       throw new NotFoundException('Projeto não encontrado');
     }
 
+    project.ensureCanBeModified();
+
     await this.projectRepository.delete(input.id);
   }
 }

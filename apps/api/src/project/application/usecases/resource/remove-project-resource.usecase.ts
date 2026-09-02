@@ -27,6 +27,8 @@ export class RemoveProjectResourceUseCase implements UseCaseContract<
       throw new NotFoundException('Projeto não encontrado');
     }
 
+    project.ensureCanBeModified();
+
     const resource = await this.projectResourceRepository.findById(
       input.resourceId,
     );

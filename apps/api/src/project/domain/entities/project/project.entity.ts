@@ -38,6 +38,8 @@ export class ProjectEntity extends Entity<ProjectProps> {
     super(completeProps, id);
   }
   addTechnology(name: string, version?: string): ProjectTechnologyEntity {
+    this.ensureCanBeModified();
+
     return new ProjectTechnologyEntity({
       projectId: this.id,
       name,
@@ -51,6 +53,8 @@ export class ProjectEntity extends Entity<ProjectProps> {
     description?: string,
     executionOrder?: number,
   ): ProjectCommandEntity {
+    this.ensureCanBeModified();
+
     return new ProjectCommandEntity({
       projectId: this.id,
       title,
@@ -65,6 +69,8 @@ export class ProjectEntity extends Entity<ProjectProps> {
     url: string,
     type: ProjectResourceType,
   ): ProjectResourceEntity {
+    this.ensureCanBeModified();
+
     return new ProjectResourceEntity({
       projectId: this.id,
       label,
@@ -79,6 +85,8 @@ export class ProjectEntity extends Entity<ProjectProps> {
     if (Object.values(props).every((value) => value === undefined)) {
       return;
     }
+
+    this.ensureCanBeModified();
 
     const now = new Date();
     // Os spreads condicionais preservam campos ausentes. Nos campos anuláveis,
@@ -211,6 +219,14 @@ export class ProjectEntity extends Entity<ProjectProps> {
 
   private set updatedAt(updatedAt: Date) {
     this.props.updatedAt = updatedAt;
+  }
+
+  ensureCanBeModified(): void {
+    if (this.archivedAt !== undefined) {
+      throw new EntityValidationError({
+        archivedAt: ['Projetos arquivados são somente leitura'],
+      });
+    }
   }
 
   static validate(props: ProjectProps) {

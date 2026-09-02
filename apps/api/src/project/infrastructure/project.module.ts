@@ -112,10 +112,16 @@ import { GetProjectResourceUseCase } from '../application/usecases/resource/get-
     },
     {
       provide: GetProjectUseCase,
-      useFactory: (projectRepository: ProjectPrismaRepository) => {
-        return new GetProjectUseCase(projectRepository);
+      useFactory: (
+        projectRepository: ProjectPrismaRepository,
+        projectTechnologyRepository: ProjectTechnologyRepository,
+      ) => {
+        return new GetProjectUseCase(
+          projectRepository,
+          projectTechnologyRepository,
+        );
       },
-      inject: ['ProjectRepository'],
+      inject: ['ProjectRepository', 'ProjectTechnologyRepository'],
     },
     {
       provide: SearchTechnicalEntryUseCase,

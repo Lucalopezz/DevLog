@@ -3,6 +3,7 @@ import { ProjectStatusEnum } from '../../project-status-enum';
 import { ProjectCommandEntity } from '../../../command/project-command.entity';
 import { ProjectResourceEntity } from '../../../resource/project-resource.entity';
 import { ProjectResourceType } from '../../../resource/project-resource-type.enum';
+import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 
@@ -57,7 +58,7 @@ describe('ProjectEntity', () => {
     expect(project.updatedAt).toEqual(restoredAt);
   });
 
-  it('atualiza nome, descrição, status e caminho sem arquivar', () => {
+  it('atualiza nome, descrição, status e caminho enquanto ativo', () => {
     const project = new ProjectEntity(makeProps());
 
     project.update({
@@ -71,12 +72,37 @@ describe('ProjectEntity', () => {
     expect(project.description).toBe('Nova descrição');
     expect(project.status).toBe(ProjectStatusEnum.FINISHED);
     expect(project.localPath).toBe('/workspace/devlog');
+  });
+
+  it('mantém o status independente e torna o agregado somente leitura quando arquivado', () => {
+    const project = new ProjectEntity(
+      makeProps({ status: ProjectStatusEnum.FINISHED }),
+    );
 
     project.archive();
-    project.update({ status: ProjectStatusEnum.ACTIVE });
 
-    expect(project.archivedAt).toBeDefined();
-    expect(project.status).toBe(ProjectStatusEnum.ACTIVE);
+    expect(project.status).toBe(ProjectStatusEnum.FINISHED);
+    expect(() => project.update({ status: ProjectStatusEnum.ACTIVE })).toThrow(
+      EntityValidationError,
+    );
+    expect(() => project.addTechnology('NestJS')).toThrow(
+      EntityValidationError,
+    );
+    expect(() => project.addCommand('Subir API', 'pnpm dev')).toThrow(
+      EntityValidationError,
+    );
+    expect(() =>
+      project.addResource(
+        'Documentação',
+        'https://example.com',
+        ProjectResourceType.DOCUMENTATION,
+      ),
+    ).toThrow(EntityValidationError);
+
+    project.restore();
+    expect(() =>
+      project.update({ status: ProjectStatusEnum.ACTIVE }),
+    ).not.toThrow();
   });
 
   it('permite remover a descrição durante a atualização', () => {

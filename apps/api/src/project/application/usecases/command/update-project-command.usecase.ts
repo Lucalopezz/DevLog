@@ -42,6 +42,8 @@ export class UpdateProjectCommandUseCase implements UseCaseContract<
       throw new NotFoundException('Projeto não encontrado');
     }
 
+    project.ensureCanBeModified();
+
     const entity = await this.projectCommandRepository.findById(
       input.commandId,
     );
