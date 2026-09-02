@@ -171,8 +171,8 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar testes unitários para `CreateTechnicalEntryUseCase`.
 - [x] Criar testes da entidade técnica.
 - [ ] Ampliar os testes do repositório Prisma; a tradução do filtro de status e alguns fluxos de persistência estão cobertos, mas as demais combinações de filtros ainda não são exercitadas diretamente.
-- [ ] Corrigir a configuração do Jest e2e para resolver os imports relativos `.js` do cliente Prisma gerado; atualmente a suíte falha antes de executar qualquer teste.
-- [ ] Aplicar `applyGlobalConfig` também no bootstrap dos testes e2e, garantindo que eles exercitem o prefixo `/api`, validação, cookies e serialização usados em produção.
+- [x] Corrigir a configuração do Jest e2e para resolver os imports relativos `.js` do cliente Prisma gerado.
+- [x] Aplicar `applyGlobalConfig` também no bootstrap dos testes e2e, garantindo que eles exercitem o prefixo `/api`, validação, cookies e serialização usados em produção.
 - [ ] Substituir o teste e2e legado de `GET /` pelos fluxos de criação, listagem, consulta, atualização e exclusão de entradas técnicas.
 - [x] Validar UUIDs recebidos em `projectId` na criação/atualização e nos parâmetros `:id`; somente o `projectId` da busca já utiliza `@IsUUID`.
 - [x] Validar os limites persistidos pelo banco, especialmente `title` com no máximo 200 caracteres, para retornar erro de entrada em vez de erro de persistência.
@@ -357,21 +357,31 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 
 - [x] Criar casos de uso explícitos e idempotentes para arquivamento e restauração.
 - [x] Alterar o projeto para arquivado sem exclusão física, preenchendo `archivedAt`.
-- [ ] Definir a relação entre `archivedAt` e `ProjectStatus` (`ACTIVE`, `INACTIVE` ou `FINISHED`).
-- [ ] Impedir operações incompatíveis com projeto arquivado conforme as regras do domínio.
-- [ ] Preservar tecnologias, comandos e recursos relacionados; a preservação das entradas técnicas já está coberta na relação projeto × entrada.
+- [x] Definir a relação entre `archivedAt` e `ProjectStatus` (`ACTIVE`, `INACTIVE` ou `FINISHED`).
+- [x] Impedir operações incompatíveis com projeto arquivado conforme as regras do domínio.
+- [x] Preservar tecnologias, comandos e recursos relacionados; a preservação das entradas técnicas já está coberta na relação projeto × entrada.
 - [x] Criar os endpoints autenticados `PATCH /api/project/:id/archive` e `PATCH /api/project/:id/restore`.
 - [x] Testar arquivamento, restauração e autorização no caso de uso.
-- [ ] Testar a preservação dos relacionamentos por HTTP.
+- [x] Testar a preservação dos relacionamentos por HTTP.
+
+`archivedAt` é um eixo independente de `ProjectStatus`: arquivar não troca
+`ACTIVE`, `INACTIVE` ou `FINISHED`, e restaurar recupera o mesmo status. Enquanto
+arquivado, o agregado fica somente leitura; consultas continuam disponíveis,
+mas alterações no projeto, em tecnologias, comandos e recursos exigem a
+restauração explícita.
 
 ### ArchiveTechnicalEntry
 
-- [ ] Criar o caso de uso `ArchiveTechnicalEntry`.
-- [ ] Implementar arquivamento lógico da entrada sem exclusão física.
-- [ ] Definir o comportamento de entradas arquivadas na listagem e na consulta detalhada.
-- [ ] Impedir novas tentativas de solução em entrada arquivada.
-- [ ] Criar o endpoint de arquivamento.
-- [ ] Testar arquivamento, preservação do histórico e isolamento por usuário.
+- [x] Criar o caso de uso `ArchiveTechnicalEntry`.
+- [x] Implementar arquivamento lógico da entrada sem exclusão física.
+- [x] Definir o comportamento de entradas arquivadas na listagem e na consulta detalhada.
+- [x] Impedir novas tentativas de solução em entrada arquivada.
+- [x] Criar o endpoint de arquivamento.
+- [x] Testar arquivamento, preservação do histórico e isolamento por usuário.
+
+A listagem omite entradas arquivadas por padrão (`archivedAt = null`), enquanto
+a consulta detalhada continua retornando a entrada e seu histórico. O endpoint
+`PATCH /api/technical-entry/:id/archive` é autenticado e idempotente.
 
 ## 10. Entrega incremental sugerida
 
