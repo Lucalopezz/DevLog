@@ -141,6 +141,11 @@ describe('SearchTechnicalEntryUseCase', () => {
       perPage: 1,
     });
 
+    expect(repository.search.mock.calls[0][0].filter).toEqual({
+      userId: USER_ID,
+      archivedAt: null,
+    });
+
     expect(output).toEqual({
       items: [
         expect.objectContaining({

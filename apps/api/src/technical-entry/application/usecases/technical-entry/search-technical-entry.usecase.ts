@@ -78,7 +78,9 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
     if (input.title) filter.title = input.title;
     if (input.type) filter.type = input.type;
     if (input.status) filter.status = input.status;
-    if (input.archivedAt !== undefined) filter.archivedAt = input.archivedAt;
+
+    // Se for passado data de arquivamento, adiciona ao filtro, caso contrário, define como null para buscar apenas entradas não arquivadas
+    filter.archivedAt = input.archivedAt ?? null;
 
     const params = new TechnicalEntrySearchParams({
       page: input.page,
@@ -89,6 +91,7 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
     });
 
     const result = await this.technicalEntryRepository.search(params);
+    // "entry-1" => [tag1, tag2]
     const tagsByEntry = await this.technicalEntryTagRepository.findTags({
       // Passa os IDs das entradas técnicas encontradas para buscar as tags associadas
       technicalEntryIds: result.items.map((item) => item.id),

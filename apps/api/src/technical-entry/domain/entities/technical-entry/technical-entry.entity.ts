@@ -171,8 +171,21 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   }
 
   archive(): void {
-    this.archivedAt = new Date();
-    this.updateUpdatedAt();
+    if (this.archivedAt !== undefined) {
+      return;
+    }
+
+    const now = new Date();
+    const updatedProps = {
+      ...this.props,
+      archivedAt: now,
+      updatedAt: now,
+    };
+
+    TechnicalEntryEntity.validate(updatedProps);
+
+    this.archivedAt = now;
+    this.updatedAt = now;
   }
   get status(): TechnicalEntryStatus | undefined {
     if (this.type !== TechnicalEntryType.ISSUE) {
@@ -250,10 +263,6 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
 
   private set updatedAt(updatedAt: Date) {
     this.props.updatedAt = updatedAt;
-  }
-
-  private updateUpdatedAt(): void {
-    this.props.updatedAt = new Date();
   }
 
   static validate(props: TechnicalEntryProps): void {

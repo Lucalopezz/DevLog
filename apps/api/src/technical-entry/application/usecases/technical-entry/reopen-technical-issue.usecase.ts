@@ -1,10 +1,5 @@
-import {
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
-import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry/technical-entry-status.enum';
-import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry/technical-entry-type.enum';
 import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technical-entry/technical-entry.repository';
 import {
   TechnicalEntryOutput,
@@ -37,18 +32,8 @@ export class ReopenTechnicalIssueUseCase implements UseCaseContract<
       throw new NotFoundException('Entrada técnica não encontrada');
     }
 
-    if (technicalEntry.type !== TechnicalEntryType.ISSUE) {
-      throw new UnprocessableEntityException(
-        'Somente entradas do tipo ISSUE podem ser reabertas',
-      );
-    }
-
-    if (technicalEntry.status !== TechnicalEntryStatus.RESOLVED) {
-      throw new UnprocessableEntityException(
-        'Somente entradas RESOLVED podem ser reabertas',
-      );
-    }
-
+    // A entidade é a única fonte das regras da transição. Assim, qualquer
+    // chamador de reopen() recebe a mesma proteção, não apenas este caso de uso.
     technicalEntry.reopen();
 
     await this.technicalEntryRepository.update(technicalEntry);

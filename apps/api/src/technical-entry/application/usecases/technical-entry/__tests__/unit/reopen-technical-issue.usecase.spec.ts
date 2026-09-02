@@ -1,7 +1,4 @@
-import {
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { EntityValidationError } from '@/shared/domain/errors/entity-validation-error';
 import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry/technical-entry.entity';
 import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technical-entry/technical-entry-status.enum';
@@ -77,7 +74,11 @@ describe('ReopenTechnicalIssueUseCase', () => {
 
     await expect(
       useCase.execute({ id: ENTRY_ID, userId: USER_ID }),
-    ).rejects.toBeInstanceOf(UnprocessableEntityException);
+    ).rejects.toMatchObject({
+      error: {
+        resolvedAt: ['Somente entradas resolvidas podem ser reabertas'],
+      },
+    });
 
     expect(repository.update.mock.calls).toHaveLength(0);
   });
@@ -89,7 +90,11 @@ describe('ReopenTechnicalIssueUseCase', () => {
 
     await expect(
       useCase.execute({ id: ENTRY_ID, userId: USER_ID }),
-    ).rejects.toBeInstanceOf(UnprocessableEntityException);
+    ).rejects.toMatchObject({
+      error: {
+        type: ['Somente entradas do tipo ISSUE podem ser reabertas'],
+      },
+    });
 
     expect(repository.update.mock.calls).toHaveLength(0);
   });

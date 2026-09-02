@@ -4,6 +4,7 @@ import {
   type TechnicalEntryProps,
 } from '../../technical-entry.entity';
 import { TechnicalEntryType } from '../../technical-entry-type.enum';
+import { SolutionAttemptResult } from '../../../solution-attempt/solution-attempt-result.enum';
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const PROJECT_ID = '123e4567-e89b-42d3-a456-426614174010';
@@ -149,5 +150,39 @@ describe('TechnicalEntryEntity', () => {
 
     expect(() => entry.update({})).not.toThrow();
     expect(entry.updatedAt).toEqual(originalUpdatedAt);
+  });
+
+  it('arquiva de forma idempotente sem alterar resolução ou projeto', () => {
+    jest.useFakeTimers();
+    const archivedAt = new Date('2026-08-02T12:00:00.000Z');
+    jest.setSystemTime(archivedAt);
+    const entry = new TechnicalEntryEntity(
+      makeProps({
+        projectId: PROJECT_ID,
+        conclusion: 'A porta foi liberada',
+        resolvedAt: new Date('2026-08-02T10:00:00.000Z'),
+      }),
+    );
+
+    entry.archive();
+    jest.setSystemTime(new Date('2026-08-03T12:00:00.000Z'));
+    entry.archive();
+
+    expect(entry.archivedAt).toEqual(archivedAt);
+    expect(entry.updatedAt).toEqual(archivedAt);
+    expect(entry.projectId).toBe(PROJECT_ID);
+    expect(entry.status).toBe('RESOLVED');
+  });
+
+  it('impede novas tentativas após o arquivamento', () => {
+    const entry = new TechnicalEntryEntity(makeProps());
+    entry.archive();
+
+    expect(() =>
+      entry.addSolutionAttempt(
+        'Reiniciar o processo',
+        SolutionAttemptResult.FAILED,
+      ),
+    ).toThrow(EntityValidationError);
   });
 });
