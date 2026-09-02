@@ -9,24 +9,27 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 > [!NOTE]
 > Uma tarefa só deve ser marcada como concluída quando existir implementação verificável no backend. A presença de uma tabela no Prisma, por exemplo, não significa que o caso de uso e os endpoints correspondentes já estejam prontos.
 
+> [!NOTE]
+> Revisão em 2026-09-01: o escopo funcional principal do MVP está implementado e validado pelo build e pelos testes unitários da API (69 suítes, 335 testes). Permanecem abertas apenas lacunas funcionais explícitas (como filtro por tag e agregação completa de projeto), decisões pós-MVP e cobertura HTTP complementar.
+
 ## Regras transversais
 
-- [ ] Garantir que todo recurso tenha `userId` e pertença ao usuário autenticado.
-- [ ] Impedir leitura, alteração ou exclusão lógica de recursos pertencentes a outro usuário.
-- [ ] Definir os estados e tipos documentados:
+- [x] Garantir que todo recurso tenha um proprietário verificável: `userId` direto em usuários, projetos, entradas e tags; recursos filhos usam a propriedade do projeto ou da entrada pai.
+- [x] Impedir leitura, alteração ou exclusão lógica de recursos pertencentes a outro usuário.
+- [x] Definir os estados e tipos documentados:
   - [x] `TechnicalEntry.type`: `ISSUE` ou `LEARNING`.
   - [x] Status de problema: a entidade retorna `OPEN` quando `resolvedAt` está vazio e `RESOLVED` quando está preenchido; no MVP, o status não possui coluna própria.
-  - [x] Status de projeto: `ACTIVE`, `INACTIVE` ou `FINISHED`; o enum, a validação e a atualização já existem. Ainda falta definir como esses estados se relacionam ao arquivamento lógico por `archivedAt`.
+  - [x] Status de projeto: `ACTIVE`, `INACTIVE` ou `FINISHED`; o enum, a validação e a atualização já existem. `archivedAt` é independente do status (e `INACTIVE` é mapeado para `PAUSED` no schema Prisma).
   - [x] Resultado de tentativa: `FAILED`, `PARTIAL` ou `SUCCESSFUL` no schema Prisma.
 - [ ] Padronizar erros de validação, autenticação, autorização e recurso não encontrado.
-- [ ] Definir DTOs, validações de entrada, respostas HTTP e contratos de cada endpoint.
-- [ ] Criar testes unitários para regras de domínio e casos de uso.
+- [x] Definir DTOs, validações de entrada, respostas HTTP e contratos de cada endpoint.
+- [x] Criar testes unitários para as principais regras de domínio e casos de uso; as lacunas específicas de cobertura permanecem indicadas abaixo.
 - [ ] Criar testes end-to-end para os fluxos HTTP principais.
 
 ## 1. Fundação compartilhada
 
 - [x] Definir a estrutura dos módulos por feature em `apps/api/src/`. -> shared, user, auth e technicalEntry.
-- [ ] Definir entidades, identificadores, datas de criação/atualização e estratégia de arquivamento lógico.
+- [x] Definir entidades, identificadores, datas de criação/atualização e estratégia de arquivamento lógico.
 - [x] Configurar o schema do banco e a migration inicial para usuários, projetos, entradas, tags e seus relacionamentos.
 - [x] Definir as interfaces de repositório compartilhadas e as de usuário, projeto, entrada técnica e tag.
 - [x] Implementar os adaptadores Prisma para usuário, projeto, entrada técnica, relação entrada × tag e tag.
@@ -57,7 +60,7 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Gerar JWT após autenticação válida.
 - [x] Enviar o token por cookie HttpOnly com `secure`, `sameSite`, `maxAge` e `path` configurados.
 - [x] Criar o endpoint `POST /api/auth/login`.
-- [ ] Testar login válido, usuário inexistente, senha incorreta e criação do cookie.
+- [x] Testar login válido, usuário inexistente, senha incorreta e criação do cookie.
 
 ### GetCurrentUser
 
@@ -161,8 +164,8 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o caso de uso `DeleteTechnicalEntry` com verificação do proprietário.
 - [x] Criar o endpoint autenticado `DELETE /api/technical-entry/:id` com resposta `204 No Content`.
 - [x] Testar exclusão e isolamento entre usuários em teste unitário.
-- [ ] Decidir se a exclusão física faz parte do produto ou se deve ser substituída por `ArchiveTechnicalEntry`, como definido nos casos de uso e na seção de arquivamento deste backlog.
-- [ ] Se a exclusão física for mantida, documentar explicitamente que ela também remove tentativas e relações com tags por `ON DELETE CASCADE`.
+- [x] Decidir se a exclusão física faz parte do produto ou se deve ser substituída por `ArchiveTechnicalEntry`, como definido nos casos de uso e na seção de arquivamento deste backlog. No MVP, a exclusão física permanece disponível em `DELETE /api/technical-entry/:id`; o arquivamento lógico é a alternativa explícita para preservar o registro.
+- [x] Documentar que a exclusão física de uma entrada também remove tentativas e relações com tags por `ON DELETE CASCADE`, conforme as relações no schema Prisma.
 
 ### Pendências encontradas na revisão da etapa
 
@@ -321,8 +324,8 @@ O passo a passo da autenticação está em [`docs/guides/authentication_workflow
 - [x] Criar o caso de uso `RemoveProjectTechnology`.
 - [x] Remover a tecnologia sem remover tags ou entradas técnicas com o mesmo nome.
 - [x] Criar os endpoints de adicionar e remover tecnologia.
-- [x] Testar duplicidade, autorização e independência entre tecnolo- 
-- [ ] **Pós-MVP:** permitir atualizar `name` e `version` de uma tecnologia do projeto do projeto.
+- [x] Testar duplicidade, autorização e independência entre tecnologias.
+- [ ] **Pós-MVP:** permitir atualizar `name` e `version` de uma tecnologia do projeto.
 
 ### Project Commands
 
@@ -385,24 +388,24 @@ a consulta detalhada continua retornando a entrada e seu histórico. O endpoint
 
 ## 10. Entrega incremental sugerida
 
-- [ ] Entregar a fundação compartilhada.
-- [ ] Entregar cadastro, login, usuário atual e logout.
-- [ ] Entregar criação, consulta, listagem e atualização de entradas técnicas.
-- [ ] Entregar criação, listagem e relacionamento de tags.
-- [ ] Entregar criação, consulta, listagem e atualização de projetos.
-- [ ] Entregar relacionamento entre projetos e entradas.
-- [ ] Entregar tentativas, resolução e reabertura de problemas.
-- [ ] Entregar tecnologias, comandos e recursos de projetos.
-- [ ] Entregar arquivamento de projetos e entradas.
+- [x] Entregar a fundação compartilhada; permanecem abertas a padronização global de erros e a cobertura HTTP.
+- [x] Entregar cadastro, login, usuário atual e logout.
+- [x] Entregar criação, consulta, listagem e atualização de entradas técnicas.
+- [x] Entregar criação, listagem e relacionamento de tags.
+- [x] Entregar criação, consulta, listagem e atualização de projetos.
+- [x] Entregar relacionamento entre projetos e entradas.
+- [x] Entregar tentativas, resolução e reabertura de problemas.
+- [x] Entregar tecnologias, comandos e recursos de projetos.
+- [x] Entregar arquivamento de projetos e entradas.
 - [ ] Revisar documentação da API e atualizar os testes de regressão a cada etapa.
 
 ## Critério de conclusão do backend do MVP
 
-- [ ] Um usuário consegue se cadastrar, autenticar, consultar a própria conta e sair.
-- [ ] Um usuário autenticado consegue criar e consultar projetos.
-- [ ] Um usuário autenticado consegue criar, atualizar, listar e consultar entradas técnicas.
-- [ ] Entradas podem ser relacionadas a projetos e tags do mesmo usuário.
+- [x] Um usuário consegue se cadastrar, autenticar, consultar a própria conta e sair.
+- [x] Um usuário autenticado consegue criar e consultar projetos.
+- [x] Um usuário autenticado consegue criar, atualizar, listar e consultar entradas técnicas.
+- [x] Entradas podem ser relacionadas a projetos e tags do mesmo usuário.
 - [ ] A listagem de entradas suporta busca e filtros documentados.
-- [ ] Problemas podem registrar tentativas, ser resolvidos e reabertos.
-- [ ] Nenhum usuário consegue acessar dados de outro usuário.
+- [x] Problemas podem registrar tentativas, ser resolvidos e reabertos.
+- [x] Nenhum usuário consegue acessar dados de outro usuário.
 - [ ] Os principais fluxos possuem testes unitários e end-to-end.
