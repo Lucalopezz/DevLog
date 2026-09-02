@@ -13,7 +13,9 @@ dos arquivos indicados:
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
 | Quero entender o objetivo, o escopo e as decisões gerais do produto                  | [`decisions/devlog-decisoes.md`](decisions/devlog-decisoes.md)                 |
 | Quero saber como o banco foi modelado e por que as tabelas se relacionam dessa forma | [`decisions/database.md`](decisions/database.md)                               |
-| Quero saber o que o sistema deve fazer                                               | [`usecases/cases.md`](usecases/cases.md)                                       |
+| Quero saber o que a API implementa hoje                                              | [`usecases/README.md`](usecases/README.md)                                     |
+| Quero consultar a especificação histórica/planejada do MVP                           | [`usecases/cases.md`](usecases/cases.md)                                       |
+| Quero consultar os diagramas UML                                                     | [`diagrams/README.md`](diagrams/README.md)                                     |
 | Quero saber o que ainda falta implementar no backend                                 | [`backlog/backend.md`](backlog/backend.md)                                     |
 | Quero configurar o ambiente e conectar a API ao PostgreSQL                           | [`guides/configs_workflow.md`](guides/configs_workflow.md)                     |
 | Quero entender ou implementar autenticação                                           | [`guides/authentication_workflow.md`](guides/authentication_workflow.md)       |
@@ -65,7 +67,7 @@ Consulte essa pasta quando a pergunta for “o que ainda precisa ser feito?”.
 1. Leia o [README da raiz](../README.md) para executar o projeto.
 2. Leia [`decisions/devlog-decisoes.md`](decisions/devlog-decisoes.md) para
    entender o produto.
-3. Consulte [`usecases/cases.md`](usecases/cases.md) para entender as regras.
+3. Consulte [`usecases/README.md`](usecases/README.md) para entender as regras implementadas.
 4. Escolha um guia técnico relacionado à dúvida.
 5. Confira [`backlog/backend.md`](backlog/backend.md) antes de implementar uma
    nova tarefa.

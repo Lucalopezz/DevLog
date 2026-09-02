@@ -1,0 +1,126 @@
+@startuml DevLogUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam actorStyle awesome
+
+actor Visitante
+actor "Usuário autenticado" as AuthUser
+Visitante <|-- AuthUser
+
+rectangle "API DevLog" {
+  package "Conta e autenticação" {
+    usecase "Cadastrar usuário" as UC01
+    usecase "Autenticar usuário" as UC02
+    usecase "Encerrar sessão" as UC03
+    usecase "Consultar perfil" as UC04
+    usecase "Atualizar perfil" as UC05
+    usecase "Alterar senha" as UC06
+  }
+
+  package "Tags" {
+    usecase "Criar tag" as UC07
+    usecase "Pesquisar tags" as UC08
+    usecase "Excluir tag" as UC09
+  }
+
+  package "Projetos" {
+    usecase "Criar projeto" as UC10
+    usecase "Pesquisar projetos" as UC11
+    usecase "Consultar projeto" as UC12
+    usecase "Pesquisar registros\ndo projeto" as UC13
+    usecase "Atualizar projeto" as UC14
+    usecase "Arquivar projeto" as UC15
+    usecase "Restaurar projeto" as UC16
+    usecase "Excluir projeto" as UC17
+  }
+
+  package "Detalhes do projeto" {
+    usecase "Adicionar tecnologia" as UC18
+    usecase "Remover tecnologia" as UC19
+    usecase "Adicionar comando" as UC20
+    usecase "Pesquisar comandos" as UC21
+    usecase "Consultar comando" as UC22
+    usecase "Atualizar comando" as UC23
+    usecase "Remover comando" as UC24
+    usecase "Adicionar recurso" as UC25
+    usecase "Pesquisar recursos" as UC26
+    usecase "Consultar recurso" as UC27
+    usecase "Atualizar recurso" as UC28
+    usecase "Remover recurso" as UC29
+  }
+
+  package "Diário técnico" {
+    usecase "Criar registro técnico" as UC30
+    usecase "Pesquisar registros" as UC31
+    usecase "Consultar registro" as UC32
+    usecase "Atualizar registro" as UC33
+    usecase "Resolver problema" as UC34
+    usecase "Reabrir problema" as UC35
+    usecase "Arquivar registro" as UC36
+    usecase "Excluir registro" as UC37
+    usecase "Atribuir tag" as UC38
+    usecase "Remover tag" as UC39
+    usecase "Adicionar tentativa" as UC40
+    usecase "Listar tentativas" as UC41
+    usecase "Atualizar tentativa" as UC42
+    usecase "Remover tentativa" as UC43
+  }
+}
+
+Visitante -- UC01
+Visitante -- UC02
+Visitante -- UC03
+
+AuthUser -- UC04
+AuthUser -- UC05
+AuthUser -- UC06
+AuthUser -- UC07
+AuthUser -- UC08
+AuthUser -- UC09
+AuthUser -- UC10
+AuthUser -- UC11
+AuthUser -- UC12
+AuthUser -- UC13
+AuthUser -- UC14
+AuthUser -- UC15
+AuthUser -- UC16
+AuthUser -- UC17
+AuthUser -- UC18
+AuthUser -- UC19
+AuthUser -- UC20
+AuthUser -- UC21
+AuthUser -- UC22
+AuthUser -- UC23
+AuthUser -- UC24
+AuthUser -- UC25
+AuthUser -- UC26
+AuthUser -- UC27
+AuthUser -- UC28
+AuthUser -- UC29
+AuthUser -- UC30
+AuthUser -- UC31
+AuthUser -- UC32
+AuthUser -- UC33
+AuthUser -- UC34
+AuthUser -- UC35
+AuthUser -- UC36
+AuthUser -- UC37
+AuthUser -- UC38
+AuthUser -- UC39
+AuthUser -- UC40
+AuthUser -- UC41
+AuthUser -- UC42
+AuthUser -- UC43
+
+note bottom of UC34
+  Apenas ISSUE em estado OPEN.
+end note
+note bottom of UC40
+  Apenas ISSUE não arquivada.
+end note
+note bottom of UC14
+  Projeto arquivado é somente leitura.
+end note
+
+@enduml

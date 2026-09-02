@@ -1,4 +1,9 @@
-# DevLog — Use Cases
+# DevLog — Casos de uso planejados (documento histórico)
+
+> [!WARNING]
+> Este arquivo registra a visão originalmente planejada do MVP e pode conter
+> comportamentos ainda não expostos pela API. Para a documentação **as is**,
+> extraída do código atual, comece pelo [índice de casos de uso](README.md).
 
 Este documento representa os principais casos de uso do MVP do DevLog.
 
