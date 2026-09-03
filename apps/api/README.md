@@ -1,101 +1,154 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# DevLog API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend do DevLog. A API transforma o diário técnico em recursos persistidos,
+organizados por usuário e projeto: entradas sobre problemas e aprendizados,
+tentativas de solução, tags, tecnologias, comandos e links úteis.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Estado atual
 
-## Description
+A API já possui os módulos de:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- autenticação por JWT em cookie `httpOnly`;
+- cadastro e edição do usuário autenticado;
+- projetos, com status, arquivamento e restauração;
+- entradas técnicas dos tipos `ISSUE` e `LEARNING`;
+- tentativas de solução e resolução/reabertura de problemas;
+- tags associadas às entradas;
+- tecnologias, comandos e recursos vinculados a projetos.
 
-## Project setup
+Todas as rotas, exceto o cadastro de usuário e o fluxo de autenticação, exigem
+um usuário autenticado. O prefixo global da API é `/api`.
 
-```bash
-$ pnpm install
+## Tecnologias e responsabilidades
+
+- **NestJS** organiza a aplicação em módulos e expõe os controllers HTTP.
+- **Prisma** mapeia o domínio para o PostgreSQL e versiona o banco por meio de
+  migrations.
+- **PostgreSQL** armazena usuários, projetos e registros técnicos.
+- **Jest** cobre regras unitárias, integração com o banco e fluxos HTTP.
+- **Cookie de sessão** transporta o JWT. O cliente precisa enviar credenciais
+  nas requisições cross-origin.
+
+## Organização do código
+
+Cada recurso possui uma fronteira própria em `src/`:
+
+```text
+src/
+  auth/              # login, logout, guard e usuário autenticado
+  user/              # cadastro e perfil
+  project/           # projetos e seus recursos auxiliares
+  technical-entry/   # entradas, tags e tentativas de solução
+  tag/               # catálogo de tags do usuário
+  shared/            # banco, configuração, pipes, filtros e presenters
+  app.module.ts      # composição dos módulos
+  main.ts            # inicialização e configuração global
 ```
 
-## Compile and run the project
+Dentro das features, a separação principal é:
+
+- `domain/`: entidades, regras e contratos do domínio;
+- `application/`: casos de uso e DTOs de entrada/saída;
+- `infrastructure/`: controllers, módulos, repositórios Prisma e presenters.
+
+Os casos de uso recebem o `userId` do `AuthGuard`, nunca do corpo enviado pelo
+cliente. Buscas e alterações validam a propriedade do recurso para impedir que
+um usuário acesse dados de outro. A justificativa dessa decisão está em
+[`docs/resource-ownership-validation.md`](docs/resource-ownership-validation.md).
+
+## Configuração local
+
+Na raiz do monorepo, instale as dependências e inicie o PostgreSQL:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm install
+cp .env.example .env
+pnpm db:up
 ```
 
-## Run tests
+Configure as variáveis da API em `apps/api/.env`:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# integration tests (requires the test database)
-$ pnpm run test:integration
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+cp apps/api/.env.example apps/api/.env
 ```
 
-## Deployment
+O arquivo deve conter, no mínimo:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+| Variável | Uso |
+| --- | --- |
+| `PORT` | Porta HTTP; padrão `3000` |
+| `NODE_ENV` | Ambiente, normalmente `development` |
+| `DATABASE_URL` | URL de conexão com o PostgreSQL |
+| `JWT_SECRET` | Segredo usado para assinar os tokens |
+| `CORS_ALLOWED_ORIGINS` | Origens permitidas pelo frontend |
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Depois da primeira instalação, aplique as migrations e gere o cliente Prisma:
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm --filter api exec prisma generate
+pnpm --filter api exec prisma migrate deploy
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+O serviço de configuração lê `JWT_EXPIRES_IN_SECONDS` para a duração do JWT.
+Os arquivos de exemplo ainda usam o nome legado `JWT_EXPIRES_IN`; se a duração
+precisar ser alterada, use o nome lido pelo serviço ou alinhe os exemplos em
+uma alteração futura.
 
-## Resources
+## Executar
 
-Check out a few resources that may come in handy when working with NestJS:
+Com o banco disponível:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+# somente a API, com reload automático
+pnpm --filter api dev
 
-## Support
+# todos os apps do monorepo
+pnpm dev
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Por padrão, a API fica disponível em `http://localhost:3000/api`.
 
-## Stay in touch
+## Principais grupos de rotas
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Os controllers são a fonte de verdade dos detalhes de payload e paginação.
+Este resumo ajuda a encontrar o ponto de entrada de cada caso de uso:
 
-## License
+| Grupo | Exemplos | Acesso |
+| --- | --- | --- |
+| Auth | `POST /api/auth/login`, `POST /api/auth/logout` | login/logout |
+| Users | `POST /api/users`, `GET /api/users/me` | cadastro / autenticado |
+| Projects | `GET`, `POST` e `PATCH /api/project/...` | autenticado |
+| Entries | `GET`, `POST`, `PATCH` e `DELETE /api/technical-entry/...` | autenticado |
+| Tags | `GET`, `POST` e `DELETE /api/tag/...` | autenticado |
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Projetos também expõem sub-recursos para entradas técnicas, tecnologias,
+comandos e recursos. Entradas expõem tags e tentativas de solução.
+
+## Testes e qualidade
+
+```bash
+pnpm --filter api lint
+pnpm --filter api test
+pnpm --filter api test:cov
+```
+
+Os testes de integração e end-to-end usam um PostgreSQL separado. Suba esse
+banco antes dos testes e encerre-o ao terminar:
+
+```bash
+pnpm --filter api db:test:up
+pnpm --filter api test:integration
+pnpm --filter api test:e2e
+pnpm --filter api db:test:down
+```
+
+O banco de testes usa `apps/api/.env.test` e, por padrão, a porta `5433`.
+`db:test:reset` remove os dados desse banco; use-o somente quando essa limpeza
+for intencional.
+
+## Migrações
+
+O schema está em [`prisma/schema.prisma`](prisma/schema.prisma) e as alterações
+versionadas ficam em [`prisma/migrations`](prisma/migrations). Durante o
+desenvolvimento, altere o schema com cuidado e registre uma migration antes de
+compartilhar a mudança com o restante do time.
