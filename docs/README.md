@@ -22,6 +22,7 @@ dos arquivos indicados:
 | Quero entender a validação das entidades                                             | [`guides/entity_validation_workflow.md`](guides/entity_validation_workflow.md) |
 | Quero entender onde ficam e como executar os testes                                  | [`guides/testing.md`](guides/testing.md)                                       |
 | Quero entender como os módulos do backend são organizados                            | [`guides/backend_structure.md`](guides/backend_structure.md)                   |
+| Quero entender como o frontend é organizado                                          | [`guides/frontend_structure.md`](guides/frontend_structure.md)                  |
 | Quero entender a estrutura do monorepo                                               | [`guides/monorepo.md`](guides/monorepo.md)                                     |
 | Procuro comandos usados com frequência                                               | [`guides/utils.md`](guides/utils.md)                                           |
 | Quero consultar anotações de modelagem feitas durante o estudo                       | [`anotations.md`](anotations.md)                                               |
