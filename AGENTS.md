@@ -35,6 +35,8 @@ Run commands from the repository root using pnpm 11.18.0.
 
 Write TypeScript throughout. Follow the nearest ESLint configuration: `apps/api` uses ESLint with Prettier, while `apps/web` uses ESLint with React Hooks and React Refresh rules. Format API TypeScript with `pnpm --filter api format`; let Prettier determine spacing and line endings. Use PascalCase for React components, Nest classes, and interfaces; camelCase for functions and variables; and kebab-case filenames such as `user-profile.tsx`. Keep Nest modules, controllers, and services grouped by feature under `apps/api/src/`.
 
+For frontend styling, prefer the Tailwind spacing and sizing scale over arbitrary values when an equivalent utility exists (for example, use `size-128` instead of `size-[32rem]`). Use `rem` for custom CSS dimensions and arbitrary Tailwind values; do not introduce CSS dimensions in `px`. Remember that utility names such as `px-6` represent horizontal padding tokens and are not pixel units.
+
 ## Testing Guidelines
 
 API unit tests use Jest and belong beside source as `*.spec.ts`. End-to-end tests belong in `apps/api/test/` and use the `*.e2e-spec.ts` convention with Supertest. Add tests for new backend behavior and run the smallest relevant test command before submitting. The web app has no test runner configured yet; at minimum run its lint and build commands after frontend changes.

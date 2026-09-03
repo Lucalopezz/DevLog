@@ -85,6 +85,6 @@ html.dark {
 
   body {
     @apply bg-background text-foreground;
-    min-width: 320px;
+    min-width: 20rem;
   }
 }

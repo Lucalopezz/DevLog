@@ -11,8 +11,8 @@ function HomePage() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
       >
-        <div className="absolute left-1/2 top-[-18rem] size-[36rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute bottom-[-16rem] right-[-12rem] size-[32rem] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute left-1/2 -top-72 size-144 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -right-48 -bottom-64 size-128 rounded-full bg-primary/5 blur-3xl" />
       </div>
 
       <div className="mx-auto flex min-h-svh w-full max-w-4xl flex-col justify-center gap-10 px-6 py-16 sm:px-8">
