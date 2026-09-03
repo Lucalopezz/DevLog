@@ -21,6 +21,27 @@ Prefer teaching and explaining over simply providing a finished implementation.
 
 The goal is for me to learn as much as possible from every change.
 
+### Didactic Code Comments
+
+When implementing code, add concise comments in the places where the logic may
+not be obvious to someone learning the subject. Comments should explain the
+reasoning and the flow, not merely repeat what the code already says.
+
+In particular, make the following explicit when they are relevant:
+
+- How hooks cooperate and what responsibility each hook has.
+- How data flows through forms, schemas, resolvers, mutations, and API calls.
+- Why a design or implementation approach was chosen over reasonable alternatives.
+- How asynchronous states such as loading, success, and error are handled.
+- Important accessibility, architectural, or TypeScript concepts involved.
+- Trade-offs, limitations, and topics that are worth studying further.
+
+Prefer comments close to the code they explain, using examples or short
+step-by-step explanations when that improves understanding. Avoid excessive
+comments on self-explanatory lines and avoid comments that can become stale;
+keep the implementation readable enough that comments complement the code
+instead of replacing it.
+
 ## Build, Test, and Development Commands
 
 Run commands from the repository root using pnpm 11.18.0.
