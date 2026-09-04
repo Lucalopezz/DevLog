@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
 import { FormInput } from '@/components/ui/form-input'
 import { useRegister } from '@/features/auth/hooks/use-register'
-import { registerSchema } from '@/features/auth/register.schema'
-import type { RegisterFormData } from '@/features/auth/types'
+import { registerSchema } from '@/features/auth/schemas/register.schema'
+import type { RegisterFormData } from '@/features/auth/types/auth'
 
 export default function RegisterPage() {
   const registerMutation = useRegister()

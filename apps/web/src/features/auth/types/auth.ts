@@ -1,6 +1,6 @@
 import type { z } from 'zod'
-import type { loginSchema } from './login.schema'
-import type { registerSchema } from './register.schema'
+import type { loginSchema } from '../schemas/login.schema'
+import type { registerSchema } from '../schemas/register.schema'
 
 export type User = {
   id: string

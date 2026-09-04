@@ -5,12 +5,12 @@ import { Form } from '@/components/ui/form'
 import { FormInput } from '@/components/ui/form-input'
 import { useLogin } from '@/features/auth/hooks/use-login'
 import { useLoginForm } from '@/features/auth/hooks/use-login-form'
-import type { LoginFormData } from '@/features/auth/types'
+import type { LoginFormData } from '@/features/auth/types/auth'
 
 /**
  * Formulário responsável apenas pela interface e pela orquestração do login.
  *
- * A regra de validação fica no schema (login.schema.ts), a configuração do
+ * A regra de validação fica no schema (schemas/login.schema.ts), a configuração do
  * React Hook Form fica em useLoginForm e a chamada HTTP fica em useLogin.
  * Separar essas responsabilidades deixa o componente mais fácil de entender
  * e permite reutilizar a mesma lógica em outros lugares, se necessário.

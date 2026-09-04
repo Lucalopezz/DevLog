@@ -1,7 +1,7 @@
 import { isAxiosError } from "axios";
 import { redirect } from "react-router";
 import { currentUserQueryKey, getCurrentUser } from "@/features/auth/api/get-current-user";
-import type { User } from "@/features/auth/types";
+import type { User } from "@/features/auth/types/auth";
 import { queryClient } from "@/lib/query-client";
 
 /**

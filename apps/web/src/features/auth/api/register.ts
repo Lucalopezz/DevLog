@@ -1,5 +1,5 @@
 import { api } from '@/api/http'
-import type { RegisterFormData, User } from '../types'
+import type { RegisterFormData, User } from '../types/auth'
 
 export async function registerUser(input: RegisterFormData): Promise<User> {
   // O backend cria o usuário em POST /users, mas não inicia a sessão.
