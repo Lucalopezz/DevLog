@@ -1,5 +1,6 @@
 import type { z } from 'zod'
 import type { loginSchema } from './login.schema'
+import type { registerSchema } from './register.schema'
 
 export type User = {
   id: string
@@ -9,3 +10,5 @@ export type User = {
 
 // Infere o tipo de dados do formulário a partir do schema do Zod
 export type LoginFormData = z.infer<typeof loginSchema>
+
+export type RegisterFormData = z.infer<typeof registerSchema>
