@@ -32,7 +32,7 @@ export function LoginForm() {
       // submit. Assim, o React Hook Form mantém `isSubmitting` correto.
       await loginMutation.mutateAsync(data)
     } catch {
-      // A mutation já registra o erro em `isError`. Capturamos a exceção para
+      // O hook exibe o erro do servidor via toast. Capturamos a exceção para
       // evitar uma Promise rejeitada não tratada no evento de submit.
     }
   }
@@ -71,12 +71,6 @@ export function LoginForm() {
             type="password"
           />
         </div>
-
-        {loginMutation.isError ? (
-          <p className="text-sm text-destructive" role="alert">
-            Não foi possível entrar. Verifique seu e-mail e sua senha e tente novamente.
-          </p>
-        ) : null}
 
         <Button className="w-full" disabled={isLoading} size="lg" type="submit">
           {isLoading ? 'Entrando...' : 'Entrar'}

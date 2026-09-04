@@ -26,7 +26,8 @@ export default function RegisterPage() {
     try {
       await registerMutation.mutateAsync(data)
     } catch {
-      // O estado de erro continua disponível em registerMutation para a UI.
+      // O hook exibe o erro do servidor via toast; o catch evita uma Promise
+      // rejeitada não tratada no evento de submit.
     }
   }
 
@@ -74,12 +75,6 @@ export default function RegisterPage() {
             name="confirmPassword"
             type="password"
           />
-
-          {registerMutation.isError ? (
-            <p className="text-sm text-destructive" role="alert">
-              Não foi possível criar a conta. Verifique os dados e tente novamente.
-            </p>
-          ) : null}
 
           <Button className="w-full" disabled={isLoading} type="submit">
             {isLoading ? 'Criando...' : 'Criar conta'}
