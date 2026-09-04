@@ -1,20 +1,18 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import type { SubmitHandler } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'
+
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
+import { FormInput } from '@/components/ui/form-input'
 import { useRegister } from '@/features/auth/hooks/use-register'
 import { registerSchema } from '@/features/auth/register.schema'
 import type { RegisterFormData } from '@/features/auth/types'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 
 export default function RegisterPage() {
   const registerMutation = useRegister()
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterFormData>({
+  const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
@@ -32,7 +30,7 @@ export default function RegisterPage() {
     }
   }
 
-  const isLoading = isSubmitting || registerMutation.isPending
+  const isLoading = form.formState.isSubmitting || registerMutation.isPending
 
   return (
     <section className="mx-auto w-full max-w-md space-y-6">
@@ -43,94 +41,58 @@ export default function RegisterPage() {
         </p>
       </header>
 
-      <form
-        className="space-y-5 rounded-2xl border bg-card p-6"
-        noValidate
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <div className="space-y-2">
-          <label className="text-sm font-medium" htmlFor="name">
-            Nome
-          </label>
-          <Input {...register('name')} id="name" autoComplete="name" />
-          {errors.name ? (
-            <p className="text-sm text-destructive" role="alert">
-              {errors.name.message}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium" htmlFor="register-email">
-            E-mail
-          </label>
-          <Input
-            {...register('email')}
-            id="register-email"
+      <Form {...form}>
+        <form
+          className="space-y-5 rounded-2xl border bg-card p-6"
+          noValidate
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <FormInput
+            autoComplete="name"
+            control={form.control}
+            label="Nome"
+            name="name"
+          />
+          <FormInput
             autoComplete="email"
+            control={form.control}
+            label="E-mail"
+            name="email"
             type="email"
           />
-          {errors.email ? (
-            <p className="text-sm text-destructive" role="alert">
-              {errors.email.message}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium" htmlFor="register-password">
-            Senha
-          </label>
-          <Input
-            {...register('password')}
-            id="register-password"
+          <FormInput
             autoComplete="new-password"
+            control={form.control}
+            label="Senha"
+            name="password"
             type="password"
           />
-          {errors.password ? (
-            <p className="text-sm text-destructive" role="alert">
-              {errors.password.message}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="space-y-2">
-          <label
-            className="text-sm font-medium"
-            htmlFor="register-confirm-password"
-          >
-            Confirmar senha
-          </label>
-          <Input
-            {...register('confirmPassword')}
-            id="register-confirm-password"
+          <FormInput
             autoComplete="new-password"
+            control={form.control}
+            label="Confirmar senha"
+            name="confirmPassword"
             type="password"
           />
-          {errors.confirmPassword ? (
+
+          {registerMutation.isError ? (
             <p className="text-sm text-destructive" role="alert">
-              {errors.confirmPassword.message}
+              Não foi possível criar a conta. Verifique os dados e tente novamente.
             </p>
           ) : null}
-        </div>
 
-        {registerMutation.isError ? (
-          <p className="text-sm text-destructive" role="alert">
-            Não foi possível criar a conta. Verifique os dados e tente novamente.
+          <Button className="w-full" disabled={isLoading} type="submit">
+            {isLoading ? 'Criando...' : 'Criar conta'}
+          </Button>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Já possui uma conta?{' '}
+            <Link className="underline underline-offset-4" to="/login">
+              Entrar
+            </Link>
           </p>
-        ) : null}
-
-        <Button className="w-full" disabled={isLoading} type="submit">
-          {isLoading ? 'Criando...' : 'Criar conta'}
-        </Button>
-
-        <p className="text-center text-sm text-muted-foreground">
-          Já possui uma conta?{' '}
-          <Link className="underline underline-offset-4" to="/login">
-            Entrar
-          </Link>
-        </p>
-      </form>
+        </form>
+      </Form>
     </section>
   )
 }
