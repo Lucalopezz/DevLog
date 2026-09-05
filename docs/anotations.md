@@ -2,6 +2,8 @@
 
 Este é o próximo exercício recomendado para o frontend do DevLog.
 
+Or run codex resume and select Documente a feature projects.
+
 ## Objetivo deste exercício
 
 Implementar uma primeira versão da tela de projetos com uma fatia vertical
