@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import {
   CircleUserRound,
+  FolderKanban,
   LogIn,
   LogOut,
   UserPlus,
@@ -84,6 +85,12 @@ export function AppSidebar() {
                 <SidebarLink end to="/">
                   <CircleUserRound />
                   <span>Início</span>
+                </SidebarLink>
+              </SidebarMenu>
+              <SidebarMenu>
+                <SidebarLink end to="/projects">
+                  <FolderKanban />
+                  <span>Projetos</span>
                 </SidebarLink>
               </SidebarMenu>
             </SidebarGroupContent>
