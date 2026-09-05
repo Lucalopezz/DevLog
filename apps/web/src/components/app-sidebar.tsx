@@ -66,12 +66,13 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2 font-semibold">
-          {/* Logo */}
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            D
-          </span>
-          <span>DevLog</span>
+        <div className="flex items-center px-2 py-2">
+          {/* A versão horizontal mantém o nome legível na largura limitada da sidebar. */}
+          <img
+            alt="DevLog"
+            className="h-16 w-auto object-contain"
+            src="/logo_horizontal.png"
+          />
         </div>
       </SidebarHeader>
 

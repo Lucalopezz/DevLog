@@ -33,11 +33,14 @@ export function LoginPage() {
          */}
         <Link
           aria-label="Ir para a página inicial do DevLog"
-          className="inline-flex items-center gap-3 text-xl font-semibold tracking-tight"
+          className="inline-flex items-center tracking-tight"
           to="/"
         >
-          <img alt="" className="size-9" src="/favicon.svg" />
-          DevLog
+          <img
+            alt="DevLog"
+            className="h-20 w-auto object-contain"
+            src="/logo_horizontal.png"
+          />
         </Link>
 
         <LoginForm />
