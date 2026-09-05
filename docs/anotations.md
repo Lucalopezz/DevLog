@@ -1,611 +1,738 @@
-# Guia rápido: rotas privadas e navbar lateral com shadcn/ui
+# Tutorial guiado: primeira versão de Projects no frontend
 
-Este guia mostra como:
+Este é o próximo exercício recomendado para o frontend do DevLog.
 
-1. proteger rotas no React Router sem criar um componente `PrivateRoute`;
-2. montar uma navbar lateral usando o componente `Sidebar` do shadcn/ui;
-3. exibir links públicos para visitantes e ações privadas para usuários autenticados;
-4. conectar o botão de logout ao React Query e à sessão da API.
+## Objetivo deste exercício
 
-Os exemplos consideram a estrutura atual do `apps/web`:
+Implementar uma primeira versão da tela de projetos com uma fatia vertical
+completa:
 
-- React Router `8.x`, usando `createBrowserRouter` e loaders;
-- React Query para buscar e armazenar o usuário atual;
-- Axios com `withCredentials: true`;
-- autenticação por cookie HttpOnly;
-- imports a partir do alias `@/`.
+1. criar um projeto;
+2. listar os projetos do usuário autenticado;
+3. pesquisar pelo nome;
+4. filtrar por status;
+5. paginar os resultados;
+6. mostrar estados de carregamento, erro e lista vazia;
+7. adicionar a rota privada `/projects` e o link na sidebar.
 
-## 1. A ideia moderna: proteger a rota com `loader`
+Não implemente tudo de Projects de uma vez. A API também possui detalhes,
+tecnologias, comandos, recursos, arquivamento, restauração, edição e exclusão.
+Essas serão as próximas fatias da mesma feature.
 
-Uma abordagem antiga cria um componente parecido com:
-
-```tsx
-<PrivateRoute>
-  <HomePage />
-</PrivateRoute>
-```
-
-Esse componente precisa renderizar primeiro para então decidir se o usuário pode
-continuar. Com o data router do React Router, a verificação pode acontecer no
-`loader` da rota. O router executa o loader antes de renderizar a página:
+O motivo dessa ordem é didático: esta primeira entrega ensina o ciclo mais
+importante do frontend de dados remotos:
 
 ```text
-usuário acessa /dashboard
-        ↓
-loader chama GET /users/me
-        ↓
-401? ──────────────── sim ──→ redirect('/login')
-        │
-        não
-        ↓
-React Router renderiza o layout e a página protegida
+formulário
+  → validação local
+  → mutation HTTP
+  → resposta da API
+  → invalidação do cache
+  → nova consulta da lista
+  → interface atualizada
 ```
 
-O `loader` é uma barreira de navegação e de renderização no frontend. Ele não
-substitui a proteção do backend: todos os endpoints privados ainda precisam
-validar o cookie/token e responder `401 Unauthorized` quando necessário.
+Ao terminar, você terá uma feature útil e uma base que poderá reutilizar em
+Tags e Technical Entries.
 
-## 2. Confirmar o endpoint do usuário atual
+## Decisão de escopo
 
-O frontend já possui esta separação:
+### O que entra agora
 
-```text
-features/auth/
-├── api/get-current-user.ts  ← chamada HTTP
-├── hooks/use-get-user.ts    ← integração com React Query
-└── types.ts                 ← tipo User
-```
+- rota privada `/projects`;
+- consulta `GET /api/project`;
+- criação `POST /api/project`;
+- filtros de nome e status;
+- filtro padrão para exibir apenas projetos não arquivados;
+- paginação usando o `meta` devolvido pela API;
+- formulário com `name` obrigatório e `description` opcional.
 
-O arquivo `apps/web/src/features/auth/api/get-current-user.ts` deve ter uma
-função equivalente a esta:
+### O que fica para depois
 
-```tsx
-import { api } from '@/api/http'
-import type { User } from '../types'
+- página de detalhes `/projects/:id`;
+- edição;
+- arquivar, restaurar e excluir;
+- tecnologias;
+- comandos;
+- recursos;
+- debounce da busca;
+- testes automatizados do frontend, quando um test runner for configurado.
 
-export const currentUserQueryKey = ['currentUser', 'auth'] as const
+Essa separação evita duas dificuldades ao mesmo tempo: primeiro você aprende a
+listagem e a mutação; depois aprende relações entre recursos e ações sobre um
+recurso específico.
 
-export async function getCurrentUser(): Promise<User> {
-  const { data } = await api.get<User>('/users/me')
-  return data
-}
-```
+## Antes de codar: leia o contrato que já existe
 
-O `withCredentials: true` do Axios é importante: ele permite que o navegador
-envie o cookie HttpOnly para a API. O JavaScript não deve tentar ler esse
-cookie, pois essa é justamente uma das proteções contra roubo por scripts.
+Confira estes arquivos antes de começar:
 
-## 3. Criar o loader da rota privada
+- `apps/api/src/project/infrastructure/project.controller.ts`;
+- `apps/api/src/project/infrastructure/dto/project/create-project.dto.ts`;
+- `apps/api/src/project/infrastructure/dto/project/search-project.dto.ts`;
+- `apps/api/src/project/infrastructure/presenter/project/project.presenter.ts`;
+- `apps/api/src/project/domain/entities/project/project-status-enum.ts`;
+- `docs/usecases/projects.md`;
+- `docs/guides/frontend_structure.md`.
 
-Crie `apps/web/src/routes/require-user.ts`:
+O backend já está preparado. O frontend precisa apenas representar esse
+contrato sem duplicar regras que pertencem ao servidor.
 
-```tsx
-import { isAxiosError } from 'axios'
-import { redirect } from 'react-router'
-import {
-  currentUserQueryKey,
-  getCurrentUser,
-} from '@/features/auth/api/get-current-user'
-import { queryClient } from '@/lib/query-client'
+### Endpoints da primeira etapa
 
-/**
- * Executa antes de qualquer rota protegida.
- *
- * query aproveita o cache do React Query. Assim, o loader continua
- * sendo a barreira da rota sem criar uma segunda estratégia de armazenamento
- * para o usuário autenticado.
- */
-export async function requireUser() {
-  try {
-    return await queryClient.query({
-      queryKey: currentUserQueryKey,
-      queryFn: getCurrentUser,
-      retry: false,
-    })
-  } catch (error) {
-    // Somente uma sessão inválida deve mandar o usuário para o login.
-    // Outros erros, como API fora do ar, precisam continuar visíveis para a
-    // tela de erro do router em vez de parecerem um logout.
-    if (isAxiosError(error) && error.response?.status === 401) {
-      throw redirect('/login')
-    }
+| Operação | Endpoint | Corpo ou parâmetros |
+| --- | --- | --- |
+| listar | `GET /api/project` | `page`, `perPage`, `name`, `status`, `archivedAt`, `sort`, `sortDir` |
+| criar | `POST /api/project` | `{ name, description? }` |
 
-    throw error
+O `api` do frontend já possui `baseURL` com `/api` e
+`withCredentials: true`. Por isso, as funções da feature devem chamar
+`/project`, e não repetir `/api` nem configurar cookies novamente.
+
+### Resposta da listagem
+
+A API retorna uma coleção com esta forma conceitual:
+
+```ts
+{
+  data: Project[],
+  meta: {
+    currentPage: number,
+    perPage: number,
+    lastPage: number,
+    total: number
   }
 }
 ```
 
-### Por que usar `query`?
+O campo `data` contém os projetos. O campo `meta` contém as informações para a
+paginação. Não calcule a quantidade de páginas no componente: o backend já
+calcula `lastPage` a partir da quantidade total de itens.
 
-`getCurrentUser()` sozinho resolveria o problema, mas o resultado ficaria
-separado do cache usado por `useGetUser()`. `query` mantém o mesmo
-`queryKey` e evita uma requisição desnecessária quando o usuário já foi
-carregado, por exemplo, logo depois do login.
+### Modelo recebido pelo frontend
 
-O `throw redirect('/login')` interrompe a execução do loader. Portanto, a
-`HomePage` nem chega a ser renderizada quando não existe uma sessão válida.
+O presenter do backend devolve, entre outros, estes campos:
 
-## 4. Opcional: impedir que usuário autenticado veja o login
-
-Rotas públicas normalmente podem ser acessadas por qualquer pessoa. Porém,
-`/login` e `/register` ficam melhores quando redirecionam um usuário que já
-está autenticado.
-
-Adicione ao mesmo arquivo:
-
-```tsx
-/**
- * Loader para páginas destinadas apenas a visitantes.
- * Uma resposta 401 é esperada nesse caso: significa que não há sessão.
- */
-export async function redirectAuthenticatedUser() {
-  try {
-    await queryClient.query({
-      queryKey: currentUserQueryKey,
-      queryFn: getCurrentUser,
-      retry: false,
-    })
-
-    throw redirect('/')
-  } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 401) {
-      return null
-    }
-
-    // O redirect é uma Response lançada de propósito e deve continuar sendo
-    // tratado pelo React Router.
-    throw error
-  }
+```ts
+type Project = {
+  id: string
+  name: string
+  description?: string
+  status: 'ACTIVE' | 'INACTIVE' | 'FINISHED'
+  localPath?: string
+  archivedAt?: string
+  createdAt: string
+  updatedAt: string
 }
 ```
 
-Não é obrigatório usar esse segundo loader. O importante para uma rota privada
-é `requireUser`.
+No frontend, datas vindas do JSON devem ser tipadas inicialmente como
+`string`. O navegador recebe texto ISO; transformar para `Date` só é necessário
+quando a apresentação exigir formatação ou comparação de datas.
 
-## 5. Criar um layout que contém a sidebar
+Os valores de status são do domínio da API. Os textos em português, cores e
+ícones são decisões de apresentação e devem ficar em um arquivo como
+`presentation.ts`, não dentro da função HTTP.
 
-O layout fica em torno das páginas filhas. `Outlet` é o ponto em que o React
-Router injeta a página correspondente à URL atual.
+## Passo 1 — crie a estrutura da feature
 
-Crie `apps/web/src/routes/root-layout.tsx`:
+Crie somente as pastas e arquivos que a primeira versão realmente precisa:
 
-```tsx
-import { Outlet } from 'react-router'
-import { AppSidebar } from '@/components/app-sidebar'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/sidebar'
-
-export function RootLayout() {
-  return (
-    <SidebarProvider>
-      <AppSidebar />
-
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-2 border-b px-4">
-          {/* No mobile, o SidebarTrigger abre a sidebar como um drawer. */}
-          <SidebarTrigger aria-label="Abrir menu de navegação" />
-        </header>
-
-        <div className="flex-1 p-6">
-          <Outlet />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  )
-}
+```text
+apps/web/src/features/projects/
+├── api/
+│   ├── create-project.ts
+│   └── list-projects.ts
+├── components/
+│   ├── project-form.tsx
+│   └── project-list.tsx
+├── hooks/
+│   ├── use-create-project.ts
+│   └── use-projects.ts
+├── pages/
+│   └── projects-page.tsx
+├── presentation.ts
+├── schemas/
+│   └── project.schema.ts
+└── types/
+    └── project.ts
 ```
 
-O `SidebarProvider` controla o estado aberto/fechado e a responsividade. O
-`SidebarInset` reserva o espaço visual da área principal. Dessa forma, as
-páginas não precisam repetir a estrutura da navbar.
+A separação tem uma intenção:
 
-## 6. Organizar as rotas públicas e privadas
+- `api/` conhece URLs e payloads HTTP;
+- `hooks/` conecta a API ao React Query;
+- `schemas/` conhece a validação do formulário;
+- `components/` conhece a interface de Projects;
+- `pages/` compõe a tela e conversa com a rota;
+- `presentation.ts` traduz valores do domínio para a interface;
+- `types/project.ts` mantém os contratos próprios da feature;
+- `api/types.ts` mantém contratos genéricos de transporte, como paginação.
+
+Não coloque chamadas de Axios diretamente em `ProjectsPage`. Isso faria a
+página conhecer transporte, cache e regras de consulta ao mesmo tempo.
+
+### Checkpoint
+
+Neste momento, os arquivos podem estar vazios. O importante é você conseguir
+explicar por que cada responsabilidade está em sua pasta.
+
+## Passo 2 — modele os tipos do frontend
+
+Em `features/projects/types/project.ts`, declare:
+
+1. o union type `ProjectStatus` com `ACTIVE`, `INACTIVE` e `FINISHED`;
+2. o tipo `Project` recebido da API;
+3. o tipo `ProjectCollection`, reutilizando o `Pagination<T>` global de
+   `@/api/types`;
+4. o tipo dos parâmetros de busca;
+5. o tipo do payload de criação.
+
+Use tipos próprios do frontend em vez de importar classes do backend. O
+frontend e o backend são aplicações separadas; compartilhar uma classe de
+entidade criaria acoplamento entre camadas e poderia levar regras internas do
+domínio para o navegador.
+
+Uma forma de pensar nos contratos é:
+
+```text
+Project                 ← um recurso
+ProjectCollection       ← resposta paginada
+ListProjectsParams      ← entrada da consulta
+CreateProjectInput      ← entrada da mutation
+```
+
+Inclua apenas campos que realmente serão usados agora, mas mantenha o tipo
+compatível com a resposta da API. `description` e `localPath` podem ser
+opcionais; `archivedAt` pode ser ausente em um projeto não arquivado.
+
+## Passo 3 — centralize textos e apresentação de status
+
+Em `features/projects/presentation.ts`, crie um mapa para cada status:
+
+```text
+ACTIVE   → Ativo
+INACTIVE → Inativo
+FINISHED → Finalizado
+```
+
+Você também pode definir uma classe visual para cada um:
+
+```text
+ACTIVE   → aparência positiva
+INACTIVE → aparência neutra
+FINISHED → aparência informativa
+```
+
+O componente deve consultar esse mapa, em vez de espalhar ternários como
+`status === 'ACTIVE'` pela tela.
+
+Isso é uma distinção importante: `ACTIVE` é um valor do domínio; “Ativo” é
+uma decisão de idioma da interface. Se a API mudar ou a aplicação ganhar
+outro idioma, a alteração fica concentrada na apresentação.
+
+## Passo 4 — implemente a função HTTP de listagem
+
+Em `features/projects/api/list-projects.ts`:
+
+1. importe `api` de `@/api/http`;
+2. importe os tipos da feature;
+3. crie uma função assíncrona `listProjects(params)`;
+4. faça `api.get<ProjectCollection>('/project', { params })`;
+5. retorne somente `response.data`.
+
+Não faça a requisição na montagem do componente com `useEffect`. A leitura é
+responsabilidade do React Query, porque ele fornece cache, deduplicação,
+estado de carregamento, erro e refetch.
+
+### Parâmetros iniciais sugeridos
+
+Na primeira chamada, envie:
+
+```text
+page=1
+perPage=10
+archivedAt=null
+sort=createdAt
+sortDir=desc
+```
+
+O valor textual `null` é entendido pelo DTO do backend como filtro
+`archivedAt: null`. Assim, a tela principal mostra projetos não arquivados.
+Se você omitir esse parâmetro, a API pode retornar arquivados e não arquivados
+juntos, porque a ausência do filtro tem outro significado.
+
+O status pode ficar ausente inicialmente. Dessa forma, a lista mostra projetos
+ativos, inativos e finalizados, desde que não estejam arquivados.
+
+## Passo 5 — defina as query keys e crie `useProjects`
+
+No mesmo arquivo da API ou em um pequeno arquivo `projects.keys.ts`, defina uma
+hierarquia de chaves:
+
+```text
+projects
+└── lists
+    └── list(params)
+```
+
+A chave da lista precisa incluir os parâmetros da busca. O React Query deve
+entender que estas são consultas diferentes:
+
+```text
+['projects', 'list', { page: 1, name: 'api' }]
+['projects', 'list', { page: 2, name: 'api' }]
+```
+
+Em `hooks/use-projects.ts`:
+
+1. use `useQuery` do `@tanstack/react-query`;
+2. receba os parâmetros como argumento;
+3. use a chave que inclui esses parâmetros;
+4. passe `listProjects` como `queryFn`;
+5. retorne o objeto do React Query.
+
+O componente não precisa saber se os dados vieram de cache ou da rede. Ele
+apenas observa `data`, `isPending`, `isError`, `error` e `refetch`.
+
+### Por que os parâmetros fazem parte da chave?
+
+Se a chave fosse apenas `['projects']`, a busca por “api” poderia reaproveitar
+incorretamente a resposta da busca por “web”. A chave representa a identidade
+da consulta, não apenas o nome do recurso.
+
+## Passo 6 — configure a rota privada
 
 Atualize `apps/web/src/routes/router.tsx`:
 
-```tsx
-import { createBrowserRouter } from 'react-router'
-import LoginPage from '@/features/auth/pages/login-page'
-import HomePage from '@/features/home/pages/home-page'
-import { RootLayout } from './root-layout'
-import {
-  redirectAuthenticatedUser,
-  requireUser,
-} from './require-user'
-
-export const router = createBrowserRouter([
-  {
-    element: <RootLayout />,
-    children: [
-      // Rotas públicas: qualquer visitante pode acessá-las.
-      {
-        path: '/login',
-        loader: redirectAuthenticatedUser,
-        Component: LoginPage,
-      },
-      {
-        path: '/register',
-        loader: redirectAuthenticatedUser,
-        // Crie essa página quando o cadastro for implementado.
-        // Component: RegisterPage,
-      },
-
-      // Todas as rotas dentro deste ramo passam pelo requireUser.
-      {
-        loader: requireUser,
-        children: [
-          {
-            index: true,
-            Component: HomePage,
-          },
-          // Exemplo de nova rota privada:
-          // { path: 'account', Component: AccountPage },
-        ],
-      },
-    ],
-  },
-])
-```
-
-### O que torna uma rota privada?
-
-Não é o `Component: HomePage`. A privacidade vem do fato de `HomePage` ser
-filha do ramo que possui `loader: requireUser`.
-
-Para criar outra rota protegida, coloque-a dentro de `children` desse ramo:
+1. importe `ProjectsPage`;
+2. dentro do ramo que já usa `loader: requireUser`, adicione:
 
 ```tsx
 {
-  loader: requireUser,
-  children: [
-    { index: true, Component: HomePage },
-    { path: 'account', Component: AccountPage },
-    { path: 'projects', Component: ProjectsPage },
-  ],
+  path: 'projects',
+  Component: ProjectsPage,
 }
 ```
 
-Atenção: a página pública de cadastro ainda não existe na estrutura atual.
-Enquanto ela não for criada, remova esse objeto de rota ou crie um
-`RegisterPage`; deixar uma rota sem `Component`, `element` ou `children` não é
-uma rota renderizável.
+Não crie um novo guard dentro da página. A rota já possui a proteção do
+`requireUser`. Lembre-se, porém, de que essa proteção é uma barreira de UX e
+de navegação; quem realmente protege os dados é o `AuthGuard` do backend.
 
-## 7. Adicionar os componentes do shadcn/ui
+O fluxo ficará assim:
 
-Execute a partir de `apps/web`:
+```text
+acesso a /projects
+  → requireUser verifica a sessão
+  → sessão válida: ProjectsPage é renderizada
+  → sessão inválida: redirect para /login
+```
+
+## Passo 7 — adicione o link da sidebar
+
+Em `apps/web/src/components/app-sidebar.tsx`:
+
+1. escolha um ícone do `lucide-react`, como `FolderKanban`;
+2. importe o ícone;
+3. no menu autenticado, adicione um `SidebarLink` para `/projects`;
+4. confirme que o link está dentro do ramo exibido apenas para usuários
+   autenticados.
+
+O link deve usar `NavLink`, como o item “Início”. Assim, o React Router informa
+quando a rota está ativa e a sidebar aplica o estilo correspondente.
+
+Não duplique a lógica de autenticação na sidebar. `useGetUser` serve para
+decidir o que exibir; o loader continua sendo a barreira da rota.
+
+## Passo 8 — monte primeiro a tela de listagem sem formulário
+
+Implemente `features/projects/pages/projects-page.tsx` em pequenas partes.
+
+### 8.1 Cabeçalho
+
+Crie um `main` ou `section` com:
+
+- título “Projetos”;
+- texto explicando que são os projetos do usuário;
+- botão “Novo projeto” ou uma área de criação visível.
+
+Por enquanto, pode deixar o formulário sempre visível abaixo do cabeçalho. Isso
+reduz o escopo inicial. Transformar o formulário em modal ou drawer é um
+refinamento posterior.
+
+### 8.2 Estado da consulta
+
+Chame `useProjects` com os parâmetros atuais. Existem duas opções para guardar
+esses parâmetros:
+
+- estado local com `useState`, mais simples para a primeira implementação;
+- query string com `useSearchParams`, recomendada para esta tela.
+
+Use `useSearchParams` se quiser que a busca possa ser recarregada, compartilhada
+e navegada com os botões voltar e avançar do navegador. Nesse modelo, a URL é
+a fonte de verdade:
+
+```text
+/projects?name=api&status=ACTIVE&page=1
+```
+
+Converta valores da URL para os tipos esperados antes de chamar o hook. Por
+exemplo, `page` precisa virar número e um status desconhecido deve ser tratado
+como ausente.
+
+Uma estratégia prática é manter os campos de filtro como “rascunho” local e
+aplicar a busca somente quando o usuário enviar o formulário de filtros. Ao
+aplicar um novo filtro, volte para `page=1`; caso contrário, o usuário poderia
+estar na página 4 de uma busca antiga e receber uma página vazia na nova busca.
+
+### 8.3 Estados assíncronos
+
+Renderize explicitamente cada estado:
+
+1. `isPending`: skeletons ou uma mensagem “Carregando projetos...”;
+2. `isError`: mensagem compreensível e botão “Tentar novamente” usando
+   `refetch`;
+3. resposta sem itens: estado vazio com convite para criar o primeiro projeto;
+4. resposta com itens: lista de projetos;
+5. refetch depois de uma consulta existente: mantenha os dados visíveis e,
+   se desejar, mostre um indicador menor de atualização.
+
+Não trate `isPending` e lista vazia como a mesma coisa. `isPending` significa
+que ainda não sabemos o resultado; lista vazia significa que a API respondeu e
+não encontrou itens.
+
+### 8.4 Card ou linha de projeto
+
+Em `components/project-list.tsx`, renderize cada projeto com:
+
+- nome;
+- descrição, quando existir;
+- badge com o status traduzido;
+- data de criação ou atualização formatada;
+- indicação de caminho local somente quando existir.
+
+Use `project.id` como `key`, não o índice do array. O id representa a
+identidade do recurso mesmo quando a ordenação ou a paginação muda.
+
+Por enquanto, o card pode ser somente leitura. Não coloque botões de editar,
+arquivar ou excluir antes de implementar as mutations correspondentes.
+
+## Passo 9 — implemente a paginação
+
+Depois que a lista básica funcionar, adicione:
+
+- botão “Anterior”;
+- botão “Próxima”;
+- texto `Página X de Y`;
+- opcionalmente, total de projetos.
+
+Use `meta.currentPage` e `meta.lastPage`:
+
+```text
+Anterior desabilitado quando currentPage <= 1
+Próxima desabilitada quando currentPage >= lastPage
+```
+
+Ao trocar de página, atualize apenas `page` nos parâmetros da consulta.
+Mantenha `name`, `status`, `archivedAt`, `sort` e `sortDir`; a paginação faz
+parte da mesma busca, não inicia uma busca sem filtros.
+
+O backend usa `perPage` para calcular `lastPage`. O frontend não deve tentar
+reimplementar essa regra contando apenas os itens que recebeu, porque a página
+atual pode ter menos itens que o limite e ainda haver outras páginas.
+
+## Passo 10 — crie o schema do formulário
+
+Em `features/projects/schemas/project.schema.ts`, use Zod para representar as
+regras conhecidas antes de chamar a API:
+
+- `name`: texto obrigatório, mínimo de 3 e máximo de 150 caracteres;
+- `description`: texto opcional.
+
+Esses limites aparecem no `CreateProjectDto` do backend e devem ser refletidos
+no formulário para dar feedback rápido ao usuário. Ainda assim, mantenha a
+validação no backend: o navegador pode ser burlado e diferentes clientes podem
+consumir a mesma API.
+
+Use `zodResolver` com `useForm`, seguindo o padrão de
+`features/auth/hooks/use-login-form.ts`.
+
+O fluxo do formulário é:
+
+```text
+input controlado pelo React Hook Form
+  → zodResolver
+  → se válido, onSubmit recebe os dados tipados
+  → mutation chama POST /api/project
+```
+
+Considere normalizar `name` com `trim()` antes de enviar. Isso melhora a
+experiência, mas não substitui a validação do backend. Decida conscientemente
+se espaços da descrição devem ser preservados.
+
+## Passo 11 — implemente `ProjectForm`
+
+Em `components/project-form.tsx`:
+
+1. crie o formulário com `useForm` e o schema;
+2. envolva os campos com o componente `Form` do projeto;
+3. use `FormInput` para o nome;
+4. use `FormField` + `FormControl` com um `textarea` para a descrição, ou
+   crie um `FormTextarea` reutilizável somente se essa necessidade aparecer em
+   outras features;
+5. mostre `FormMessage` em cada campo;
+6. adicione um botão de submit;
+7. desabilite o botão enquanto a mutation estiver pendente;
+8. altere o texto para “Criando...” durante o envio;
+9. após sucesso, limpe o formulário;
+10. permita que a página decida onde o formulário será exibido.
+
+O `FormField` é importante porque conecta valor, erro, label e acessibilidade.
+Não use apenas `useState` para o valor e um `if` separado para erros; isso
+duplicaria responsabilidades que o padrão React Hook Form + shadcn já resolve.
+
+### Acessibilidade para observar
+
+Confirme no navegador que:
+
+- cada label aponta para seu input;
+- o campo inválido recebe `aria-invalid`;
+- a mensagem de erro é associada por `aria-describedby`;
+- o formulário pode ser usado somente com teclado;
+- o botão comunica o estado de envio e não permite submits repetidos.
+
+Esses detalhes já são favorecidos pelos componentes `FormLabel`, `FormControl`
+e `FormMessage` existentes.
+
+## Passo 12 — implemente a função HTTP de criação
+
+Em `features/projects/api/create-project.ts`:
+
+1. crie uma função `createProject(input)`;
+2. faça `api.post<Project>('/project', input)`;
+3. retorne `response.data`.
+
+A função HTTP não deve exibir toast, navegar ou invalidar queries. Ela deve
+conhecer somente a comunicação com a API. Efeitos de interface pertencem ao
+hook ou ao componente que possui o contexto da tela.
+
+## Passo 13 — crie `useCreateProject`
+
+Em `hooks/use-create-project.ts`, use `useMutation`.
+
+### `mutationFn`
+
+Passe `createProject` como `mutationFn`. Isso conecta os dados validados do
+formulário ao POST.
+
+### `onSuccess`
+
+Depois de criar:
+
+1. invalide as queries de listas de projetos;
+2. mostre `toast.success('Projeto criado com sucesso!')`;
+3. deixe o formulário ser resetado pelo componente ou informe esse sucesso
+   por callback;
+4. não navegue para detalhes, porque a tela de detalhes ainda não existe.
+
+A invalidação é necessária porque a lista antiga continua correta apenas para o
+instante anterior à criação. Ao invalidar a chave de lista, o React Query
+refaz a consulta e traz a ordenação e a paginação oficiais do servidor.
+
+### `onError`
+
+Use `getApiErrorMessage` com uma mensagem de fallback, por exemplo:
+
+```text
+Não foi possível criar o projeto. Tente novamente.
+```
+
+O helper já normaliza o formato de erro do Nest, que pode ser uma string ou um
+array de mensagens. Assim, o hook não precisa conhecer detalhes do Axios.
+
+### Por que invalidar em vez de inserir manualmente?
+
+Você poderia usar `queryClient.setQueryData` para colocar o projeto novo no
+início da lista. Isso é mais imediato, mas exige manter manualmente a ordenação,
+o total e todas as páginas afetadas. Na primeira versão, invalidar é mais
+simples e confiável. Depois de entender o fluxo, estude atualização otimista e
+atualização manual de cache.
+
+## Passo 14 — conecte formulário, página e mutation
+
+Decida onde o hook de mutation será instanciado. Uma opção clara para estudar
+é instanciá-lo na página e passar para o formulário somente o necessário:
+
+```text
+ProjectsPage
+  ├── useProjects(params)
+  ├── useCreateProject()
+  ├── ProjectForm(onSubmit, isPending)
+  └── ProjectList(data)
+```
+
+O fluxo completo deve ser:
+
+```text
+usuário preenche nome e descrição
+  → ProjectForm valida com Zod
+  → onSubmit entrega dados válidos à página
+  → useCreateProject executa POST
+  → API retorna o projeto criado
+  → hook invalida ['projects', 'lists']
+  → useProjects refaz GET
+  → lista mostra o novo projeto
+```
+
+Não faça `window.location.reload()`. O React Query já sabe atualizar a parte
+da interface que depende dos dados modificados.
+
+## Passo 15 — trate filtros sem criar requisições desnecessárias
+
+Adicione um formulário separado para filtros:
+
+- input de nome;
+- select nativo de status com a opção “Todos”;
+- botão “Buscar”;
+- botão “Limpar”.
+
+Ao buscar:
+
+1. remova parâmetros vazios;
+2. preserve `archivedAt=null`;
+3. defina `page=1`;
+4. atualize a query string ou o estado escolhido;
+5. deixe a mudança dos parâmetros gerar uma nova `queryKey`.
+
+Ao limpar, volte para o estado inicial. Não adicione debounce ainda: primeiro
+entenda a relação entre parâmetros, query key e resposta. Depois, se a busca
+for disparada a cada tecla, compare essa solução com um botão de envio e
+estude debounce com cuidado.
+
+### Atenção ao status
+
+O valor vazio do select deve significar “não enviar `status`”. Não envie a
+string `"ALL"`, porque `ALL` não faz parte do enum aceito pelo backend.
+
+## Passo 16 — valide o comportamento manualmente
+
+Com a API, o banco e o frontend executando, verifique:
+
+### Sessão
+
+- visitante que acessa `/projects` é redirecionado para `/login`;
+- usuário autenticado consegue abrir `/projects`;
+- o link aparece na sidebar somente durante uma sessão válida.
+
+### Listagem
+
+- carregamento mostra feedback visual;
+- lista mostra apenas projetos não arquivados por padrão;
+- status aparece traduzido;
+- descrição ausente não cria um espaço estranho;
+- lista vazia tem uma mensagem útil;
+- erro oferece nova tentativa;
+- paginação preserva os filtros.
+
+### Criação
+
+- nome vazio mostra erro local;
+- nome com menos de 3 caracteres mostra erro local;
+- nome com mais de 150 caracteres mostra erro local;
+- descrição é opcional;
+- botão não permite vários envios enquanto a requisição está pendente;
+- erro da API aparece em toast;
+- sucesso mostra toast e o novo projeto aparece sem recarregar a página.
+
+### Rede e cache
+
+Use o DevTools do React Query já configurado no projeto e o painel Network do
+navegador para observar:
+
+1. qual query key foi criada;
+2. quais parâmetros foram enviados;
+3. quando a query fica `pending`, `success` ou `error`;
+4. qual requisição acontece depois da criação;
+5. se o cookie é enviado pela configuração global do Axios.
+
+Esse acompanhamento é parte do exercício. Não basta a tela “parecer” correta;
+entenda quais eventos produziram cada mudança.
+
+## Passo 17 — validação técnica
+
+Depois de implementar a primeira versão, execute na raiz:
 
 ```bash
-cd apps/web
-pnpm dlx shadcn@latest add sidebar
+pnpm --filter web lint
+pnpm --filter web build
 ```
 
-Esse é o mínimo necessário para a navbar lateral. O CLI adiciona os arquivos
-de composição em `src/components/ui/sidebar.tsx` e suas dependências.
+Corrija os avisos de TypeScript e ESLint antes de continuar. Em especial,
+observe:
 
-Para adicionar vários componentes de uma vez, use:
+- tipos de `status` vindos de `URLSearchParams`, que são apenas `string`;
+- campos opcionais possivelmente `undefined`;
+- imports que não são usados;
+- componentes React exportados no mesmo arquivo de forma incompatível com o
+  Fast Refresh;
+- nomes de query keys usados de forma diferente entre query e mutation.
 
-```bash
-pnpm dlx shadcn@latest add sidebar button separator avatar dropdown-menu
-```
+Como o frontend ainda não possui test runner, a validação mínima desta etapa é
+lint, build e o roteiro manual acima.
 
-Componentes úteis neste exemplo:
+## Critérios de conclusão da primeira fatia
 
-| Componente | Uso |
-| --- | --- |
-| `sidebar` | estrutura lateral, menu, footer e suporte mobile |
-| `button` | ações explícitas, como salvar ou sair |
-| `separator` | separar grupos visualmente |
-| `avatar` | representar a conta do usuário |
-| `dropdown-menu` | colocar ações de conta em um menu suspenso |
+Considere Projects pronto para a próxima etapa quando:
 
-Como o projeto já possui `components/ui/button.tsx` e a configuração do
-shadcn, não é necessário executar `init` novamente. Se você estiver usando o
-guia em outro projeto sem shadcn configurado, faça primeiro:
+- `/projects` é uma rota privada funcional;
+- a lista vem da API e usa os parâmetros corretamente;
+- filtros e paginação geram consultas diferentes no React Query;
+- a criação valida localmente e envia o payload correto;
+- o cache é invalidado após sucesso;
+- loading, erro e vazio são estados distintos;
+- a sidebar possui o link correto;
+- `pnpm --filter web lint` e `pnpm --filter web build` passam.
 
-```bash
-pnpm dlx shadcn@latest init
-```
+## Próxima ordem depois desta etapa
 
-O shadcn não é uma biblioteca de componentes instalada e importada como um
-pacote único. O CLI copia/adiciona os componentes ao seu código, permitindo
-que você leia e personalize a implementação.
+Quando a primeira fatia estiver estável, avance nesta ordem:
 
-## 8. Implementar a sidebar pública e privada
+1. `GET /api/project/:id` e página `/projects/:id`;
+2. tecnologias do projeto;
+3. comandos e recursos, cada um como uma pequena lista + mutation;
+4. edição com `PATCH /api/project/:id`;
+5. arquivamento e restauração;
+6. exclusão com confirmação;
+7. melhorar paginação, debounce e atualização de cache.
 
-Crie `apps/web/src/components/app-sidebar.tsx`:
-
-```tsx
-import type { ReactNode } from 'react'
-import {
-  CircleUserRound,
-  LogIn,
-  LogOut,
-  UserPlus,
-} from 'lucide-react'
-import { NavLink } from 'react-router'
-import { useGetUser } from '@/features/auth/hooks/use-get-user'
-import { useLogout } from '@/features/auth/hooks/use-logout'
-import { cn } from '@/lib/utils'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar'
-
-function SidebarLink({
-  to,
-  children,
-  end = false,
-}: {
-  to: string
-  children: ReactNode
-  end?: boolean
-}) {
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild>
-        <NavLink
-          end={end}
-          to={to}
-          className={({ isActive }) =>
-            cn(
-              'w-full',
-              isActive && 'bg-sidebar-accent text-sidebar-accent-foreground',
-            )
-          }
-        >
-          {children}
-        </NavLink>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
-  )
-}
-
-export function AppSidebar() {
-  const { data: user, isPending } = useGetUser()
-  const { mutate: logout, isPending: isLoggingOut } = useLogout()
-
-  const isAuthenticated = Boolean(user)
-
-  return (
-    <Sidebar>
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2 font-semibold">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            D
-          </span>
-          <span>DevLog</span>
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent>
-        {isAuthenticated ? (
-          <SidebarGroup>
-            <SidebarGroupLabel>Minha conta</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarLink end to="/">
-                  <CircleUserRound />
-                  <span>Início</span>
-                </SidebarLink>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ) : (
-          <SidebarGroup>
-            <SidebarGroupLabel>Acesso</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarLink to="/login">
-                  <LogIn />
-                  <span>Entrar</span>
-                </SidebarLink>
-
-                <SidebarLink to="/register">
-                  <UserPlus />
-                  <span>Criar conta</span>
-                </SidebarLink>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {/* Evita uma interface vazia enquanto a sessão ainda está sendo
-            verificada. A rota privada continua protegida pelo loader. */}
-        {isPending ? (
-          <p className="px-4 text-sm text-muted-foreground">
-            Verificando sessão...
-          </p>
-        ) : null}
-      </SidebarContent>
-
-      <SidebarFooter>
-        {user ? (
-          <SidebarMenu>
-            {/* A conta fica no rodapé, separada da navegação principal. */}
-            <SidebarLink to="/account">
-              <CircleUserRound />
-              <span className="truncate">{user.name}</span>
-            </SidebarLink>
-
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                disabled={isLoggingOut}
-                onClick={() => logout()}
-                type="button"
-              >
-                <LogOut />
-                <span>{isLoggingOut ? 'Saindo...' : 'Sair'}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        ) : null}
-      </SidebarFooter>
-    </Sidebar>
-  )
-}
-```
-
-### Como os campos são separados?
-
-O valor de `user` vem da query `useGetUser()`:
-
-- `user` existe: a sidebar mostra `Conta do usuário` e `Sair`;
-- `user` não existe: a sidebar mostra `Entrar` e `Criar conta`;
-- `isPending` é verdadeiro: a aplicação ainda está descobrindo o estado da sessão.
-
-`NavLink` recebe `isActive` do React Router, então o item da rota atual pode
-receber uma classe diferente sem comparar manualmente `window.location`.
-
-O logout é um botão, e não um link, porque ele executa uma mutação HTTP. Depois
-que a API responde com sucesso, o hook existente `useLogout` remove a query do
-usuário e navega para `/login`.
-
-## 9. Reutilizar o hook de logout corretamente
-
-O hook atual pode seguir esta lógica:
-
-```tsx
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router'
-import { currentUserQueryKey } from '../api/get-current-user'
-import { logout } from '../api/logout'
-
-export function useLogout() {
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: logout,
-    onSuccess: () => {
-      // Remover o cache impede que a interface continue exibindo o usuário
-      // depois que a sessão foi encerrada.
-      queryClient.removeQueries({ queryKey: currentUserQueryKey })
-      navigate('/login', { replace: true })
-    },
-  })
-}
-```
-
-A ordem conceitual é:
+O detalhe deve vir antes das ações complexas porque ele cria o contexto para
+tecnologias, comandos e recursos. Ao implementar cada nova operação, repita o
+mesmo raciocínio:
 
 ```text
-clique em Sair
-  → POST /auth/logout
-  → remover currentUser do cache
-  → navegar para /login
-  → loaders privados passam a redirecionar
+contrato da API
+  → tipo
+  → função HTTP
+  → query ou mutation
+  → componente
+  → estados assíncronos
+  → cache
+  → validação manual
 ```
 
-Não remova o usuário do cache antes da resposta da API se a intenção for
-garantir que o logout no servidor terminou. Se a requisição falhar, você pode
-mostrar uma mensagem de erro e manter a sessão visível.
+## Assuntos para estudar enquanto implementa
 
-## 10. Fluxo completo depois da implementação
+- diferença entre estado local e estado remoto;
+- identidade de uma query e composição de `queryKey`;
+- `useQuery` versus `useMutation`;
+- invalidação e atualização manual de cache;
+- diferença entre validação no cliente e validação no servidor;
+- `FormProvider`, `Controller` e acessibilidade em formulários;
+- loaders do React Router como barreira de navegação;
+- paginação baseada em metadados do servidor;
+- separação entre domínio, transporte e apresentação;
+- estados de UI: pending, error, empty, success e refetching.
 
-### Visitante acessando uma página pública
-
-```text
-GET /login
-  → RootLayout é renderizado
-  → requireUser não é executado
-  → visitante vê Entrar e Criar conta
-```
-
-### Visitante acessando uma página privada
-
-```text
-GET /
-  → loader requireUser
-  → GET /users/me
-  → API responde 401
-  → redirect('/login')
-```
-
-### Usuário autenticado acessando uma página privada
-
-```text
-GET /
-  → loader requireUser
-  → GET /users/me
-  → API responde 200 com User
-  → HomePage é renderizada dentro do RootLayout
-  → sidebar mostra Conta do usuário e Sair
-```
-
-### Usuário fazendo login
-
-O hook de login deve atualizar o mesmo `currentUserQueryKey` antes de navegar:
-
-```tsx
-onSuccess: (user) => {
-  queryClient.setQueryData(currentUserQueryKey, user)
-  navigate('/', { replace: true })
-}
-```
-
-Assim, quando o router executar `requireUser` após a navegação, ele poderá
-reaproveitar o usuário que acabou de ser recebido pela API.
-
-## 11. Erros comuns
-
-### Proteger somente a sidebar
-
-Esconder links privados não protege a URL. Uma pessoa ainda poderia digitar
-`/account` diretamente. A regra de acesso precisa estar no loader e no backend.
-
-### Guardar o JWT no `localStorage`
-
-Neste projeto a sessão usa cookie HttpOnly. Não tente ler o token no frontend.
-O navegador envia o cookie por meio de `withCredentials`, e a API valida a
-autenticação.
-
-### Redirecionar qualquer erro para login
-
-Se o banco ou a API estiverem fora do ar, isso não significa que o usuário fez
-logout. Redirecione somente para `401`; deixe outros erros chegarem à tela de
-erro do router.
-
-### Fazer a requisição apenas em um `useEffect`
-
-Um `useEffect` costuma renderizar a página protegida por alguns instantes antes
-de descobrir a sessão. O loader é adequado porque a decisão acontece antes da
-renderização da rota.
-
-### Usar `Link` para logout
-
-`Link` representa navegação. Logout é uma operação assíncrona que precisa lidar
-com `loading`, sucesso e erro; por isso deve ser um `button` conectado a uma
-mutation.
-
-## 12. Checklist de implementação
-
-- [ ] `getCurrentUser` chama o endpoint de sessão e usa o cookie da API.
-- [ ] `requireUser` redireciona somente em `401`.
-- [ ] Todas as páginas privadas são filhas do ramo com `loader: requireUser`.
-- [ ] O `RootLayout` usa `SidebarProvider`, `Sidebar` e `Outlet`.
-- [ ] O comando do shadcn adicionou `sidebar` em `src/components/ui`.
-- [ ] Visitantes veem `Entrar` e `Criar conta`.
-- [ ] Usuários autenticados veem `Conta do usuário` e `Sair`.
-- [ ] Logout remove o cache de `currentUser` e navega com `replace: true`.
-- [ ] O backend também protege seus endpoints privados.
-
-## O que estudar depois
-
-Para entender profundamente essa solução, estude nesta ordem:
-
-1. loaders, actions e `redirect` do React Router;
-2. rotas aninhadas e `Outlet`;
-3. cache, query keys e mutations do React Query;
-4. cookies HttpOnly, `SameSite`, CORS e `withCredentials`;
-5. composição e acessibilidade de componentes do shadcn/ui.
+Se algo parecer difícil, implemente primeiro sem filtros e sem paginação,
+confirme o ciclo `GET → renderização`, depois adicione uma responsabilidade por
+vez. O objetivo deste arquivo é servir como roteiro de estudo, não como uma
+lista para copiar inteira de uma vez.
