@@ -9,7 +9,7 @@ import { LoginForm } from "@/features/auth/components/login-form";
  * layout centralizado, mantendo cada componente com uma responsabilidade
  * pequena e fácil de testar.
  */
-export function LoginPage() {
+export default function LoginPage() {
   return (
     <main className="relative isolate flex min-h-svh items-center justify-center overflow-hidden bg-background px-6 py-12 sm:px-8">
       {/*
@@ -48,5 +48,3 @@ export function LoginPage() {
     </main>
   );
 }
-
-export default LoginPage;

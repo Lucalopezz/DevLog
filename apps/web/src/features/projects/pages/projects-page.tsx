@@ -15,7 +15,7 @@ const defaultProjectParams = {
 } satisfies Omit<ListProjectsParams, 'page'>;
 
 
-export function ProjectsPage() {
+export default function ProjectsPage() {
   const [page, setPage] = useState(1);
   const params = { ...defaultProjectParams, page };
   const { data, isError, isFetching, isPending, refetch } = useProjects(params);
