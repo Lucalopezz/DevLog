@@ -5,6 +5,7 @@ import RegisterPage from '@/features/auth/pages/register-page'
 import HomePage from '@/features/home/pages/home-page'
 import { RootLayout } from './root-layout'
 import { redirectAuthenticatedUser, requireUser } from './require-user'
+import { ProjectsPage } from '@/features/projects/pages/projects-page'
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
           {
             path: 'account',
             Component: AccountPage,
+          },
+          {
+            path: 'projects',
+            Component: ProjectsPage,
           },
         ],
       },
