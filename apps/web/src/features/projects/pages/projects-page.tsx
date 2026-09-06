@@ -1,24 +1,27 @@
-import { FolderKanban, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { useProjects } from '../hooks/use-projects';
-import { ProjectList } from '../components/project-list';
-import type { ListProjectsParams } from '../types/project';
-import { ProjectPagination } from '../components/project-list-pagination';
-import { ProjectListSkeleton } from '../components/project-list-skeleton';
+import { FolderKanban, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useProjects } from "../hooks/use-projects";
+import { ProjectList } from "../components/project-list";
+import type { ListProjectsParams } from "../types/project";
+import { ProjectPagination } from "../components/project-list-pagination";
+import { ProjectListSkeleton } from "../components/project-list-skeleton";
+import { ProjectForm } from "../components/project-form";
 
 const defaultProjectParams = {
   perPage: 10,
-  archivedAt: 'null',
-  sort: 'createdAt',
-  sortDir: 'desc',
-} satisfies Omit<ListProjectsParams, 'page'>;
-
+  archivedAt: "null",
+  sort: "createdAt",
+  sortDir: "desc",
+} satisfies Omit<ListProjectsParams, "page">;
 
 export default function ProjectsPage() {
   const [page, setPage] = useState(1);
   const params = { ...defaultProjectParams, page };
   const { data, isError, isFetching, isPending, refetch } = useProjects(params);
+
+  const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] =
+    useState(false);
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-8">
@@ -33,13 +36,28 @@ export default function ProjectsPage() {
           </p>
         </div>
 
+        <Button
+          type="button"
+          onClick={() => setIsCreateProjectDialogOpen(true)}
+        >
+          Novo projeto
+        </Button>
+
         {isFetching && !isPending ? (
-          <p aria-live="polite" className="flex items-center gap-2 text-sm text-muted-foreground">
+          <p
+            aria-live="polite"
+            className="flex items-center gap-2 text-sm text-muted-foreground"
+          >
             <RefreshCw className="size-4 animate-spin" />
             Atualizando...
           </p>
         ) : null}
       </header>
+
+      <ProjectForm
+        open={isCreateProjectDialogOpen}
+        onOpenChange={setIsCreateProjectDialogOpen}
+      />
 
       {isPending ? <ProjectListSkeleton /> : null}
 
