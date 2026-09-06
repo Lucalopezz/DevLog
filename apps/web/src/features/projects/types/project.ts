@@ -1,6 +1,6 @@
-import type { Pagination } from '@/api/types';
+import type { Pagination } from "@/api/types";
 
-export type ProjectStatus = 'ACTIVE' | 'INACTIVE' | 'FINISHED';
+export type ProjectStatus = "ACTIVE" | "INACTIVE" | "FINISHED";
 
 export type Project = {
   id: string;
@@ -29,10 +29,11 @@ export type ListProjectsParams = {
   name?: string;
   status?: ProjectStatus;
   archivedAt?: string;
-  sort?: 'createdAt' | 'updatedAt' | 'name';
-  sortDir?: 'asc' | 'desc';
+  sort?: "createdAt" | "updatedAt" | "name";
+  sortDir?: "asc" | "desc";
 };
 
 export type CreateProjectInput = {
-  name: string; description?: string;
+  name: string;
+  description?: string;
 };
