@@ -1,9 +1,15 @@
 import { FolderKanban, RefreshCw } from "lucide-react";
+import { useSearchParams } from "react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useProjects } from "../hooks/use-projects";
 import { ProjectList } from "../components/project-list";
-import type { ListProjectsParams } from "../types/project";
+import { ProjectFilters } from "../components/project-filter";
+import type {
+  ListProjectsParams,
+  ProjectSearchFormValues,
+} from "../types/project";
+import { isProjectStatus } from "../types/project";
 import { ProjectPagination } from "../components/project-list-pagination";
 import { ProjectListSkeleton } from "../components/project-list-skeleton";
 import { ProjectForm } from "../components/project-form";
@@ -15,13 +21,77 @@ const defaultProjectParams = {
   sortDir: "desc",
 } satisfies Omit<ListProjectsParams, "page">;
 
+function parsePage(value: string | null) {
+  const page = Number(value);
+
+  // A URL pode ser editada manualmente. Nunca enviamos NaN, zero ou número
+  // decimal para a API, que espera uma página inteira maior que zero.
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}
+
 export default function ProjectsPage() {
-  const [page, setPage] = useState(1);
-  const params = { ...defaultProjectParams, page };
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // A URL representa os filtros já aplicados. O formulário mantém um rascunho
+  // separado e só altera estes valores depois do submit.
+  const page = parsePage(searchParams.get("page"));
+  const name = searchParams.get("name")?.trim() || undefined;
+  const rawStatus = searchParams.get("status");
+  const status = isProjectStatus(rawStatus) ? rawStatus : undefined;
+
+  const params = {
+    ...defaultProjectParams,
+    page,
+    ...(name ? { name } : {}),
+    ...(status ? { status } : {}),
+  } satisfies ListProjectsParams;
+
   const { data, isError, isFetching, isPending, refetch } = useProjects(params);
 
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] =
     useState(false);
+
+  function handleSearch(filters: ProjectSearchFormValues) {
+    const nextParams = new URLSearchParams(searchParams);
+
+    // Removemos os valores anteriores para que uma busca vazia não deixe
+    // parâmetros antigos escondidos na URL.
+    nextParams.delete("name");
+    nextParams.delete("status");
+
+    // Uma mudança de filtro sempre começa na primeira página. Caso contrário,
+    // uma busca nova poderia tentar abrir a página 4 e aparentar estar vazia.
+    nextParams.set("page", "1");
+
+    const normalizedName = filters.name.trim();
+
+    if (normalizedName) {
+      nextParams.set("name", normalizedName);
+    }
+
+    // "Todos" é representado por ausência de status. "ALL" não existe no
+    // enum do backend e não deve ser enviado como se fosse um status válido.
+    if (filters.status) {
+      nextParams.set("status", filters.status);
+    }
+
+    setSearchParams(nextParams);
+  }
+
+  function handleClearFilters() {
+    // Sem parâmetros, a página volta aos defaults: página 1, projetos não
+    // arquivados, ordenação por criação e sem filtros de texto/status.
+    setSearchParams({});
+  }
+
+  function handlePageChange(nextPage: number) {
+    const nextParams = new URLSearchParams(searchParams);
+
+    // Como começamos com a URL atual, name e status são preservados ao trocar
+    // de página. A paginação continua sendo parte da mesma busca.
+    nextParams.set("page", String(nextPage));
+    setSearchParams(nextParams);
+  }
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-8">
@@ -53,6 +123,17 @@ export default function ProjectsPage() {
           </p>
         ) : null}
       </header>
+
+      <ProjectFilters
+        // Quando os filtros aplicados mudam pela URL, o `key` cria um novo
+        // rascunho com os valores da URL. Enquanto o usuário apenas digita,
+        // a URL não muda e o formulário não é remontado.
+        key={`${name ?? ""}:${status ?? ""}`}
+        initialName={name ?? ""}
+        initialStatus={status}
+        onClear={handleClearFilters}
+        onSearch={handleSearch}
+      />
 
       <ProjectForm
         open={isCreateProjectDialogOpen}
@@ -96,7 +177,7 @@ export default function ProjectsPage() {
           <ProjectPagination
             isFetching={isFetching}
             meta={data.meta}
-            onPageChange={setPage}
+            onPageChange={handlePageChange}
           />
         </>
       ) : null}

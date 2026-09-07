@@ -2,6 +2,19 @@ import type { Pagination } from "@/api/types";
 
 export type ProjectStatus = "ACTIVE" | "INACTIVE" | "FINISHED";
 
+/**
+ * Valida valores que vieram de fontes externas, como URLSearchParams ou um
+ * elemento <select>. Depois desta verificação, o TypeScript pode tratá-los
+ * como ProjectStatus com segurança.
+ */
+export function isProjectStatus(
+  value: string | null | undefined,
+): value is ProjectStatus {
+  return (
+    value === "ACTIVE" || value === "INACTIVE" || value === "FINISHED"
+  );
+}
+
 export type Project = {
   id: string;
   name: string;
@@ -31,6 +44,12 @@ export type ListProjectsParams = {
   archivedAt?: string;
   sort?: "createdAt" | "updatedAt" | "name";
   sortDir?: "asc" | "desc";
+};
+
+/** Valores editados no formulário antes de serem convertidos em query params. */
+export type ProjectSearchFormValues = {
+  name: string;
+  status: ProjectStatus | "";
 };
 
 export type CreateProjectInput = {
