@@ -2,6 +2,14 @@ import type { Pagination } from "@/api/types";
 
 export type ProjectStatus = "ACTIVE" | "INACTIVE" | "FINISHED";
 
+export type ProjectTechnology = {
+  id: string;
+  name: string;
+  version?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 /**
  * Valida valores que vieram de fontes externas, como URLSearchParams ou um
  * elemento <select>. Depois desta verificação, o TypeScript pode tratá-los
@@ -20,6 +28,7 @@ export type Project = {
   name: string;
   description?: string;
   status: ProjectStatus;
+  technologies?: ProjectTechnology[];
   localPath?: string;
   archivedAt?: string;
   createdAt: string;
