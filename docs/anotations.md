@@ -701,10 +701,9 @@ Quando a primeira fatia estiver estável, avance nesta ordem:
 1. `GET /api/project/:id` e página `/projects/:id`;
 2. tecnologias do projeto;
 3. comandos e recursos, cada um como uma pequena lista + mutation;
-4. edição com `PATCH /api/project/:id`;
-5. arquivamento e restauração;
-6. exclusão com confirmação;
-7. melhorar paginação, debounce e atualização de cache.
+4. arquivamento e restauração;
+5. exclusão com confirmação;
+6. melhorar paginação, debounce e atualização de cache.
 
 O detalhe deve vir antes das ações complexas porque ele cria o contexto para
 tecnologias, comandos e recursos. Ao implementar cada nova operação, repita o
@@ -720,6 +719,100 @@ contrato da API
   → cache
   → validação manual
 ```
+
+## Passo 18 — atualize os dados gerais do projeto
+
+A atualização genérica já deve cuidar somente dos campos escalares do próprio
+projeto. No frontend, o fluxo fica distribuído assim:
+
+```text
+ProjectEditForm
+  → useProjectEditForm + updateProjectSchema
+  → useUpdateProject
+  → updateProject
+  → PATCH /api/project/:id
+  → invalidação do detalhe e das listas
+```
+
+`ProjectFormFields` concentra os campos compartilhados de nome e descrição.
+`ProjectForm` continua sendo o wrapper de criação e `ProjectEditForm` o wrapper
+de edição; dessa forma, a marcação e a acessibilidade são reutilizadas sem
+misturar as mutations ou os schemas de operações diferentes.
+
+Confira o contrato antes de criar a mutation:
+
+| Campo | Tipo | Comportamento |
+| --- | --- | --- |
+| `name` | `string` | substitui o nome e continua obrigatório quando enviado |
+| `description` | `string \| null` | `null` remove a descrição |
+| `status` | `ACTIVE \| INACTIVE \| FINISHED` | altera o estado de trabalho |
+| `localPath` | `string \| null` | `null` remove o caminho local |
+
+O `PATCH` é parcial: campo ausente preserva o valor salvo. O formulário de
+edição pode enviar todos os dados gerais atuais, mas a função HTTP não deve
+assumir que todo consumidor fará isso. Essa distinção é importante para não
+confundir “não alterar” com “limpar”.
+
+Não inclua `archivedAt` no payload genérico. Arquivar e restaurar são transições
+de ciclo de vida e possuem endpoints próprios. Da mesma forma, tecnologias,
+comandos e recursos são agregados relacionados e devem continuar usando suas
+próprias mutations.
+
+### Como adicionar o `localPath` ao formulário
+
+1. Inclua `localPath` nos tipos de entrada e nos valores controlados do
+   formulário.
+2. Inicialize o campo com `project.localPath ?? ''`; a interface trabalha com
+   string vazia para representar um campo visualmente vazio.
+3. Renderize um `FormInput` com label “Caminho local”. O componente conecta o
+   campo ao React Hook Form e mantém label, erro e acessibilidade associados.
+4. Antes do `PATCH`, aplique `trim()` e converta string vazia para `null`.
+   Assim, apagar o conteúdo no formulário remove o valor persistido.
+5. Após sucesso, invalide tanto `getProjectQueryKey(projectId)` quanto
+   `projectsKeys.lists()`. O detalhe precisa ser recarregado porque a resposta
+   do update não contém as coleções de tecnologias, comandos e recursos.
+
+O caminho é apenas uma referência informada pelo usuário; a API não deve
+presumir que o servidor consegue acessar o filesystem do navegador ou validar
+se a pasta existe.
+
+## Passo 19 — marque um projeto como arquivado
+
+Arquivamento não é uma edição comum. O endpoint específico é:
+
+```text
+PATCH /api/project/:id/archive
+```
+
+Implemente essa ação separadamente:
+
+1. crie `archiveProject(projectId)` em `features/projects/api/` sem body;
+2. crie `useArchiveProject` com `useMutation`;
+3. no sucesso, invalide o detalhe e as listas de projetos e mostre um toast;
+4. adicione um botão com confirmação na página de detalhe;
+5. desabilite ações de edição, tecnologias, comandos e recursos enquanto
+   `archivedAt` existir;
+6. mantenha o projeto consultável e mostre o badge “Arquivado”;
+7. use `PATCH /api/project/:id/restore` para permitir a restauração em uma
+   mutation distinta.
+
+A operação é idempotente: repetir o arquivamento não deve trocar novamente a
+data. O `ProjectStatus` também não deve ser alterado automaticamente; ele é um
+eixo independente que preserva, por exemplo, um projeto `FINISHED` arquivado.
+
+### O que não pertence à atualização geral?
+
+| Operação | Endpoint | Motivo da separação |
+| --- | --- | --- |
+| Arquivar/restaurar | `PATCH /api/project/:id/archive` e `PATCH /api/project/:id/restore` | transição de ciclo de vida |
+| Excluir | `DELETE /api/project/:id` | remoção física e confirmação explícita |
+| Tecnologia | `POST`/`DELETE /api/project/:id/technologies/...` | entidade relacionada |
+| Comando | `POST`/`PATCH`/`DELETE /api/project/:id/commands/...` | entidade relacionada |
+| Recurso | `POST`/`PATCH`/`DELETE /api/project/:id/resources/...` | entidade relacionada |
+
+Antes de criar uma nova função, procure o caso de uso correspondente em
+`docs/usecases/projects.md`. O caso de uso é a fonte para decidir se a ação é
+uma atualização de dados gerais ou uma operação de domínio explícita.
 
 ## Assuntos para estudar enquanto implementa
 

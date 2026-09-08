@@ -9,6 +9,7 @@ import {
   useProjectTechnicalEntries,
 } from "../hooks/use-project-details";
 import { ProjectDetailHeader } from "../components/project-detail-header";
+import { ProjectEditForm } from "../components/project-edit-form";
 import { ProjectDetailOverview } from "../components/project-detail-overview";
 import { ProjectDetailSkeleton } from "../components/project-detail-skeleton";
 import {
@@ -36,6 +37,7 @@ export default function ProjectDetailPage() {
   const [entriesPage, setEntriesPage] = useState(1);
   const [commandsPage, setCommandsPage] = useState(1);
   const [resourcesPage, setResourcesPage] = useState(1);
+  const [isEditProjectDialogOpen, setIsEditProjectDialogOpen] = useState(false);
 
   // Cada hook representa uma coleção independente da API. As páginas também
   // são independentes: avançar em comandos não altera a página de recursos.
@@ -79,7 +81,16 @@ export default function ProjectDetailPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8">
-      <ProjectDetailHeader project={project} />
+      <ProjectDetailHeader
+        onEdit={() => setIsEditProjectDialogOpen(true)}
+        project={project}
+      />
+      <ProjectEditForm
+        key={`${project.id}:${project.updatedAt}`}
+        open={isEditProjectDialogOpen}
+        onOpenChange={setIsEditProjectDialogOpen}
+        project={project}
+      />
 
       {/* Os papéis ARIA tornam a navegação compreensível para leitores de tela;
           o foco visível mantém a mesma affordance para teclado e mouse. */}

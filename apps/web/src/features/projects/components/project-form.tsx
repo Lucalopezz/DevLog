@@ -1,15 +1,7 @@
 import type { SubmitHandler } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { FormInput } from "@/components/ui/form-input";
+import { Form } from "@/components/ui/form";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { useCreateProject } from "../hooks/use-create-project";
 import { useProjectForm } from "../hooks/use-project-form";
+import { ProjectFormFields } from "./project-form-fields";
 import type { CreateProjectInput } from "../types/project";
 
 export type ProjectFormProps = {
@@ -73,33 +66,14 @@ export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
             noValidate
             onSubmit={handleSubmit(onSubmit)}
           >
-            <FormInput
-              autoComplete="off"
+            {/*
+              O wrapper de criação fornece o `form.control` configurado por
+              useProjectForm. ProjectFormFields apenas renderiza e conecta nome
+              e descrição; ele não sabe que a operação final será um POST.
+            */}
+            <ProjectFormFields
               control={form.control}
               disabled={isLoading}
-              label="Nome"
-              name="name"
-              placeholder="Meu projeto"
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição</FormLabel>
-                  <FormControl>
-                    <textarea
-                      {...field}
-                      className="min-h-24 w-full resize-y rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                      disabled={isLoading}
-                      placeholder="Uma breve descrição do projeto"
-                      rows={4}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
             />
 
             <DialogFooter className="mx-0 mt-1 mb-0 border-t-0 bg-transparent p-0">

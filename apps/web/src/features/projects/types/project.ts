@@ -65,3 +65,24 @@ export type CreateProjectInput = {
   name: string;
   description?: string;
 };
+
+/**
+ * Campos diretos que o endpoint PATCH aceita.
+ *
+ * O contrato é parcial de propósito: a ausência preserva o valor atual e
+ * `null` remove os campos opcionais. Transições de ciclo de vida, como
+ * arquivar e restaurar, não fazem parte deste payload.
+ */
+export type UpdateProjectInput = {
+  name?: string;
+  description?: string | null;
+  status?: ProjectStatus;
+  localPath?: string | null;
+};
+
+export type UpdateProjectFormValues = {
+  name: string;
+  description: string;
+  status: ProjectStatus;
+  localPath: string;
+};
