@@ -6,6 +6,7 @@ import HomePage from '@/features/home/pages/home-page'
 import { RootLayout } from './root-layout'
 import { redirectAuthenticatedUser, requireUser } from './require-user'
 import ProjectsPage from '@/features/projects/pages/projects-page'
+import ProjectDetailPage from '@/features/projects/pages/project-detail-page'
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ export const router = createBrowserRouter([
           {
             path: 'projects',
             Component: ProjectsPage,
+          },
+          {
+            path: 'projects/:projectId',
+            Component: ProjectDetailPage,
           },
         ],
       },

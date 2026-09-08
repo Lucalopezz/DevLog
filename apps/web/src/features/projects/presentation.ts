@@ -1,4 +1,12 @@
-import type { ProjectStatus } from './types/project';
+import {
+  BookOpen,
+  ExternalLink,
+  FileCode2,
+  GitBranch,
+  Globe2,
+} from "lucide-react";
+import type { ProjectStatus } from "./types/project";
+import type { ProjectResourceType } from "./types/project-detail";
 
 export type ProjectStatusPresentation = {
   label: string;
@@ -17,17 +25,16 @@ export const projectStatusPresentation: Record<
   ProjectStatusPresentation
 > = {
   ACTIVE: {
-    label: 'Ativo',
-    className:
-      'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+    label: "Ativo",
+    className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   },
   INACTIVE: {
-    label: 'Inativo',
-    className: 'bg-muted text-muted-foreground',
+    label: "Inativo",
+    className: "bg-muted text-muted-foreground",
   },
   FINISHED: {
-    label: 'Finalizado',
-    className: 'bg-sky-500/10 text-sky-700 dark:text-sky-300',
+    label: "Finalizado",
+    className: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
   },
 };
 /**
@@ -38,3 +45,14 @@ export function presentProjectStatus(
 ): ProjectStatusPresentation {
   return projectStatusPresentation[status];
 }
+
+export const resourcePresentation: Record<
+  ProjectResourceType,
+  { label: string; icon: typeof Globe2 }
+> = {
+  REPOSITORY: { label: "Repositório", icon: GitBranch },
+  DOCUMENTATION: { label: "Documentação", icon: BookOpen },
+  LOCAL_URL: { label: "URL local", icon: FileCode2 },
+  EXTERNAL_URL: { label: "Link externo", icon: Globe2 },
+  OTHER: { label: "Recurso", icon: ExternalLink },
+};
