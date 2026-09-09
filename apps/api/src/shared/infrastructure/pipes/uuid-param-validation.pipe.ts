@@ -12,8 +12,8 @@ export class UuidParamValidationPipe implements PipeTransform {
     version: '4',
     errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
   });
-  // Função que vem do NestJS, que é chamada para transformar o valor do parâmetro antes de ser passado para
-  // o manipulador de rota. Aqui, verificamos se o parâmetro é um UUID válido usando o ParseUUIDPipe.
+  // NestJS calls this function to transform a parameter value before passing it to
+  // the route handler. Here, ParseUUIDPipe checks whether the parameter is a valid UUID.
   async transform(
     value: unknown,
     metadata: ArgumentMetadata,

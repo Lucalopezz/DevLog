@@ -5,16 +5,16 @@ export class UpdateUserPasswordDto implements Omit<
   UpdateUserPasswordUseCaseInput,
   'userId'
 > {
-  @IsString({ message: 'Parametro inválido' })
-  @IsNotEmpty({ message: 'A senha atual é obrigatória' })
+  @IsString({ message: 'Invalid parameter' })
+  @IsNotEmpty({ message: 'Current password is required' })
   currentPassword: string;
 
-  @IsString({ message: 'Parametro inválido' })
-  @IsNotEmpty({ message: 'A senha é obrigatória' })
-  @MinLength(6, { message: 'A senha deve ter no mínimo 6 caracteres' })
+  @IsString({ message: 'Invalid parameter' })
+  @IsNotEmpty({ message: 'Password is required' })
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
   password: string;
 
-  @IsString({ message: 'Parametro inválido' })
-  @IsNotEmpty({ message: 'A confirmação de senha é obrigatória' })
+  @IsString({ message: 'Invalid parameter' })
+  @IsNotEmpty({ message: 'Password confirmation is required' })
   confirmPassword: string;
 }

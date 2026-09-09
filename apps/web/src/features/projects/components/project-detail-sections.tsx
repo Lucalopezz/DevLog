@@ -16,11 +16,11 @@ function SectionError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-start gap-3 rounded-xl border border-destructive/25 bg-destructive/5 p-5 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-sm text-muted-foreground">
-        Não foi possível carregar esta seção.
+        Could not load this section.
       </p>
       <Button onClick={onRetry} size="sm" type="button" variant="outline">
         <RefreshCw data-icon="inline-start" />
-        Tentar novamente
+        Try again
       </Button>
     </div>
   );
@@ -50,12 +50,12 @@ function DetailPagination({
 
   return (
     <nav
-      aria-label="Paginação da seção"
+      aria-label="Section pagination"
       className="flex flex-col gap-3 border-t border-border/60 pt-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <p aria-live="polite" className="text-sm text-muted-foreground">
-        Página {meta.currentPage} de {meta.lastPage} ·{" "}
-        {meta.total.toLocaleString("pt-BR")} item(ns)
+        Page {meta.currentPage} of {meta.lastPage} ·{" "}
+        {meta.total.toLocaleString("en-US")} item(s)
       </p>
       <div className="flex items-center gap-2">
         <Button
@@ -65,7 +65,7 @@ function DetailPagination({
           type="button"
           variant="outline"
         >
-          Anterior
+          Previous
         </Button>
         <Button
           disabled={isLastPage || isFetching}
@@ -74,7 +74,7 @@ function DetailPagination({
           type="button"
           variant="outline"
         >
-          Próxima
+          Next
         </Button>
       </div>
     </nav>
@@ -82,8 +82,8 @@ function DetailPagination({
 }
 
 const technicalEntryTypePresentation = {
-  ISSUE: { label: "Problema", icon: CircleAlert },
-  LEARNING: { label: "Aprendizado", icon: Lightbulb },
+  ISSUE: { label: "Issue", icon: CircleAlert },
+  LEARNING: { label: "Learning", icon: Lightbulb },
 } as const;
 
 export function TechnicalEntriesSection({
@@ -103,14 +103,14 @@ export function TechnicalEntriesSection({
   onRetry: () => void;
   onPageChange: (page: number) => void;
 }) {
-  // A resposta pode estar pendente, vazia ou com erro. Tratar esses estados
-  // aqui mantém a página focada em composição e permite retry por seção.
+  // The response can be pending, empty, or failed. Handling these states
+  // here keeps the page focused on composition and allows retries per section.
   if (isError) return <SectionError onRetry={onRetry} />;
   if (isPending) return <LoadingSection />;
   if (!entries?.length) {
     return (
       <EmptySection>
-        Nenhuma entrada técnica foi registrada neste projeto.
+        No technical entries have been recorded for this project.
       </EmptySection>
     );
   }
@@ -143,7 +143,7 @@ export function TechnicalEntriesSection({
                 </div>
                 {entry.status ? (
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {entry.status === "RESOLVED" ? "Resolvido" : "Em aberto"}
+                    {entry.status === "RESOLVED" ? "Resolved" : "Open"}
                   </span>
                 ) : null}
               </header>
@@ -169,7 +169,7 @@ export function TechnicalEntriesSection({
                 className="mt-auto text-xs text-muted-foreground"
                 dateTime={entry.updatedAt}
               >
-                Atualizado {formatRelativeDate(entry.updatedAt)}
+                Updated {formatRelativeDate(entry.updatedAt)}
               </time>
             </article>
           );
@@ -205,7 +205,7 @@ export function CommandsSection({
   if (isPending) return <LoadingSection />;
   if (!commands?.length) {
     return (
-      <EmptySection>Nenhum comando foi registrado neste projeto.</EmptySection>
+      <EmptySection>No commands have been recorded for this project.</EmptySection>
     );
   }
 
@@ -224,7 +224,7 @@ export function CommandsSection({
                 </span>
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-muted-foreground">
-                    {command.executionOrder ?? index + 1}. Comando
+                    {command.executionOrder ?? index + 1}. Command
                   </p>
                   <h3 className="mt-1 break-words font-semibold">
                     {command.title}
@@ -279,7 +279,7 @@ export function ResourcesSection({
   if (isPending) return <LoadingSection />;
   if (!resources?.length) {
     return (
-      <EmptySection>Nenhum recurso foi registrado neste projeto.</EmptySection>
+      <EmptySection>No resources have been recorded for this project.</EmptySection>
     );
   }
 
@@ -331,8 +331,8 @@ export function ResourcesSection({
 }
 
 function LoadingSection() {
-  // aria-live/role=status comunica a mudança assíncrona sem depender de
-  // animação visual, o que também ajuda usuários de tecnologias assistivas.
+  // aria-live/role=status announces asynchronous changes without relying on
+  // visual animation, helping people who use assistive technology.
   return (
     <div
       className="rounded-2xl border border-border/60 bg-card/60 p-8 text-center"
@@ -340,7 +340,7 @@ function LoadingSection() {
     >
       <RefreshCw className="mx-auto size-5 animate-spin text-primary" />
       <p className="mt-3 text-sm text-muted-foreground">
-        Carregando conteúdo...
+        Loading content...
       </p>
     </div>
   );

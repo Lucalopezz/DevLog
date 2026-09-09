@@ -10,11 +10,11 @@ describe('TagPresenter', () => {
     updatedAt: new Date('2026-08-10T13:00:00.000Z'),
   };
 
-  it('mapeia a saída do caso de uso para a representação de item', () => {
+  it('maps use case output to the item representation', () => {
     expect(new TagPresenter(tag)).toEqual(tag);
   });
 
-  it('mapeia itens paginados para data e paginação para meta', () => {
+  it('maps paginated items to data and pagination to meta', () => {
     const presenter = new TagCollectionPresenter({
       items: [tag],
       currentPage: 2,

@@ -30,7 +30,7 @@ export class GetProjectResourceUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(input.projectId);
 
     if (!project || project.userId !== input.userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     const resource = await this.projectResourceRepository.findById(
@@ -38,7 +38,7 @@ export class GetProjectResourceUseCase implements UseCaseContract<
     );
 
     if (!resource || resource.projectId !== project.id) {
-      throw new NotFoundException('Recurso não encontrado');
+      throw new NotFoundException('Resource not found');
     }
 
     return ProjectResourceOutputMapper.toOutput(resource);

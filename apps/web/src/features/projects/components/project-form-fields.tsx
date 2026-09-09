@@ -8,18 +8,18 @@ type ProjectCommonFormValues = FieldValues & {
 }
 
 type ProjectFormFieldsProps<TFieldValues extends ProjectCommonFormValues> = {
-  // `control` é a ponte entre o formulário criado pelo wrapper e cada campo:
-  // ele carrega valor, onChange, estado de erro e regras de acessibilidade.
+  // `control` connects the form created by the wrapper to each field:
+  // it carries the value, onChange, error state, and accessibility rules.
   control: Control<TFieldValues>
   disabled?: boolean
 }
 
 /**
- * Campos presentes tanto na criação quanto na edição de um projeto.
+ * Fields shared by project creation and editing.
  *
- * O componente recebe apenas `control`, então continua sendo o formulário
- * pai que decide o schema, os valores iniciais e a mutation. Essa separação
- * evita duplicar marcação e mantém cada fluxo responsável por sua operação.
+ * The component only receives `control`, so the parent form still
+ * chooses the schema, initial values, and mutation. This separation
+ * avoids duplicate markup and keeps each flow responsible for its operation.
  */
 export function ProjectFormFields<TFieldValues extends ProjectCommonFormValues>({
   control,
@@ -31,30 +31,30 @@ export function ProjectFormFields<TFieldValues extends ProjectCommonFormValues>(
         autoComplete="off"
         control={control}
         disabled={disabled}
-        label="Nome"
-        // A restrição ProjectCommonFormValues garante estes campos; a asserção
-        // adapta essa garantia ao tipo recursivo de caminhos do React Hook Form.
+        label="Name"
+        // The ProjectCommonFormValues constraint guarantees these fields; the assertion
+        // adapts that guarantee to React Hook Form's recursive path type.
         name={'name' as FieldPath<TFieldValues>}
-        placeholder="Meu projeto"
+        placeholder="My project"
       />
 
       {/*
-        FormField adapta o textarea ao React Hook Form. O `field` recebido no
-        render já contém as props necessárias para manter o valor sincronizado;
-        por isso o componente compartilhado não precisa de um useState próprio.
+        FormField adapts the textarea to React Hook Form. The `field` received by
+        render already contains the props needed to keep the value synchronized;
+        therefore, the shared component does not need its own useState.
       */}
       <FormField
         control={control}
         name={'description' as FieldPath<TFieldValues>}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Descrição</FormLabel>
+            <FormLabel>Description</FormLabel>
             <FormControl>
               <textarea
                 {...field}
                 className="min-h-24 w-full resize-y rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 disabled={disabled}
-                placeholder="Uma breve descrição do projeto"
+                placeholder="A brief project description"
                 rows={4}
               />
             </FormControl>

@@ -30,13 +30,13 @@ export class CreateUserUseCase implements UseCaseContract<
     const { name, email, password, confirmPassword } = input;
 
     if (password !== confirmPassword) {
-      throw new UnprocessableEntityException('As senhas não conferem');
+      throw new UnprocessableEntityException('Passwords do not match');
     }
 
     const emailExists = await this.userRepository.findByEmail(email);
 
     if (emailExists !== null) {
-      throw new ConflictException('E-mail já cadastrado');
+      throw new ConflictException('Email already registered');
     }
     const hashPass = await this.hashProvider.generateHash(password);
 

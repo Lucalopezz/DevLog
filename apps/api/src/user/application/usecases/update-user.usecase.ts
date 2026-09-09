@@ -20,7 +20,7 @@ export class UpdateUserUseCase implements UseCaseContract<
     const user = await this.userRepository.findById(input.userId);
 
     if (user === null) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException('User not found');
     }
 
     user.updateName(input.name);

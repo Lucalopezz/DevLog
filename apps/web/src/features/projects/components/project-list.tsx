@@ -16,7 +16,7 @@ export function ProjectList({ projects }: ProjectListProps) {
           Seus projetos
         </h2>
         <p className="text-sm text-muted-foreground">
-          Projetos não arquivados ordenados pelos mais recentes.
+          Unarchived projects ordered from newest to oldest.
         </p>
       </div>
 
@@ -49,13 +49,13 @@ export function ProjectList({ projects }: ProjectListProps) {
                     </p>
                   ) : (
                     <p className="text-sm italic text-muted-foreground">
-                      Sem descrição.
+                      No description.
                     </p>
                   )}
 
                   <dl className="mt-auto space-y-2 border-t pt-4 text-sm">
                     <div className="flex items-baseline justify-between gap-4">
-                      <dt className="text-muted-foreground">Atualizado</dt>
+                      <dt className="text-muted-foreground">Updated</dt>
                       <dd>
                         <time dateTime={project.updatedAt}>
                           {formatDate(project.updatedAt)}
@@ -65,7 +65,7 @@ export function ProjectList({ projects }: ProjectListProps) {
 
                     {project.localPath ? (
                       <div className="space-y-1">
-                        <dt className="text-muted-foreground">Caminho local</dt>
+                        <dt className="text-muted-foreground">Local path</dt>
                         <dd
                           className="truncate font-mono text-xs"
                           title={project.localPath}

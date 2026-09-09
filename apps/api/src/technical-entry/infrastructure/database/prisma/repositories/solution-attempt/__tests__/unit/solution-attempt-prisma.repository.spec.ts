@@ -16,7 +16,7 @@ function makeEntity(): SolutionAttemptEntity {
   return new SolutionAttemptEntity(
     {
       technicalEntryId: ENTRY_ID,
-      description: 'Adicionar credentials na requisição',
+      description: 'Add credentials to the request',
       result: SolutionAttemptResult.PARTIAL,
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -29,7 +29,7 @@ function makeModel(): SolutionAttempt {
   return {
     id: ATTEMPT_ID,
     technicalEntryId: ENTRY_ID,
-    description: 'Adicionar credentials na requisição',
+    description: 'Add credentials to the request',
     result: PrismaSolutionAttemptResult.PARTIAL,
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -65,7 +65,7 @@ describe('SolutionAttemptPrismaRepository', () => {
     deleteAttempt.mockResolvedValue(undefined);
   });
 
-  it('declara somente campos seguros para ordenação', () => {
+  it('declares only safe sorting fields', () => {
     expect(repository.sortableFields).toEqual(['createdAt', 'result']);
   });
 
@@ -90,7 +90,7 @@ describe('SolutionAttemptPrismaRepository', () => {
           data: {
             id: ATTEMPT_ID,
             technicalEntryId: ENTRY_ID,
-            description: 'Adicionar credentials na requisição',
+            description: 'Add credentials to the request',
             result: PrismaSolutionAttemptResult.PARTIAL,
             createdAt: timestamp,
             updatedAt: timestamp,
@@ -101,7 +101,7 @@ describe('SolutionAttemptPrismaRepository', () => {
     expect(update).toHaveBeenCalledWith({
       where: { id: ATTEMPT_ID },
       data: {
-        description: 'Adicionar credentials na requisição',
+        description: 'Add credentials to the request',
         result: PrismaSolutionAttemptResult.PARTIAL,
         updatedAt: timestamp,
       },
@@ -109,7 +109,7 @@ describe('SolutionAttemptPrismaRepository', () => {
     expect(deleteAttempt).toHaveBeenCalledWith({ where: { id: ATTEMPT_ID } });
   });
 
-  it('retorna null quando a tentativa não existe', async () => {
+  it('returns null when the attempt does not exist', async () => {
     await expect(repository.findById(ATTEMPT_ID)).resolves.toBeNull();
   });
 
@@ -124,7 +124,7 @@ describe('SolutionAttemptPrismaRepository', () => {
     });
   });
 
-  it('aplica filtros, paginação e ordenação permitida', async () => {
+  it('applies filters, pagination, and allowed sorting', async () => {
     count.mockResolvedValue(1);
     findMany.mockResolvedValue([makeModel()]);
     const params = new SolutionAttemptSearchParams({
@@ -153,7 +153,7 @@ describe('SolutionAttemptPrismaRepository', () => {
     expect(result.items[0]).toBeInstanceOf(SolutionAttemptEntity);
   });
 
-  it('usa filtro vazio e ordenação padrão para sort não permitido', async () => {
+  it('uses empty filters and default sorting for a disallowed sort', async () => {
     await repository.search(
       new SolutionAttemptSearchParams({ sort: 'description', filter: null }),
     );

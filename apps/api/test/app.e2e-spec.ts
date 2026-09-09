@@ -49,7 +49,7 @@ describe('Project archive relationships (e2e)', () => {
     await prisma.user.create({
       data: {
         id: USER_ID,
-        name: 'Usuário E2E',
+        name: 'E2E user',
         email: 'archive-relations-e2e@example.com',
         passwordHash: 'not-used-in-this-test',
         projects: {
@@ -65,7 +65,7 @@ describe('Project archive relationships (e2e)', () => {
             },
             resources: {
               create: {
-                label: 'Documentação',
+                label: 'Documentation',
                 url: 'https://example.com/docs',
                 type: ProjectResourceType.DOCUMENTATION,
               },
@@ -74,7 +74,7 @@ describe('Project archive relationships (e2e)', () => {
               create: {
                 userId: USER_ID,
                 title: 'Entrada preservada',
-                context: 'Contexto técnico',
+                context: 'Technical context',
                 type: TechnicalEntryType.ISSUE,
               },
             },
@@ -93,7 +93,7 @@ describe('Project archive relationships (e2e)', () => {
     }
   });
 
-  it('preserva tecnologias, comandos, recursos e entradas após arquivar', async () => {
+  it('preserves technologies, commands, resources, and entries after archiving', async () => {
     const archiveResponse = await request(app.getHttpServer())
       .patch(`/api/project/${PROJECT_ID}/archive`)
       .set('Cookie', AUTH_COOKIE)
@@ -138,7 +138,7 @@ describe('Project archive relationships (e2e)', () => {
       expect.objectContaining({ title: 'Iniciar API' }),
     ]);
     expect(resourceBody.data).toEqual([
-      expect.objectContaining({ label: 'Documentação' }),
+      expect.objectContaining({ label: 'Documentation' }),
     ]);
     expect(entryBody.data).toEqual([
       expect.objectContaining({

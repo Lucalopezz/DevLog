@@ -27,7 +27,7 @@ export class ProjectCommandModelMapper {
       projectId: entity.projectId,
       title: entity.title,
       command: entity.command,
-      // permite que o Prisma receba null ao persistir campos opcionais
+      // Allow Prisma to receive null when persisting optional fields
       description: entity.description ?? null,
       executionOrder: entity.executionOrder ?? null,
       createdAt: entity.createdAt,

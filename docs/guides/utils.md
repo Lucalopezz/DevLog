@@ -1,34 +1,34 @@
-# Comandos úteis
+# Useful commands
 
-Execute os comandos a partir da raiz do repositório.
+Run commands from the repository root.
 
 ```bash
-# Instalar todas as dependências
+# Install all dependencies
 pnpm install
 
-# Executar todas as aplicações
+# Run all applications
 pnpm dev
 
-# Executar somente a API
+# Run only the API
 pnpm --filter api dev
 
-# Criar arquivos nest pela cli + diretorio correto
+# Generate Nest files in the correct directory through the CLI
 pnpm --filter api exec nest g controller auth/infrastructure/auth --flat --no-spec
 pnpm --filter api exec nest g guard auth/infrastructure/auth --flat --no-spec
 
-# Executar somente o frontend
+# Run only the frontend
 pnpm --filter web dev
 
-# Executar Prisma
+# Run Prisma
 pnpm --filter api exec prisma migrate dev --name init
 pnpm --filter api exec prisma generate
 
-# Gerar os builds
+# Generate builds
 pnpm build
 
-# Executar lint
+# Run lint checks
 pnpm lint
 
-# Executar testes
+# Run tests
 pnpm test
 ```

@@ -51,7 +51,7 @@ describe('ProjectCommandPrismaRepository (integration)', () => {
     await prisma.$disconnect();
   });
 
-  it('persiste, ordena, filtra e atualiza comandos do projeto', async () => {
+  it('persists, sorts, filters, and updates project commands', async () => {
     const second = new ProjectCommandEntity(
       {
         projectId: PROJECT_ID,

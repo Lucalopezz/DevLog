@@ -13,8 +13,8 @@ export function RootLayout() {
 
       <SidebarInset>
         <header className="flex h-14 items-center gap-2 border-b px-4">
-          {/* No mobile, o SidebarTrigger abre a sidebar como um drawer. */}
-          <SidebarTrigger aria-label="Abrir menu de navegação" />
+          {/* On mobile, SidebarTrigger opens the sidebar as a drawer. */}
+          <SidebarTrigger aria-label="Open navigation menu" />
         </header>
 
         <div className="flex-1 p-6">

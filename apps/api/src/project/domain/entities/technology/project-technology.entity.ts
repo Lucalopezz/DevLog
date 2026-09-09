@@ -10,7 +10,7 @@ export type ProjectTechnologyProps = {
   updatedAt: Date;
 };
 
-// Remove createdAt e updatedAt das propriedades obrigatórias
+// Remove createdAt and updatedAt from the required properties
 // e adiciona essas duas propriedades novamente como opcionais.
 type ProjectTechnologyInputProps = Omit<
   ProjectTechnologyProps,

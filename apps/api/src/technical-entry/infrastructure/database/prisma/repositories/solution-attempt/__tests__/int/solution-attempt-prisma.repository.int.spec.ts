@@ -44,7 +44,7 @@ describe('SolutionAttemptPrismaRepository (integration)', () => {
       new TechnicalEntryEntity(
         {
           userId: USER_ID,
-          title: 'Erro na API',
+          title: 'API error',
           context: 'Contexto do erro',
           type: TechnicalEntryType.ISSUE,
         },
@@ -57,7 +57,7 @@ describe('SolutionAttemptPrismaRepository (integration)', () => {
     await prisma.$disconnect();
   });
 
-  it('persiste, filtra, atualiza e remove tentativas vinculadas à entrada', async () => {
+  it('persists, filters, updates, and removes attempts linked to the entry', async () => {
     const failed = new SolutionAttemptEntity(
       {
         technicalEntryId: ENTRY_ID,
@@ -89,12 +89,12 @@ describe('SolutionAttemptPrismaRepository (integration)', () => {
       expect.objectContaining({ id: SUCCESS_ATTEMPT_ID }),
     ]);
 
-    successful.updateDescription('Solução confirmada');
+    successful.updateDescription('Confirmed solution');
     await repository.update(successful);
     await expect(
       repository.findById(SUCCESS_ATTEMPT_ID),
     ).resolves.toMatchObject({
-      description: 'Solução confirmada',
+      description: 'Confirmed solution',
     });
 
     await repository.delete(FAILED_ATTEMPT_ID);

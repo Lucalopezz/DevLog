@@ -6,7 +6,7 @@ type MarkdownProps = React.ComponentProps<typeof ReactMarkdown> & {
   className?: string;
 };
 
-// Componente Markdown que renderiza o conteúdo em Markdown usando ReactMarkdown e remarkGfm
+// Renders Markdown content using ReactMarkdown and remarkGfm
 export function Markdown({ className, ...props }: MarkdownProps) {
   return (
     <div

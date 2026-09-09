@@ -3,7 +3,7 @@ import { EntityValidationError } from '@/shared/domain/errors/entity-validation-
 import { EntityValidationErrorFilter } from '../../entity-validation-error.filter';
 
 describe('EntityValidationErrorFilter', () => {
-  it('converte erro de validação da entidade em resposta 422', () => {
+  it('converts entity validation errors to a 422 response', () => {
     const response = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -14,7 +14,7 @@ describe('EntityValidationErrorFilter', () => {
       }),
     } as unknown as ArgumentsHost;
     const exception = new EntityValidationError({
-      name: ['O nome é obrigatório'],
+      name: ['Name is required'],
     });
 
     new EntityValidationErrorFilter().catch(exception, host);

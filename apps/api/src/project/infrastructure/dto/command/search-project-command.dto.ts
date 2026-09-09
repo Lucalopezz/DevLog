@@ -15,36 +15,36 @@ export class SearchProjectCommandDto implements Omit<
 > {
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'O número da página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Page number must be greater than zero' })
   page?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'A quantidade por página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Items per page must be greater than zero' })
   perPage?: number;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   @MaxLength(120, {
-    message: 'O título do comando deve ter no máximo 120 caracteres',
+    message: 'Command title must be at most 120 characters long',
   })
   title?: string;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   command?: string;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   description?: string;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   sort?: string;
 
   @IsOptional()
-  @IsIn(['asc', 'desc'], { message: 'Parametro inválido' })
+  @IsIn(['asc', 'desc'], { message: 'Invalid parameter' })
   sortDir?: 'asc' | 'desc';
 }

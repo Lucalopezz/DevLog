@@ -22,7 +22,7 @@ function makeModel(overrides: Partial<ProjectCommand> = {}): ProjectCommand {
 }
 
 describe('ProjectCommandModelMapper', () => {
-  it('converte nulls persistidos em opcionais do domínio', () => {
+  it('converts persisted nulls to optional domain fields', () => {
     const entity = ProjectCommandModelMapper.toEntity(makeModel());
 
     expect(entity).toMatchObject({
@@ -35,7 +35,7 @@ describe('ProjectCommandModelMapper', () => {
     expect(entity.executionOrder).toBeUndefined();
   });
 
-  it('converte opcionais ausentes em null para persistência', () => {
+  it('converts absent optional fields to null for persistence', () => {
     const entity = new ProjectCommandEntity(
       {
         projectId: PROJECT_ID,
@@ -59,7 +59,7 @@ describe('ProjectCommandModelMapper', () => {
     });
   });
 
-  it('encapsula erro de validação ao hidratar uma entidade inválida', () => {
+  it('wraps validation errors when hydrating an invalid entity', () => {
     expect(() =>
       ProjectCommandModelMapper.toEntity(makeModel({ title: '' })),
     ).toThrow(ValidationError);

@@ -1,30 +1,30 @@
-Pelo contexto, o banco deve manter o **registro técnico como núcleo**, com projetos apenas como contexto opcional. Tags representam assuntos ou tecnologias, não projetos.
+The database keeps the **technical entry at its core**, with projects as optional context. Tags represent topics or technologies, not projects.
 
-## 1. Modelo lógico
+## 1. Logical model
 
-### Entidades principais
+### Main entities
 
-![Modelo Relacional](./banco.png)
+![Relational model](./banco.png)
 
 ### Cardinalidades
 
-| Relacionamento                   | Cardinalidade | Explicação                                                                     |
+| Relationship | Cardinality | Explanation |
 | -------------------------------- | ------------: | ------------------------------------------------------------------------------ |
-| User → Project                   |           1:N | Um usuário pode possuir vários projetos                                        |
-| User → TechnicalEntry            |           1:N | Um usuário pode criar vários registros                                         |
-| User → Tag                       |           1:N | Cada usuário possui seu próprio conjunto de tags                               |
-| Project → TechnicalEntry         |  1:N opcional | Um projeto pode possuir vários registros, mas um registro pode não ter projeto |
-| TechnicalEntry → SolutionAttempt |           1:N | Um problema pode ter várias tentativas                                         |
-| TechnicalEntry ↔ Tag             |           N:N | Um registro pode ter várias tags e uma tag pode estar em vários registros      |
-| Project → ProjectTechnology      |           1:N | Um projeto pode usar várias tecnologias                                        |
-| Project → ProjectCommand         |           1:N | Um projeto pode possuir vários comandos                                        |
-| Project → ProjectResource        |           1:N | Um projeto pode possuir vários links e recursos                                |
+| User → Project | 1:N | A user can own multiple projects. |
+| User → TechnicalEntry | 1:N | A user can create multiple entries. |
+| User → Tag | 1:N | Each user has their own set of tags. |
+| Project → TechnicalEntry | Optional 1:N | A project can have multiple entries, but an entry may have no project. |
+| TechnicalEntry → SolutionAttempt | 1:N | An issue can have multiple attempts. |
+| TechnicalEntry ↔ Tag | N:N | An entry can have multiple tags, and a tag can appear on multiple entries. |
+| Project → ProjectTechnology | 1:N | A project can use multiple technologies. |
+| Project → ProjectCommand | 1:N | A project can have multiple commands. |
+| Project → ProjectResource | 1:N | A project can have multiple links and resources. |
 
-A relação entre registro e projeto é opcional, porém cada registro pode estar vinculado a no máximo um projeto no MVP.
+The entry/project relationship is optional, but an entry can be linked to at most one project in the MVP.
 
 ---
 
-# 2. Modelo relacional
+# 2. Relational model
 
 ## `users`
 
@@ -39,25 +39,25 @@ created_at        TIMESTAMPTZ NOT NULL
 updated_at        TIMESTAMPTZ NOT NULL
 ```
 
-### Observações
+### Notes
 
-- O e-mail deve ser único globalmente.
-- A senha nunca deve ser salva diretamente.
-- O nome `password_hash` deixa mais claro que o campo contém um hash.
+- Email must be globally unique.
+- Passwords must never be stored directly.
+- The name `password_hash` makes it clear that the field contains a hash.
 
-### Geração de identificadores e timestamps
+### Generating identifiers and timestamps
 
-As entidades de domínio geram o UUID na aplicação quando são criadas sem `id` e os repositórios persistem esse mesmo valor.
+Domain entities generate a UUID in the application when created without an `id`, and repositories persist that same value.
 
-No Prisma 7.9 usado pelo projeto, `@default(uuid())` gera o UUID no Prisma Client, mas não produz um `DEFAULT` na coluna PostgreSQL. Para garantir a proteção complementar também em inserções diretas no banco, o schema declara:
+In the project's Prisma 7.9 version, `@default(uuid())` generates a UUID in Prisma Client but does not create a PostgreSQL column `DEFAULT`. To also protect direct database inserts, the schema declares:
 
 ```prisma
 @default(dbgenerated("gen_random_uuid()"))
 ```
 
-Assim, o UUID recebido da aplicação é preservado e o PostgreSQL usa `gen_random_uuid()` apenas quando a inserção não fornece um `id`.
+This preserves the UUID supplied by the application. PostgreSQL uses `gen_random_uuid()` only when the insert omits `id`.
 
-Os timestamps seguem o padrão:
+Timestamps follow this convention:
 
 ```text
 id         @default(dbgenerated("gen_random_uuid()"))
@@ -65,7 +65,7 @@ created_at @default(now())
 updated_at @updatedAt
 ```
 
-No PostgreSQL, os IDs usam o tipo nativo `UUID` e os timestamps usam `TIMESTAMPTZ`.
+PostgreSQL IDs use the native `UUID` type, and timestamps use `TIMESTAMPTZ`.
 
 ---
 
@@ -95,32 +95,32 @@ PAUSED
 FINISHED
 ```
 
-O arquivamento deve ser controlado por `archived_at`, não por um valor `ARCHIVED` dentro de `status`.
+Archiving is controlled by `archived_at`, not by an `ARCHIVED` value in `status`.
 
-Isso evita misturar dois conceitos:
+This keeps two concepts separate:
 
-- `status`: estado funcional do projeto;
-- `archived_at`: visibilidade e arquivamento do registro.
+- `status`: the project's functional state;
+- `archived_at`: record visibility and archiving.
 
-Novos projetos começam com o status `ACTIVE` por padrão.
+New projects default to `ACTIVE`.
 
-### Restrição de unicidade
+### Unique constraint
 
 ```text
 UNIQUE (user_id, name)
 ```
 
-Um usuário não pode ter dois projetos com o mesmo nome, mas usuários diferentes podem ter projetos com nomes iguais.
+A user cannot have two projects with the same name, but different users may use the same project names.
 
-### Sobre `repository_url`
+### About `repository_url`
 
-O documento inicialmente coloca `repositoryUrl` diretamente em `Project`, mas também define `ProjectResource` com o tipo `REPOSITORY`.
+The initial document placed `repositoryUrl` directly in `Project`, but also defined `ProjectResource` with the `REPOSITORY` type.
 
-Foi decidido **remover `repository_url` de `projects`** e armazenar repositórios em `project_resources`, porque:
+The decision was to **remove `repository_url` from `projects`** and store repositories in `project_resources`, because:
 
-- um projeto pode possuir frontend e backend em repositórios separados;
-- pode existir mais de um repositório;
-- `ProjectResource` já representa esse conceito.
+- A project may have separate frontend and backend repositories;
+- There may be multiple repositories;
+- `ProjectResource` already represents this concept.
 
 ---
 
@@ -142,7 +142,7 @@ updated_at        TIMESTAMPTZ NOT NULL
 archived_at       TIMESTAMPTZ NULL
 ```
 
-### Tipo
+### Type
 
 ```text
 technical_entry_type
@@ -151,25 +151,25 @@ ISSUE
 LEARNING
 ```
 
-Os tipos iniciais definidos são `ISSUE` e `LEARNING`, e apenas registros do tipo `ISSUE` podem possuir tentativas.
+The initial types are `ISSUE` and `LEARNING`; only `ISSUE` entries can have attempts.
 
-### Resolução de problemas
+### Issue resolution
 
-Um registro `LEARNING` não é exatamente “aberto” ou “resolvido”.
+A `LEARNING` entry is not meaningfully open or resolved.
 
-Foi escolhida a substituição de `status` por:
+The chosen replacement for `status` is:
 
 ```text
 resolved_at TIMESTAMPTZ NULL
 ```
 
-Nesse modelo:
+In this model:
 
-- `ISSUE` com `resolved_at IS NULL`: aberto;
-- `ISSUE` com `resolved_at IS NOT NULL`: resolvido;
-- `LEARNING`: `resolved_at` sempre nulo.
+- `ISSUE` with `resolved_at IS NULL`: open;
+- `ISSUE` with `resolved_at IS NOT NULL`: resolved;
+- `LEARNING`: `resolved_at` is always null.
 
-A tabela ficaria:
+The table becomes:
 
 ```text
 technical_entries
@@ -187,21 +187,21 @@ updated_at
 archived_at
 ```
 
-Essa decisão reduz estados inválidos, como:
+This decision reduces invalid states, such as:
 
 ```text
 type = LEARNING
 status = RESOLVED
 ```
 
-### Regras de negócio
+### Business rules
 
 ```text
-type != ISSUE -> resolved_at deve ser NULL
-resolved_at != NULL -> conclusion deve estar preenchida
+type != ISSUE -> resolved_at must be NULL
+resolved_at != NULL -> conclusion must be provided
 ```
 
-Essas regras serão validadas na aplicação, sem `CHECK constraint` ou trigger no banco.
+These rules are validated in the application, without database `CHECK constraints` or triggers.
 
 ---
 
@@ -228,32 +228,32 @@ PARTIAL
 SUCCESSFUL
 ```
 
-### Relacionamento
+### Relationship
 
 ```text
 technical_entries 1 ---- N solution_attempts
 ```
 
-### Regra importante
+### Important rule
 
-Somente registros `ISSUE` podem possuir tentativas.
+Only `ISSUE` entries can have attempts.
 
-Essa regra não pode ser garantida facilmente por uma `CHECK`, porque ela depende de consultar outra tabela. Deve ser garantida por:
+A `CHECK` cannot easily enforce this rule because it requires querying another table. Enforce it through:
 
-1. regra no domínio/caso de uso;
-2. teste de integração.
+1. A domain/use case rule;
+2. An integration test.
 
-A regra já está explicitamente definida no projeto.
+The project explicitly defines this rule.
 
-### Exclusão
+### Deletion
 
 ```text
 ON DELETE CASCADE
 ```
 
-Ao remover definitivamente um registro técnico, suas tentativas também devem ser removidas.
+Permanently deleting a technical entry must also delete its attempts.
 
-No uso normal, porém, registros devem ser arquivados em vez de apagados.
+In normal use, however, entries should be archived rather than deleted.
 
 ---
 
@@ -270,21 +270,21 @@ created_at        TIMESTAMPTZ NOT NULL
 updated_at        TIMESTAMPTZ NOT NULL
 ```
 
-### Restrição
+### Constraint
 
 ```text
 UNIQUE (user_id, normalized_name)
 ```
 
-O campo `normalized_name` pode armazenar:
+The `normalized_name` field can store:
 
 ```text
 "NestJS"          -> "nestjs"
-"Banco de Dados"  -> "banco de dados"
+"Database"       -> "database"
 " Docker "        -> "docker"
 ```
 
-Assim, o mesmo usuário não consegue criar:
+This prevents the same user from creating:
 
 ```text
 Docker
@@ -292,15 +292,15 @@ docker
 DOCKER
 ```
 
-como três tags diferentes.
+as three different tags.
 
-Cada usuário só pode usar suas próprias tags.
+Each user can only use their own tags.
 
 ---
 
 ## `technical_entry_tags`
 
-Tabela associativa para o relacionamento N:N.
+Association table for the N:N relationship.
 
 ```text
 technical_entry_tags
@@ -312,24 +312,24 @@ created_at          TIMESTAMPTZ NOT NULL
 PK (technical_entry_id, tag_id)
 ```
 
-### Por que chave primária composta?
+### Why a composite primary key?
 
-Porque o par já identifica unicamente a associação:
+The pair already uniquely identifies the association:
 
 ```text
 technical_entry_id + tag_id
 ```
 
-Um campo `id` adicional não traria benefício no MVP.
+An additional `id` field would bring no benefit to the MVP.
 
-### Exclusão
+### Deletion
 
 ```text
 technical_entry_id ON DELETE CASCADE
 tag_id             ON DELETE CASCADE
 ```
 
-Ao excluir uma tag ou um registro, suas associações desaparecem.
+Deleting a tag or entry removes its associations.
 
 ---
 
@@ -346,22 +346,22 @@ created_at        TIMESTAMPTZ NOT NULL
 updated_at        TIMESTAMPTZ NOT NULL
 ```
 
-### Restrição
+### Constraint
 
 ```text
 UNIQUE (project_id, name)
 ```
 
-Uma tecnologia é única por nome dentro do projeto. Com essa restrição, não é possível registrar:
+A technology name is unique within a project. This constraint prevents registering:
 
 ```text
 Node.js 20
 Node.js 22
 ```
 
-no mesmo projeto. Essa limitação foi aceita para o MVP.
+in the same project. This limitation was accepted for the MVP.
 
-As tecnologias são informações específicas de um único projeto.
+Technologies are information specific to one project.
 
 ---
 
@@ -380,15 +380,15 @@ created_at        TIMESTAMPTZ NOT NULL
 updated_at        TIMESTAMPTZ NOT NULL
 ```
 
-### Regra de negócio
+### Business rule
 
 ```text
-execution_order deve ser NULL ou maior ou igual a zero
+execution_order must be NULL or greater than or equal to zero
 ```
 
-Essa regra será validada pela aplicação, sem `CHECK constraint` no banco. `execution_order` não é único por projeto, portanto dois comandos podem ocupar a mesma posição.
+The application validates this rule without a database `CHECK constraint`. `execution_order` is not unique within a project, so two commands may share a position.
 
-Os comandos devem ser apenas documentados; o sistema não deve executá-los no navegador.
+Commands are documentation only; the system must not execute them in the browser.
 
 ---
 
@@ -418,21 +418,21 @@ EXTERNAL_URL
 OTHER
 ```
 
-### Restrição
+### Constraint
 
 ```text
 UNIQUE (project_id, url)
 ```
 
-Essa restrição impede cadastrar a mesma URL várias vezes no mesmo projeto.
+This constraint prevents registering the same URL multiple times within a project.
 
 ---
 
-# 3. Política de exclusão
+# 3. Deletion policy
 
-As relações usam os seguintes comportamentos:
+Relationships use these behaviors:
 
-| Relação | Comportamento |
+| Relationship | Behavior |
 | --- | --- |
 | `User` → `Project` | `ON DELETE CASCADE` |
 | `User` → `TechnicalEntry` | `ON DELETE CASCADE` |
@@ -444,15 +444,15 @@ As relações usam os seguintes comportamentos:
 | `TechnicalEntry` → `SolutionAttempt` | `ON DELETE CASCADE` |
 | `TechnicalEntry`/`Tag` → `TechnicalEntryTag` | `ON DELETE CASCADE` |
 
-Excluir diretamente um projeto apaga suas tecnologias, comandos e recursos. Os registros técnicos associados são preservados e passam a ter `project_id = NULL`.
+Directly deleting a project deletes its technologies, commands, and resources. Associated technical entries are preserved with `project_id = NULL`.
 
-A exclusão de um usuário também se propaga para seus projetos, registros e tags. Ao excluir os projetos, o banco remove em cascata suas tecnologias, comandos e recursos.
+Deleting a user also cascades to their projects, entries, and tags. Deleting those projects cascades to their technologies, commands, and resources.
 
-No fluxo normal, projetos e registros técnicos são arquivados em vez de excluídos definitivamente.
+In normal use, projects and technical entries are archived rather than permanently deleted.
 
 ---
 
-# 4. Diagrama relacional completo
+# 4. Complete relational diagram
 
 ```text
 USERS
@@ -542,26 +542,26 @@ PROJECT_RESOURCES
 
 ---
 
-# 5. Restrições entre usuários
+# 5. Cross-user constraints
 
-Existe um ponto importante: somente colocar `user_id` nas tabelas não garante integralmente estas regras:
+Adding `user_id` columns alone does not fully enforce these rules:
 
-- o registro deve pertencer ao mesmo usuário do projeto;
-- a tag deve pertencer ao mesmo usuário do registro;
-- o usuário não pode acessar dados de outro usuário.
+- The entry must belong to the same user as the project;
+- The tag must belong to the same user as the entry;
+- A user cannot access another user's data.
 
-Essas são regras declaradas no documento.
+These rules are declared in the document.
 
-Por exemplo, sem validação adicional seria tecnicamente possível salvar:
+For example, without extra validation, it would technically be possible to save:
 
 ```text
-technical_entry.user_id = usuário A
-technical_entry.project_id = projeto do usuário B
+technical_entry.user_id = user A
+technical_entry.project_id = user B's project
 ```
 
-## Decisão para o MVP
+## MVP decision
 
-Validar isso nos casos de uso:
+Validate this in use cases:
 
 ```text
 CreateTechnicalEntry
@@ -569,7 +569,7 @@ UpdateTechnicalEntry
 AddTagToEntry
 ```
 
-Antes de relacionar:
+Before linking:
 
 ```text
 project.userId === currentUser.id
@@ -577,24 +577,24 @@ tag.userId === currentUser.id
 entry.userId === currentUser.id
 ```
 
-## Alternativa não adotada
+## Alternative not adopted
 
 Usar chaves estrangeiras compostas.
 
-Em `projects`:
+In `projects`:
 
 ```text
 UNIQUE (id, user_id)
 ```
 
-Em `technical_entries`:
+In `technical_entries`:
 
 ```text
 FOREIGN KEY (project_id, user_id)
 REFERENCES projects (id, user_id)
 ```
 
-Para tags, a tabela associativa teria também o `user_id`:
+For tags, the association table would also contain `user_id`:
 
 ```text
 technical_entry_tags
@@ -604,13 +604,13 @@ tag_id
 user_id
 ```
 
-E usaria FKs compostas.
+It would then use composite foreign keys.
 
-Isso aumenta a segurança estrutural, mas também aumenta a complexidade do Prisma e das consultas. Foi decidido manter essas validações na aplicação e cobri-las com testes de integração.
+This improves structural protection but increases Prisma and query complexity. The decision was to keep these validations in the application and cover them with integration tests.
 
 ---
 
-# 6. Índices
+# 6. Indexes
 
 ```sql
 CREATE INDEX idx_projects_user
@@ -650,14 +650,14 @@ CREATE INDEX idx_resources_project
 ON project_resources (project_id);
 ```
 
-O MVP usa o parâmetro `title` para fazer correspondência parcial case-insensitive somente no título. Se futuramente a busca também abranger contexto e conclusão, vale considerar `tsvector` e índice GIN do PostgreSQL:
+The MVP uses the `title` parameter for case-insensitive partial matching on the title only. If search later includes context and conclusion, consider PostgreSQL `tsvector` and a GIN index:
 
 ```sql
 CREATE INDEX idx_entries_full_text
 ON technical_entries
 USING GIN (
     to_tsvector(
-        'portuguese',
+        'english',
         coalesce(title, '') || ' ' ||
         coalesce(context, '') || ' ' ||
         coalesce(conclusion, '')
@@ -665,26 +665,26 @@ USING GIN (
 );
 ```
 
-No MVP, o filtro textual é feito por título. Projeto, tag, tipo e status permanecem filtros estruturados separados.
+In the MVP, text filtering is based on title. Project, tag, type, and status remain separate structured filters.
 
 ---
 
-# 7. Decisões consolidadas
+# 7. Consolidated decisions
 
-As decisões consolidadas para o schema são:
+The consolidated schema decisions are:
 
-1. **Remover `repositoryUrl` de `Project`** e usar apenas `ProjectResource`.
-2. **Trocar o `status` do registro por `resolvedAt`**, porque `LEARNING` não possui estado aberto ou resolvido.
-3. **Adicionar timestamps às entidades secundárias**, principalmente tags, tecnologias, comandos e recursos.
-4. **Adicionar nome normalizado às tags**, evitando duplicidades por letras maiúsculas ou espaços.
-5. **Não colocar ambientes e serviços agora**, porque estão corretamente classificados como evolução futura, e não como parte do núcleo do MVP.
-6. **Não criar tabela de tecnologias global neste momento**. Uma tecnologia pertence ao contexto de um projeto no escopo atual; normalizá-la globalmente adicionaria complexidade sem benefício claro.
-7. **Gerar UUIDs normalmente no domínio** e manter `gen_random_uuid()` como fallback no PostgreSQL.
-8. **Tornar o nome do projeto único por usuário**, a tecnologia única por nome dentro do projeto e a URL de recurso única dentro do projeto.
-9. **Permitir ordens de execução repetidas** nos comandos de um mesmo projeto.
-10. **Validar regras entre usuários e demais invariantes na aplicação**, sem chaves estrangeiras compostas, triggers ou `CHECK constraints`.
-11. **Preservar registros ao excluir um projeto**, definindo `project_id` como `NULL`, e remover em cascata as tecnologias, os comandos e os recursos do projeto.
-12. **Iniciar novos projetos com status `ACTIVE`** por padrão.
-13. **Otimizar a listagem de registros não arquivados** com um índice em `(user_id, archived_at, created_at DESC)`, cobrindo filtro e ordenação.
+1. **Remove `repositoryUrl` from `Project`** and use only `ProjectResource`.
+2. **Replace entry `status` with `resolvedAt`**, because `LEARNING` has no open or resolved state.
+3. **Add timestamps to secondary entities**, especially tags, technologies, commands, and resources.
+4. **Add normalized tag names** to avoid duplicates caused by case or whitespace.
+5. **Defer environments and services**, since they are future extensions rather than part of the MVP core.
+6. **Do not create a global technology table yet**. In the current scope, a technology belongs to a project context; global normalization would add complexity without a clear benefit.
+7. **Normally generate UUIDs in the domain**, keeping PostgreSQL `gen_random_uuid()` as a fallback.
+8. **Make project names unique per user**, technology names unique per project, and resource URLs unique per project.
+9. **Allow repeated execution orders** for commands in the same project.
+10. **Validate cross-user rules and other invariants in the application**, without composite foreign keys, triggers, or `CHECK constraints`.
+11. **Preserve entries when deleting a project**, setting `project_id` to `NULL`, while cascading deletion of project technologies, commands, and resources.
+12. **Default new projects to `ACTIVE`**.
+13. **Optimize unarchived entry listing** with an index on `(user_id, archived_at, created_at DESC)`, covering filtering and sorting.
 
-Esse modelo resulta em **nove tabelas**, incluindo a tabela associativa `technical_entry_tags`, mantém o MVP pequeno e suporta as funcionalidades previstas sem antecipar estruturas de infraestrutura que ainda não fazem parte do produto.
+This model has **nine tables**, including the `technical_entry_tags` association table. It keeps the MVP small and supports planned features without introducing infrastructure structures outside the product scope.

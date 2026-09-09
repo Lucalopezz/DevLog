@@ -38,7 +38,7 @@ export class UpdateTechnicalEntryUseCase implements UseCaseContract<
     );
 
     if (technicalEntry === null || technicalEntry.userId !== input.userId) {
-      throw new NotFoundException('Entrada técnica não encontrada');
+      throw new NotFoundException('Technical entry not found');
     }
 
     if (
@@ -48,13 +48,13 @@ export class UpdateTechnicalEntryUseCase implements UseCaseContract<
       input.projectId === undefined
     ) {
       throw new UnprocessableEntityException(
-        'Informe ao menos um campo para atualizar a entrada técnica',
+        'Provide at least one field to update the technical entry',
       );
     }
 
     const shouldUpdateProject = input.projectId !== undefined;
-    // undefined preserva o projeto atual, null desvincula e string exige validar
-    // a existência, a propriedade e o arquivamento do novo projeto.
+    // undefined preserves the current project, null unlinks it, and a string requires validating
+    // the new project's existence, ownership, and archive state.
     if (shouldUpdateProject && typeof input.projectId === 'string') {
       const project = await this.projectRepository.findById(input.projectId);
 
@@ -63,7 +63,7 @@ export class UpdateTechnicalEntryUseCase implements UseCaseContract<
         project.userId !== input.userId ||
         project.archivedAt !== undefined
       ) {
-        throw new NotFoundException('Projeto não encontrado');
+        throw new NotFoundException('Project not found');
       }
     }
 

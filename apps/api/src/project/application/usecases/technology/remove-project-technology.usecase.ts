@@ -24,7 +24,7 @@ export class RemoveProjectTechnologyUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(input.projectId);
 
     if (!project || project.userId !== input.userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     project.ensureCanBeModified();
@@ -34,7 +34,7 @@ export class RemoveProjectTechnologyUseCase implements UseCaseContract<
     );
 
     if (!technology || technology.projectId !== project.id) {
-      throw new NotFoundException('Tecnologia não encontrada');
+      throw new NotFoundException('Technology not found');
     }
 
     await this.projectTechnologyRepository.delete(technology.id);

@@ -1,61 +1,52 @@
-# Validação de usuário e propriedade dos recursos
+# User and resource ownership validation
 
-## Regra geral
+## General rule
 
-Os recursos da API que pertencem a um usuário (`Project`, `TechnicalEntry` e
-`Tag`) devem ser acessíveis somente pelo proprietário autenticado.
+User-owned API resources (`Project`, `TechnicalEntry`, and `Tag`) must be accessible only to their authenticated owner.
 
-O `userId` usado pelos casos de uso vem do `CurrentUser`, preenchido pelo
-`AuthGuard` a partir do JWT. Ele não deve ser aceito como uma informação
-confiável enviada pelo cliente no corpo da requisição.
+The `userId` used by use cases comes from `CurrentUser`, populated by `AuthGuard` from the JWT. It must not be trusted when supplied in the client request body.
 
-## Quando consultar o `UserRepository`
+## When to query `UserRepository`
 
-Na criação de um recurso, ainda não existe um recurso que possa ser consultado
-para confirmar a propriedade. Por isso, o caso de uso deve verificar se o
-usuário existe antes de criar:
+During resource creation, there is no existing resource to query for ownership. The use case must therefore verify that the user exists before creating it:
 
 ```ts
 const user = await this.userRepository.findById(userId);
 
 if (user === null) {
-  throw new NotFoundException('Usuário não encontrado');
+  throw new NotFoundException('User not found');
 }
 ```
 
-Essa verificação também evita deixar um erro de chave estrangeira do banco
-chegar à aplicação sem uma resposta de negócio apropriada.
+This also prevents an unhandled database foreign key error from reaching the application without an appropriate business response.
 
-Atualmente essa regra é aplicada em:
+The rule currently applies to:
 
 - `CreateProjectUseCase`;
 - `CreateTechnicalEntryUseCase`;
 - `CreateTagUseCase`.
 
-## Quando a busca do recurso já é suficiente
+## When the resource query is sufficient
 
-Em operações sobre um recurso existente, a busca do próprio recurso pode
-validar existência e autorização ao mesmo tempo:
+For an existing resource, querying the resource can validate existence and authorization together:
 
 ```ts
 const project = await this.projectRepository.findById(input.id);
 
 if (project === null || project.userId !== input.userId) {
-  throw new NotFoundException('Projeto não encontrado');
+  throw new NotFoundException('Project not found');
 }
 ```
 
-Essa condição significa:
+This condition means:
 
-1. se o recurso não existe, a operação falha;
-2. se existe, mas pertence a outro usuário, a operação também falha;
-3. somente o proprietário continua o fluxo.
+1. If the resource does not exist, the operation fails.
+2. If it exists but belongs to another user, the operation also fails.
+3. Only the owner continues.
 
-Portanto, não é necessário injetar `UserRepository` em todos os casos de uso
-de atualização, consulta ou exclusão de projetos e entradas técnicas. Os
-casos de uso devem consultar o recurso e conferir seu `userId`.
+There is no need to inject `UserRepository` into every update, query, or delete use case for projects and technical entries. Query the resource and check its `userId`.
 
-Essa é a estratégia usada atualmente em:
+This strategy is currently used by:
 
 - `UpdateProjectUseCase`;
 - `ArchiveProjectUseCase`;
@@ -66,44 +57,32 @@ Essa é a estratégia usada atualmente em:
 - `GetTechnicalEntryUseCase`;
 - `DeleteTechnicalEntryUseCase`.
 
-Nas buscas/listagens, a mesma proteção é aplicada diretamente no filtro:
+For searches and lists, apply the same protection directly in the filter:
 
 ```ts
 const filter = { userId: input.userId };
 ```
 
-Assim, a aplicação não precisa carregar registros de outros usuários para
-depois descartá-los.
+The application then does not need to load other users' records just to discard them.
 
-## Por que o usuário continua válido nesses casos?
+## Why is the user still valid in these cases?
 
-No banco, `Project.userId`, `TechnicalEntry.userId` e `Tag.userId` são chaves
-estrangeiras obrigatórias para `User`. Além disso, as relações usam
-`onDelete: Cascade`. Portanto, um recurso existente não deveria apontar para
-um usuário inexistente.
+In the database, `Project.userId`, `TechnicalEntry.userId`, and `Tag.userId` are required foreign keys to `User`. Their relationships use `onDelete: Cascade`, so an existing resource should not point to a missing user.
 
-Por isso, ao encontrar um projeto ou uma entrada técnica pertencente ao
-usuário autenticado, a existência desse relacionamento já funciona como uma
-garantia indireta da existência do usuário.
+Finding a project or technical entry belonging to the authenticated user therefore indirectly guarantees the user's existence through that relationship.
 
-## Exceção: validar o usuário autenticado no `AuthGuard`
+## Exception: validating the authenticated user in `AuthGuard`
 
-O `AuthGuard` atual verifica a assinatura e a validade do JWT, mas não consulta
-o banco para confirmar que o usuário ainda existe. Se o usuário for removido
-depois da emissão do token, o token poderá continuar válido até expirar.
+The current `AuthGuard` verifies JWT signature and validity but does not query the database to confirm that the user still exists. If a user is deleted after token issuance, the token may remain valid until it expires.
 
-Isso não exige adicionar `UserRepository` a todos os casos de uso. Se a regra
-do produto passar a exigir revogação imediata, usuários desativados ou
-validação da existência em toda requisição, essa responsabilidade deve ser
-centralizada no fluxo de autenticação (`AuthGuard` ou uma estratégia de
-autenticação).
+This does not require adding `UserRepository` to every use case. If product rules require immediate revocation, disabled users, or an existence check on every request, centralize that responsibility in the authentication flow (`AuthGuard` or an authentication strategy).
 
-## Resumo para decisão rápida
+## Decision reference
 
-| Operação | Validação principal |
+| Operation | Main validation |
 | --- | --- |
-| Criar projeto, entrada ou tag | Consultar `UserRepository` |
-| Criar entrada com projeto | Consultar usuário e validar projeto/proprietário |
-| Atualizar, consultar ou excluir | Buscar recurso e conferir `resource.userId` |
-| Listar | Filtrar por `userId` |
-| Invalidar usuário/token imediatamente | Validar usuário no fluxo de autenticação |
+| Create a project, entry, or tag | Query `UserRepository` |
+| Create an entry with a project | Query the user and validate project/ownership |
+| Update, query, or delete | Find the resource and check `resource.userId` |
+| List | Filter by `userId` |
+| Immediately invalidate a user/token | Validate the user in the authentication flow |

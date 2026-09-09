@@ -14,28 +14,28 @@ export class CreateTechnicalEntryDto implements Omit<
   CreateTechnicalEntryUseCaseInput,
   'userId'
 > {
-  @IsNotEmpty({ message: 'O título é obrigatório' })
-  @IsString({ message: 'Parametro inválido' })
-  @MinLength(3, { message: 'O título deve ter no mínimo 3 caracteres' })
+  @IsNotEmpty({ message: 'Title is required' })
+  @IsString({ message: 'Invalid parameter' })
+  @MinLength(3, { message: 'Title must be at least 3 characters long' })
   @MaxLength(200, {
-    message: 'O título deve ter no máximo 200 caracteres',
+    message: 'Title must be at most 200 characters long',
   })
   title: string;
 
   @IsOptional()
-  @IsUUID('4', { message: 'O ID do projeto deve ser um UUID válido' })
+  @IsUUID('4', { message: 'Project ID must be a valid UUID' })
   projectId?: string | null;
 
-  @IsNotEmpty({ message: 'O contexto é obrigatório' })
-  @IsString({ message: 'Parametro inválido' })
-  @MinLength(3, { message: 'O contexto deve ter no mínimo 3 caracteres' })
+  @IsNotEmpty({ message: 'Context is required' })
+  @IsString({ message: 'Invalid parameter' })
+  @MinLength(3, { message: 'Context must be at least 3 characters long' })
   context: string;
 
-  @IsEnum(TechnicalEntryType, { message: 'Parametro inválido' })
-  @IsNotEmpty({ message: 'O tipo é obrigatório' })
+  @IsEnum(TechnicalEntryType, { message: 'Invalid parameter' })
+  @IsNotEmpty({ message: 'Type is required' })
   type: TechnicalEntryType;
 
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   @IsOptional()
   conclusion?: string | undefined;
 }

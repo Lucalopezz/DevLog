@@ -20,7 +20,7 @@ describe('AuthGuard', () => {
     jest.clearAllMocks();
   });
 
-  it('adiciona o usuário autenticado à requisição para um token de cookie válido', async () => {
+  it('adds the authenticated user to the request for a valid cookie token', async () => {
     const request = { cookies: { [ACCESS_TOKEN_COOKIE]: 'valid-token' } };
     verify.mockResolvedValue({ sub: 'user-id' });
 
@@ -30,7 +30,7 @@ describe('AuthGuard', () => {
     expect(request).toMatchObject({ user: { id: 'user-id' } });
   });
 
-  it('rejeita uma requisição sem o cookie do token de acesso', async () => {
+  it('rejects a request without an access token cookie', async () => {
     await expect(
       guard.canActivate(makeContext({ cookies: {} })),
     ).rejects.toBeInstanceOf(UnauthorizedException);
@@ -39,9 +39,9 @@ describe('AuthGuard', () => {
   });
 
   it.each([
-    ['o token não pode ser verificado', undefined, new Error('invalid token')],
-    ['o payload não possui subject', {}, undefined],
-  ])('rejeita quando %s', async (_description, payload, error) => {
+    ['the token cannot be verified', undefined, new Error('invalid token')],
+    ['the payload has no subject', {}, undefined],
+  ])('rejects when %s', async (_description, payload, error) => {
     if (error) {
       verify.mockRejectedValue(error);
     } else {

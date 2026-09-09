@@ -7,7 +7,7 @@ describe('UuidParamValidationPipe', () => {
   const pipe = new UuidParamValidationPipe();
 
   it.each(['id', 'projectId', 'entryId'])(
-    'aceita UUID v4 no parâmetro de rota %s',
+    'accepts UUID v4 in route parameter %s',
     async (paramName) => {
       const metadata: ArgumentMetadata = {
         type: 'param',
@@ -19,7 +19,7 @@ describe('UuidParamValidationPipe', () => {
     },
   );
 
-  it('rejeita UUID inválido no parâmetro id da rota', async () => {
+  it('rejects an invalid UUID in the route id parameter', async () => {
     const metadata: ArgumentMetadata = {
       type: 'param',
       data: 'id',
@@ -31,7 +31,7 @@ describe('UuidParamValidationPipe', () => {
     );
   });
 
-  it('não valida parâmetros que não representam IDs de rota', async () => {
+  it('does not validate parameters that are not route IDs', async () => {
     const metadata: ArgumentMetadata = {
       type: 'param',
       data: 'slug',
@@ -44,7 +44,7 @@ describe('UuidParamValidationPipe', () => {
   });
 
   it.each(['body', 'query'] as const)(
-    'não valida valores de %s',
+    'does not validate %s values',
     async (type) => {
       const metadata: ArgumentMetadata = {
         type,

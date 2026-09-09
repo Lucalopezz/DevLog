@@ -1,16 +1,16 @@
-# Criação do Monorepo
+# Creating the monorepo
 
-Este documento registra o processo inicial de criação do monorepo do DevLog, contendo:
+This document records the initial DevLog monorepo setup, including:
 
-- backend em NestJS;
-- frontend em React com Vite;
-- gerenciamento de pacotes com pnpm;
-- organização do workspace com pnpm Workspaces;
-- execução das aplicações com Turborepo.
+- NestJS backend;
+- React frontend with Vite;
+- pnpm package management;
+- Workspace organization with pnpm Workspaces;
+- Application execution through Turborepo.
 
-## Estrutura inicial
+## Initial structure
 
-A estrutura adotada para o projeto é:
+The adopted project structure is:
 
 ```text
 devlog/
@@ -24,19 +24,19 @@ devlog/
 └── README.md
 ```
 
-Responsabilidades:
+Responsibilities:
 
 ```text
 apps/api     → Backend NestJS
-apps/web     → Frontend React com Vite
+apps/web     → React frontend with Vite
 packages     → Pacotes compartilhados futuros
 ```
 
-O diretório `packages` pode permanecer vazio inicialmente. Pacotes compartilhados só devem ser criados quando existir uma necessidade real.
+The `packages` directory may initially remain empty. Create shared packages only when there is a real need.
 
 ---
 
-## 1. Criar a raiz do projeto
+## 1. Create the project root
 
 ```bash
 mkdir DevLog
@@ -45,11 +45,11 @@ git init
 pnpm init
 ```
 
-A raiz do projeto representa o monorepo e não uma aplicação Node executável.
+The root represents the monorepo, not an executable Node application.
 
-O `package.json` da raiz deve utilizar um nome em letras minúsculas e possuir `"private": true` para evitar uma publicação acidental no npm.
+The root `package.json` should use a lowercase name and `"private": true` to avoid accidental npm publication.
 
-Exemplo:
+Example:
 
 ```json
 {
@@ -68,23 +68,23 @@ Exemplo:
 }
 ```
 
-O campo `packageManager` precisa conter uma versão semântica completa:
+`packageManager` requires a complete semantic version:
 
 ```text
 pnpm@11.18.0
 ```
 
-Valores incompletos, como:
+Incomplete values, such as:
 
 ```text
 pnpm@10
 ```
 
-não são válidos.
+are invalid.
 
-Também não é necessário manter simultaneamente os campos `packageManager` e `devEngines.packageManager`.
+There is no need to keep both `packageManager` and `devEngines.packageManager`.
 
-Caso exista um bloco semelhante a este:
+If a block like this exists:
 
 ```json
 {
@@ -99,13 +99,13 @@ Caso exista um bloco semelhante a este:
 
 ele pode ser removido.
 
-Além de duplicar a configuração, o valor de `version` estaria incorreto, pois nesse campo seria necessário utilizar apenas:
+Besides duplicating configuration, its `version` value would be incorrect; this field requires only:
 
 ```text
 11.18.0
 ```
 
-Para este projeto, foi mantido apenas o campo tradicional:
+This project keeps only the traditional field:
 
 ```json
 {
@@ -115,15 +115,15 @@ Para este projeto, foi mantido apenas o campo tradicional:
 
 ---
 
-## 2. Instalar o Turborepo
+## 2. Install Turborepo
 
-Na raiz do projeto:
+From the project root:
 
 ```bash
 pnpm add -D turbo
 ```
 
-O Turborepo será responsável por coordenar comandos como:
+Turborepo coordinates commands such as:
 
 ```bash
 pnpm dev
@@ -132,20 +132,20 @@ pnpm lint
 pnpm test
 ```
 
-Ele não substitui o pnpm Workspace.
+It does not replace pnpm Workspaces.
 
-As responsabilidades são diferentes:
+Their responsibilities differ:
 
 ```text
-pnpm Workspace → organiza os projetos e dependências
-Turborepo      → executa e coordena tarefas
+pnpm Workspaces → organizes projects and dependencies
+Turborepo       → runs and coordinates tasks
 ```
 
 ---
 
-## 3. Configurar o workspace
+## 3. Configure the workspace
 
-Crie o arquivo `pnpm-workspace.yaml` na raiz:
+Create `pnpm-workspace.yaml` at the root:
 
 ```yaml
 packages:
@@ -153,19 +153,19 @@ packages:
   - packages/*
 ```
 
-Depois, crie os diretórios principais:
+Then create the main directories:
 
 ```bash
 mkdir -p apps packages
 ```
 
-O pnpm reconhecerá cada diretório que possuir um `package.json` dentro desses caminhos como parte do workspace.
+pnpm recognizes each directory containing a `package.json` under these paths as part of the workspace.
 
 ---
 
-## 4. Criar o backend NestJS
+## 4. Create the NestJS backend
 
-Na raiz do monorepo, execute:
+Run from the monorepo root:
 
 ```bash
 pnpm dlx @nestjs/cli new apps/api \
@@ -173,11 +173,11 @@ pnpm dlx @nestjs/cli new apps/api \
   --skip-git
 ```
 
-A opção `--skip-git` evita que o NestJS crie outro repositório Git dentro de `apps/api`.
+`--skip-git` prevents NestJS from creating another Git repository inside `apps/api`.
 
-O Git deve existir apenas na raiz do monorepo.
+Git should exist only at the monorepo root.
 
-A estrutura criada será semelhante a:
+The generated structure looks like:
 
 ```text
 apps/api/
@@ -189,60 +189,60 @@ apps/api/
 └── tsconfig.build.json
 ```
 
-### Possível falha durante a instalação
+### Possible installation failure
 
-O Nest CLI pode criar todos os arquivos corretamente, mas falhar na etapa automática de instalação.
+Nest CLI can generate all files correctly but fail during automatic dependency installation.
 
-Exemplo:
+Example:
 
 ```text
 Packages installation failed
 ```
 
-Nesse caso, o scaffold não precisa ser recriado. Basta corrigir a configuração do pnpm e executar a instalação manualmente pela raiz:
+In that case, do not recreate the scaffold. Fix pnpm configuration and install manually from the root:
 
 ```bash
 pnpm install --strict-peer-dependencies=false
 ```
 
-Como `apps/api` faz parte do workspace, a instalação deve preferencialmente ser executada na raiz do monorepo.
+Since `apps/api` belongs to the workspace, prefer installing from the monorepo root.
 
 ---
 
-## 5. Aprovar scripts de build do pnpm
+## 5. Approve pnpm build scripts
 
-Durante a instalação, o pnpm pode bloquear scripts de build de determinadas dependências.
+During installation, pnpm may block build scripts from some dependencies.
 
-Exemplo:
+Example:
 
 ```text
 ERR_PNPM_IGNORED_BUILDS
 Ignored build scripts: unrs-resolver
 ```
 
-Para revisar as dependências bloqueadas:
+To review blocked dependencies:
 
 ```bash
 pnpm approve-builds
 ```
 
-Na interface interativa:
+In the interactive interface:
 
 ```text
-Espaço → selecionar o pacote
-Enter  → confirmar
+Space → select the package
+Enter → confirm
 ```
 
-Se o pacote não for selecionado, o pnpm poderá registrar:
+If the package is not selected, pnpm may record:
 
 ```yaml
 allowBuilds:
   unrs-resolver: false
 ```
 
-Isso significa que a execução do script foi negada.
+This means script execution was denied.
 
-Como `unrs-resolver` veio da árvore de dependências das ferramentas instaladas pelo scaffold oficial, ele pode ser autorizado:
+Since `unrs-resolver` came from the dependency tree of tools installed by the official scaffold, it may be authorized:
 
 ```yaml
 packages:
@@ -253,13 +253,13 @@ allowBuilds:
   unrs-resolver: true
 ```
 
-Depois da alteração:
+After the change:
 
 ```bash
 pnpm install
 ```
 
-Para verificar se ainda existem scripts bloqueados:
+To check for remaining blocked scripts:
 
 ```bash
 pnpm ignored-builds
@@ -267,9 +267,9 @@ pnpm ignored-builds
 
 ---
 
-## 6. Padronizar os scripts da API
+## 6. Standardize API scripts
 
-O NestJS normalmente cria o script:
+NestJS usually creates this script:
 
 ```json
 {
@@ -279,9 +279,9 @@ O NestJS normalmente cria o script:
 }
 ```
 
-O Turborepo executará a tarefa chamada `dev`. Portanto, deve ser adicionado um script com esse nome em `apps/api/package.json`.
+Turborepo runs the task named `dev`. Add a script with that name to `apps/api/package.json`.
 
-Exemplo:
+Example:
 
 ```json
 {
@@ -296,28 +296,28 @@ Exemplo:
 }
 ```
 
-O script `start:dev` pode continuar existindo. O script `dev` funciona como uma padronização para o monorepo.
+`start:dev` can remain. The `dev` script provides a consistent monorepo convention.
 
-Para iniciar apenas a API:
+To start only the API:
 
 ```bash
 pnpm --filter api dev
 ```
 
-Também é possível filtrar pelo caminho:
+You can also filter by path:
 
 ```bash
 pnpm --filter ./apps/api dev
 ```
 
-Ou executar diretamente dentro da pasta:
+Or run directly inside the directory:
 
 ```bash
 cd apps/api
 pnpm dev
 ```
 
-A API ficará disponível, por padrão, em:
+By default, the API is available at:
 
 ```text
 http://localhost:3000
@@ -325,21 +325,21 @@ http://localhost:3000
 
 ---
 
-## 7. Criar o frontend React com Vite
+## 7. Create the React frontend with Vite
 
-Na raiz do monorepo:
+From the monorepo root:
 
 ```bash
 pnpm create vite apps/web --template react-ts
 ```
 
-Depois:
+Then:
 
 ```bash
 pnpm install
 ```
 
-A estrutura será semelhante a:
+The structure looks like:
 
 ```text
 apps/web/
@@ -350,7 +350,7 @@ apps/web/
 └── vite.config.ts
 ```
 
-O Vite já cria o script:
+Vite already creates this script:
 
 ```json
 {
@@ -363,7 +363,7 @@ O Vite já cria o script:
 }
 ```
 
-O nome do pacote pode ser alterado para:
+The package name can be changed to:
 
 ```json
 {
@@ -371,13 +371,13 @@ O nome do pacote pode ser alterado para:
 }
 ```
 
-Para iniciar somente o frontend:
+To start only the frontend:
 
 ```bash
 pnpm --filter web dev
 ```
 
-Por padrão, o Vite utiliza:
+By default, Vite uses:
 
 ```text
 http://localhost:5173
@@ -385,9 +385,9 @@ http://localhost:5173
 
 ---
 
-## 8. Configurar o Turborepo
+## 8. Configure Turborepo
 
-Crie o arquivo `turbo.json` na raiz:
+Create `turbo.json` at the root:
 
 ```json
 {
@@ -411,30 +411,30 @@ Crie o arquivo `turbo.json` na raiz:
 }
 ```
 
-A tarefa `dev` não utiliza cache e permanece ativa porque os servidores de desenvolvimento continuam executando.
+`dev` does not use caching and stays active because development servers continue running.
 
-A tarefa `build` considera como saída os diretórios `dist`.
+`build` treats `dist` directories as outputs.
 
-Tanto NestJS quanto Vite geram seus builds nesse tipo de diretório.
+Both NestJS and Vite produce builds in these directories.
 
 ---
 
-## 9. Executar o monorepo
+## 9. Run the monorepo
 
-Depois que `apps/api` e `apps/web` possuírem scripts chamados `dev`, execute na raiz:
+Once `apps/api` and `apps/web` have scripts named `dev`, run from the root:
 
 ```bash
 pnpm dev
 ```
 
-O Turborepo iniciará as duas aplicações:
+Turborepo starts both applications:
 
 ```text
 api → nest start --watch
 web → vite
 ```
 
-Também é possível executar cada aplicação separadamente:
+You can also run each application separately:
 
 ```bash
 pnpm --filter api dev
@@ -446,22 +446,22 @@ pnpm --filter web dev
 
 ---
 
-## 10. Comunicação entre frontend e backend
+## 10. Frontend/backend communication
 
-Durante o desenvolvimento:
+During development:
 
 ```text
 Frontend: http://localhost:5173
 Backend:  http://localhost:3000
 ```
 
-No frontend, pode ser criada uma variável de ambiente:
+The frontend can define an environment variable:
 
 ```env
 VITE_API_URL=http://localhost:3000
 ```
 
-Exemplo de requisição:
+Example request:
 
 ```ts
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -471,15 +471,15 @@ const response = await fetch(`${apiUrl}/entries`, {
 });
 ```
 
-O uso de:
+Using:
 
 ```ts
 credentials: "include";
 ```
 
-é necessário para enviar e receber cookies entre frontend e backend.
+is necessary to send and receive cookies between frontend and backend.
 
-No NestJS, o CORS deve permitir a origem do frontend e o envio de credenciais:
+In NestJS, CORS must allow the frontend origin and credentials:
 
 ```ts
 app.enableCors({
@@ -490,26 +490,26 @@ app.enableCors({
 
 ---
 
-## 11. Estrutura futura com proxy reverso
+## 11. Future reverse proxy structure
 
-No deploy local, frontend e backend ficarão atrás do mesmo domínio:
+For local deployment, frontend and backend will share a domain:
 
 ```text
 http://devlog.local
 ```
 
-A estrutura será:
+The structure is:
 
 ```text
 Browser
    |
-Caddy ou Nginx
+Caddy or Nginx
    |
    ├── /     → React
    └── /api  → NestJS
 ```
 
-Com isso, o frontend poderá acessar a API usando:
+The frontend can then access the API using:
 
 ```ts
 fetch("/api/entries", {
@@ -517,15 +517,15 @@ fetch("/api/entries", {
 });
 ```
 
-Essa configuração simplifica o uso de cookies e evita parte dos problemas relacionados a CORS.
+This configuration simplifies cookie usage and avoids some CORS-related issues.
 
 ---
 
-## 12. Estrutura interna da API
+## 12. Internal API structure
 
-A arquitetura de domínio deve existir dentro do backend, e não na raiz do monorepo.
+Domain architecture belongs inside the backend, not at the monorepo root.
 
-Exemplo:
+Example:
 
 ```text
 apps/api/src/
@@ -538,7 +538,7 @@ apps/api/src/
 └── main.ts
 ```
 
-Cada módulo pode ser dividido em:
+Each module can be divided into:
 
 ```text
 entries/
@@ -554,9 +554,9 @@ entries/
     └── http/
 ```
 
-Não devem ser compartilhadas entidades de domínio diretamente com o frontend.
+Do not share domain entities directly with the frontend.
 
-Por exemplo, uma entidade como:
+For example, an entity such as:
 
 ```ts
 class TechnicalEntry {
@@ -566,15 +566,15 @@ class TechnicalEntry {
 }
 ```
 
-pertence somente ao backend.
+belongs only to the backend.
 
-No futuro, contratos da API poderão ser gerados a partir de OpenAPI para utilização no frontend.
+In the future, API contracts may be generated from OpenAPI for frontend use.
 
 ---
 
-## Resultado esperado
+## Expected result
 
-Depois da configuração inicial, a estrutura deve estar semelhante a:
+After initial setup, the structure should look like:
 
 ```text
 devlog/

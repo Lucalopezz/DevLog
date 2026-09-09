@@ -8,12 +8,12 @@ import { useLoginForm } from '@/features/auth/hooks/use-login-form'
 import type { LoginFormData } from '@/features/auth/types/auth'
 
 /**
- * Formulário responsável apenas pela interface e pela orquestração do login.
+ * Form responsible for the login interface and orchestration.
  *
- * A regra de validação fica no schema (schemas/login.schema.ts), a configuração do
- * React Hook Form fica em useLoginForm e a chamada HTTP fica em useLogin.
- * Separar essas responsabilidades deixa o componente mais fácil de entender
- * e permite reutilizar a mesma lógica em outros lugares, se necessário.
+ * Validation lives in the schema (schemas/login.schema.ts), React Hook Form
+ * configuration lives in useLoginForm, and the HTTP call lives in useLogin.
+ * Separating these responsibilities makes the component easier to understand
+ * and lets other places reuse the same logic when needed.
  */
 export function LoginForm() {
   const form = useLoginForm()
@@ -22,18 +22,18 @@ export function LoginForm() {
   const { handleSubmit } = form
 
   /**
-   * `handleSubmit` chama esta função somente depois que o resolver do Zod
-   * valida os campos. Por isso, `data` já chega com o formato de
-   * LoginFormData e não precisamos validar email/senha manualmente aqui.
+   * `handleSubmit` calls this function only after the Zod resolver
+   * validates the fields. Therefore, `data` already has the shape of
+   * LoginFormData, so no manual email/password validation is needed here.
    */
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
-      // `mutateAsync` permite aguardar a conclusão da requisição dentro do
-      // submit. Assim, o React Hook Form mantém `isSubmitting` correto.
+      // `mutateAsync` lets submission await the request, keeping
+      // React Hook Form's `isSubmitting` accurate.
       await loginMutation.mutateAsync(data)
     } catch {
-      // O hook exibe o erro do servidor via toast. Capturamos a exceção para
-      // evitar uma Promise rejeitada não tratada no evento de submit.
+      // The hook displays server errors in a toast. Catch the exception to
+      // avoid an unhandled Promise rejection in the submit event.
     }
   }
 
@@ -47,9 +47,9 @@ export function LoginForm() {
         onSubmit={handleSubmit(onSubmit)}
       >
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Entrar</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
           <p className="text-sm text-muted-foreground">
-            Acesse sua conta para continuar no DevLog.
+            Sign in to your account to continue to DevLog.
           </p>
         </div>
 
@@ -59,21 +59,21 @@ export function LoginForm() {
             control={form.control}
             label="E-mail"
             name="email"
-            placeholder="voce@exemplo.com"
+            placeholder="you@example.com"
             type="email"
           />
           <FormInput
             autoComplete="current-password"
             control={form.control}
-            label="Senha"
+            label="Password"
             name="password"
-            placeholder="Digite sua senha"
+            placeholder="Enter your password"
             type="password"
           />
         </div>
 
         <Button className="w-full" disabled={isLoading} size="lg" type="submit">
-          {isLoading ? 'Entrando...' : 'Entrar'}
+          {isLoading ? 'Signing in...' : 'Sign in'}
         </Button>
       </form>
     </Form>

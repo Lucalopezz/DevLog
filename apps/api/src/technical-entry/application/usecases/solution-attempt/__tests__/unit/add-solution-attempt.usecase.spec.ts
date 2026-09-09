@@ -23,7 +23,7 @@ function makeEntry(
   return new TechnicalEntryEntity(
     {
       userId: overrides.userId ?? USER_ID,
-      title: 'Erro na API',
+      title: 'API error',
       context: 'Contexto do erro',
       type: overrides.type ?? TechnicalEntryType.ISSUE,
       archivedAt: overrides.archivedAt,
@@ -50,20 +50,20 @@ function makeUseCase(entry: TechnicalEntryEntity | null = makeEntry()) {
 }
 
 describe('AddSolutionAttemptUseCase', () => {
-  it('cria e persiste uma tentativa para uma entrada ISSUE aberta', async () => {
+  it('creates and persists an attempt for an open ISSUE entry', async () => {
     const { useCase, solutionAttemptRepository } = makeUseCase();
 
     const output = await useCase.execute({
       userId: USER_ID,
       technicalEntryId: ENTRY_ID,
-      description: 'Adicionar credentials na requisição',
+      description: 'Add credentials to the request',
       result: SolutionAttemptResult.PARTIAL,
     });
 
     const inserted = solutionAttemptRepository.insert.mock.calls[0]?.[0];
     expect(inserted).toMatchObject({
       technicalEntryId: ENTRY_ID,
-      description: 'Adicionar credentials na requisição',
+      description: 'Add credentials to the request',
       result: SolutionAttemptResult.PARTIAL,
     });
     expect(output).toMatchObject({
@@ -74,9 +74,9 @@ describe('AddSolutionAttemptUseCase', () => {
   });
 
   it.each([
-    ['entrada inexistente', null],
-    ['entrada de outro usuário', makeEntry({ userId: OTHER_USER_ID })],
-  ])('rejeita %s sem persistir tentativa', async (_case, entry) => {
+    ['missing entry', null],
+    ['entry belonging to another user', makeEntry({ userId: OTHER_USER_ID })],
+  ])('rejects %s without persisting an attempt', async (_case, entry) => {
     const { useCase, solutionAttemptRepository } = makeUseCase(entry);
 
     await expect(
@@ -94,7 +94,7 @@ describe('AddSolutionAttemptUseCase', () => {
   it.each([
     ['entrada LEARNING', makeEntry({ type: TechnicalEntryType.LEARNING })],
     ['entrada arquivada', makeEntry({ archivedAt: new Date() })],
-  ])('rejeita %s sem persistir tentativa', async (_case, entry) => {
+  ])('rejects %s without persisting an attempt', async (_case, entry) => {
     const { useCase, solutionAttemptRepository } = makeUseCase(entry);
 
     await expect(

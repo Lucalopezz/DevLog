@@ -1,8 +1,8 @@
 /**
  * Metadados compartilhados pelas respostas paginadas da API.
  *
- * O tipo fica próximo da infraestrutura HTTP porque não pertence a um domínio
- * específico: Projects, Tags e Technical Entries podem reutilizá-lo.
+ * This type stays near the HTTP infrastructure because it is not tied to a specific
+ * domain: Projects, Tags, and Technical Entries can reuse it.
  */
 export type Meta = {
   currentPage: number;

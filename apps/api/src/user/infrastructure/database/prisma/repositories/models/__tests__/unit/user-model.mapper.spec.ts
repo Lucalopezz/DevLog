@@ -17,7 +17,7 @@ function makeModel(overrides: Partial<User> = {}): User {
 }
 
 describe('UserModelMapper', () => {
-  it('converte o modelo persistido em entidade sem expor a nomenclatura do banco', () => {
+  it('converts the persisted model to an entity without exposing database naming', () => {
     const entity = UserModelMapper.toEntity(makeModel());
 
     expect(entity).toMatchObject({
@@ -30,7 +30,7 @@ describe('UserModelMapper', () => {
     });
   });
 
-  it('converte falhas de hidratação em erro da camada de mapeamento', () => {
+  it('converts hydration failures to mapping layer errors', () => {
     expect(() =>
       UserModelMapper.toEntity(makeModel({ email: 'invalid' })),
     ).toThrow(ValidationError);

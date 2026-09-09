@@ -33,7 +33,7 @@ export class UpdateSolutionAttemptUseCase implements UseCaseContract<
     );
 
     if (!technicalEntry || technicalEntry.userId !== input.userId) {
-      throw new NotFoundException('Entrada técnica não encontrada');
+      throw new NotFoundException('Technical entry not found');
     }
 
     const solutionAttempt = await this.solutionAttemptRepository.findById(
@@ -44,7 +44,7 @@ export class UpdateSolutionAttemptUseCase implements UseCaseContract<
       !solutionAttempt ||
       solutionAttempt.technicalEntryId !== technicalEntry.id
     ) {
-      throw new NotFoundException('Tentativa de solução não encontrada');
+      throw new NotFoundException('Solution attempt not found');
     }
 
     solutionAttempt.updateDescription(input.description);

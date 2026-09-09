@@ -15,7 +15,7 @@ function makeModel(overrides: Partial<SolutionAttempt> = {}): SolutionAttempt {
   return {
     id: ATTEMPT_ID,
     technicalEntryId: ENTRY_ID,
-    description: 'Adicionar credentials na requisição',
+    description: 'Add credentials to the request',
     result: PrismaSolutionAttemptResult.PARTIAL,
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -29,7 +29,7 @@ describe('SolutionAttemptModelMapper', () => {
     [PrismaSolutionAttemptResult.PARTIAL, SolutionAttemptResult.PARTIAL],
     [PrismaSolutionAttemptResult.SUCCESSFUL, SolutionAttemptResult.SUCCESSFUL],
   ])(
-    'converte o resultado %s do Prisma para o domínio',
+    'converts result %s from Prisma to the domain',
     (prismaResult, domainResult) => {
       expect(
         SolutionAttemptModelMapper.toEntity(makeModel({ result: prismaResult }))
@@ -43,7 +43,7 @@ describe('SolutionAttemptModelMapper', () => {
     [SolutionAttemptResult.PARTIAL, PrismaSolutionAttemptResult.PARTIAL],
     [SolutionAttemptResult.SUCCESSFUL, PrismaSolutionAttemptResult.SUCCESSFUL],
   ])(
-    'converte o resultado %s do domínio para o Prisma',
+    'converts result %s from the domain to Prisma',
     (domainResult, prismaResult) => {
       expect(SolutionAttemptModelMapper.toPrismaResult(domainResult)).toBe(
         prismaResult,
@@ -51,11 +51,11 @@ describe('SolutionAttemptModelMapper', () => {
     },
   );
 
-  it('converte entidade para persistência', () => {
+  it('converts an entity for persistence', () => {
     const entity = new SolutionAttemptEntity(
       {
         technicalEntryId: ENTRY_ID,
-        description: 'Adicionar credentials na requisição',
+        description: 'Add credentials to the request',
         result: SolutionAttemptResult.SUCCESSFUL,
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -66,14 +66,14 @@ describe('SolutionAttemptModelMapper', () => {
     expect(SolutionAttemptModelMapper.toPersistence(entity)).toEqual({
       id: ATTEMPT_ID,
       technicalEntryId: ENTRY_ID,
-      description: 'Adicionar credentials na requisição',
+      description: 'Add credentials to the request',
       result: PrismaSolutionAttemptResult.SUCCESSFUL,
       createdAt: timestamp,
       updatedAt: timestamp,
     });
   });
 
-  it('rejeita resultados desconhecidos nas duas direções', () => {
+  it('rejects unknown results in both directions', () => {
     expect(() =>
       SolutionAttemptModelMapper.toEntity(
         makeModel({ result: 'UNKNOWN' as PrismaSolutionAttemptResult }),
@@ -86,7 +86,7 @@ describe('SolutionAttemptModelMapper', () => {
     ).toThrow(ValidationError);
   });
 
-  it('encapsula erro de validação ao hidratar uma entidade inválida', () => {
+  it('wraps validation errors when hydrating an invalid entity', () => {
     expect(() =>
       SolutionAttemptModelMapper.toEntity(makeModel({ description: '' })),
     ).toThrow(ValidationError);

@@ -50,7 +50,7 @@ describe('CreateTagUseCase', () => {
     useCase = new CreateTagUseCase(tagRepository, userRepository);
   });
 
-  it('cria uma tag quando ela ainda não existe para o usuário', async () => {
+  it('creates a tag when it does not yet exist for the user', async () => {
     findById.mockResolvedValue(makeUser());
     findByNormalizedName.mockResolvedValue(null);
 
@@ -64,7 +64,7 @@ describe('CreateTagUseCase', () => {
     expect(output.name).toBe('NestJS');
   });
 
-  it('rejeita uma tag que já existe após a normalização do nome', async () => {
+  it('rejects a tag that already exists after name normalization', async () => {
     findById.mockResolvedValue(makeUser());
     findByNormalizedName.mockResolvedValue(makeTag());
 
@@ -79,7 +79,7 @@ describe('CreateTagUseCase', () => {
     expect(insert).not.toHaveBeenCalled();
   });
 
-  it('não cria a tag quando o usuário não existe', async () => {
+  it('does not create the tag when the user does not exist', async () => {
     findById.mockResolvedValue(null);
 
     await expect(

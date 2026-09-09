@@ -56,7 +56,7 @@ function makeUseCase(
 }
 
 describe('RemoveProjectTechnologyUseCase', () => {
-  it('remove a tecnologia pertencente ao projeto do usuário', async () => {
+  it('removes the technology belonging to the user project', async () => {
     const { useCase, projectTechnologyRepository } = makeUseCase();
 
     await useCase.execute({
@@ -70,7 +70,7 @@ describe('RemoveProjectTechnologyUseCase', () => {
     );
   });
 
-  it('não remove tecnologia de projeto de outro usuário', async () => {
+  it("does not remove a technology in another user's project", async () => {
     const { useCase, projectTechnologyRepository } = makeUseCase(
       makeProject(OTHER_USER_ID),
     );
@@ -86,7 +86,7 @@ describe('RemoveProjectTechnologyUseCase', () => {
     expect(projectTechnologyRepository.delete.mock.calls).toHaveLength(0);
   });
 
-  it('não remove tecnologia que pertence a outro projeto', async () => {
+  it('does not remove a technology belonging to another project', async () => {
     const otherProjectId = '123e4567-e89b-42d3-a456-426614174004';
     const { useCase, projectTechnologyRepository } = makeUseCase(
       makeProject(),

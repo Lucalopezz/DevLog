@@ -12,39 +12,39 @@ import type { ProjectProps } from '../../entities/project/project.entity';
 import { ProjectStatusEnum } from '../../entities/project/project-status-enum';
 
 export class ProjectRules {
-  @IsString({ message: 'O ID do usuário deve ser um texto' })
-  @IsNotEmpty({ message: 'O ID do usuário é obrigatório' })
-  @IsUUID('4', { message: 'O ID do usuário deve ser um UUID válido' })
+  @IsString({ message: 'User ID must be a string' })
+  @IsNotEmpty({ message: 'User ID is required' })
+  @IsUUID('4', { message: 'User ID must be a valid UUID' })
   userId: string;
 
   @MaxLength(150, {
-    message: 'O nome do projeto deve ter no máximo 150 caracteres',
+    message: 'Project name must be at most 150 characters long',
   })
-  @IsString({ message: 'O nome do projeto deve ser um texto' })
-  @IsNotEmpty({ message: 'O nome do projeto é obrigatório' })
+  @IsString({ message: 'Project name must be a string' })
+  @IsNotEmpty({ message: 'Project name is required' })
   name: string;
 
   @IsOptional()
-  @IsString({ message: 'A descrição do projeto deve ser um texto' })
+  @IsString({ message: 'Project description must be a string' })
   description?: string;
 
   @IsEnum(ProjectStatusEnum, {
-    message: 'O status do projeto deve ser válido',
+    message: 'Project status must be valid',
   })
   status: ProjectStatusEnum;
 
   @IsOptional()
-  @IsString({ message: 'O caminho local deve ser um texto' })
+  @IsString({ message: 'Local path must be a string' })
   localPath?: string;
 
   @IsOptional()
-  @IsDate({ message: 'A data de arquivamento deve ser válida' })
+  @IsDate({ message: 'Archive date must be valid' })
   archivedAt?: Date;
 
-  @IsDate({ message: 'A data de criação deve ser válida' })
+  @IsDate({ message: 'Creation date must be valid' })
   createdAt: Date;
 
-  @IsDate({ message: 'A data de atualização deve ser válida' })
+  @IsDate({ message: 'Update date must be valid' })
   updatedAt: Date;
 
   constructor({

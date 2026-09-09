@@ -7,7 +7,7 @@ import { SearchProjectResourceDto } from '../../search-project-resource.dto';
 import { UpdateProjectResourceDto } from '../../update-project-resource.dto';
 
 describe('AddProjectResourceDto', () => {
-  it('aceita um recurso válido sem tipo explícito', async () => {
+  it('accepts a valid resource without an explicit type', async () => {
     const dto = plainToInstance(AddProjectResourceDto, {
       label: 'Figma',
       url: 'https://figma.com/file/devlog',
@@ -16,9 +16,9 @@ describe('AddProjectResourceDto', () => {
     expect(await validate(dto)).toHaveLength(0);
   });
 
-  it('rejeita URL e tipo inválidos', async () => {
+  it('rejects invalid URL and type', async () => {
     const dto = plainToInstance(AddProjectResourceDto, {
-      label: 'Recurso inválido',
+      label: 'Invalid resource',
       url: 'not-a-url',
       type: 'UNKNOWN',
     });
@@ -32,7 +32,7 @@ describe('AddProjectResourceDto', () => {
 });
 
 describe('UpdateProjectResourceDto', () => {
-  it('aceita atualização parcial', async () => {
+  it('accepts partial updates', async () => {
     const dto = plainToInstance(UpdateProjectResourceDto, {
       type: ProjectResourceType.DOCUMENTATION,
     });
@@ -40,7 +40,7 @@ describe('UpdateProjectResourceDto', () => {
     expect(await validate(dto)).toHaveLength(0);
   });
 
-  it('rejeita valores nulos e URL inválida', async () => {
+  it('rejects null values and an invalid URL', async () => {
     const dto = plainToInstance(UpdateProjectResourceDto, {
       label: null,
       url: 'not-a-url',
@@ -56,7 +56,7 @@ describe('UpdateProjectResourceDto', () => {
 });
 
 describe('SearchProjectResourceDto', () => {
-  it('transforma paginação e aceita filtros válidos', async () => {
+  it('transforms pagination and accepts valid filters', async () => {
     const dto = plainToInstance(SearchProjectResourceDto, {
       page: '2',
       perPage: '10',
@@ -68,7 +68,7 @@ describe('SearchProjectResourceDto', () => {
     expect(dto).toMatchObject({ page: 2, perPage: 10 });
   });
 
-  it('rejeita paginação, tipo e direção inválidos', async () => {
+  it('rejects invalid pagination, type, and direction', async () => {
     const dto = plainToInstance(SearchProjectResourceDto, {
       page: '0',
       type: 'UNKNOWN',

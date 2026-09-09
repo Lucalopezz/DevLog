@@ -30,7 +30,7 @@ export class TechnicalEntryPresenter {
     this.archivedAt = output.archivedAt;
     if (output.tags !== undefined) {
       this.tags = output.tags.map((tag) => {
-        // O tipo já é validado pelo TechnicalEntryOutput.
+        // TechnicalEntryOutput already validates the type.
         return new TagPresenter(tag);
       });
     }

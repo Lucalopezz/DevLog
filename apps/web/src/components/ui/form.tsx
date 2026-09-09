@@ -132,7 +132,7 @@ export {
   FormMessage,
 }
 
-// O hook faz parte da API do padrão Form do shadcn, mas não é um componente.
-// A exceção fica restrita a esta exportação para manter o Fast Refresh no restante do arquivo.
+// The hook belongs to the shadcn Form API but is not a component.
+// The exception is limited to this export to preserve Fast Refresh in the rest of the file.
 // eslint-disable-next-line react-refresh/only-export-components
 export { useFormField }

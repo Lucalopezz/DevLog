@@ -19,11 +19,11 @@ export function useUpdateProject() {
       updateProject(projectId, input),
 
     onSuccess: async (_project, { projectId }) => {
-      toast.success('Projeto atualizado com sucesso!')
+      toast.success('Project updated successfully!')
 
-      // A resposta do PATCH não inclui as coleções do detalhe, então deixamos
-      // o GET reconstruir o recurso completo em vez de sobrescrever tecnologias
-      // já presentes no cache com uma resposta parcial.
+      // The PATCH response omits the detail collections, so let
+      // GET rebuild the complete resource to avoid overwriting technologies
+      // already in the cache with a partial response.
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: getProjectQueryKey(projectId),
@@ -38,7 +38,7 @@ export function useUpdateProject() {
       toast.error(
         getApiErrorMessage(
           error,
-          'Não foi possível atualizar o projeto. Tente novamente.',
+          'Could not update the project. Try again.',
         ),
       )
     },

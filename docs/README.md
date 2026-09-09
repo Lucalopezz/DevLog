@@ -1,74 +1,61 @@
-# Documentação do DevLog
+# DevLog documentation
 
-Este diretório reúne as decisões, explicações e planos de implementação do
-DevLog. A documentação foi organizada para apoiar tanto quem está conhecendo o
-projeto quanto quem está estudando uma parte específica da aplicação.
+This directory collects DevLog decisions, explanations, and implementation plans. It supports both newcomers and readers studying a specific part of the application.
 
-## Tenho uma dúvida. Onde procuro?
+## Where to find answers
 
-Use a tabela abaixo como ponto de entrada. Em geral, a resposta já está em um
-dos arquivos indicados:
+Use this table as your starting point. Most questions are addressed in the listed files:
 
-| Dúvida                                                                               | Arquivo recomendado                                                            |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| Quero entender o objetivo, o escopo e as decisões gerais do produto                  | [`decisions/devlog-decisoes.md`](decisions/devlog-decisoes.md)                 |
-| Quero saber como o banco foi modelado e por que as tabelas se relacionam dessa forma | [`decisions/database.md`](decisions/database.md)                               |
-| Quero saber o que a API implementa hoje                                              | [`usecases/README.md`](usecases/README.md)                                     |
-| Quero consultar a especificação histórica/planejada do MVP                           | [`usecases/cases.md`](usecases/cases.md)                                       |
-| Quero consultar os diagramas UML                                                     | [`diagrams/README.md`](diagrams/README.md)                                     |
-| Quero saber o que ainda falta implementar no backend                                 | [`backlog/backend.md`](backlog/backend.md)                                     |
-| Quero configurar o ambiente e conectar a API ao PostgreSQL                           | [`guides/configs_workflow.md`](guides/configs_workflow.md)                     |
-| Quero entender ou implementar autenticação                                           | [`guides/authentication_workflow.md`](guides/authentication_workflow.md)       |
-| Quero entender a validação das entidades                                             | [`guides/entity_validation_workflow.md`](guides/entity_validation_workflow.md) |
-| Quero entender onde ficam e como executar os testes                                  | [`guides/testing.md`](guides/testing.md)                                       |
-| Quero entender como os módulos do backend são organizados                            | [`guides/backend_structure.md`](guides/backend_structure.md)                   |
-| Quero entender como o frontend é organizado                                          | [`guides/frontend_structure.md`](guides/frontend_structure.md)                  |
-| Quero entender a estrutura do monorepo                                               | [`guides/monorepo.md`](guides/monorepo.md)                                     |
-| Procuro comandos usados com frequência                                               | [`guides/utils.md`](guides/utils.md)                                           |
-| Quero consultar anotações de modelagem feitas durante o estudo                       | [`anotations.md`](anotations.md)                                               |
+| Question | Recommended file |
+| --- | --- |
+| What are the product goals, scope, and general decisions? | [`decisions/devlog-decisions.md`](decisions/devlog-decisions.md) |
+| How is the database modeled, and why are tables related this way? | [`decisions/database.md`](decisions/database.md) |
+| What does the API implement today? | [`usecases/README.md`](usecases/README.md) |
+| Where is the historical/planned MVP specification? | [`usecases/cases.md`](usecases/cases.md) |
+| Where are the UML diagrams? | [`diagrams/README.md`](diagrams/README.md) |
+| What remains to be implemented in the backend? | [`backlog/backend.md`](backlog/backend.md) |
+| How do I configure the environment and connect the API to PostgreSQL? | [`guides/configs_workflow.md`](guides/configs_workflow.md) |
+| How does authentication work, and how is it implemented? | [`guides/authentication_workflow.md`](guides/authentication_workflow.md) |
+| How does entity validation work? | [`guides/entity_validation_workflow.md`](guides/entity_validation_workflow.md) |
+| Where are the tests, and how do I run them? | [`guides/testing.md`](guides/testing.md) |
+| How are backend modules organized? | [`guides/backend_structure.md`](guides/backend_structure.md) |
+| How is the frontend organized? | [`guides/frontend_structure.md`](guides/frontend_structure.md) |
+| How is the monorepo structured? | [`guides/monorepo.md`](guides/monorepo.md) |
+| Which commands are used frequently? | [`guides/utils.md`](guides/utils.md) |
+| Where are the modeling study notes? | [`notes.md`](notes.md) |
 
-Se a dúvida for sobre como iniciar o projeto, consulte primeiro o
-[README da raiz](../README.md). Ele contém os pré-requisitos, a instalação e
-os comandos principais.
+For setup questions, first read the [root README](../README.md). It contains prerequisites, installation instructions, and the main commands.
 
-## Como a documentação está organizada
+## Documentation organization
 
 ### `decisions/`
 
-Registra decisões de produto, arquitetura e banco de dados. Consulte esses
-arquivos quando a pergunta for “por que o projeto foi estruturado assim?”.
+Records product, architecture, and database decisions. Read these files to understand why the project has its current structure.
 
 ### `guides/`
 
-Explica fluxos técnicos e procedimentos passo a passo. Consulte essa pasta
-quando a pergunta for “como essa parte funciona ou deve ser implementada?”.
+Explains technical workflows and step-by-step procedures. Use this directory to understand how a part works or should be implemented.
 
 ### `usecases/`
 
-Descreve o comportamento esperado do sistema e as regras dos casos de uso.
-Consulte essa pasta antes de alterar o comportamento de uma funcionalidade.
+Describes expected system behavior and use case rules. Read these documents before changing feature behavior.
 
 ### `backlog/`
 
-Mostra o estado planejado da implementação e as pendências conhecidas.
-Consulte essa pasta quando a pergunta for “o que ainda precisa ser feito?”.
+Tracks planned implementation and known pending work. Use it to find what still needs to be done.
 
-## Como manter a documentação útil
+## Keeping documentation useful
 
-- Antes de criar um novo documento, verifique se a dúvida pode ser respondida
-  em um arquivo existente.
-- Ao criar um documento novo, adicione-o à tabela acima e indique em que pasta
-  ele se encaixa.
-- Diferencie uma decisão já tomada de uma ideia ou tarefa futura.
-- Quando uma implementação mudar, atualize também o documento que descreve o
-  comportamento afetado.
+- Before creating a document, check whether an existing file can answer the question.
+- Add new documents to the table above and place them in the appropriate directory.
+- Distinguish accepted decisions from ideas or future tasks.
+- When implementation changes, update the document describing the affected behavior.
+- Write all documentation and examples in English, following `AGENTS.md`.
 
-## Ordem sugerida para quem está chegando
+## Suggested reading order
 
-1. Leia o [README da raiz](../README.md) para executar o projeto.
-2. Leia [`decisions/devlog-decisoes.md`](decisions/devlog-decisoes.md) para
-   entender o produto.
-3. Consulte [`usecases/README.md`](usecases/README.md) para entender as regras implementadas.
-4. Escolha um guia técnico relacionado à dúvida.
-5. Confira [`backlog/backend.md`](backlog/backend.md) antes de implementar uma
-   nova tarefa.
+1. Read the [root README](../README.md) to run the project.
+2. Read [`decisions/devlog-decisions.md`](decisions/devlog-decisions.md) to understand the product.
+3. Read [`usecases/README.md`](usecases/README.md) for implemented rules.
+4. Choose a technical guide related to your question.
+5. Check [`backlog/backend.md`](backlog/backend.md) before implementing a new task.

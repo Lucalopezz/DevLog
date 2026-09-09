@@ -13,7 +13,7 @@ function makeProps(overrides: Partial<ProjectProps> = {}): ProjectProps {
   return {
     userId: USER_ID,
     name: 'DevLog',
-    description: 'Projeto de estudos',
+    description: 'Study project',
     status: ProjectStatusEnum.ACTIVE,
     createdAt: date,
     updatedAt: date,
@@ -26,7 +26,7 @@ describe('ProjectEntity', () => {
     jest.useRealTimers();
   });
 
-  it('atualiza e limpa campos opcionais pelo mesmo método', () => {
+  it('updates and clears optional fields through the same method', () => {
     const project = new ProjectEntity(makeProps());
 
     project.update({ localPath: '/workspace/devlog' });
@@ -37,7 +37,7 @@ describe('ProjectEntity', () => {
     expect(project.localPath).toBeUndefined();
   });
 
-  it('arquiva e restaura o projeto explicitamente', () => {
+  it('explicitly archives and restores the project', () => {
     jest.useFakeTimers();
     const archivedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(archivedAt);
@@ -58,23 +58,23 @@ describe('ProjectEntity', () => {
     expect(project.updatedAt).toEqual(restoredAt);
   });
 
-  it('atualiza nome, descrição, status e caminho enquanto ativo', () => {
+  it('updates name, description, status, and path while active', () => {
     const project = new ProjectEntity(makeProps());
 
     project.update({
       name: 'DevLog atualizado',
-      description: 'Nova descrição',
+      description: 'New description',
       status: ProjectStatusEnum.FINISHED,
       localPath: '/workspace/devlog',
     });
 
     expect(project.name).toBe('DevLog atualizado');
-    expect(project.description).toBe('Nova descrição');
+    expect(project.description).toBe('New description');
     expect(project.status).toBe(ProjectStatusEnum.FINISHED);
     expect(project.localPath).toBe('/workspace/devlog');
   });
 
-  it('mantém o status independente e torna o agregado somente leitura quando arquivado', () => {
+  it('keeps status independent and makes the aggregate read-only when archived', () => {
     const project = new ProjectEntity(
       makeProps({ status: ProjectStatusEnum.FINISHED }),
     );
@@ -93,7 +93,7 @@ describe('ProjectEntity', () => {
     );
     expect(() =>
       project.addResource(
-        'Documentação',
+        'Documentation',
         'https://example.com',
         ProjectResourceType.DOCUMENTATION,
       ),
@@ -105,19 +105,19 @@ describe('ProjectEntity', () => {
     ).not.toThrow();
   });
 
-  it('permite remover a descrição durante a atualização', () => {
+  it('allows clearing the description during an update', () => {
     const project = new ProjectEntity(makeProps());
 
     project.update({ description: null });
 
     expect(project.description).toBeUndefined();
 
-    project.update({ description: 'Descrição restaurada' });
+    project.update({ description: 'Description restaurada' });
 
-    expect(project.description).toBe('Descrição restaurada');
+    expect(project.description).toBe('Description restaurada');
   });
 
-  it('mantém archive e restore idempotentes', () => {
+  it('keeps archive and restore idempotent', () => {
     jest.useFakeTimers();
     const archivedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(archivedAt);
@@ -142,7 +142,7 @@ describe('ProjectEntity', () => {
     expect(project.updatedAt).toEqual(restoredAt);
   });
 
-  it('trata atualização sem campos como no-op e preserva updatedAt', () => {
+  it('treats an update with no fields as a no-op and preserves updatedAt', () => {
     const project = new ProjectEntity(makeProps());
     const originalUpdatedAt = project.updatedAt;
 
@@ -150,13 +150,13 @@ describe('ProjectEntity', () => {
     expect(project.updatedAt).toEqual(originalUpdatedAt);
   });
 
-  it('cria um comando vinculado ao próprio projeto', () => {
+  it('creates a command linked to its own project', () => {
     const project = new ProjectEntity(makeProps());
 
     const command = project.addCommand(
       'Subir ambiente local',
       'docker compose up -d',
-      'Inicia os serviços',
+      'Start services',
       1,
     );
 
@@ -164,22 +164,22 @@ describe('ProjectEntity', () => {
     expect(command.projectId).toBe(project.id);
     expect(command.title).toBe('Subir ambiente local');
     expect(command.command).toBe('docker compose up -d');
-    expect(command.description).toBe('Inicia os serviços');
+    expect(command.description).toBe('Start services');
     expect(command.executionOrder).toBe(1);
   });
 
-  it('cria um recurso vinculado ao próprio projeto', () => {
+  it('creates a resource linked to its own project', () => {
     const project = new ProjectEntity(makeProps());
 
     const resource = project.addResource(
-      'Repositório principal',
+      'Repository principal',
       'https://github.com/example/devlog',
       ProjectResourceType.REPOSITORY,
     );
 
     expect(resource).toBeInstanceOf(ProjectResourceEntity);
     expect(resource.projectId).toBe(project.id);
-    expect(resource.label).toBe('Repositório principal');
+    expect(resource.label).toBe('Repository principal');
     expect(resource.url).toBe('https://github.com/example/devlog');
     expect(resource.type).toBe(ProjectResourceType.REPOSITORY);
   });

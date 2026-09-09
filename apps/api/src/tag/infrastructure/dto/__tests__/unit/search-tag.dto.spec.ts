@@ -4,7 +4,7 @@ import { validate } from 'class-validator';
 import { SearchTagDto } from '../../search-tag.dto';
 
 describe('SearchTagDto', () => {
-  it('converte e valida os parâmetros de busca', async () => {
+  it('converts and validates search parameters', async () => {
     const dto = plainToInstance(SearchTagDto, {
       page: '2',
       perPage: '10',
@@ -20,7 +20,7 @@ describe('SearchTagDto', () => {
     expect(dto.perPage).toBe(10);
   });
 
-  it('rejeita parâmetros inválidos', async () => {
+  it('rejects invalid parameters', async () => {
     const dto = plainToInstance(SearchTagDto, {
       page: '0',
       perPage: 'invalid',

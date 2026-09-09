@@ -46,7 +46,7 @@ describe('SearchTechnicalEntryUseCase', () => {
     );
   });
 
-  it('converte a entrada em parâmetros de busca', async () => {
+  it('converts input to search parameters', async () => {
     repository.search.mockResolvedValue(
       new TechnicalEntrySearchResult({
         items: [],
@@ -88,7 +88,7 @@ describe('SearchTechnicalEntryUseCase', () => {
     });
   });
 
-  it('rejeita filtro de status para entradas do tipo LEARNING', async () => {
+  it('rejects a status filter for LEARNING entries', async () => {
     await expect(
       useCase.execute({
         userId: USER_ID,
@@ -101,9 +101,9 @@ describe('SearchTechnicalEntryUseCase', () => {
   });
 
   it.each([
-    ['quando o projeto não existe', null],
-    ['quando o projeto pertence a outro usuário', makeProject('other-user-id')],
-  ])('rejeita o filtro de projeto %s', async (_description, project) => {
+    ['when the project does not exist', null],
+    ['when the project belongs to another user', makeProject('other-user-id')],
+  ])('rejects the project filter %s', async (_description, project) => {
     projectRepository.findById.mockResolvedValue(project);
 
     await expect(
@@ -113,12 +113,12 @@ describe('SearchTechnicalEntryUseCase', () => {
     expect(repository.search.mock.calls).toHaveLength(0);
   });
 
-  it('converte o resultado do repositório em uma saída paginada', async () => {
+  it('converts the repository result to paginated output', async () => {
     const entry = new TechnicalEntryEntity(
       {
         userId: USER_ID,
-        title: 'Paginação no NestJS',
-        context: 'Implementando uma busca paginada',
+        title: 'Pagination in NestJS',
+        context: 'Implementing a paginated search',
         type: TechnicalEntryType.ISSUE,
         createdAt: new Date('2026-08-01T00:00:00.000Z'),
         updatedAt: new Date('2026-08-01T00:00:00.000Z'),
@@ -150,7 +150,7 @@ describe('SearchTechnicalEntryUseCase', () => {
       items: [
         expect.objectContaining({
           id: 'entry-1',
-          title: 'Paginação no NestJS',
+          title: 'Pagination in NestJS',
           status: 'OPEN',
           tags: [],
         }),
@@ -166,7 +166,7 @@ describe('SearchTechnicalEntryUseCase', () => {
     const entry = new TechnicalEntryEntity(
       {
         userId: USER_ID,
-        title: 'Tags na busca',
+        title: 'Tags in search',
         context: 'Carregando tags associadas',
         type: TechnicalEntryType.LEARNING,
         createdAt: new Date('2026-08-01T00:00:00.000Z'),

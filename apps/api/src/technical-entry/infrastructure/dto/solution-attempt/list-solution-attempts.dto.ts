@@ -9,25 +9,25 @@ export class ListSolutionAttemptsDto implements Omit<
 > {
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'O número da página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Page number must be greater than zero' })
   page?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'A quantidade por página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Items per page must be greater than zero' })
   perPage?: number;
 
   @IsOptional()
-  @IsIn(['createdAt', 'result'], { message: 'Parametro inválido' })
+  @IsIn(['createdAt', 'result'], { message: 'Invalid parameter' })
   sort?: string;
 
   @IsOptional()
-  @IsIn(['asc', 'desc'], { message: 'Parametro inválido' })
+  @IsIn(['asc', 'desc'], { message: 'Invalid parameter' })
   sortDir?: 'asc' | 'desc';
 
   @IsOptional()
-  @IsEnum(SolutionAttemptResult, { message: 'Parametro inválido' })
+  @IsEnum(SolutionAttemptResult, { message: 'Invalid parameter' })
   result?: SolutionAttemptResult;
 }

@@ -17,36 +17,36 @@ export class SearchProjectResourceDto implements Omit<
 > {
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'O número da página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Page number must be greater than zero' })
   page?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'A quantidade por página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Items per page must be greater than zero' })
   perPage?: number;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   @MaxLength(120, {
-    message: 'O rótulo do recurso deve ter no máximo 120 caracteres',
+    message: 'Resource label must be at most 120 characters long',
   })
   label?: string;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   url?: string;
 
   @IsOptional()
-  @IsEnum(ProjectResourceType, { message: 'Parametro inválido' })
+  @IsEnum(ProjectResourceType, { message: 'Invalid parameter' })
   type?: ProjectResourceType;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   sort?: string;
 
   @IsOptional()
-  @IsIn(['asc', 'desc'], { message: 'Parametro inválido' })
+  @IsIn(['asc', 'desc'], { message: 'Invalid parameter' })
   sortDir?: 'asc' | 'desc';
 }

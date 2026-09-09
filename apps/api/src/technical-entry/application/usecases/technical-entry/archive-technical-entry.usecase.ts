@@ -27,7 +27,7 @@ export class ArchiveTechnicalEntryUseCase implements UseCaseContract<
     const entry = await this.technicalEntryRepository.findById(input.id);
 
     if (entry === null || entry.userId !== input.userId) {
-      throw new NotFoundException('Entrada técnica não encontrada');
+      throw new NotFoundException('Technical entry not found');
     }
 
     entry.archive();

@@ -13,27 +13,27 @@ export class UpdateProjectCommandDto implements Omit<
   UpdateProjectCommandUseCaseInput,
   'userId' | 'projectId' | 'commandId'
 > {
-  // ValidateIf permite omitir o campo no PATCH, mas ainda encaminha null aos
-  // validadores dos campos que não podem ser removidos.
+  // ValidateIf allows omission in PATCH but still passes null to
+  // validators for fields that cannot be cleared.
   @ValidateIf((_, value) => value !== undefined)
-  @IsNotEmpty({ message: 'O título do comando é obrigatório' })
-  @IsString({ message: 'O título do comando deve ser um texto' })
+  @IsNotEmpty({ message: 'Command title is required' })
+  @IsString({ message: 'Command title must be a string' })
   @MaxLength(120, {
-    message: 'O título do comando deve ter no máximo 120 caracteres',
+    message: 'Command title must be at most 120 characters long',
   })
   title?: string;
 
   @ValidateIf((_, value) => value !== undefined)
-  @IsNotEmpty({ message: 'O comando é obrigatório' })
-  @IsString({ message: 'O comando deve ser um texto' })
+  @IsNotEmpty({ message: 'Command is required' })
+  @IsString({ message: 'Command must be a string' })
   command?: string;
 
   @IsOptional()
-  @IsString({ message: 'A descrição do comando deve ser um texto' })
+  @IsString({ message: 'Command description must be a string' })
   description?: string | null;
 
   @IsOptional()
-  @IsInt({ message: 'A ordem de execução deve ser um número inteiro' })
-  @Min(0, { message: 'A ordem de execução deve ser maior ou igual a zero' })
+  @IsInt({ message: 'Execution order must be an integer' })
+  @Min(0, { message: 'Execution order must be greater than or equal to zero' })
   executionOrder?: number | null;
 }

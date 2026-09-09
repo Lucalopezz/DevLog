@@ -64,8 +64,8 @@ export async function listProjectTechnicalEntries(
 ): Promise<TechnicalEntryCollection> {
   const { data } = await api.get<TechnicalEntryCollection>(
     `/project/${projectId}/technical-entries`,
-    // A API usa a string especial "null" para representar entradas não
-    // arquivadas; isso mantém o filtro alinhado ao contrato do backend.
+    // The API uses the special string "null" to represent unarchived
+    // entries; this keeps the filter aligned with the backend contract.
     { params: { ...defaultParams, ...params, archivedAt: "null" } },
   );
 

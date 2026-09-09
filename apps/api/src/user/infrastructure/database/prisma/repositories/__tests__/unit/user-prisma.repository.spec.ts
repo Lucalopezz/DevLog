@@ -50,7 +50,7 @@ describe('UserPrismaRepository', () => {
     deleteUser.mockResolvedValue(undefined);
   });
 
-  it('insere o usuário traduzindo password para passwordHash', async () => {
+  it('inserts the user by mapping password to passwordHash', async () => {
     await repository.insert(makeEntity());
 
     expect(create).toHaveBeenCalledWith({
@@ -65,7 +65,7 @@ describe('UserPrismaRepository', () => {
     });
   });
 
-  it('atualiza somente os campos mutáveis do usuário', async () => {
+  it('updates only mutable user fields', async () => {
     await repository.update(makeEntity());
 
     expect(update).toHaveBeenCalledWith({
@@ -79,7 +79,7 @@ describe('UserPrismaRepository', () => {
     });
   });
 
-  it('lista modelos convertidos em entidades', async () => {
+  it('lists models converted to entities', async () => {
     findMany.mockResolvedValue([makeModel()]);
 
     await expect(repository.findAll()).resolves.toEqual([
@@ -95,21 +95,21 @@ describe('UserPrismaRepository', () => {
       () => repository.findByEmail('lucas@example.com'),
       { email: 'lucas@example.com' },
     ],
-  ])('busca por %s e converte o resultado', async (_field, execute, where) => {
+  ])('finds by %s and converts the result', async (_field, execute, where) => {
     findUnique.mockResolvedValue(makeModel());
 
     await expect(execute()).resolves.toMatchObject({ id: USER_ID });
     expect(findUnique).toHaveBeenCalledWith({ where });
   });
 
-  it('retorna null quando o usuário não existe', async () => {
+  it('returns null when the user does not exist', async () => {
     await expect(repository.findById(USER_ID)).resolves.toBeNull();
     await expect(
       repository.findByEmail('missing@example.com'),
     ).resolves.toBeNull();
   });
 
-  it('remove o usuário pelo id', async () => {
+  it('removes the user by ID', async () => {
     await repository.delete(USER_ID);
 
     expect(deleteUser).toHaveBeenCalledWith({ where: { id: USER_ID } });

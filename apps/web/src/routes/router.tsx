@@ -12,7 +12,7 @@ export const router = createBrowserRouter([
   {
     element: <RootLayout />,
     children: [
-      // Rotas públicas
+      // Public routes
       {
         path: '/login',
         loader: redirectAuthenticatedUser,
@@ -23,7 +23,7 @@ export const router = createBrowserRouter([
         loader: redirectAuthenticatedUser,
         Component: RegisterPage,
       },
-      // Rotas privadas
+      // Private routes
       {
         loader: requireUser,
         children: [

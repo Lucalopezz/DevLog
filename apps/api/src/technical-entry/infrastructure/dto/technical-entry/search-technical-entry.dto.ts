@@ -19,22 +19,22 @@ export class SearchTechnicalEntryDto implements Omit<
 > {
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'O número da página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Page number must be greater than zero' })
   page?: number | undefined;
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'A quantidade por página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Items per page must be greater than zero' })
   perPage?: number | undefined;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   sort?: string | undefined;
 
   @IsOptional()
-  @IsIn(['asc', 'desc'], { message: 'Parametro inválido' })
+  @IsIn(['asc', 'desc'], { message: 'Invalid parameter' })
   sortDir?: 'asc' | 'desc' | undefined;
 
   @IsOptional()
@@ -45,22 +45,22 @@ export class SearchTechnicalEntryDto implements Omit<
 
     return typeof value === 'string' ? new Date(value) : (value as unknown);
   })
-  @IsDate({ message: 'Parametro inválido' })
+  @IsDate({ message: 'Invalid parameter' })
   archivedAt?: Date | null | undefined;
 
   @IsOptional()
-  @IsEnum(TechnicalEntryType, { message: 'Parametro inválido' })
+  @IsEnum(TechnicalEntryType, { message: 'Invalid parameter' })
   type?: TechnicalEntryType | undefined;
 
   @IsOptional()
-  @IsEnum(TechnicalEntryStatus, { message: 'Parametro inválido' })
+  @IsEnum(TechnicalEntryStatus, { message: 'Invalid parameter' })
   status?: TechnicalEntryStatus | undefined;
 
   @IsOptional()
-  @IsUUID('4', { message: 'Parametro inválido' })
+  @IsUUID('4', { message: 'Invalid parameter' })
   projectId?: string | undefined;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   title?: string | undefined;
 }

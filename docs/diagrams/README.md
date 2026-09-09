@@ -1,42 +1,30 @@
-# Diagramas da API DevLog
+# DevLog API diagrams
 
-Os modelos desta pasta foram extraídos da API atual e usam duas notações:
+The models in this directory were derived from the current API and use two notations:
 
-- [casos de uso em PlantUML](use-cases/devlog-use-cases.puml), porque PlantUML
-  representa atores, fronteira, generalização, `include` e `extend` de forma
-  mais fiel à UML;
-- [classes em Mermaid](classes.md), porque o diagrama fica renderizável junto
-  do Markdown e fácil de versionar;
-- diagramas de sequência em Mermaid, separados em
-  [conta e tags](sequences/account-and-tags.md),
-  [projetos](sequences/projects.md) e
-  [registros técnicos](sequences/technical-entries.md).
+- [PlantUML use cases](use-cases/devlog-use-cases.puml), because PlantUML represents actors, boundaries, generalization, `include`, and `extend` more faithfully to UML;
+- [Mermaid classes](classes.md), because the diagram renders alongside Markdown and is easy to version;
+- Mermaid sequence diagrams, grouped into [account and tags](sequences/account-and-tags.md), [projects](sequences/projects.md), and [technical entries](sequences/technical-entries.md).
 
-## Por que manter a fonte textual
+## Why keep text sources
 
-A fonte é o artefato principal: pode ser revisada em pull requests, atualizada
-junto com o código e renderizada em diferentes formatos. Imagens geradas não
-foram versionadas para evitar divergência entre fonte e figura.
+The source is the main artifact: it can be reviewed in pull requests, updated alongside code, and rendered in different formats. Generated images are not versioned here to avoid divergence between source and rendering.
 
-## Como renderizar
+## Rendering
 
-Blocos Mermaid são renderizados automaticamente por GitHub, GitLab e editores
-compatíveis. Para PlantUML, abra o arquivo `.puml` em uma extensão compatível ou
-execute, caso o CLI esteja instalado:
+Mermaid blocks render automatically on GitHub, GitLab, and compatible editors. For PlantUML, open the `.puml` file in a compatible extension or run this command if the CLI is installed:
 
 ```bash
 plantuml -tsvg docs/diagrams/use-cases/devlog-use-cases.puml
 ```
 
-O ambiente atual possui Java, mas não possui o executável PlantUML; por isso a
-validação local verifica a sintaxe estrutural da fonte sem gerar SVG.
+The environment used to prepare these diagrams had Java but no PlantUML executable, so local validation checked the source structure without generating SVG.
 
-## Níveis de abstração
+## Abstraction levels
 
-- Caso de uso: visão externa, sem controllers ou banco.
-- Sequência: visão de projeto, com responsabilidades entre camadas.
-- Classes de domínio: estrutura e regras de negócio.
-- Classes técnicas: dependências arquiteturais, mantidas separadas do domínio.
+- Use cases: external view, without controllers or a database.
+- Sequences: design view, showing responsibilities across layers.
+- Domain classes: structure and business rules.
+- Technical classes: architectural dependencies, kept separate from the domain.
 
-Consulte também os [casos de uso textuais](../usecases/README.md) e a
-[rastreabilidade dos endpoints](../usecases/traceability.md).
+See also the [textual use cases](../usecases/README.md) and [endpoint traceability](../usecases/traceability.md).

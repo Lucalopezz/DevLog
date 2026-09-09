@@ -49,7 +49,7 @@ function makeTechnologyRepository() {
 }
 
 describe('Project use cases', () => {
-  it('retorna o projeto quando ele pertence ao usuário', async () => {
+  it('returns the project when it belongs to the user', async () => {
     const { repository } = makeRepository();
     const useCase = new GetProjectUseCase(
       repository,
@@ -61,7 +61,7 @@ describe('Project use cases', () => {
     expect(output).toMatchObject({ id: PROJECT_ID, name: 'DevLog' });
   });
 
-  it('não expõe projeto de outro usuário na consulta', async () => {
+  it("does not expose another user's project in a query", async () => {
     const { repository } = makeRepository(makeProject(OTHER_USER_ID));
     const useCase = new GetProjectUseCase(
       repository,
@@ -73,7 +73,7 @@ describe('Project use cases', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('atualiza apenas os campos recebidos', async () => {
+  it('updates only supplied fields', async () => {
     const project = makeProject();
     const { repository } = makeRepository(project);
     const useCase = new UpdateProjectUseCase(repository);
@@ -89,7 +89,7 @@ describe('Project use cases', () => {
     expect(output.status).toBe(ProjectStatusEnum.ACTIVE);
   });
 
-  it('não atualiza um projeto de outro usuário', async () => {
+  it("does not update another user's project", async () => {
     const { repository } = makeRepository(makeProject(OTHER_USER_ID));
     const useCase = new UpdateProjectUseCase(repository);
 
@@ -104,7 +104,7 @@ describe('Project use cases', () => {
     expect(repository.update.mock.calls).toHaveLength(0);
   });
 
-  it('exige restauração antes de atualizar um projeto arquivado', async () => {
+  it('requires restoring an archived project before updating', async () => {
     const project = makeProject();
     project.archive();
     const { repository } = makeRepository(project);
@@ -121,10 +121,10 @@ describe('Project use cases', () => {
     expect(repository.update.mock.calls).toHaveLength(0);
   });
 
-  it('atualiza e remove campos opcionais pelo caso de uso principal', async () => {
+  it('updates and clears optional fields through the main use case', async () => {
     const project = makeProject();
     project.update({
-      description: 'Descrição atual',
+      description: 'Description atual',
       localPath: '/workspace/devlog',
     });
     const { repository } = makeRepository(project);
@@ -142,7 +142,7 @@ describe('Project use cases', () => {
     expect(output.localPath).toBeUndefined();
   });
 
-  it('rejeita atualização de projeto sem campos', async () => {
+  it('rejects a project update with no fields', async () => {
     const { repository } = makeRepository();
     const useCase = new UpdateProjectUseCase(repository);
 
@@ -153,7 +153,7 @@ describe('Project use cases', () => {
     expect(repository.update.mock.calls).toHaveLength(0);
   });
 
-  it('remove o projeto somente quando ele pertence ao usuário', async () => {
+  it('removes the project only when it belongs to the user', async () => {
     const { repository } = makeRepository();
     const useCase = new DeleteProjectUseCase(repository);
 
@@ -162,7 +162,7 @@ describe('Project use cases', () => {
     expect(repository.delete.mock.calls[0]?.[0]).toBe(PROJECT_ID);
   });
 
-  it('não remove um projeto de outro usuário', async () => {
+  it("does not remove another user's project", async () => {
     const { repository } = makeRepository(makeProject(OTHER_USER_ID));
     const useCase = new DeleteProjectUseCase(repository);
 
@@ -173,7 +173,7 @@ describe('Project use cases', () => {
     expect(repository.delete.mock.calls).toHaveLength(0);
   });
 
-  it('exige restauração antes de excluir fisicamente um projeto', async () => {
+  it('requires restoring a project before hard deletion', async () => {
     const project = makeProject();
     project.archive();
     const { repository } = makeRepository(project);
@@ -185,7 +185,7 @@ describe('Project use cases', () => {
     expect(repository.delete.mock.calls).toHaveLength(0);
   });
 
-  it('arquiva e restaura o projeto do usuário autenticado', async () => {
+  it('archives and restores the authenticated user project', async () => {
     const project = makeProject();
     const { repository } = makeRepository(project);
     const archiveUseCase = new ArchiveProjectUseCase(repository);
@@ -207,7 +207,7 @@ describe('Project use cases', () => {
     expect(restoredOutput.archivedAt).toBeUndefined();
   });
 
-  it('não arquiva um projeto de outro usuário', async () => {
+  it("does not archive another user's project", async () => {
     const project = makeProject(OTHER_USER_ID);
     const { repository } = makeRepository(project);
     const useCase = new ArchiveProjectUseCase(repository);
@@ -219,7 +219,7 @@ describe('Project use cases', () => {
     expect(repository.update.mock.calls).toHaveLength(0);
   });
 
-  it('monta o filtro de busca com os parâmetros recebidos', async () => {
+  it('builds the search filter from the supplied parameters', async () => {
     const archivedAt = new Date('2026-08-01T00:00:00.000Z');
     const repository = {
       search: jest.fn().mockResolvedValue(

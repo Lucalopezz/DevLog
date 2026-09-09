@@ -18,7 +18,7 @@ export class FindUserByEmailUseCase implements UseCaseContract<
     const user = await this.userRepository.findByEmail(input.email);
 
     if (user === null) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException('User not found');
     }
 
     return UserOutputMapper.toOutput(user);

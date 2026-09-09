@@ -4,26 +4,26 @@ import type { SolutionAttemptProps } from '../../entities/solution-attempt/solut
 import { SolutionAttemptResult } from '../../entities/solution-attempt/solution-attempt-result.enum';
 
 export class SolutionAttemptRules {
-  @IsString({ message: 'O ID da entrada técnica deve ser um texto' })
-  @IsNotEmpty({ message: 'O ID da entrada técnica é obrigatório' })
+  @IsString({ message: 'Technical entry ID must be a string' })
+  @IsNotEmpty({ message: 'Technical entry ID is required' })
   @IsUUID('4', {
-    message: 'O ID da entrada técnica deve ser um UUID válido',
+    message: 'Technical entry ID must be a valid UUID',
   })
   technicalEntryId: string;
 
-  @IsString({ message: 'A descrição da tentativa deve ser um texto' })
-  @IsNotEmpty({ message: 'A descrição da tentativa é obrigatória' })
+  @IsString({ message: 'Attempt description must be a string' })
+  @IsNotEmpty({ message: 'Attempt description is required' })
   description: string;
 
   @IsEnum(SolutionAttemptResult, {
-    message: 'O resultado da tentativa deve ser válido',
+    message: 'Attempt result must be valid',
   })
   result: SolutionAttemptResult;
 
-  @IsDate({ message: 'A data de criação deve ser válida' })
+  @IsDate({ message: 'Creation date must be valid' })
   createdAt: Date;
 
-  @IsDate({ message: 'A data de atualização deve ser válida' })
+  @IsDate({ message: 'Update date must be valid' })
   updatedAt: Date;
 
   constructor({

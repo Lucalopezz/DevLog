@@ -30,7 +30,7 @@ export class GetProjectCommandUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(input.projectId);
 
     if (!project || project.userId !== input.userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     const command = await this.projectCommandRepository.findById(
@@ -38,7 +38,7 @@ export class GetProjectCommandUseCase implements UseCaseContract<
     );
 
     if (!command || command.projectId !== project.id) {
-      throw new NotFoundException('Comando não encontrado');
+      throw new NotFoundException('Command not found');
     }
 
     return ProjectCommandOutputMapper.toOutput(command);

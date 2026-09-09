@@ -4,73 +4,73 @@ skinparam packageStyle rectangle
 skinparam shadowing false
 skinparam actorStyle awesome
 
-actor Visitante
-actor "Usuário autenticado" as AuthUser
-Visitante <|-- AuthUser
+actor Guest
+actor "Authenticated user" as AuthUser
+Guest <|-- AuthUser
 
 rectangle "API DevLog" {
-  package "Conta e autenticação" {
-    usecase "Cadastrar usuário" as UC01
-    usecase "Autenticar usuário" as UC02
-    usecase "Encerrar sessão" as UC03
-    usecase "Consultar perfil" as UC04
-    usecase "Atualizar perfil" as UC05
-    usecase "Alterar senha" as UC06
+  package "Account and authentication" {
+    usecase "Register user" as UC01
+    usecase "Authenticate user" as UC02
+    usecase "End session" as UC03
+    usecase "View profile" as UC04
+    usecase "Update profile" as UC05
+    usecase "Change password" as UC06
   }
 
   package "Tags" {
-    usecase "Criar tag" as UC07
-    usecase "Pesquisar tags" as UC08
-    usecase "Excluir tag" as UC09
+    usecase "Create tag" as UC07
+    usecase "Search tags" as UC08
+    usecase "Delete tag" as UC09
   }
 
-  package "Projetos" {
-    usecase "Criar projeto" as UC10
-    usecase "Pesquisar projetos" as UC11
-    usecase "Consultar projeto" as UC12
-    usecase "Pesquisar registros\ndo projeto" as UC13
-    usecase "Atualizar projeto" as UC14
-    usecase "Arquivar projeto" as UC15
-    usecase "Restaurar projeto" as UC16
-    usecase "Excluir projeto" as UC17
+  package "Projects" {
+    usecase "Create project" as UC10
+    usecase "Search projects" as UC11
+    usecase "Get project" as UC12
+    usecase "Search project\nentries" as UC13
+    usecase "Update project" as UC14
+    usecase "Archive project" as UC15
+    usecase "Restore project" as UC16
+    usecase "Delete project" as UC17
   }
 
-  package "Detalhes do projeto" {
-    usecase "Adicionar tecnologia" as UC18
-    usecase "Remover tecnologia" as UC19
-    usecase "Adicionar comando" as UC20
-    usecase "Pesquisar comandos" as UC21
-    usecase "Consultar comando" as UC22
-    usecase "Atualizar comando" as UC23
-    usecase "Remover comando" as UC24
-    usecase "Adicionar recurso" as UC25
-    usecase "Pesquisar recursos" as UC26
-    usecase "Consultar recurso" as UC27
-    usecase "Atualizar recurso" as UC28
-    usecase "Remover recurso" as UC29
+  package "Project details" {
+    usecase "Add technology" as UC18
+    usecase "Remove technology" as UC19
+    usecase "Add command" as UC20
+    usecase "Search commands" as UC21
+    usecase "Get command" as UC22
+    usecase "Update command" as UC23
+    usecase "Remove command" as UC24
+    usecase "Add resource" as UC25
+    usecase "Search resources" as UC26
+    usecase "Get resource" as UC27
+    usecase "Update resource" as UC28
+    usecase "Remove resource" as UC29
   }
 
-  package "Diário técnico" {
-    usecase "Criar registro técnico" as UC30
-    usecase "Pesquisar registros" as UC31
-    usecase "Consultar registro" as UC32
-    usecase "Atualizar registro" as UC33
-    usecase "Resolver problema" as UC34
-    usecase "Reabrir problema" as UC35
-    usecase "Arquivar registro" as UC36
-    usecase "Excluir registro" as UC37
-    usecase "Atribuir tag" as UC38
-    usecase "Remover tag" as UC39
-    usecase "Adicionar tentativa" as UC40
-    usecase "Listar tentativas" as UC41
-    usecase "Atualizar tentativa" as UC42
-    usecase "Remover tentativa" as UC43
+  package "Technical journal" {
+    usecase "Create technical entry" as UC30
+    usecase "Search entries" as UC31
+    usecase "Get entry" as UC32
+    usecase "Update entry" as UC33
+    usecase "Resolve issue" as UC34
+    usecase "Reopen issue" as UC35
+    usecase "Archive entry" as UC36
+    usecase "Delete entry" as UC37
+    usecase "Assign tag" as UC38
+    usecase "Remove tag" as UC39
+    usecase "Add attempt" as UC40
+    usecase "List attempts" as UC41
+    usecase "Update attempt" as UC42
+    usecase "Remove attempt" as UC43
   }
 }
 
-Visitante -- UC01
-Visitante -- UC02
-Visitante -- UC03
+Guest -- UC01
+Guest -- UC02
+Guest -- UC03
 
 AuthUser -- UC04
 AuthUser -- UC05
@@ -114,13 +114,13 @@ AuthUser -- UC42
 AuthUser -- UC43
 
 note bottom of UC34
-  Apenas ISSUE em estado OPEN.
+  Only ISSUE entries in the OPEN state.
 end note
 note bottom of UC40
-  Apenas ISSUE não arquivada.
+  Only unarchived ISSUE entries.
 end note
 note bottom of UC14
-  Projeto arquivado é somente leitura.
+  Archived projects are read-only.
 end note
 
 @enduml

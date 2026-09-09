@@ -3,7 +3,7 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Toaster } from "sonner";
 import { queryClient } from "@/lib/query-client";
 
-// Se está em ambiente DEV, importa o ReactQueryDevtools de forma assíncrona, caso contrário, define como null
+// In DEV, asynchronously imports ReactQueryDevtools; otherwise, sets it to null
 const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(async () => {
       const module = await import("@tanstack/react-query-devtools");

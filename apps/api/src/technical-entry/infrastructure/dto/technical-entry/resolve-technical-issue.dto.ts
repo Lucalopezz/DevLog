@@ -5,7 +5,7 @@ export class ResolveTechnicalIssueDto implements Omit<
   ResolveTechnicalIssueUseCaseInput,
   'id' | 'userId'
 > {
-  @IsNotEmpty({ message: 'A conclusão é obrigatória para resolver a entrada' })
-  @IsString({ message: 'A conclusão deve ser um texto' })
+  @IsNotEmpty({ message: 'A conclusion is required to resolve the entry' })
+  @IsString({ message: 'Conclusion must be a string' })
   conclusion: string;
 }

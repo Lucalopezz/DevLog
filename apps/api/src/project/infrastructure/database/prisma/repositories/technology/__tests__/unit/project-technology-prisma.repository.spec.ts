@@ -54,13 +54,13 @@ describe('ProjectTechnologyPrismaRepository', () => {
     };
   }
 
-  it('insere a entidade usando o mapper de persistência', async () => {
+  it('inserts the entity using the persistence mapper', async () => {
     await repository.insert(makeEntity());
 
     expect(create).toHaveBeenCalledWith({ data: makeEntity().toJSON() });
   });
 
-  it('lista todas as tecnologias convertidas em entidades', async () => {
+  it('lists all technologies converted to entities', async () => {
     findMany.mockResolvedValueOnce([makeModel()]);
 
     const result = await repository.findAll();
@@ -71,7 +71,7 @@ describe('ProjectTechnologyPrismaRepository', () => {
     ]);
   });
 
-  it('busca por id e retorna null quando não encontra', async () => {
+  it('finds by ID and returns null when missing', async () => {
     await expect(repository.findById(TECHNOLOGY_ID)).resolves.toBeNull();
 
     expect(findUnique).toHaveBeenCalledWith({
@@ -79,7 +79,7 @@ describe('ProjectTechnologyPrismaRepository', () => {
     });
   });
 
-  it('busca pela chave composta do projeto e nome', async () => {
+  it('finds by the project and name composite key', async () => {
     await repository.findByName(PROJECT_ID, 'NestJS');
 
     expect(findUnique).toHaveBeenCalledWith({
@@ -89,7 +89,7 @@ describe('ProjectTechnologyPrismaRepository', () => {
     });
   });
 
-  it('lista as tecnologias de um projeto', async () => {
+  it('lists project technologies', async () => {
     await repository.findByProjectId(PROJECT_ID);
 
     expect(findMany).toHaveBeenCalledWith({
@@ -97,7 +97,7 @@ describe('ProjectTechnologyPrismaRepository', () => {
     });
   });
 
-  it('atualiza nome, versão e data de atualização', async () => {
+  it('updates name, version, and update date', async () => {
     const entity = makeEntity();
 
     await repository.update(entity);
@@ -112,7 +112,7 @@ describe('ProjectTechnologyPrismaRepository', () => {
     });
   });
 
-  it('remove pelo id', async () => {
+  it('removes by ID', async () => {
     await repository.delete(TECHNOLOGY_ID);
 
     expect(deleteTechnology).toHaveBeenCalledWith({

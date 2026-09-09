@@ -47,7 +47,7 @@ export class ListSolutionAttemptsUseCase implements UseCaseContract<
     );
 
     if (!technicalEntry || technicalEntry.userId !== input.userId) {
-      throw new NotFoundException('Entrada técnica não encontrada');
+      throw new NotFoundException('Technical entry not found');
     }
 
     const filter: SolutionAttemptFilter = {

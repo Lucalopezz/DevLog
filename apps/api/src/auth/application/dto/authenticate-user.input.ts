@@ -1,11 +1,11 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class AuthenticateUserDto {
-  @IsEmail({}, { message: 'Email inválido' })
-  @IsNotEmpty({ message: 'O email é obrigatório' })
+  @IsEmail({}, { message: 'Invalid email' })
+  @IsNotEmpty({ message: 'Email is required' })
   email: string;
 
-  @IsString({ message: 'A senha deve ser um texto' })
-  @IsNotEmpty({ message: 'A senha é obrigatória' })
+  @IsString({ message: 'Password must be a string' })
+  @IsNotEmpty({ message: 'Password is required' })
   password: string;
 }

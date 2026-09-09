@@ -50,7 +50,7 @@ export class TechnicalEntryTagPrismaRepository implements TechnicalEntryTagRepos
       return new Map();
     }
 
-    // Procura as associações entre entradas técnicas e tags, filtrando pelo userId da tag
+    // Look up technical entry/tag associations, filtering by the tag userId
     const associations = await this.prismaService.technicalEntryTag.findMany({
       where: {
         technicalEntryId: { in: input.technicalEntryIds },
@@ -61,7 +61,7 @@ export class TechnicalEntryTagPrismaRepository implements TechnicalEntryTagRepos
 
     const tagsByEntry = new Map<string, TagEntity[]>();
 
-    // Retorna um Map onde a chave é o ID da entrada técnica e o valor é um array de TagEntity associadas a essa entrada
+    // Return a Map from each technical entry ID to its associated TagEntity array
     for (const association of associations) {
       const tags = tagsByEntry.get(association.technicalEntryId) ?? [];
       tags.push(TagModelMapper.toEntity(association.tag));

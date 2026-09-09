@@ -5,7 +5,7 @@ import { UuidParamValidationPipe } from '../../shared/infrastructure/pipes/uuid-
 import { applyGlobalConfig } from '../../global-config';
 
 describe('applyGlobalConfig', () => {
-  it('registra a validação global de UUIDs nos parâmetros de rota', () => {
+  it('registers global UUID validation for route parameters', () => {
     const useGlobalPipes = jest.fn();
     const useGlobalFilters = jest.fn();
     const app = {

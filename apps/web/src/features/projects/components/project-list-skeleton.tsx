@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function ProjectListSkeleton() {
   return (
     <div
-      aria-label="Carregando projetos"
+      aria-label="Loading projects"
       className="grid gap-4 md:grid-cols-2"
       role="status"
     >

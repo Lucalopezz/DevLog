@@ -5,16 +5,16 @@ import { ProjectStatusEnum } from '@/project/domain/entities/project/project-sta
 import { UpdateProjectDto } from '../../update-project.dto';
 
 describe('UpdateProjectDto', () => {
-  it('aceita os campos editáveis de forma parcial', async () => {
+  it('accepts editable fields partially', async () => {
     const dto = plainToInstance(UpdateProjectDto, {
-      description: 'Projeto de estudos',
+      description: 'Study project',
       status: ProjectStatusEnum.FINISHED,
     });
 
     expect(await validate(dto)).toHaveLength(0);
   });
 
-  it('aceita null para remover descrição e caminho local', async () => {
+  it('accepts null to clear description and local path', async () => {
     const dto = plainToInstance(UpdateProjectDto, {
       description: null,
       localPath: null,
@@ -23,7 +23,7 @@ describe('UpdateProjectDto', () => {
     expect(await validate(dto)).toHaveLength(0);
   });
 
-  it('rejeita nome e status inválidos', async () => {
+  it('rejects invalid name and status', async () => {
     const dto = plainToInstance(UpdateProjectDto, {
       name: null,
       status: null,

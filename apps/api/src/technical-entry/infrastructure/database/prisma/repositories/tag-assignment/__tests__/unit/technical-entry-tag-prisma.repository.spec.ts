@@ -24,13 +24,13 @@ describe('TechnicalEntryTagPrismaRepository', () => {
     jest.clearAllMocks();
   });
 
-  it('adiciona a associação usando os ids da entrada e da tag', async () => {
+  it('adds the association using the entry and tag IDs', async () => {
     await repository.add(input);
 
     expect(create).toHaveBeenCalledWith({ data: input });
   });
 
-  it('verifica a associação pela chave composta', async () => {
+  it('checks the association by its composite key', async () => {
     findUnique.mockResolvedValueOnce({
       technicalEntryId: input.technicalEntryId,
       tagId: input.tagId,
@@ -42,7 +42,7 @@ describe('TechnicalEntryTagPrismaRepository', () => {
     });
   });
 
-  it('remove a associação pela chave composta', async () => {
+  it('removes the association by its composite key', async () => {
     await repository.remove(input);
 
     expect(deleteAssociation).toHaveBeenCalledWith({
@@ -50,7 +50,7 @@ describe('TechnicalEntryTagPrismaRepository', () => {
     });
   });
 
-  it('busca as tags das entradas do usuário agrupadas por entrada', async () => {
+  it('finds tags for user entries grouped by entry', async () => {
     const createdAt = new Date('2026-08-10T12:00:00.000Z');
     const tag = {
       id: input.tagId,

@@ -39,7 +39,7 @@ function makeUseCase(project: ProjectEntity | null = makeProject()) {
 }
 
 describe('AddProjectCommandUseCase', () => {
-  it('cria e retorna o comando do projeto', async () => {
+  it('creates and returns the project command', async () => {
     const { useCase, projectCommandRepository } = makeUseCase();
 
     const output = await useCase.execute({
@@ -47,7 +47,7 @@ describe('AddProjectCommandUseCase', () => {
       projectId: PROJECT_ID,
       title: 'Subir ambiente local',
       command: 'docker compose up -d',
-      description: 'Inicia os serviços do projeto',
+      description: 'Start project services',
       executionOrder: 1,
     });
 
@@ -56,7 +56,7 @@ describe('AddProjectCommandUseCase', () => {
       projectId: PROJECT_ID,
       title: 'Subir ambiente local',
       command: 'docker compose up -d',
-      description: 'Inicia os serviços do projeto',
+      description: 'Start project services',
       executionOrder: 1,
     });
     expect(output).toMatchObject({
@@ -67,7 +67,7 @@ describe('AddProjectCommandUseCase', () => {
     expect(output).not.toHaveProperty('name');
   });
 
-  it('não cria comando para projeto de outro usuário', async () => {
+  it("does not create a command for another user's project", async () => {
     const { useCase, projectCommandRepository } = makeUseCase(
       makeProject(OTHER_USER_ID),
     );
@@ -76,7 +76,7 @@ describe('AddProjectCommandUseCase', () => {
       useCase.execute({
         userId: USER_ID,
         projectId: PROJECT_ID,
-        title: 'Comando indevido',
+        title: 'Command indevido',
         command: 'echo unsafe',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);

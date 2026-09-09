@@ -17,14 +17,14 @@ describe('UserEntity', () => {
     jest.useRealTimers();
   });
 
-  it('mantém propriedades válidas e as expõe como JSON', () => {
+  it('preserves valid properties and exposes them as JSON', () => {
     const props = makeProps();
     const user = new UserEntity(props, 'user-id');
 
     expect(user.toJSON()).toEqual({ id: 'user-id', ...props });
   });
 
-  it('agrupa erros de validação antes de construir um usuário inválido', () => {
+  it('groups validation errors before constructing an invalid user', () => {
     let caughtError: unknown;
     try {
       new UserEntity(
@@ -36,12 +36,12 @@ describe('UserEntity', () => {
 
     expect(caughtError).toBeInstanceOf(EntityValidationError);
     const validationError = caughtError as EntityValidationError;
-    expect(validationError.error.name).toContain('O nome é obrigatório');
-    expect(validationError.error.email).toContain('O e-mail deve ser válido');
-    expect(validationError.error.password).toContain('A senha é obrigatória');
+    expect(validationError.error.name).toContain('Name is required');
+    expect(validationError.error.email).toContain('Email must be valid');
+    expect(validationError.error.password).toContain('Password is required');
   });
 
-  it('atualiza somente o campo solicitado e renova updatedAt', () => {
+  it('updates only the requested field and refreshes updatedAt', () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-08-02T12:00:00.000Z'));
     const user = new UserEntity(makeProps());
@@ -53,7 +53,7 @@ describe('UserEntity', () => {
     expect(user.updatedAt).toEqual(new Date('2026-08-02T12:00:00.000Z'));
   });
 
-  it('valida a atualização de senha antes de alterar a entidade', () => {
+  it('validates the password update before changing the entity', () => {
     const user = new UserEntity(makeProps());
 
     expect(() => user.updatePassword('')).toThrow(EntityValidationError);

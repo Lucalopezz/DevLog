@@ -1,281 +1,281 @@
-# Diagramas de sequência — projetos
+# Sequence diagrams — projects
 
-## UC-10 — Criar projeto
+## UC-10 — Create project
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as ProjectController
     participant UC as CreateProjectUseCase
     participant URepo as UserRepository
     participant Project as ProjectEntity
     participant PRepo as ProjectRepository
 
-    Usuario->>C: POST /api/project
+    UserActor->>C: POST /api/project
     C->>UC: execute(userId, name, description)
     UC->>URepo: findById(userId)
-    alt usuário inexistente
-        UC-->>Usuario: 404 Not Found
-    else usuário existente
-        UC->>Project: criar(status ACTIVE)
-        Project-->>UC: projeto válido ou erro 422
-        UC->>PRepo: insert(projeto)
-        UC-->>Usuario: projeto criado
+    alt missing user
+        UC-->>UserActor: 404 Not Found
+    else existing user
+        UC->>Project: create(status ACTIVE)
+        Project-->>UC: valid project or error 422
+        UC->>PRepo: insert(project)
+        UC-->>UserActor: project created
     end
 ```
 
-## UC-11 a UC-13 — Consultar projetos e seus registros
+## UC-11 through UC-13 — Query projects and their entries
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as ProjectController
-    participant UC as Caso de uso de consulta
+    participant UC as Query use case
     participant PRepo as ProjectRepository
     participant TechRepo as ProjectTechnologyRepository
     participant ERepo as TechnicalEntryRepository
     participant LinkRepo as TechnicalEntryTagRepository
 
-    alt UC-11 pesquisar projetos
-        Usuario->>C: GET /api/project?filtros
+    alt UC-11 search projects
+        UserActor->>C: GET /api/project?filters
         C->>UC: search(userId, filtros)
         UC->>PRepo: search(filtro inclui userId)
-        PRepo-->>UC: página de projetos
-        UC-->>Usuario: página
-    else UC-12 consultar projeto
-        Usuario->>C: GET /api/project/:id
+        PRepo-->>UC: project page
+        UC-->>UserActor: page
+    else UC-12 get project
+        UserActor->>C: GET /api/project/:id
         C->>UC: get(id, userId)
         UC->>PRepo: findById(id)
-        alt projeto ausente ou alheio
-            UC-->>Usuario: 404 Not Found
-        else projeto próprio
+        alt missing project or belongs to another user
+            UC-->>UserActor: 404 Not Found
+        else own project
             UC->>TechRepo: findByProjectId(id)
-            TechRepo-->>UC: tecnologias
-            UC-->>Usuario: projeto com tecnologias
+            TechRepo-->>UC: technologies
+            UC-->>UserActor: project with technologies
         end
-    else UC-13 registros do projeto
-        Usuario->>C: GET /api/project/:id/technical-entries
+    else UC-13 project entries
+        UserActor->>C: GET /api/project/:id/technical-entries
         C->>UC: searchEntries(projectId, userId, filtros)
         UC->>PRepo: findById(projectId)
-        alt projeto ausente ou alheio
-            UC-->>Usuario: 404 Not Found
-        else projeto próprio
+        alt missing project or belongs to another user
+            UC-->>UserActor: 404 Not Found
+        else own project
             UC->>ERepo: search(userId, projectId, filtros)
-            ERepo-->>UC: página de registros
-            UC->>LinkRepo: findTags(ids dos registros, userId)
-            LinkRepo-->>UC: tags agrupadas por registro
-            UC-->>Usuario: página de registros com tags
+            ERepo-->>UC: entry page
+            UC->>LinkRepo: findTags(entry IDs, userId)
+            LinkRepo-->>UC: tags grouped by entry
+            UC-->>UserActor: entry page with tags
         end
     end
 ```
 
-## UC-14 a UC-17 — Ciclo de vida do projeto
+## UC-14 through UC-17 — Project lifecycle
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as ProjectController
-    participant UC as Caso de uso do projeto
+    participant UC as Project use case
     participant PRepo as ProjectRepository
     participant Project as ProjectEntity
-    participant DB as Banco de dados
+    participant DB as Database
 
-    Usuario->>C: PATCH ou DELETE /api/project/:id
+    UserActor->>C: PATCH or DELETE /api/project/:id
     C->>UC: execute(id, userId, dados?)
     UC->>PRepo: findById(id)
-    alt ausente ou de outro usuário
-        UC-->>Usuario: 404 Not Found
-    else UC-14 atualizar
-        alt nenhum campo editável
-            UC-->>Usuario: 422 Unprocessable Entity
-        else possui alterações
-            UC->>Project: update(alterações)
-            alt projeto arquivado
-                Project-->>Usuario: 422 somente leitura
-            else projeto editável
-                UC->>PRepo: update(projeto)
-                UC-->>Usuario: projeto atualizado
+    alt missing or belongs to another user
+        UC-->>UserActor: 404 Not Found
+    else UC-14 update
+        alt no editable fields
+            UC-->>UserActor: 422 Unprocessable Entity
+        else has changes
+            UC->>Project: update(changes)
+            alt archived project
+                Project-->>UserActor: 422 read-only
+            else editable project
+                UC->>PRepo: update(project)
+                UC-->>UserActor: project updated
             end
         end
-    else UC-15 arquivar
+    else UC-15 archive
         UC->>Project: archive()
-        Note over Project: Idempotente se já arquivado
-        UC->>PRepo: update(projeto)
-        UC-->>Usuario: projeto arquivado
-    else UC-16 restaurar
+        Note over Project: Idempotent when already archived
+        UC->>PRepo: update(project)
+        UC-->>UserActor: archived project
+    else UC-16 restore
         UC->>Project: restore()
-        Note over Project: Idempotente se já restaurado
-        UC->>PRepo: update(projeto)
-        UC-->>Usuario: projeto restaurado
-    else UC-17 excluir
+        Note over Project: Idempotent when already restored
+        UC->>PRepo: update(project)
+        UC-->>UserActor: project restored
+    else UC-17 delete
         UC->>Project: ensureCanBeModified()
-        alt projeto arquivado
-            Project-->>Usuario: 422 somente leitura
-        else projeto editável
+        alt archived project
+            Project-->>UserActor: 422 read-only
+        else editable project
             UC->>PRepo: delete(id)
-            PRepo->>DB: DELETE projeto
-            DB->>DB: excluir detalhes em cascata
-            DB->>DB: desvincular registros técnicos
-            UC-->>Usuario: 204 No Content
+            PRepo->>DB: DELETE project
+            DB->>DB: cascade detail deletion
+            DB->>DB: unlink technical entries
+            UC-->>UserActor: 204 No Content
         end
     end
 ```
 
-## UC-18 e UC-19 — Tecnologias do projeto
+## UC-18 and UC-19 — Project technologies
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as ProjectController
-    participant UC as Caso de uso de tecnologia
+    participant UC as Technology use case
     participant PRepo as ProjectRepository
     participant TRepo as ProjectTechnologyRepository
     participant Project as ProjectEntity
 
-    alt UC-18 adicionar tecnologia
-        Usuario->>C: POST /api/project/:id/technologies
+    alt UC-18 add technology
+        UserActor->>C: POST /api/project/:id/technologies
         C->>UC: add(projectId, userId, name, version)
         UC->>PRepo: findById(projectId)
         UC->>TRepo: findByName(projectId, name)
-        alt nome duplicado
-            UC-->>Usuario: 422 Unprocessable Entity
-        else nome disponível
+        alt duplicate name
+            UC-->>UserActor: 422 Unprocessable Entity
+        else available name
             UC->>Project: addTechnology(name, version)
-            alt projeto arquivado
-                Project-->>Usuario: 422 somente leitura
-            else projeto editável
-                Project-->>UC: tecnologia
-                UC->>TRepo: insert(tecnologia)
-                UC-->>Usuario: projeto com tecnologia adicionada
+            alt archived project
+                Project-->>UserActor: 422 read-only
+            else editable project
+                Project-->>UC: technology
+                UC->>TRepo: insert(technology)
+                UC-->>UserActor: project with added technology
             end
         end
-    else UC-19 remover tecnologia
-        Usuario->>C: DELETE /api/project/:id/technologies/:technologyId
+    else UC-19 remove technology
+        UserActor->>C: DELETE /api/project/:id/technologies/:technologyId
         C->>UC: remove(projectId, technologyId, userId)
         UC->>PRepo: findById(projectId)
         UC->>Project: ensureCanBeModified()
         UC->>TRepo: findById(technologyId)
-        alt tecnologia fora do projeto
-            UC-->>Usuario: 404 Not Found
-        else tecnologia vinculada
+        alt technology outside project
+            UC-->>UserActor: 404 Not Found
+        else linked technology
             UC->>TRepo: delete(technologyId)
-            UC-->>Usuario: 204 No Content
+            UC-->>UserActor: 204 No Content
         end
     end
 ```
 
-## UC-20 a UC-24 — Comandos do projeto
+## UC-20 through UC-24 — Project commands
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as ProjectController
-    participant UC as Caso de uso de comando
+    participant UC as Command use case
     participant PRepo as ProjectRepository
     participant CRepo as ProjectCommandRepository
     participant Project as ProjectEntity
     participant Command as ProjectCommandEntity
 
-    Usuario->>C: requisição em /api/project/:projectId/commands
+    UserActor->>C: request to /api/project/:projectId/commands
     C->>UC: execute(dados, projectId, userId)
     UC->>PRepo: findById(projectId)
-    alt projeto ausente ou alheio
-        UC-->>Usuario: 404 Not Found
-    else UC-20 adicionar
+    alt missing project or belongs to another user
+        UC-->>UserActor: 404 Not Found
+    else UC-20 add
         UC->>Project: addCommand(dados)
-        Project-->>UC: comando ou erro se arquivado
-        UC->>CRepo: insert(comando)
-        UC-->>Usuario: comando criado
+        Project-->>UC: command or error if archived
+        UC->>CRepo: insert(command)
+        UC-->>UserActor: command created
     else UC-21 pesquisar
         UC->>CRepo: search(projectId, filtros)
-        CRepo-->>UC: página
-        UC-->>Usuario: página de comandos
-    else UC-22 consultar
+        CRepo-->>UC: page
+        UC-->>UserActor: command page
+    else UC-22 get
         UC->>CRepo: findById(commandId)
-        alt comando fora do projeto
-            UC-->>Usuario: 404 Not Found
-        else comando vinculado
-            UC-->>Usuario: comando
+        alt command outside project
+            UC-->>UserActor: 404 Not Found
+        else linked command
+            UC-->>UserActor: command
         end
-    else UC-23 atualizar
+    else UC-23 update
         UC->>Project: ensureCanBeModified()
         UC->>CRepo: findById(commandId)
-        alt corpo vazio ou vínculo inválido
-            UC-->>Usuario: 422 ou 404
-        else atualização válida
-            UC->>Command: update(alterações)
-            UC->>CRepo: update(comando)
-            UC-->>Usuario: comando atualizado
+        alt empty body or invalid link
+            UC-->>UserActor: 422 or 404
+        else valid update
+            UC->>Command: update(changes)
+            UC->>CRepo: update(command)
+            UC-->>UserActor: command updated
         end
-    else UC-24 remover
+    else UC-24 remove
         UC->>Project: ensureCanBeModified()
         UC->>CRepo: findById(commandId)
-        alt comando fora do projeto
-            UC-->>Usuario: 404 Not Found
-        else comando vinculado
+        alt command outside project
+            UC-->>UserActor: 404 Not Found
+        else linked command
             UC->>CRepo: delete(commandId)
-            UC-->>Usuario: 204 No Content
+            UC-->>UserActor: 204 No Content
         end
     end
 ```
 
-## UC-25 a UC-29 — Recursos do projeto
+## UC-25 through UC-29 — Project resources
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as ProjectController
-    participant UC as Caso de uso de recurso
+    participant UC as Resource use case
     participant PRepo as ProjectRepository
     participant RRepo as ProjectResourceRepository
     participant Project as ProjectEntity
     participant Resource as ProjectResourceEntity
 
-    Usuario->>C: requisição em /api/project/:projectId/resources
+    UserActor->>C: request to /api/project/:projectId/resources
     C->>UC: execute(dados, projectId, userId)
     UC->>PRepo: findById(projectId)
-    alt projeto ausente ou alheio
-        UC-->>Usuario: 404 Not Found
-    else UC-25 adicionar
-        UC->>Project: addResource(label, url, type ou OTHER)
-        Project-->>UC: recurso ou erro se arquivado
-        UC->>RRepo: insert(recurso)
-        UC-->>Usuario: recurso criado
+    alt missing project or belongs to another user
+        UC-->>UserActor: 404 Not Found
+    else UC-25 add
+        UC->>Project: addResource(label, url, type or OTHER)
+        Project-->>UC: resource or error if archived
+        UC->>RRepo: insert(resource)
+        UC-->>UserActor: resource created
     else UC-26 pesquisar
         UC->>RRepo: search(projectId, filtros)
-        RRepo-->>UC: página
-        UC-->>Usuario: página de recursos
-    else UC-27 consultar
+        RRepo-->>UC: page
+        UC-->>UserActor: resource page
+    else UC-27 get
         UC->>RRepo: findById(resourceId)
-        alt recurso fora do projeto
-            UC-->>Usuario: 404 Not Found
-        else recurso vinculado
-            UC-->>Usuario: recurso
+        alt resource outside project
+            UC-->>UserActor: 404 Not Found
+        else linked resource
+            UC-->>UserActor: resource
         end
-    else UC-28 atualizar
+    else UC-28 update
         UC->>Project: ensureCanBeModified()
         UC->>RRepo: findById(resourceId)
-        alt corpo vazio ou vínculo inválido
-            UC-->>Usuario: 422 ou 404
-        else atualização válida
-            UC->>Resource: update(alterações)
-            UC->>RRepo: update(recurso)
-            UC-->>Usuario: recurso atualizado
+        alt empty body or invalid link
+            UC-->>UserActor: 422 or 404
+        else valid update
+            UC->>Resource: update(changes)
+            UC->>RRepo: update(resource)
+            UC-->>UserActor: resource updated
         end
-    else UC-29 remover
+    else UC-29 remove
         UC->>Project: ensureCanBeModified()
         UC->>RRepo: findById(resourceId)
-        alt recurso fora do projeto
-            UC-->>Usuario: 404 Not Found
-        else recurso vinculado
+        alt resource outside project
+            UC-->>UserActor: 404 Not Found
+        else linked resource
             UC->>RRepo: delete(resourceId)
-            UC-->>Usuario: 204 No Content
+            UC-->>UserActor: 204 No Content
         end
     end
 ```

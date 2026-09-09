@@ -65,7 +65,7 @@ describe('ProjectCommandPrismaRepository', () => {
     deleteCommand.mockResolvedValue(undefined);
   });
 
-  it('declara somente campos seguros para ordenação', () => {
+  it('declares only safe sorting fields', () => {
     expect(repository.sortableFields).toEqual([
       'title',
       'executionOrder',
@@ -118,11 +118,11 @@ describe('ProjectCommandPrismaRepository', () => {
     expect(deleteCommand).toHaveBeenCalledWith({ where: { id: COMMAND_ID } });
   });
 
-  it('retorna null quando o comando não existe', async () => {
+  it('returns null when the command does not exist', async () => {
     await expect(repository.findById(COMMAND_ID)).resolves.toBeNull();
   });
 
-  it('aplica todos os filtros, paginação e ordenação permitida', async () => {
+  it('applies all filters, pagination, and allowed sorting', async () => {
     count.mockResolvedValue(1);
     findMany.mockResolvedValue([makeModel()]);
     const params = new ProjectCommandSearchParams({
@@ -155,7 +155,7 @@ describe('ProjectCommandPrismaRepository', () => {
     expect(result.items[0]).toBeInstanceOf(ProjectCommandEntity);
   });
 
-  it('usa filtro vazio e ordenação padrão para sort não permitido', async () => {
+  it('uses empty filters and default sorting for a disallowed sort', async () => {
     await repository.search(
       new ProjectCommandSearchParams({ sort: 'command', filter: null }),
     );

@@ -57,7 +57,7 @@ function makeUseCase(
 }
 
 describe('RemoveProjectCommandUseCase', () => {
-  it('remove o comando do projeto do usuário autenticado', async () => {
+  it('removes the command from the authenticated user project', async () => {
     const { useCase, projectCommandRepository } = makeUseCase();
 
     await useCase.execute({
@@ -69,7 +69,7 @@ describe('RemoveProjectCommandUseCase', () => {
     expect(projectCommandRepository.delete.mock.calls[0]?.[0]).toBe(COMMAND_ID);
   });
 
-  it('não remove comando de projeto de outro usuário', async () => {
+  it("does not remove a command in another user's project", async () => {
     const { useCase, projectCommandRepository } = makeUseCase(
       makeProject(OTHER_USER_ID),
     );
@@ -86,7 +86,7 @@ describe('RemoveProjectCommandUseCase', () => {
     expect(projectCommandRepository.delete.mock.calls).toHaveLength(0);
   });
 
-  it('não remove comando que pertence a outro projeto', async () => {
+  it('does not remove a command belonging to another project', async () => {
     const { useCase, projectCommandRepository } = makeUseCase(
       makeProject(),
       makeCommand(OTHER_PROJECT_ID),
@@ -103,7 +103,7 @@ describe('RemoveProjectCommandUseCase', () => {
     expect(projectCommandRepository.delete.mock.calls).toHaveLength(0);
   });
 
-  it('retorna erro quando o comando não existe', async () => {
+  it('returns an error when the command does not exist', async () => {
     const { useCase, projectCommandRepository } = makeUseCase(
       makeProject(),
       null,

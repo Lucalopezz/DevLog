@@ -55,7 +55,7 @@ describe('ProjectPrismaRepository (integration)', () => {
     await prisma.$disconnect();
   });
 
-  it('persiste, filtra e atualiza um projeto sem vazar dados de outro usuário', async () => {
+  it("persists, filters, and updates a project without leaking another user's data", async () => {
     const project = makeProject(PROJECT_ID, USER_ID, 'DevLog');
     await repository.insert(project);
     await repository.insert(

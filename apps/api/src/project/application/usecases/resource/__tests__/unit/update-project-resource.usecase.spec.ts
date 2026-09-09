@@ -32,7 +32,7 @@ function makeResource(projectId = PROJECT_ID): ProjectResourceEntity {
   return new ProjectResourceEntity(
     {
       projectId,
-      label: 'Repositório principal',
+      label: 'Repository principal',
       url: 'https://github.com/example/devlog',
       type: ProjectResourceType.REPOSITORY,
     },
@@ -62,7 +62,7 @@ function makeUseCase(
 }
 
 describe('UpdateProjectResourceUseCase', () => {
-  it('atualiza os campos recebidos e persiste o recurso', async () => {
+  it('updates supplied fields and persists the resource', async () => {
     const resource = makeResource();
     const { useCase, projectResourceRepository } = makeUseCase(
       makeProject(),
@@ -73,7 +73,7 @@ describe('UpdateProjectResourceUseCase', () => {
       userId: USER_ID,
       projectId: PROJECT_ID,
       resourceId: RESOURCE_ID,
-      label: 'Documentação da API',
+      label: 'Documentation da API',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
@@ -82,13 +82,13 @@ describe('UpdateProjectResourceUseCase', () => {
     expect(output).toMatchObject({
       id: RESOURCE_ID,
       projectId: PROJECT_ID,
-      label: 'Documentação da API',
+      label: 'Documentation da API',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
   });
 
-  it('não persiste uma URL inválida', async () => {
+  it('does not persist an invalid URL', async () => {
     const { useCase, projectResourceRepository } = makeUseCase();
 
     await expect(
@@ -103,7 +103,7 @@ describe('UpdateProjectResourceUseCase', () => {
     expect(projectResourceRepository.update.mock.calls).toHaveLength(0);
   });
 
-  it('rejeita atualização sem campos', async () => {
+  it('rejects an update with no fields', async () => {
     const { useCase, projectResourceRepository } = makeUseCase();
 
     await expect(
@@ -117,7 +117,7 @@ describe('UpdateProjectResourceUseCase', () => {
     expect(projectResourceRepository.update.mock.calls).toHaveLength(0);
   });
 
-  it('não atualiza recurso de projeto de outro usuário', async () => {
+  it("does not update a resource in another user's project", async () => {
     const { useCase, projectResourceRepository } = makeUseCase(
       makeProject(OTHER_USER_ID),
     );
@@ -127,7 +127,7 @@ describe('UpdateProjectResourceUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         resourceId: RESOURCE_ID,
-        label: 'Recurso indevido',
+        label: 'Resource indevido',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 
@@ -135,7 +135,7 @@ describe('UpdateProjectResourceUseCase', () => {
     expect(projectResourceRepository.update.mock.calls).toHaveLength(0);
   });
 
-  it('não atualiza recurso que pertence a outro projeto', async () => {
+  it('does not update a resource belonging to another project', async () => {
     const { useCase, projectResourceRepository } = makeUseCase(
       makeProject(),
       makeResource(OTHER_PROJECT_ID),
@@ -146,14 +146,14 @@ describe('UpdateProjectResourceUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         resourceId: RESOURCE_ID,
-        label: 'Recurso indevido',
+        label: 'Resource indevido',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 
     expect(projectResourceRepository.update.mock.calls).toHaveLength(0);
   });
 
-  it('retorna erro quando o recurso não existe', async () => {
+  it('returns an error when the resource does not exist', async () => {
     const { useCase, projectResourceRepository } = makeUseCase(
       makeProject(),
       null,
@@ -164,7 +164,7 @@ describe('UpdateProjectResourceUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         resourceId: RESOURCE_ID,
-        label: 'Novo rótulo',
+        label: 'New label',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 

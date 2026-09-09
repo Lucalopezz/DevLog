@@ -21,11 +21,11 @@ export type ProjectFormProps = {
 };
 
 /**
- * Formulário responsável pela interface de criação de projetos.
+ * Form responsible for the project creation interface.
  *
- * O hook useProjectForm configura React Hook Form e Zod; a mutation cuida da
- * chamada HTTP e dos efeitos globais, como toast e invalidação do cache.
- * Assim, este componente apenas conecta os campos ao fluxo de submissão.
+ * useProjectForm configures React Hook Form and Zod; the mutation handles
+ * the HTTP call and global effects, such as toasts and cache invalidation.
+ * This component therefore only connects fields to the submission flow.
  */
 export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
   const form = useProjectForm();
@@ -35,13 +35,13 @@ export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
 
   const onSubmit: SubmitHandler<CreateProjectInput> = async (data) => {
     try {
-      // handleSubmit só chama esta função depois da validação do resolver.
+      // handleSubmit calls this function only after resolver validation.
       await createProjectMutation.mutateAsync(data);
       form.reset();
       onOpenChange(false);
     } catch {
-      // O hook da mutation já exibe o erro via toast; o catch evita uma
-      // Promise rejeitada não tratada no evento de submit.
+      // The mutation hook already displays errors in a toast; catch prevents an
+      // unhandled Promise rejection in the submit event.
     }
   };
 
@@ -53,10 +53,10 @@ export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
       <DialogContent className="gap-6 border-border/60 bg-card p-7 shadow-2xl ring-0 sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight">
-            Novo projeto
+            New project
           </DialogTitle>
           <DialogDescription className="leading-6">
-            Cadastre um projeto para organizá-lo no DevLog.
+            Create a project to organize it in DevLog.
           </DialogDescription>
         </DialogHeader>
 
@@ -67,9 +67,9 @@ export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
             onSubmit={handleSubmit(onSubmit)}
           >
             {/*
-              O wrapper de criação fornece o `form.control` configurado por
-              useProjectForm. ProjectFormFields apenas renderiza e conecta nome
-              e descrição; ele não sabe que a operação final será um POST.
+              The creation wrapper provides `form.control` configured by
+              useProjectForm. ProjectFormFields only renders and connects name
+              and description; it does not know the final operation will be a POST.
             */}
             <ProjectFormFields
               control={form.control}
@@ -78,7 +78,7 @@ export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
 
             <DialogFooter className="mx-0 mt-1 mb-0 border-t-0 bg-transparent p-0">
               <Button disabled={isLoading} type="submit">
-                {isLoading ? "Criando..." : "Criar projeto"}
+                {isLoading ? "Creating..." : "Create project"}
               </Button>
             </DialogFooter>
           </form>

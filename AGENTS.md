@@ -4,6 +4,15 @@
 
 DevLog is a pnpm/Turborepo monorepo. Application code lives in `apps/`: `apps/api` is the NestJS backend, with source in `src/` and end-to-end tests in `test/`; `apps/web` is the React + Vite frontend, with code in `src/` and static files in `public/`. Reserve `packages/` for genuinely shared workspace packages. Infrastructure is in `docker/`, while project decisions and setup notes live in `docs/`.
 
+## Language Standard
+
+English is the standard language for the application and all repository content.
+Write all UI text (including accessibility labels), API responses and validation
+messages, documentation and READMEs, diagrams, code comments, test descriptions,
+and example data in English. Use English for new file names and identifiers, and
+use the `en-US` locale for application date and number formatting. Preserve
+user-provided content and external API identifiers as supplied.
+
 ## Learning-Focused Development
 
 Remember that this is a study project. My main goal is not only to get the code working, but to understand the reasoning behind the implementation.

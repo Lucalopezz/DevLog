@@ -5,9 +5,9 @@ type ApiErrorResponse = {
 }
 
 /**
- * O Nest pode retornar uma mensagem única ou uma lista de mensagens.
- * Normalizar os dois formatos deixa os hooks livres para cuidar apenas do
- * fluxo da mutation e evita expor detalhes do Axios na interface.
+ * Nest can return a single message or a list of messages.
+ * Normalizing both formats lets hooks focus on the mutation
+ * flow and avoids exposing Axios details in the interface.
  */
 export function getApiErrorMessage(error: unknown, fallback: string) {
   if (!isAxiosError<ApiErrorResponse>(error)) {

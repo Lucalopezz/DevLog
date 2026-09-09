@@ -32,7 +32,7 @@ function makeCommand(projectId = PROJECT_ID): ProjectCommandEntity {
       projectId,
       title: 'Subir ambiente local',
       command: 'docker compose up -d',
-      description: 'Inicia os serviços do projeto',
+      description: 'Start project services',
       executionOrder: 0,
     },
     COMMAND_ID,
@@ -62,7 +62,7 @@ function makeUseCase(
 }
 
 describe('UpdateProjectCommandUseCase', () => {
-  it('atualiza os campos recebidos e persiste o comando', async () => {
+  it('updates supplied fields and persists the command', async () => {
     const command = makeCommand();
     const { useCase, projectCommandRepository } = makeUseCase(
       makeProject(),
@@ -83,12 +83,12 @@ describe('UpdateProjectCommandUseCase', () => {
       projectId: PROJECT_ID,
       title: 'Parar ambiente local',
       command: 'docker compose down',
-      description: 'Inicia os serviços do projeto',
+      description: 'Start project services',
       executionOrder: 0,
     });
   });
 
-  it('não atualiza comando de projeto de outro usuário', async () => {
+  it("does not update a command in another user's project", async () => {
     const { useCase, projectCommandRepository } = makeUseCase(
       makeProject(OTHER_USER_ID),
     );
@@ -98,7 +98,7 @@ describe('UpdateProjectCommandUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         commandId: COMMAND_ID,
-        title: 'Comando indevido',
+        title: 'Command indevido',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 
@@ -106,7 +106,7 @@ describe('UpdateProjectCommandUseCase', () => {
     expect(projectCommandRepository.update.mock.calls).toHaveLength(0);
   });
 
-  it('remove descrição e ordem quando recebe null', async () => {
+  it('clears description and order when receiving null', async () => {
     const command = makeCommand();
     const { useCase } = makeUseCase(makeProject(), command);
 
@@ -122,7 +122,7 @@ describe('UpdateProjectCommandUseCase', () => {
     expect(output.executionOrder).toBeUndefined();
   });
 
-  it('rejeita atualização sem campos', async () => {
+  it('rejects an update with no fields', async () => {
     const { useCase, projectCommandRepository } = makeUseCase();
 
     await expect(
@@ -136,7 +136,7 @@ describe('UpdateProjectCommandUseCase', () => {
     expect(projectCommandRepository.update.mock.calls).toHaveLength(0);
   });
 
-  it('não atualiza comando que pertence a outro projeto', async () => {
+  it('does not update a command belonging to another project', async () => {
     const command = makeCommand(OTHER_PROJECT_ID);
     const { useCase, projectCommandRepository } = makeUseCase(
       makeProject(),
@@ -148,14 +148,14 @@ describe('UpdateProjectCommandUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         commandId: COMMAND_ID,
-        title: 'Comando indevido',
+        title: 'Command indevido',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 
     expect(projectCommandRepository.update.mock.calls).toHaveLength(0);
   });
 
-  it('retorna erro quando o comando não existe', async () => {
+  it('returns an error when the command does not exist', async () => {
     const { useCase, projectCommandRepository } = makeUseCase(
       makeProject(),
       null,
@@ -166,7 +166,7 @@ describe('UpdateProjectCommandUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         commandId: COMMAND_ID,
-        title: 'Novo título',
+        title: 'New title',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 

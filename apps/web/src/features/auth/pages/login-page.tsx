@@ -2,20 +2,20 @@ import { Link } from "react-router";
 import { LoginForm } from "@/features/auth/components/login-form";
 
 /**
- * Página responsável pelo contexto visual do login.
+ * Page responsible for the visual context of the login screen.
  *
- * O LoginForm continua responsável pelos campos, validação e envio dos dados.
- * A página apenas compõe esse formulário com a identidade do DevLog e um
- * layout centralizado, mantendo cada componente com uma responsabilidade
- * pequena e fácil de testar.
+ * LoginForm remains responsible for fields, validation, and data submission.
+ * The page simply combines the form with DevLog branding and a
+ * centered layout, giving each component a small responsibility
+ * that is easy to test.
  */
 export default function LoginPage() {
   return (
     <main className="relative isolate flex min-h-svh items-center justify-center overflow-hidden bg-background px-6 py-12 sm:px-8">
       {/*
-       * Elementos decorativos ficam fora do fluxo e são ignorados por leitores
-       * de tela. Assim, a aparência da página não interfere na navegação por
-       * teclado nem na leitura do formulário.
+       * Decorative elements stay outside the flow and are ignored by screen
+       * readers. This keeps the page appearance from interfering with keyboard
+       * navigation or form reading.
        */}
       <div
         aria-hidden="true"
@@ -27,12 +27,12 @@ export default function LoginPage() {
 
       <div className="flex w-full max-w-md flex-col items-center gap-8">
         {/*
-         * Linkar a marca para a página inicial oferece uma saída clara para
-         * quem chegou ao login por engano, sem criar uma nova regra de
-         * navegação dentro do formulário.
+         * Linking the brand to the home page provides a clear way out for
+         * visitors who reached login by mistake, without adding a new navigation
+         * rule inside the form.
          */}
         <Link
-          aria-label="Ir para a página inicial do DevLog"
+          aria-label="Go to the DevLog home page"
           className="inline-flex items-center tracking-tight"
           to="/"
         >

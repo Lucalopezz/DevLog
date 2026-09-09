@@ -23,11 +23,11 @@ function HomePage() {
           </div>
           <div className="space-y-4">
             <h1 className="max-w-3xl text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-              Base do frontend pronta
+              Frontend foundation ready
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-              Rotas, dados remotos, formulários, interface e conteúdo técnico já
-              têm uma base consistente para as próximas funcionalidades.
+              Routes, remote data, forms, the interface, and technical content now
+              have a consistent foundation for upcoming features.
             </p>
           </div>
         </header>
@@ -37,12 +37,12 @@ function HomePage() {
             <span className="flex size-9 items-center justify-center rounded-full bg-emerald-500/10">
               <CheckCircle2 className="size-5 text-emerald-400" />
             </span>
-            <span>Configuração inicial</span>
+            <span>Initial setup</span>
           </div>
           <Markdown className="text-card-foreground/80">
-            {`- Use \`api\` para chamadas HTTP com cookies de autenticação.
-- Use React Query para leituras e mutações da API.
-- Use \`useLoginForm\` como referência para novos formulários Zod + Hook Form.`}
+            {`- Use \`api\` for HTTP calls with authentication cookies.
+- Use React Query for API queries and mutations.
+- Use \`useLoginForm\` as a reference for new Zod + Hook Form forms.`}
           </Markdown>
         </section>
 
@@ -50,13 +50,13 @@ function HomePage() {
           <Button
             className="shadow-lg shadow-primary/10"
             size="lg"
-            onClick={() => toast.success("Sonner está configurado!")}
+            onClick={() => toast.success("Sonner is configured!")}
           >
             <Sparkles data-icon="inline-start" />
-            Testar notificação
+            Test notification
           </Button>
           <span className="text-sm text-muted-foreground">
-            Configurado {formatRelativeDate(new Date())}
+            Configured {formatRelativeDate(new Date())}
           </span>
         </div>
       </div>

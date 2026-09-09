@@ -37,7 +37,7 @@ export class UpdateProjectResourceUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(input.projectId);
 
     if (!project || project.userId !== input.userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     project.ensureCanBeModified();
@@ -47,7 +47,7 @@ export class UpdateProjectResourceUseCase implements UseCaseContract<
     );
 
     if (!entity || entity.projectId !== project.id) {
-      throw new NotFoundException('Recurso do projeto não encontrado');
+      throw new NotFoundException('Project resource not found');
     }
 
     if (
@@ -56,7 +56,7 @@ export class UpdateProjectResourceUseCase implements UseCaseContract<
       input.type === undefined
     ) {
       throw new UnprocessableEntityException(
-        'Informe ao menos um campo para atualizar o recurso',
+        'Provide at least one field to update the resource',
       );
     }
 

@@ -29,11 +29,11 @@ export class UpdateUserPasswordUseCase implements UseCaseContract<
     const user = await this.userRepository.findById(input.userId);
 
     if (user === null) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException('User not found');
     }
 
     if (input.password !== input.confirmPassword) {
-      throw new UnprocessableEntityException('As senhas não conferem');
+      throw new UnprocessableEntityException('Passwords do not match');
     }
 
     const currentPasswordMatches = await this.hashProvider.compareHash(
@@ -42,7 +42,7 @@ export class UpdateUserPasswordUseCase implements UseCaseContract<
     );
 
     if (!currentPasswordMatches) {
-      throw new UnprocessableEntityException('Senha atual inválida');
+      throw new UnprocessableEntityException('Invalid current password');
     }
 
     const passwordHash = await this.hashProvider.generateHash(input.password);

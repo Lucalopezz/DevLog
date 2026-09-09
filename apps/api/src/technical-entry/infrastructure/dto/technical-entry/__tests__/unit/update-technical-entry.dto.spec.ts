@@ -19,7 +19,7 @@ describe('UpdateTechnicalEntryDto', () => {
     expect(await validate(withoutProject)).toHaveLength(0);
   });
 
-  it('rejeita projectId inválido e title acima do limite', async () => {
+  it('rejects an invalid projectId and a title above the limit', async () => {
     const dto = plainToInstance(UpdateTechnicalEntryDto, {
       projectId: 'project-1',
       title: 'a'.repeat(201),
@@ -31,7 +31,7 @@ describe('UpdateTechnicalEntryDto', () => {
     expect(properties).toEqual(expect.arrayContaining(['projectId', 'title']));
   });
 
-  it('rejeita null em campos não anuláveis', async () => {
+  it('rejects null in non-nullable fields', async () => {
     const dto = plainToInstance(UpdateTechnicalEntryDto, {
       title: null,
       context: null,

@@ -33,7 +33,7 @@ export class CreateProjectUseCase implements UseCaseContract<
     const user = await this.userRepository.findById(userId);
 
     if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException('User not found');
     }
 
     const entity = new ProjectEntity({

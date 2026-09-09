@@ -15,7 +15,7 @@ function makeProps(
     projectId: PROJECT_ID,
     title: 'Subir ambiente local',
     command: 'docker compose up -d',
-    description: 'Inicia os serviços do projeto',
+    description: 'Start project services',
     executionOrder: 0,
     createdAt: date,
     updatedAt: date,
@@ -24,7 +24,7 @@ function makeProps(
 }
 
 describe('ProjectCommandEntity', () => {
-  it('cria um comando com ordem de execução opcional', () => {
+  it('creates a command with optional execution order', () => {
     const command = new ProjectCommandEntity(
       makeProps({ executionOrder: undefined }),
     );
@@ -36,42 +36,42 @@ describe('ProjectCommandEntity', () => {
   });
 
   it.each([
-    ['projectId inválido', { projectId: 'project-1' }],
-    ['título vazio', { title: '' }],
-    ['título acima do limite', { title: 'a'.repeat(121) }],
-    ['comando vazio', { command: '' }],
+    ['invalid projectId', { projectId: 'project-1' }],
+    ['empty title', { title: '' }],
+    ['title above the limit', { title: 'a'.repeat(121) }],
+    ['empty command', { command: '' }],
     ['ordem negativa', { executionOrder: -1 }],
-    ['ordem fracionária', { executionOrder: 1.5 }],
-  ])('rejeita %s', (_, overrides) => {
+    ['fractional order', { executionOrder: 1.5 }],
+  ])('rejects %s', (_, overrides) => {
     expect(() => new ProjectCommandEntity(makeProps(overrides))).toThrow(
       EntityValidationError,
     );
   });
 
-  it('valida os novos dados antes de alterar a entidade', () => {
+  it('validates new data before changing the entity', () => {
     const command = new ProjectCommandEntity(makeProps());
 
     expect(() => command.update({ title: '' })).toThrow(EntityValidationError);
     expect(command.title).toBe('Subir ambiente local');
   });
 
-  it('atualiza título, comando, descrição e ordem', () => {
+  it('updates title, command, description, and order', () => {
     const command = new ProjectCommandEntity(makeProps());
 
     command.update({
       title: 'Parar ambiente local',
       command: 'docker compose down',
-      description: 'Encerra os serviços do projeto',
+      description: 'Stop project services',
       executionOrder: 1,
     });
 
     expect(command.title).toBe('Parar ambiente local');
     expect(command.command).toBe('docker compose down');
-    expect(command.description).toBe('Encerra os serviços do projeto');
+    expect(command.description).toBe('Stop project services');
     expect(command.executionOrder).toBe(1);
   });
 
-  it('remove descrição e ordem com null', () => {
+  it('clears description and order with null', () => {
     const command = new ProjectCommandEntity(makeProps());
 
     command.update({ description: null, executionOrder: null });
@@ -80,7 +80,7 @@ describe('ProjectCommandEntity', () => {
     expect(command.executionOrder).toBeUndefined();
   });
 
-  it('trata atualização sem campos como no-op e preserva updatedAt', () => {
+  it('treats an update with no fields as a no-op and preserves updatedAt', () => {
     const command = new ProjectCommandEntity(makeProps());
     const originalUpdatedAt = command.updatedAt;
 

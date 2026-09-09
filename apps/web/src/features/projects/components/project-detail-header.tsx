@@ -25,7 +25,7 @@ export function ProjectDetailHeader({
       <Button asChild className="-ml-2" size="sm" variant="ghost">
         <Link to="/projects">
           <ArrowLeft data-icon="inline-start" />
-          Voltar para projetos
+          Back to projects
         </Link>
       </Button>
 
@@ -44,7 +44,7 @@ export function ProjectDetailHeader({
               </span>
               {project.archivedAt ? (
                 <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive">
-                  Arquivado
+                  Archived
                 </span>
               ) : null}
             </div>
@@ -55,7 +55,7 @@ export function ProjectDetailHeader({
               </h1>
               <p className="max-w-2xl text-base leading-7 text-muted-foreground">
                 {project.description ||
-                  "Um espaço para organizar decisões, referências e aprendizados deste projeto."}
+                  "A space to organize decisions, references, and lessons learned in this project."}
               </p>
             </div>
           </div>
@@ -70,15 +70,15 @@ export function ProjectDetailHeader({
             variant="outline"
           >
             <Pencil data-icon="inline-start" />
-            Editar projeto
+            Edit project
           </Button>
 
           <dl className="grid gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <CalendarDays className="size-4" />
-              <dt className="sr-only">Criado em</dt>
+              <dt className="sr-only">Created on</dt>
               <dd>
-                Criado em{' '}
+                Created on{' '}
                 <time dateTime={project.createdAt}>
                   {formatDate(project.createdAt)}
                 </time>
@@ -87,7 +87,7 @@ export function ProjectDetailHeader({
             {project.localPath ? (
               <div className="flex min-w-0 items-start gap-2">
                 <MapPin className="mt-0.5 size-4 shrink-0" />
-                <dt className="sr-only">Caminho local</dt>
+                <dt className="sr-only">Local path</dt>
                 <dd
                   className="truncate font-mono text-xs"
                   title={project.localPath}

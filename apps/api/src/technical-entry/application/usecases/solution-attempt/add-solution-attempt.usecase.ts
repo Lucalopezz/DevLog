@@ -38,7 +38,7 @@ export class AddSolutionAttemptUseCase implements UseCaseContract<
     const technicalEntry =
       await this.technicalEntryRepository.findById(technicalEntryId);
     if (!technicalEntry || technicalEntry.userId !== userId) {
-      throw new NotFoundException('Entrada técnica não encontrada');
+      throw new NotFoundException('Technical entry not found');
     }
 
     if (
@@ -46,7 +46,7 @@ export class AddSolutionAttemptUseCase implements UseCaseContract<
       technicalEntry.archivedAt
     ) {
       throw new UnprocessableEntityException(
-        'Somente entradas do tipo ISSUE não arquivadas podem receber tentativas de solução',
+        'Only unarchived ISSUE entries can receive solution attempts',
       );
     }
 

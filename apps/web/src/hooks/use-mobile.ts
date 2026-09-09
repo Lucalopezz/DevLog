@@ -4,26 +4,26 @@ const MOBILE_BREAKPOINT = 768
 const MEDIA_QUERY = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`
 
 /**
- * Informa se a viewport atual está no modo mobile.
+ * Reports whether the current viewport uses the mobile layout.
  *
- * Este hook não renderiza nada e não altera o layout sozinho. Ele apenas
- * transforma a media query do navegador em um valor booleano (`true` ou
- * `false`) que componentes React podem consultar.
+ * This hook does not render anything or change the layout on its own. It simply
+ * converts the browser media query into a boolean value (`true` or
+ * `false`) that React components can read.
  *
- * O `Sidebar` usa esse valor para escolher entre dois comportamentos:
- * - desktop: a navegação fica fixa na lateral;
- * - mobile: a navegação vira um drawer que abre e fecha.
+ * `Sidebar` uses this value to choose between two behaviors:
+ * - desktop: navigation stays fixed on the side;
+ * - mobile: navigation becomes a drawer that opens and closes.
  *
- * `matchMedia` é uma API do navegador que acompanha uma regra CSS em
- * JavaScript. Como o resultado pode mudar quando a janela é redimensionada,
- * `useSyncExternalStore` assina o evento `change` e solicita uma nova leitura
- * ao React. Ele é adequado para dados mantidos por uma fonte externa ao React,
- * em vez de copiar esse valor para um `useState` dentro de um `useEffect`.
+ * `matchMedia` is a browser API that tracks a CSS rule in
+ * JavaScript. Since the result can change when the window is resized,
+ * `useSyncExternalStore` subscribes to the `change` event and asks React
+ * to read the value again. It suits data maintained by a source outside React,
+ * avoiding copying that value into `useState` inside a `useEffect`.
  */
 export function useIsMobile() {
-  // useSyncExternalStore descreve melhor esta situação: matchMedia é um
-  // estado externo ao React, então não precisamos atualizar estado
-  // sincronamente dentro de um useEffect.
+  // useSyncExternalStore models this situation well: matchMedia is
+  // external state, so we do not need to update React state
+  // synchronously inside a useEffect.
   return React.useSyncExternalStore(
     (onStoreChange) => {
       const mediaQuery = window.matchMedia(MEDIA_QUERY)

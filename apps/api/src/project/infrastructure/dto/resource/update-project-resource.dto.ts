@@ -14,25 +14,25 @@ export class UpdateProjectResourceDto implements Omit<
   'userId' | 'projectId' | 'resourceId'
 > {
   @ValidateIf((_, value) => value !== undefined)
-  @IsNotEmpty({ message: 'O rótulo do recurso é obrigatório' })
-  @IsString({ message: 'O rótulo do recurso deve ser um texto' })
+  @IsNotEmpty({ message: 'Resource label is required' })
+  @IsString({ message: 'Resource label must be a string' })
   @MaxLength(120, {
-    message: 'O rótulo do recurso deve ter no máximo 120 caracteres',
+    message: 'Resource label must be at most 120 characters long',
   })
   label?: string;
 
   @ValidateIf((_, value) => value !== undefined)
   @IsUrl(
     { require_protocol: true, require_tld: false },
-    { message: 'A URL do recurso deve ser válida' },
+    { message: 'Resource URL must be valid' },
   )
-  @IsString({ message: 'A URL do recurso deve ser um texto' })
-  @IsNotEmpty({ message: 'A URL do recurso é obrigatória' })
+  @IsString({ message: 'Resource URL must be a string' })
+  @IsNotEmpty({ message: 'Resource URL is required' })
   url?: string;
 
   @ValidateIf((_, value) => value !== undefined)
   @IsEnum(ProjectResourceType, {
-    message: 'O tipo do recurso deve ser válido',
+    message: 'Resource type must be valid',
   })
   type?: ProjectResourceType;
 }

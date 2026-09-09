@@ -50,8 +50,8 @@ export class SolutionAttemptPrismaRepository implements SolutionAttemptRepositor
   ): Promise<SolutionAttemptSearchResult> {
     const where = this._buildWhere(props.filter);
     const orderBy = this._buildOrderBy(props);
-    // -1 por causa do offset começar em 0, e não em 1
-    // Exemplo: página 1, perPage 10, skip = (1 - 1) * 10 = 0
+    // Subtract 1 because offsets start at 0, while page numbers start at 1
+    // Example: page 1, perPage 10, skip = (1 - 1) * 10 = 0
     const skip = (props.page - 1) * props.perPage;
 
     const [total, models] = await Promise.all([

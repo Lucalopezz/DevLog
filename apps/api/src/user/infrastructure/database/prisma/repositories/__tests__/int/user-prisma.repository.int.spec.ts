@@ -41,7 +41,7 @@ describe('UserPrismaRepository (integration)', () => {
     await prisma.$disconnect();
   });
 
-  it('persiste, consulta e atualiza um usuário', async () => {
+  it('persists, queries, and updates a user', async () => {
     const user = makeUser();
     await repository.insert(user);
 

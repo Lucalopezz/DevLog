@@ -76,9 +76,9 @@ function makeUser(
   );
 }
 
-describe('Casos de uso de usuário', () => {
+describe('User use cases', () => {
   describe('CreateUserUseCase', () => {
-    it('cria um usuário quando o e-mail está disponível', async () => {
+    it('creates a user when the email is available', async () => {
       const repository = new InMemoryUserRepository();
       const useCase = new CreateUserUseCase(repository, new StubHashProvider());
 
@@ -94,7 +94,7 @@ describe('Casos de uso de usuário', () => {
       expect(output.email).toBe('lucas@example.com');
     });
 
-    it('rejeita um e-mail já cadastrado', async () => {
+    it('rejects an already registered email', async () => {
       const repository = new InMemoryUserRepository();
       repository.users.push(makeUser());
       const useCase = new CreateUserUseCase(repository, new StubHashProvider());
@@ -109,7 +109,7 @@ describe('Casos de uso de usuário', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('rejeita senhas de confirmação diferentes como entrada inválida', async () => {
+    it('rejects mismatched password confirmations as invalid input', async () => {
       const useCase = new CreateUserUseCase(
         new InMemoryUserRepository(),
         new StubHashProvider(),
@@ -127,7 +127,7 @@ describe('Casos de uso de usuário', () => {
   });
 
   describe('GetCurrentUserUseCase', () => {
-    it('retorna o usuário identificado pelo contexto autenticado', async () => {
+    it('returns the user identified by the authenticated context', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);
@@ -139,7 +139,7 @@ describe('Casos de uso de usuário', () => {
       });
     });
 
-    it('falha quando o usuário não existe', async () => {
+    it('fails when the user does not exist', async () => {
       const useCase = new GetCurrentUserUseCase(new InMemoryUserRepository());
 
       await expect(
@@ -149,7 +149,7 @@ describe('Casos de uso de usuário', () => {
   });
 
   describe('FindUserByEmailUseCase', () => {
-    it('retorna os dados públicos do usuário encontrado pelo e-mail', async () => {
+    it('returns public data for the user found by email', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);
@@ -164,7 +164,7 @@ describe('Casos de uso de usuário', () => {
       });
     });
 
-    it('falha quando nenhum usuário possui o e-mail solicitado', async () => {
+    it('fails when no user has the requested email', async () => {
       const useCase = new FindUserByEmailUseCase(new InMemoryUserRepository());
 
       await expect(
@@ -174,7 +174,7 @@ describe('Casos de uso de usuário', () => {
   });
 
   describe('UpdateUserUseCase', () => {
-    it('atualiza o nome e persiste a mesma entidade', async () => {
+    it('updates the name and persists the same entity', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);
@@ -191,7 +191,7 @@ describe('Casos de uso de usuário', () => {
   });
 
   describe('UpdateUserPasswordUseCase', () => {
-    it('gera hash e persiste uma nova senha', async () => {
+    it('hashes and persists a new password', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);
@@ -210,7 +210,7 @@ describe('Casos de uso de usuário', () => {
       expect(user.password).toBe('hashed-new-secret');
     });
 
-    it('rejeita uma senha atual incorreta', async () => {
+    it('rejects an incorrect current password', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);
@@ -229,7 +229,7 @@ describe('Casos de uso de usuário', () => {
       ).rejects.toBeInstanceOf(UnprocessableEntityException);
     });
 
-    it('rejeita senhas de confirmação diferentes como entrada inválida', async () => {
+    it('rejects mismatched password confirmations as invalid input', async () => {
       const repository = new InMemoryUserRepository();
       const user = makeUser();
       repository.users.push(user);

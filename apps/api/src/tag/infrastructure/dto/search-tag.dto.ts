@@ -12,28 +12,28 @@ import {
 export class SearchTagDto implements Omit<SearchTagUseCaseInput, 'userId'> {
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'O número da página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Page number must be greater than zero' })
   page?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'A quantidade por página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Items per page must be greater than zero' })
   perPage?: number;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   sort?: string;
 
   @IsOptional()
-  @IsIn(['asc', 'desc'], { message: 'Parametro inválido' })
+  @IsIn(['asc', 'desc'], { message: 'Invalid parameter' })
   sortDir?: 'asc' | 'desc';
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   @MaxLength(80, {
-    message: 'O nome deve ter no máximo 80 caracteres',
+    message: 'Name must be at most 80 characters long',
   })
   name?: string;
 }

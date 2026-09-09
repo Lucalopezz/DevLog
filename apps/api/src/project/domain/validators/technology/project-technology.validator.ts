@@ -10,29 +10,29 @@ import { ClassValidatorFields } from '@/shared/domain/validators/class-validator
 import type { ProjectTechnologyProps } from '../../entities/technology/project-technology.entity';
 
 export class ProjectTechnologyRules {
-  @IsString({ message: 'O ID do projeto deve ser um texto' })
-  @IsNotEmpty({ message: 'O ID do projeto é obrigatório' })
-  @IsUUID('4', { message: 'O ID do projeto deve ser um UUID válido' })
+  @IsString({ message: 'Project ID must be a string' })
+  @IsNotEmpty({ message: 'Project ID is required' })
+  @IsUUID('4', { message: 'Project ID must be a valid UUID' })
   projectId: string;
 
-  @IsString({ message: 'O nome da tecnologia deve ser um texto' })
-  @IsNotEmpty({ message: 'O nome da tecnologia é obrigatório' })
+  @IsString({ message: 'Technology name must be a string' })
+  @IsNotEmpty({ message: 'Technology name is required' })
   @MaxLength(100, {
-    message: 'O nome da tecnologia deve ter no máximo 100 caracteres',
+    message: 'Technology name must be at most 100 characters long',
   })
   name: string;
 
   @IsOptional()
-  @IsString({ message: 'A versão da tecnologia deve ser um texto' })
+  @IsString({ message: 'Technology version must be a string' })
   @MaxLength(50, {
-    message: 'A versão da tecnologia deve ter no máximo 50 caracteres',
+    message: 'Technology version must be at most 50 characters long',
   })
   version?: string;
 
-  @IsDate({ message: 'A data de criação deve ser válida' })
+  @IsDate({ message: 'Creation date must be valid' })
   createdAt: Date;
 
-  @IsDate({ message: 'A data de atualização deve ser válida' })
+  @IsDate({ message: 'Update date must be valid' })
   updatedAt: Date;
 
   constructor({

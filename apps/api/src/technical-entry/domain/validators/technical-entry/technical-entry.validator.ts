@@ -12,48 +12,48 @@ import type { TechnicalEntryProps } from '../../entities/technical-entry/technic
 import { TechnicalEntryType } from '../../entities/technical-entry/technical-entry-type.enum';
 
 export class TechnicalEntryRules {
-  @IsString({ message: 'O ID do usuário deve ser um texto' })
-  @IsNotEmpty({ message: 'O ID do usuário é obrigatório' })
-  @IsUUID('4', { message: 'O ID do usuário deve ser um UUID válido' })
+  @IsString({ message: 'User ID must be a string' })
+  @IsNotEmpty({ message: 'User ID is required' })
+  @IsUUID('4', { message: 'User ID must be a valid UUID' })
   userId: string;
 
   @IsOptional()
-  @IsString({ message: 'O ID do projeto deve ser um texto' })
-  @IsUUID('4', { message: 'O ID do projeto deve ser um UUID válido' })
+  @IsString({ message: 'Project ID must be a string' })
+  @IsUUID('4', { message: 'Project ID must be a valid UUID' })
   projectId?: string;
 
   @MaxLength(200, {
-    message: 'O título deve ter no máximo 200 caracteres',
+    message: 'Title must be at most 200 characters long',
   })
-  @IsString({ message: 'O título deve ser um texto' })
-  @IsNotEmpty({ message: 'O título é obrigatório' })
+  @IsString({ message: 'Title must be a string' })
+  @IsNotEmpty({ message: 'Title is required' })
   title: string;
 
-  @IsString({ message: 'O contexto deve ser um texto' })
-  @IsNotEmpty({ message: 'O contexto é obrigatório' })
+  @IsString({ message: 'Context must be a string' })
+  @IsNotEmpty({ message: 'Context is required' })
   context: string;
 
   @IsOptional()
-  @IsString({ message: 'A conclusão deve ser um texto' })
+  @IsString({ message: 'Conclusion must be a string' })
   conclusion?: string;
 
   @IsEnum(TechnicalEntryType, {
-    message: 'O tipo da entrada técnica deve ser válido',
+    message: 'Technical entry type must be valid',
   })
   type: TechnicalEntryType;
 
-  @IsDate({ message: 'A data de resolução deve ser válida' })
+  @IsDate({ message: 'Resolution date must be valid' })
   @IsOptional()
   resolvedAt?: Date;
 
   @IsOptional()
-  @IsDate({ message: 'A data de arquivamento deve ser válida' })
+  @IsDate({ message: 'Archive date must be valid' })
   archivedAt?: Date;
 
-  @IsDate({ message: 'A data de criação deve ser válida' })
+  @IsDate({ message: 'Creation date must be valid' })
   createdAt: Date;
 
-  @IsDate({ message: 'A data de atualização deve ser válida' })
+  @IsDate({ message: 'Update date must be valid' })
   updatedAt: Date;
 
   constructor({

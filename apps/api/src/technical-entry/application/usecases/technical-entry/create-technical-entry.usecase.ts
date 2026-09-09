@@ -45,12 +45,12 @@ export class CreateTechnicalEntryUseCase implements UseCaseContract<
         project.userId !== input.userId ||
         project.archivedAt !== undefined
       ) {
-        throw new NotFoundException('Projeto não encontrado');
+        throw new NotFoundException('Project not found');
       }
     }
 
     if (user === null) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException('User not found');
     }
 
     const entity = new TechnicalEntryEntity({

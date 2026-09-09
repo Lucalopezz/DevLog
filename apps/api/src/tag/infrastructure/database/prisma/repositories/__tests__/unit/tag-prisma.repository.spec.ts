@@ -17,7 +17,7 @@ describe('TagPrismaRepository', () => {
     jest.clearAllMocks();
   });
 
-  it('aplica os filtros, a paginação e a ordenação', async () => {
+  it('applies filters, pagination, and sorting', async () => {
     await repository.search(
       new TagSearchParams({
         page: 2,
@@ -45,7 +45,7 @@ describe('TagPrismaRepository', () => {
     });
   });
 
-  it('usa createdAt desc quando o campo de ordenação não é permitido', async () => {
+  it('uses createdAt desc when the sort field is not allowed', async () => {
     await repository.search(
       new TagSearchParams({
         sort: 'userId',

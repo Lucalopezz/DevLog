@@ -25,7 +25,7 @@ export class ArchiveProjectUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(input.id);
 
     if (project === null || project.userId !== input.userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     project.archive();

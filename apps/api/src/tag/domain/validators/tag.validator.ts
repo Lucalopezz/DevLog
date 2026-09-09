@@ -2,31 +2,31 @@ import { ClassValidatorFields } from '@/shared/domain/validators/class-validator
 import { IsDate, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class TagRules {
-  @IsString({ message: 'O nome da tag deve ser uma string' })
-  @IsNotEmpty({ message: 'O nome da tag não pode ser vazio' })
+  @IsString({ message: 'Tag name must be a string' })
+  @IsNotEmpty({ message: 'Tag name cannot be empty' })
   @MaxLength(80, {
-    message: 'O nome da tag não pode ter mais de 80 caracteres',
+    message: 'Tag name must be at most 80 characters long',
   })
   name: string;
 
-  @IsString({ message: 'O nome da tag deve ser uma string' })
-  @IsNotEmpty({ message: 'O nome da tag não pode ser vazio' })
+  @IsString({ message: 'Tag name must be a string' })
+  @IsNotEmpty({ message: 'Tag name cannot be empty' })
   @MaxLength(80, {
-    message: 'O nome da tag não pode ter mais de 80 caracteres',
+    message: 'Tag name must be at most 80 characters long',
   })
   userId: string;
 
-  @IsString({ message: 'O nome da tag deve ser uma string' })
-  @IsNotEmpty({ message: 'O nome da tag não pode ser vazio' })
+  @IsString({ message: 'Tag name must be a string' })
+  @IsNotEmpty({ message: 'Tag name cannot be empty' })
   @MaxLength(80, {
-    message: 'O nome da tag não pode ter mais de 80 caracteres',
+    message: 'Tag name must be at most 80 characters long',
   })
   normalizedName: string;
 
-  @IsDate({ message: 'A data de atualização deve ser válida' })
+  @IsDate({ message: 'Update date must be valid' })
   createdAt: Date;
 
-  @IsDate({ message: 'A data de atualização deve ser válida' })
+  @IsDate({ message: 'Update date must be valid' })
   updatedAt: Date;
 
   constructor({

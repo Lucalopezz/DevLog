@@ -11,16 +11,16 @@ export function useRegister() {
   return useMutation({
     mutationFn: registerUser,
     onSuccess: () => {
-      // O cadastro não autentica automaticamente; o usuário deve entrar
-      // pela tela de login para receber o cookie de sessão.
-      toast.success('Conta criada com sucesso! Faça login para continuar.')
+      // Registration does not authenticate automatically; the user must sign in
+      // through the login screen to receive the session cookie.
+      toast.success('Account created successfully! Sign in to continue.')
       navigate('/login', { replace: true })
     },
     onError: (error) => {
       toast.error(
         getApiErrorMessage(
           error,
-          'Não foi possível criar a conta. Tente novamente.',
+          'Could not create your account. Try again.',
         ),
       )
     },

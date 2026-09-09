@@ -13,7 +13,7 @@ export const useLogin = () => {
     mutationFn: login,
 
     onSuccess: (user) => {
-      toast.success("Login realizado com sucesso!");
+      toast.success("Signed in successfully!");
       queryClient.setQueryData(currentUserQueryKey, user);
       navigate("/", { replace: true });
     },
@@ -22,7 +22,7 @@ export const useLogin = () => {
       toast.error(
         getApiErrorMessage(
           error,
-          "Não foi possível entrar. Verifique suas credenciais e tente novamente.",
+          "Could not sign in. Check your credentials and try again.",
         ),
       );
     },

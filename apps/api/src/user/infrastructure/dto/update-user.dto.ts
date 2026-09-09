@@ -1,8 +1,8 @@
 import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class UpdateUserDto {
-  @IsString({ message: 'Parametro inválido' })
-  @IsNotEmpty({ message: 'O nome é obrigatório' })
-  @MinLength(3, { message: 'O nome deve ter no mínimo 3 caracteres' })
+  @IsString({ message: 'Invalid parameter' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @MinLength(3, { message: 'Name must be at least 3 characters long' })
   name: string;
 }

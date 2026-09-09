@@ -11,11 +11,11 @@ export function useCreateProject() {
     mutationFn: createProject,
 
     onSuccess: async () => {
-      toast.success('Projeto criado com sucesso!')
+      toast.success('Project created successfully!')
 
-      // A lista pode estar em várias páginas ou com filtros diferentes.
-      // Invalidar a raiz das listas permite que o React Query refaça somente
-      // as consultas relevantes, mantendo o servidor como fonte da verdade.
+      // The list can span multiple pages or use different filters.
+      // Invalidating the list root lets React Query refetch only
+      // relevant queries, keeping the server as the source of truth.
       await queryClient.invalidateQueries({
         queryKey: projectsKeys.lists(),
       })
@@ -25,7 +25,7 @@ export function useCreateProject() {
       toast.error(
         getApiErrorMessage(
           error,
-          'Não foi possível criar o projeto. Tente novamente.',
+          'Could not create the project. Try again.',
         ),
       )
     },

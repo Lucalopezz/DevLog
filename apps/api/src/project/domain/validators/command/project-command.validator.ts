@@ -12,35 +12,35 @@ import { ClassValidatorFields } from '@/shared/domain/validators/class-validator
 import type { ProjectCommandProps } from '../../entities/command/project-command.entity';
 
 export class ProjectCommandRules {
-  @IsString({ message: 'O ID do projeto deve ser um texto' })
-  @IsNotEmpty({ message: 'O ID do projeto é obrigatório' })
-  @IsUUID('4', { message: 'O ID do projeto deve ser um UUID válido' })
+  @IsString({ message: 'Project ID must be a string' })
+  @IsNotEmpty({ message: 'Project ID is required' })
+  @IsUUID('4', { message: 'Project ID must be a valid UUID' })
   projectId: string;
 
   @MaxLength(120, {
-    message: 'O título do comando deve ter no máximo 120 caracteres',
+    message: 'Command title must be at most 120 characters long',
   })
-  @IsString({ message: 'O título do comando deve ser um texto' })
-  @IsNotEmpty({ message: 'O título do comando é obrigatório' })
+  @IsString({ message: 'Command title must be a string' })
+  @IsNotEmpty({ message: 'Command title is required' })
   title: string;
 
-  @IsString({ message: 'O comando deve ser um texto' })
-  @IsNotEmpty({ message: 'O comando é obrigatório' })
+  @IsString({ message: 'Command must be a string' })
+  @IsNotEmpty({ message: 'Command is required' })
   command: string;
 
   @IsOptional()
-  @IsString({ message: 'A descrição do comando deve ser um texto' })
+  @IsString({ message: 'Command description must be a string' })
   description?: string;
 
   @IsOptional()
-  @IsInt({ message: 'A ordem de execução deve ser um número inteiro' })
-  @Min(0, { message: 'A ordem de execução deve ser maior ou igual a zero' })
+  @IsInt({ message: 'Execution order must be an integer' })
+  @Min(0, { message: 'Execution order must be greater than or equal to zero' })
   executionOrder?: number;
 
-  @IsDate({ message: 'A data de criação deve ser válida' })
+  @IsDate({ message: 'Creation date must be valid' })
   createdAt: Date;
 
-  @IsDate({ message: 'A data de atualização deve ser válida' })
+  @IsDate({ message: 'Update date must be valid' })
   updatedAt: Date;
 
   constructor({

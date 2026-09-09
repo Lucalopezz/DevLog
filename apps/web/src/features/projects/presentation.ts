@@ -14,31 +14,31 @@ export type ProjectStatusPresentation = {
 };
 
 /**
- * Traduz valores do domínio para decisões visuais da interface.
+ * Maps domain values to interface presentation choices.
  *
- * A API continua trabalhando com ACTIVE, INACTIVE e FINISHED. O componente
- * não precisa conhecer esses detalhes nem espalhar condicionais pela tela;
- * ele consulta este mapa e recebe o texto e as classes prontas para exibição.
+ * The API still uses ACTIVE, INACTIVE, and FINISHED. The component
+ * does not need to know these details or scatter conditionals across the screen;
+ * it reads this map to get display text and CSS classes.
  */
 export const projectStatusPresentation: Record<
   ProjectStatus,
   ProjectStatusPresentation
 > = {
   ACTIVE: {
-    label: "Ativo",
+    label: "Active",
     className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   },
   INACTIVE: {
-    label: "Inativo",
+    label: "Inactive",
     className: "bg-muted text-muted-foreground",
   },
   FINISHED: {
-    label: "Finalizado",
+    label: "Finished",
     className: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
   },
 };
 /**
- *Recebe um status de projeto e retorna o texto e as classes CSS para exibição.
+ *Takes a project status and returns its display text and CSS classes.
  * */
 export function presentProjectStatus(
   status: ProjectStatus,
@@ -50,9 +50,9 @@ export const resourcePresentation: Record<
   ProjectResourceType,
   { label: string; icon: typeof Globe2 }
 > = {
-  REPOSITORY: { label: "Repositório", icon: GitBranch },
-  DOCUMENTATION: { label: "Documentação", icon: BookOpen },
-  LOCAL_URL: { label: "URL local", icon: FileCode2 },
-  EXTERNAL_URL: { label: "Link externo", icon: Globe2 },
-  OTHER: { label: "Recurso", icon: ExternalLink },
+  REPOSITORY: { label: "Repository", icon: GitBranch },
+  DOCUMENTATION: { label: "Documentation", icon: BookOpen },
+  LOCAL_URL: { label: "Local URL", icon: FileCode2 },
+  EXTERNAL_URL: { label: "External link", icon: Globe2 },
+  OTHER: { label: "Resource", icon: ExternalLink },
 };

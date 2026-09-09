@@ -6,8 +6,8 @@ import type { LoginFormData } from '@/features/auth/types/auth'
 
 /**
  *
- * Retorna o objeto de configuração do React Hook Form para o formulário de login.
- * É passado por parâmetro para o componente de form do shadcn, que cuida da integração com o React Hook Form.
+ * Returns the React Hook Form configuration object for the login form.
+ * Passed to the shadcn form component, which handles React Hook Form integration.
  * */
 export function useLoginForm() {
   return useForm<LoginFormData>({

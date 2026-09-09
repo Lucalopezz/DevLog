@@ -24,10 +24,10 @@ type FormInputProps<TFieldValues extends FieldValues> = Omit<
 }
 
 /**
- * Campo de texto integrado ao React Hook Form.
+ * Text field integrated with React Hook Form.
  *
- * FormField conecta o input ao estado do formulário; os componentes abaixo
- * dele cuidam da associação semântica e da mensagem de validação em conjunto.
+ * FormField connects the input to form state; its child components
+ * work together to provide semantic associations and validation messages.
  */
 function FormInput<TFieldValues extends FieldValues>({
   control,

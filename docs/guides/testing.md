@@ -1,58 +1,42 @@
-# Estratégia de testes da API
+# API testing strategy
 
-## Organização
+## Organization
 
-Cada teste fica próximo da implementação que protege, mas separado do código
-de produção:
+Each test stays near the implementation it protects, separate from production code:
 
 ```text
 feature/
-  classe.ts
+  class.ts
   __tests__/
     unit/
-      classe.spec.ts
+      class.spec.ts
     int/
-      classe.int.spec.ts
+      class.int.spec.ts
 ```
 
-O Jest usa essa estrutura como regra de descoberta. `pnpm --filter api test`
-executa somente `__tests__/unit`, enquanto
-`pnpm --filter api test:integration` executa somente `__tests__/int`.
-Testes end-to-end continuam isolados em `apps/api/test`.
+Jest uses this structure for discovery. `pnpm --filter api test` runs only `__tests__/unit`, while `pnpm --filter api test:integration` runs only `__tests__/int`. End-to-end tests remain isolated in `apps/api/test`.
 
-## Unitário ou integração?
+## Unit or integration?
 
-Um teste unitário substitui dependências externas por mocks e observa apenas a
-decisão da unidade. Em um caso de uso, por exemplo, ele verifica regras,
-exceções e chamadas aos contratos de repositório.
+A unit test replaces external dependencies with mocks and observes the unit's decisions. For a use case, it checks rules, exceptions, and calls to repository contracts.
 
-Um repositório Prisma pode ter os dois tipos de teste porque eles respondem a
-perguntas diferentes:
+A Prisma repository can have both kinds of test because they answer different questions:
 
-- o unitário confirma a consulta construída, a paginação, a ordenação e o uso
-  do mapper sem depender de PostgreSQL;
-- o de integração confirma que essa consulta realmente funciona contra o
-  schema, as chaves estrangeiras, os enums e os comportamentos do Prisma.
+- Unit tests verify query construction, pagination, sorting, and mapper usage without PostgreSQL.
+- Integration tests verify that the query actually works against the schema, foreign keys, enums, and Prisma behavior.
 
-Cobertura ajuda a localizar código não exercitado, mas não substitui cenários
-com boas asserções. Por isso não há uma meta global artificial neste momento.
+Coverage helps identify untested code but does not replace scenarios with meaningful assertions. There is no artificial global coverage target at this stage.
 
-## Prioridade atual
+## Current priorities
 
-Os pontos críticos já cobertos são autenticação, casos de uso centrais,
-entidades, mappers e os principais repositórios. O próximo ciclo deve seguir
-esta ordem:
+Critical areas already covered include authentication, core use cases, entities, mappers, and the main repositories. The next cycle should follow this order:
 
-1. **P1:** controllers de User, Tag, Project e Technical Entry; presenters;
-   DTOs sem validação dedicada; integração de ProjectTechnology e
-   ProjectResource; ramos restantes de Tag e Technical Entry.
-2. **P2:** módulos Nest, `PrismaService`, bootstrap e decorators simples.
-   Esses componentes só devem ganhar teste isolado quando tiverem lógica
-   própria; normalmente são melhor avaliados por composição ou E2E.
+1. **P1:** User, Tag, Project, and Technical Entry controllers; presenters; DTOs without dedicated validation tests; ProjectTechnology and ProjectResource integration; remaining Tag and Technical Entry branches.
+2. **P2:** Nest modules, `PrismaService`, bootstrap, and simple decorators. Add isolated tests only when these components contain their own logic; composition or E2E tests usually suit them better.
 
-## Execução
+## Running
 
-Na raiz do repositório:
+From the repository root:
 
 ```bash
 pnpm --filter api test
@@ -63,5 +47,4 @@ pnpm --filter api test:integration
 pnpm --filter api db:test:down
 ```
 
-O helper de integração só limpa dados quando `NODE_ENV=test`. Nunca use
-`pnpm db:reset` apenas para executar testes.
+The integration helper clears data only when `NODE_ENV=test`. Never use `pnpm db:reset` merely to run tests.

@@ -39,7 +39,7 @@ function makeUseCase(project: ProjectEntity | null = makeProject()) {
 }
 
 describe('AddProjectTechnologyUseCase', () => {
-  it('adiciona e persiste uma tecnologia no projeto do usuário', async () => {
+  it('adds and persists a technology in the user project', async () => {
     const { useCase, projectTechnologyRepository } = makeUseCase();
 
     const output = await useCase.execute({
@@ -66,10 +66,10 @@ describe('AddProjectTechnologyUseCase', () => {
   });
 
   it.each([
-    ['projeto inexistente', null],
-    ['projeto de outro usuário', makeProject(OTHER_USER_ID)],
+    ['missing project', null],
+    ["another user's project", makeProject(OTHER_USER_ID)],
   ])(
-    'rejeita %s sem consultar ou persistir tecnologia',
+    'rejects %s without querying or persisting a technology',
     async (_case, project) => {
       const { useCase, projectTechnologyRepository } = makeUseCase(project);
 
@@ -86,7 +86,7 @@ describe('AddProjectTechnologyUseCase', () => {
     },
   );
 
-  it('rejeita tecnologia duplicada sem persistir', async () => {
+  it('rejects duplicate technology without persisting', async () => {
     const { useCase, projectTechnologyRepository } = makeUseCase();
     projectTechnologyRepository.findByName.mockResolvedValue(
       new ProjectTechnologyEntity({

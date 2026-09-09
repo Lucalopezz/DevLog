@@ -35,7 +35,7 @@ export class AddProjectTechnologyUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(projectId);
 
     if (!project || project.userId !== userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
     const technologyExists = await this.projectTechnologyRepository.findByName(
       projectId,
@@ -44,7 +44,7 @@ export class AddProjectTechnologyUseCase implements UseCaseContract<
 
     if (technologyExists !== null) {
       throw new UnprocessableEntityException(
-        `Tecnologia ${name} já existe no projeto`,
+        `Technology ${name} already exists in the project`,
       );
     }
     const technology = project.addTechnology(name, version);

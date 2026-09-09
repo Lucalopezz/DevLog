@@ -14,7 +14,7 @@ function makeProps(
 
   return {
     technicalEntryId: TECHNICAL_ENTRY_ID,
-    description: 'Adicionar credentials: include na requisição',
+    description: 'Add credentials: include to the request',
     result: SolutionAttemptResult.PARTIAL,
     createdAt: date,
     updatedAt: date,
@@ -27,13 +27,11 @@ describe('SolutionAttemptEntity', () => {
     jest.useRealTimers();
   });
 
-  it('cria uma tentativa válida', () => {
+  it('creates a valid attempt', () => {
     const attempt = new SolutionAttemptEntity(makeProps());
 
     expect(attempt.technicalEntryId).toBe(TECHNICAL_ENTRY_ID);
-    expect(attempt.description).toBe(
-      'Adicionar credentials: include na requisição',
-    );
+    expect(attempt.description).toBe('Add credentials: include to the request');
     expect(attempt.result).toBe(SolutionAttemptResult.PARTIAL);
   });
 
@@ -41,32 +39,30 @@ describe('SolutionAttemptEntity', () => {
     ['technicalEntryId', { technicalEntryId: 'entry-1' }],
     ['description', { description: '' }],
     ['result', { result: 'UNKNOWN' as SolutionAttemptResult }],
-  ])('rejeita %s inválido na criação', (_, overrides) => {
+  ])('rejects invalid %s on creation', (_, overrides) => {
     expect(() => new SolutionAttemptEntity(makeProps(overrides))).toThrow(
       EntityValidationError,
     );
   });
 
-  it('atualiza a descrição e preserva o resultado', () => {
+  it('updates the description and preserves the result', () => {
     jest.useFakeTimers();
     const updatedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(updatedAt);
     const attempt = new SolutionAttemptEntity(makeProps());
 
-    attempt.updateDescription('Corrigir o cabeçalho da requisição');
+    attempt.updateDescription('Fix the request header');
 
-    expect(attempt.description).toBe('Corrigir o cabeçalho da requisição');
+    expect(attempt.description).toBe('Fix the request header');
     expect(attempt.result).toBe(SolutionAttemptResult.PARTIAL);
     expect(attempt.updatedAt).toEqual(updatedAt);
   });
 
-  it('não altera a descrição quando a atualização é inválida', () => {
+  it('does not change the description when the update is invalid', () => {
     const attempt = new SolutionAttemptEntity(makeProps());
 
     expect(() => attempt.updateDescription('')).toThrow(EntityValidationError);
-    expect(attempt.description).toBe(
-      'Adicionar credentials: include na requisição',
-    );
+    expect(attempt.description).toBe('Add credentials: include to the request');
     expect(attempt.updatedAt).toEqual(new Date('2026-08-01T00:00:00.000Z'));
   });
 });

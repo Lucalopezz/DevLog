@@ -28,13 +28,13 @@ export class RemoveTagFromTechnicalEntryUseCase implements UseCaseContract<
     const entry = await this.entryRepository.findById(technicalEntryId);
 
     if (!entry || entry.userId !== userId) {
-      throw new NotFoundException('Entrada técnica não encontrada');
+      throw new NotFoundException('Technical entry not found');
     }
 
     const tag = await this.tagRepository.findById(tagId);
 
     if (!tag || tag.userId !== userId) {
-      throw new NotFoundException('Tag não encontrada');
+      throw new NotFoundException('Tag not found');
     }
 
     const isAssigned = await this.entryTagRepository.exists({

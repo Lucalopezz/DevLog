@@ -40,13 +40,13 @@ function makeUseCase(project: ProjectEntity | null = makeProject()) {
 }
 
 describe('AddProjectResourceUseCase', () => {
-  it('cria e retorna um recurso do projeto', async () => {
+  it('creates and returns a project resource', async () => {
     const { useCase, projectResourceRepository } = makeUseCase();
 
     const output = await useCase.execute({
       userId: USER_ID,
       projectId: PROJECT_ID,
-      label: 'Documentação da API',
+      label: 'Documentation da API',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
@@ -54,18 +54,18 @@ describe('AddProjectResourceUseCase', () => {
     expect(projectResourceRepository.insert.mock.calls).toHaveLength(1);
     expect(projectResourceRepository.insert.mock.calls[0]?.[0]).toMatchObject({
       projectId: PROJECT_ID,
-      label: 'Documentação da API',
+      label: 'Documentation da API',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
     expect(output).toMatchObject({
       projectId: PROJECT_ID,
-      label: 'Documentação da API',
+      label: 'Documentation da API',
       type: ProjectResourceType.DOCUMENTATION,
     });
   });
 
-  it('usa OTHER quando o tipo não é informado', async () => {
+  it('uses OTHER when the type is omitted', async () => {
     const { useCase } = makeUseCase();
 
     const output = await useCase.execute({
@@ -78,14 +78,14 @@ describe('AddProjectResourceUseCase', () => {
     expect(output.type).toBe(ProjectResourceType.OTHER);
   });
 
-  it('não cria recurso com URL inválida', async () => {
+  it('does not create a resource with an invalid URL', async () => {
     const { useCase, projectResourceRepository } = makeUseCase();
 
     await expect(
       useCase.execute({
         userId: USER_ID,
         projectId: PROJECT_ID,
-        label: 'URL inválida',
+        label: 'Invalid URL',
         url: 'not-a-url',
       }),
     ).rejects.toBeInstanceOf(EntityValidationError);
@@ -93,7 +93,7 @@ describe('AddProjectResourceUseCase', () => {
     expect(projectResourceRepository.insert.mock.calls).toHaveLength(0);
   });
 
-  it('não cria recurso para projeto de outro usuário', async () => {
+  it("does not create a resource for another user's project", async () => {
     const { useCase, projectResourceRepository } = makeUseCase(
       makeProject(OTHER_USER_ID),
     );
@@ -102,7 +102,7 @@ describe('AddProjectResourceUseCase', () => {
       useCase.execute({
         userId: USER_ID,
         projectId: PROJECT_ID,
-        label: 'Recurso indevido',
+        label: 'Resource indevido',
         url: 'https://example.com/unsafe',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);

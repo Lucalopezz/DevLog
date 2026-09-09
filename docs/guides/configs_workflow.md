@@ -1,36 +1,36 @@
-# Fluxo de configuração e conexão com o banco
+# Configuration and database connection workflow
 
-Este documento explica como o PostgreSQL, o Docker, o Prisma e a API NestJS se relacionam no projeto DevLog.
+This document explains how PostgreSQL, Docker, Prisma, and the NestJS API relate in DevLog.
 
-## Visão geral
+## Overview
 
-O fluxo atual pode ser representado assim:
+The workflow can be represented as follows:
 
 ```text
-.env da raiz
+Root .env
    ↓
 Docker Compose
    ↓
-PostgreSQL no container
+PostgreSQL in the container
    ↓
 localhost:5432
    ↑
-DATABASE_URL em apps/api/.env
+DATABASE_URL in apps/api/.env
    ↑
-Prisma CLI / futuro PrismaService
+Prisma CLI / future PrismaService
 ```
 
-A aplicação possui três responsabilidades diferentes:
+The application has three different responsibilities:
 
-1. O Docker inicia e configura o servidor PostgreSQL.
-2. O Prisma CLI executa migrations e gera o Prisma Client.
-3. A API deverá usar o Prisma Client para executar consultas durante a execução.
+1. Docker starts and configures the PostgreSQL server.
+2. Prisma CLI runs migrations and generates Prisma Client.
+3. The API uses Prisma Client to execute queries at runtime.
 
-No estado atual, o banco e o Prisma CLI estão configurados, mas a API ainda não possui um `PrismaService` registrado e ainda não executa consultas.
+At the stage described by this guide, the database and Prisma CLI were configured, but the API did not yet register a `PrismaService` or execute queries.
 
-## 1. O `.env` da raiz
+## 1. Root `.env`
 
-O arquivo `.env` da raiz contém as variáveis usadas pelo Docker Compose:
+The root `.env` contains variables used by Docker Compose:
 
 ```env
 POSTGRES_DB=devlog
@@ -39,13 +39,13 @@ POSTGRES_PASSWORD=devlog
 POSTGRES_PORT=5432
 ```
 
-O script `db:up`, definido no [`package.json`](../../package.json), informa ao Docker Compose que ele deve usar esse arquivo:
+The `db:up` script in [`package.json`](../../package.json) tells Docker Compose to use this file:
 
 ```json
 "db:up": "docker compose --env-file .env -f docker/compose.yaml up -d database"
 ```
 
-O arquivo [`docker/compose.yaml`](../../docker/compose.yaml) utiliza essas variáveis para configurar o container:
+[`docker/compose.yaml`](../../docker/compose.yaml) uses these variables to configure the container:
 
 ```yaml
 environment:
@@ -54,63 +54,63 @@ environment:
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 ```
 
-Essas variáveis respondem à pergunta:
+These variables answer the question:
 
-> Com qual nome, usuário e senha o PostgreSQL deve ser iniciado?
+> Which database name, user, and password should PostgreSQL start with?
 
-### Mapeamento da porta
+### Port mapping
 
-No Compose existe o seguinte mapeamento:
+Compose defines this mapping:
 
 ```yaml
 ports:
   - "${POSTGRES_PORT}:5432"
 ```
 
-Isso significa:
+This means:
 
 ```text
-porta 5432 do computador → porta 5432 do container
+Computer port 5432 → container port 5432
 ```
 
-Por isso, quando a API roda localmente no computador, ela consegue encontrar o banco usando `localhost:5432`.
+When the API runs locally on the computer, it can therefore reach the database at `localhost:5432`.
 
-## 2. O `apps/api/.env`
+## 2. `apps/api/.env`
 
-A API possui outro arquivo de ambiente, localizado em [`apps/api/.env`](../../apps/api/.env.example) — o arquivo real `.env` não deve ser versionado.
+The API has another environment file at [`apps/api/.env`](../../apps/api/.env.example). The actual `.env` must not be versioned.
 
-O exemplo contém:
+The example contains:
 
 ```env
 DATABASE_URL=postgresql://devlog:devlog@localhost:5432/devlog
 PORT=3000
 ```
 
-A `DATABASE_URL` reúne todas as informações necessárias para localizar o banco:
+`DATABASE_URL` combines the information needed to locate the database:
 
 ```text
-postgresql://USUARIO:SENHA@HOST:PORTA/BANCO
+postgresql://USER:PASSWORD@HOST:PORT/DATABASE
 ```
 
-Neste projeto:
+In this project:
 
 ```text
 postgresql://devlog:devlog@localhost:5432/devlog
                   │       │       │        │
-                usuário senha   host     banco
+                user    password host     database
 ```
 
-Como a API é executada localmente pelo Node e apenas o PostgreSQL está no Docker, o caminho da conexão é:
+Since Node runs the API locally and only PostgreSQL runs in Docker, the connection path is:
 
 ```text
-API local → localhost:5432 → PostgreSQL no Docker
+Local API → localhost:5432 → PostgreSQL in Docker
 ```
 
-## 3. Por que existem duas configurações?
+## 3. Why two configurations?
 
-As variáveis dos dois arquivos são usadas por consumidores diferentes.
+The two files have different consumers.
 
-As variáveis separadas da raiz são usadas pelo Docker:
+Docker uses the separate root variables:
 
 ```env
 POSTGRES_DB
@@ -119,13 +119,13 @@ POSTGRES_PASSWORD
 POSTGRES_PORT
 ```
 
-A URL é usada pelo Prisma e pelo driver PostgreSQL:
+Prisma and the PostgreSQL driver use the URL:
 
 ```env
 DATABASE_URL=postgresql://...
 ```
 
-As configurações representam os mesmos dados, mas em formatos diferentes:
+The configurations represent the same data in different formats:
 
 ```text
 Docker:
@@ -137,17 +137,17 @@ Prisma:
 DATABASE_URL=postgresql://devlog:devlog@localhost:5432/devlog
 ```
 
-Não é o Docker que utiliza a `DATABASE_URL` neste projeto. O Docker utiliza as variáveis `POSTGRES_*`; o Prisma utiliza a URL.
+In this project, Docker uses `POSTGRES_*` variables, while Prisma uses `DATABASE_URL`.
 
-## 4. Quem utiliza a `DATABASE_URL` atualmente?
+## 4. Who uses `DATABASE_URL`?
 
-O arquivo [`apps/api/prisma.config.ts`](../../apps/api/prisma.config.ts) carrega as variáveis de ambiente:
+[`apps/api/prisma.config.ts`](../../apps/api/prisma.config.ts) loads environment variables:
 
 ```ts
 import 'dotenv/config';
 ```
 
-Depois, fornece a URL para a configuração do Prisma:
+It then supplies the URL to Prisma configuration:
 
 ```ts
 datasource: {
@@ -155,26 +155,26 @@ datasource: {
 }
 ```
 
-Essa configuração é usada por comandos como:
+Commands such as these use the configuration:
 
 ```bash
 pnpm --filter api exec prisma migrate dev --name init
 pnpm --filter api exec prisma generate
 ```
 
-O Prisma CLI usa a `DATABASE_URL` para:
+Prisma CLI uses `DATABASE_URL` for:
 
-- verificar a conexão com o banco;
-- executar migrations;
-- comparar o schema com o banco;
-- realizar introspection, quando necessário;
-- gerar o Prisma Client.
+- Checking the database connection;
+- Running migrations;
+- Comparing the schema with the database;
+- Performing introspection when needed;
+- Generating Prisma Client.
 
-## 5. O papel do `schema.prisma`
+## 5. The role of `schema.prisma`
 
-O arquivo [`apps/api/prisma/schema.prisma`](../../apps/api/prisma/schema.prisma) descreve o modelo do banco para o Prisma.
+[`apps/api/prisma/schema.prisma`](../../apps/api/prisma/schema.prisma) describes the database model for Prisma.
 
-Por exemplo:
+For example:
 
 ```prisma
 model User {
@@ -184,37 +184,37 @@ model User {
 }
 ```
 
-Esse arquivo não é, por si só, uma conexão com o banco. Ele descreve:
+This file is not itself a database connection. It describes:
 
-- tabelas;
-- colunas;
-- tipos;
-- relacionamentos;
-- índices;
-- valores padrão;
-- restrições de unicidade.
+- Tables;
+- Columns;
+- Types;
+- Relationships;
+- Indexes;
+- Default values;
+- Unique constraints.
 
-O Prisma usa essa descrição para gerar:
+Prisma uses this description to generate:
 
-1. migrations SQL, localizadas em `apps/api/prisma/migrations`;
-2. tipos TypeScript;
-3. métodos de consulta do Prisma Client.
+1. SQL migrations in `apps/api/prisma/migrations`;
+2. TypeScript types;
+3. Prisma Client query methods.
 
-No Prisma 7, a URL de conexão fica no [`prisma.config.ts`](../../apps/api/prisma.config.ts), em vez de ficar diretamente dentro do bloco `datasource` do `schema.prisma`.
+In Prisma 7, the connection URL belongs in [`prisma.config.ts`](../../apps/api/prisma.config.ts), rather than directly in the `schema.prisma` datasource block.
 
-## 6. A API já está conectada ao banco?
+## 6. Was the API already connected to the database?
 
-Ainda não.
+Not yet at the stage described here.
 
-Embora o projeto já tenha:
+Although the project already had:
 
 - `@prisma/client`;
 - `@prisma/adapter-pg`;
-- o schema Prisma;
+- The Prisma schema;
 - migrations;
-- o client gerado;
+- The generated client;
 
-o [`apps/api/src/app.module.ts`](../../apps/api/src/app.module.ts) ainda está vazio:
+[`apps/api/src/app.module.ts`](../../apps/api/src/app.module.ts) was still empty:
 
 ```ts
 @Module({
@@ -225,17 +225,17 @@ o [`apps/api/src/app.module.ts`](../../apps/api/src/app.module.ts) ainda está v
 export class AppModule {}
 ```
 
-Também ainda não existe um serviço que instancie o Prisma Client nem código fazendo chamadas como:
+There was also no service instantiating Prisma Client or code making calls such as:
 
 ```ts
 prisma.user.findMany()
 prisma.project.create()
 ```
 
-Portanto, o estado atual é:
+The state at that stage was therefore:
 
 ```text
-PostgreSQL está rodando
-Prisma CLI conhece o banco
-API ainda não faz consultas
+PostgreSQL is running
+Prisma CLI knows the database
+The API does not query it yet
 ```

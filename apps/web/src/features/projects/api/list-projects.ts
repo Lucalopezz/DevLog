@@ -12,8 +12,8 @@ export async function listProjects(params: ListProjectsParams): Promise<ProjectC
  *['projects', 'lists', 'list', { page: 1, name: 'api' }]
  *['projects', 'lists', 'list', { page: 2, name: 'api' }]
  *
- * A primeira representa a página 1. A segunda representa a página 2. 
- * Portanto, o React Query mantém cada resultado no cache separadamente.
+ * The first represents page 1. The second represents page 2. 
+ * React Query therefore caches each result separately.
  *
  * */
 export const projectsKeys = {

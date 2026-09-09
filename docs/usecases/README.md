@@ -1,96 +1,68 @@
-# Casos de uso da API DevLog
+# DevLog API use cases
 
-Esta é a documentação comportamental **as is** da API no commit `96ba26e`,
-analisada em 2 de setembro de 2026. Ela descreve o que o código executa hoje,
-sem transformar backlog ou intenção futura em requisito implementado.
+This is the **as-is** behavioral documentation of the API at commit `96ba26e`, analyzed on September 2, 2026. It describes what the code does at that snapshot without treating backlog or future intentions as implemented requirements.
 
-## Como ler
+## Reading this documentation
 
-Cada caso segue o formato completo usado na disciplina: ator principal,
-interesses, pré-condições, gatilho, pós-condições, fluxo principal e fluxos
-alternativos. O endpoint aparece apenas como rastreabilidade; os passos evitam
-detalhes de implementação porque um caso de uso descreve **o que** acontece.
+Each case follows the full format used in the course: primary actor, interests, preconditions, trigger, postconditions, main flow, and alternative flows. Endpoints provide traceability only; steps avoid implementation details because a use case describes **what** happens.
 
-Os documentos estão divididos por área:
+Documents are grouped by area:
 
-- [Conta, autenticação e tags](account-and-tags.md)
-- [Projetos, tecnologias, comandos e recursos](projects.md)
-- [Registros técnicos, classificações e tentativas](technical-entries.md)
-- [Matriz endpoint → caso de uso](traceability.md)
-- [Especificação histórica/planejada](cases.md)
+- [Account, authentication, and tags](account-and-tags.md)
+- [Projects, technologies, commands, and resources](projects.md)
+- [Technical entries, classifications, and attempts](technical-entries.md)
+- [Endpoint → use case matrix](traceability.md)
+- [Historical/planned specification](cases.md)
 
-Os diagramas relacionados ficam no [índice de diagramas](../diagrams/README.md).
+Related diagrams are listed in the [diagram index](../diagrams/README.md).
 
-## Atores
+## Actors
 
-| Ator                | Tipo                                  | Responsabilidade                           |
-| ------------------- | ------------------------------------- | ------------------------------------------ |
-| Visitante           | Primário                              | Cria uma conta ou inicia uma sessão.       |
-| Usuário autenticado | Primário; especialização de Visitante | Gerencia exclusivamente os próprios dados. |
+| Actor | Type | Responsibility |
+| --- | --- | --- |
+| Guest | Primary | Creates an account or starts a session. |
+| Authenticated user | Primary; specialization of Guest | Manages only their own data. |
 
-Não há ator secundário externo no código atual. Banco de dados, controllers,
-casos de uso e provedores de JWT/hash são partes internas da API, portanto não
-são atores no diagrama de casos de uso.
+The current code has no external secondary actor. The database, controllers, use cases, and JWT/hash providers are internal API components, so they are not actors in the use case diagram.
 
-## Regras transversais comprovadas
+## Verified cross-cutting rules
 
-1. Todo endpoint protegido exige um JWT válido no cookie HttpOnly
-   `access_token`.
-2. Recursos de outro usuário são respondidos como “não encontrados”. Além de
-   impedir acesso, isso evita confirmar que o recurso alheio existe.
-3. Parâmetros identificadores são UUIDs; corpos e consultas rejeitam campos não
-   declarados e dados inválidos com status `422`.
-4. Listagens são paginadas e possuem ordenação e filtros próprios.
-5. Exclusões retornam sucesso sem conteúdo quando concluídas.
-6. `null` remove associações ou valores opcionais apenas nos campos cujo
-   contrato aceita remoção; campo ausente preserva o valor atual.
+1. Every protected endpoint requires a valid JWT in the HttpOnly `access_token` cookie.
+2. Resources belonging to another user are reported as not found. This prevents access without confirming that the other resource exists.
+3. Identifier parameters are UUIDs; bodies and queries reject undeclared fields and invalid data with status `422`.
+4. Lists are paginated and have their own sorting and filters.
+5. Successful deletions return no content.
+6. `null` clears associations or optional values only where the contract allows it; omission preserves the current value.
 
-## Vocabulário do domínio
+## Domain vocabulary
 
-| Termo                | Significado                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------------ |
-| Projeto              | Contexto de desenvolvimento ao qual registros, tecnologias, comandos e recursos podem pertencer. |
-| Registro técnico     | Anotação do tipo problema (`ISSUE`) ou aprendizado (`LEARNING`).                                 |
-| Tentativa de solução | Experimento documentado para um problema, com resultado `FAILED`, `PARTIAL` ou `SUCCESSFUL`.     |
-| Tag                  | Classificação reutilizável e exclusiva do usuário.                                               |
-| Arquivado            | Conteúdo retirado das consultas padrão, sem necessariamente ser excluído.                        |
-| Resolvido            | Estado derivado de `resolvedAt` e aplicável somente a problemas.                                 |
+| Term | Meaning |
+| --- | --- |
+| Project | Development context to which entries, technologies, commands, and resources may belong. |
+| Technical entry | An issue (`ISSUE`) or lesson learned (`LEARNING`). |
+| Solution attempt | Documented experiment for an issue, with a `FAILED`, `PARTIAL`, or `SUCCESSFUL` result. |
+| Tag | Reusable classification unique to a user. |
+| Archived | Content excluded from default queries, without necessarily being deleted. |
+| Resolved | State derived from `resolvedAt`, applicable only to issues. |
 
-## Decisões de modelagem
+## Modeling decisions
 
-- Autenticação da requisição não foi modelada como `<<include>>` em dezenas de
-  casos. O ator especializado “Usuário autenticado” comunica a mesma
-  pré-condição e mantém o diagrama legível.
-- Tecnologias, comandos e recursos são tratados como partes do projeto: são
-  criados dentro dele e são removidos em cascata quando o projeto é excluído.
-- Tentativas são partes de um registro técnico e também têm ciclo de vida
-  dependente dele.
-- A ligação entre registro e tag possui informação própria (`createdAt`), por
-  isso aparece no diagrama de classes como tipo associativo.
-- A ligação projeto–registro é uma associação opcional, e não composição: ao
-  excluir o projeto, o registro é preservado e apenas perde a referência.
+- Request authentication is not modeled as `<<include>>` in dozens of cases. The specialized Authenticated user actor communicates the same precondition and keeps the diagram readable.
+- Technologies, commands, and resources are project parts: they are created within it and deleted in a cascade when the project is deleted.
+- Attempts belong to a technical entry and depend on its lifecycle.
+- The entry/tag link has its own information (`createdAt`), so it appears as an association class.
+- The project/entry link is an optional association, not composition: deleting the project preserves the entry and only removes its reference.
 
-## Pontos de atenção encontrados no código atual
+## Points observed in the current code
 
-Estes itens não foram “corrigidos” nos modelos; estão documentados para que o
-diagrama permaneça fiel à implementação:
+These items were not changed in the models; they are documented to keep the diagrams faithful to the implementation:
 
-- O domínio chama o estado intermediário de projeto de `INACTIVE`, enquanto o
-  banco o armazena como `PAUSED`. Um mapper traduz explicitamente os valores.
-- Projetos arquivados são somente leitura para suas informações, tecnologias,
-  comandos e recursos. Registros técnicos arquivados, porém, ainda podem ser
-  atualizados, resolvidos, reabertos, classificados, ter tentativas existentes
-  alteradas/removidas e ser excluídos. Apenas a inclusão de nova tentativa
-  bloqueia explicitamente registro arquivado.
-- Não existe operação para restaurar um registro técnico arquivado.
-- O logout remove o cookie local, mas não existe revogação de token no servidor.
-- A API permite informar `conclusion` ao criar/editar um `LEARNING`; o domínio
-  só proíbe `resolvedAt` nesse tipo. “Conclusão” e “resolução” não são sinônimos
-  na implementação.
-- O resultado de uma tentativa pode ser definido na criação, mas a atualização
-  pública altera somente sua descrição.
-- A busca de registros omite arquivados por padrão; a busca de projetos só
-  filtra arquivamento quando o parâmetro é enviado.
+- The domain calls the intermediate project state `INACTIVE`, while the database stores `PAUSED`. A mapper explicitly translates these values.
+- Archived projects are read-only for their details, technologies, commands, and resources. Archived technical entries can still be updated, resolved, reopened, classified, have existing attempts changed/removed, and be deleted. Only adding a new attempt explicitly blocks archived entries.
+- There is no operation to restore an archived technical entry.
+- Logout removes the local cookie, but the server does not revoke the token.
+- The API accepts `conclusion` when creating/editing a `LEARNING`; the domain only prohibits `resolvedAt` for this type. Conclusion and resolution are not synonyms in the implementation.
+- An attempt result can be set on creation, but the public update only changes its description.
+- Entry search omits archived records by default; project search filters archiving only when the parameter is supplied.
 
-Esses pontos são candidatos naturais a decisões de produto ou testes de
-caracterização antes de futuras alterações.
+These points are natural candidates for product decisions or characterization tests before future changes.

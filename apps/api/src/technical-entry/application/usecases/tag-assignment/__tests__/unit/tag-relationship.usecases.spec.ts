@@ -17,7 +17,7 @@ function makeEntry(userId = USER_ID) {
   return new TechnicalEntryEntity(
     {
       userId,
-      title: 'Entrada técnica',
+      title: 'Technical entry',
       context: 'Contexto da entrada',
       type: TechnicalEntryType.LEARNING,
     },
@@ -29,9 +29,9 @@ function makeTag(userId = USER_ID) {
   return new TagEntity({ userId, name: 'NestJS' }, TAG_ID);
 }
 
-describe('Casos de uso de relacionamento entre tags e entradas', () => {
+describe('Tag and entry relationship use cases', () => {
   describe('AssignTagToTechnicalEntryUseCase', () => {
-    it('valida a propriedade e cria a relação', async () => {
+    it('validates ownership and creates the relationship', async () => {
       const entryRepository = {
         findById: jest.fn().mockResolvedValue(makeEntry()),
       } as unknown as TechnicalEntryRepository;
@@ -63,7 +63,7 @@ describe('Casos de uso de relacionamento entre tags e entradas', () => {
       });
     });
 
-    it('não cria relação duplicada', async () => {
+    it('does not create a duplicate relationship', async () => {
       const add = jest.fn();
       const entryTagRepository = {
         exists: jest.fn().mockResolvedValue(true),
@@ -100,7 +100,7 @@ describe('Casos de uso de relacionamento entre tags e entradas', () => {
         jest.fn().mockResolvedValue(null),
       ],
     ])(
-      'rejeita %s de outro usuário ou inexistente',
+      'rejects %s belonging to another user or missing',
       async (_resource, findEntry, findTag) => {
         const useCase = new AssignTagToTechnicalEntryUseCase(
           { findById: findEntry } as unknown as TechnicalEntryRepository,
@@ -123,7 +123,7 @@ describe('Casos de uso de relacionamento entre tags e entradas', () => {
   });
 
   describe('RemoveTagFromTechnicalEntryUseCase', () => {
-    it('remove somente a relação e mantém entrada e tag', async () => {
+    it('removes only the relationship and preserves the entry and tag', async () => {
       const remove = jest.fn();
       const entryTagRepository = {
         exists: jest.fn().mockResolvedValue(true),
@@ -151,7 +151,7 @@ describe('Casos de uso de relacionamento entre tags e entradas', () => {
       });
     });
 
-    it('é idempotente quando a relação não existe', async () => {
+    it('is idempotent when the relationship does not exist', async () => {
       const remove = jest.fn();
       const entryTagRepository = {
         exists: jest.fn().mockResolvedValue(false),
@@ -176,7 +176,7 @@ describe('Casos de uso de relacionamento entre tags e entradas', () => {
       expect(remove).not.toHaveBeenCalled();
     });
 
-    it('não remove relação de recurso pertencente a outro usuário', async () => {
+    it('does not remove a resource relationship belonging to another user', async () => {
       const remove = jest.fn();
       const entryTagRepository = {
         exists: jest.fn(),

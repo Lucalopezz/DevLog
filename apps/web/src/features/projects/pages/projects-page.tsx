@@ -24,16 +24,16 @@ const defaultProjectParams = {
 function parsePage(value: string | null) {
   const page = Number(value);
 
-  // A URL pode ser editada manualmente. Nunca enviamos NaN, zero ou número
-  // decimal para a API, que espera uma página inteira maior que zero.
+  // The URL can be edited manually. Never send NaN, zero, or a fractional
+  // page to the API, which expects a positive integer page number.
   return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
 export default function ProjectsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // A URL representa os filtros já aplicados. O formulário mantém um rascunho
-  // separado e só altera estes valores depois do submit.
+  // The URL represents applied filters. The form keeps a separate draft
+  // and only updates these values after submission.
   const page = parsePage(searchParams.get("page"));
   const name = searchParams.get("name")?.trim() || undefined;
   const rawStatus = searchParams.get("status");
@@ -54,13 +54,13 @@ export default function ProjectsPage() {
   function handleSearch(filters: ProjectSearchFormValues) {
     const nextParams = new URLSearchParams(searchParams);
 
-    // Removemos os valores anteriores para que uma busca vazia não deixe
-    // parâmetros antigos escondidos na URL.
+    // Remove previous values so an empty search does not leave
+    // old parameters hidden in the URL.
     nextParams.delete("name");
     nextParams.delete("status");
 
-    // Uma mudança de filtro sempre começa na primeira página. Caso contrário,
-    // uma busca nova poderia tentar abrir a página 4 e aparentar estar vazia.
+    // A filter change always starts on the first page. Otherwise,
+    // a new search could try to open page 4 and appear empty.
     nextParams.set("page", "1");
 
     const normalizedName = filters.name.trim();
@@ -69,8 +69,8 @@ export default function ProjectsPage() {
       nextParams.set("name", normalizedName);
     }
 
-    // "Todos" é representado por ausência de status. "ALL" não existe no
-    // enum do backend e não deve ser enviado como se fosse um status válido.
+    // "All" is represented by an absent status. "ALL" is not in the
+    // backend enum and must not be sent as a valid status.
     if (filters.status) {
       nextParams.set("status", filters.status);
     }
@@ -79,16 +79,16 @@ export default function ProjectsPage() {
   }
 
   function handleClearFilters() {
-    // Sem parâmetros, a página volta aos defaults: página 1, projetos não
-    // arquivados, ordenação por criação e sem filtros de texto/status.
+    // Without parameters, the page returns to its defaults: page 1, unarchived
+    // projects, creation order, and no text/status filters.
     setSearchParams({});
   }
 
   function handlePageChange(nextPage: number) {
     const nextParams = new URLSearchParams(searchParams);
 
-    // Como começamos com a URL atual, name e status são preservados ao trocar
-    // de página. A paginação continua sendo parte da mesma busca.
+    // Starting from the current URL preserves name and status when changing
+    // pages. Pagination remains part of the same search.
     nextParams.set("page", String(nextPage));
     setSearchParams(nextParams);
   }
@@ -99,10 +99,10 @@ export default function ProjectsPage() {
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <FolderKanban className="size-8 text-primary" />
-            <h1 className="text-3xl font-semibold tracking-tight">Projetos</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>
           </div>
           <p className="text-muted-foreground">
-            Consulte os projetos associados à sua conta.
+            Browse the projects associated with your account.
           </p>
         </div>
 
@@ -110,7 +110,7 @@ export default function ProjectsPage() {
           type="button"
           onClick={() => setIsCreateProjectDialogOpen(true)}
         >
-          Novo projeto
+          New project
         </Button>
 
         {isFetching && !isPending ? (
@@ -119,15 +119,15 @@ export default function ProjectsPage() {
             className="flex items-center gap-2 text-sm text-muted-foreground"
           >
             <RefreshCw className="size-4 animate-spin" />
-            Atualizando...
+            Updating...
           </p>
         ) : null}
       </header>
 
       <ProjectFilters
-        // Quando os filtros aplicados mudam pela URL, o `key` cria um novo
-        // rascunho com os valores da URL. Enquanto o usuário apenas digita,
-        // a URL não muda e o formulário não é remontado.
+        // When applied filters change through the URL, `key` creates a new
+        // draft with the URL values. While the user is only typing,
+        // the URL stays unchanged and the form is not remounted.
         key={`${name ?? ""}:${status ?? ""}`}
         initialName={name ?? ""}
         initialStatus={status}
@@ -150,23 +150,23 @@ export default function ProjectsPage() {
         >
           <div className="space-y-1">
             <h2 className="font-semibold" id="projects-error-title">
-              Não foi possível carregar os projetos
+              Could not load projects
             </h2>
             <p className="text-sm text-muted-foreground">
-              Verifique sua conexão e tente novamente.
+              Check your connection and try again.
             </p>
           </div>
           <Button onClick={() => refetch()} type="button" variant="outline">
-            Tentar novamente
+            Try again
           </Button>
         </section>
       ) : null}
 
       {!isPending && !isError && data?.data.length === 0 ? (
         <section className="space-y-2 rounded-xl border border-dashed p-10 text-center">
-          <h2 className="font-semibold">Nenhum projeto encontrado</h2>
+          <h2 className="font-semibold">No projects found</h2>
           <p className="text-sm text-muted-foreground">
-            Você ainda não possui projetos não arquivados.
+            You do not have any unarchived projects yet.
           </p>
         </section>
       ) : null}

@@ -25,7 +25,7 @@ import {
 
 /**
  * 
- * Link para navegação no menu lateral. Usa NavLink do React Router para aplicar estilos
+ * Sidebar navigation link. Uses React Router NavLink to apply active styles
  */
 function SidebarLink({
   to,
@@ -60,15 +60,15 @@ export function AppSidebar() {
   const { data: user, isPending } = useGetUser()
   const { mutate: logout, isPending: isLoggingOut } = useLogout()
 
-  // Valida se o user está logado pela resposta do hook useGetUser. 
-  // O loader da rota privada continua sendo a barreira de acesso.
+  // Determines whether the user is signed in from the useGetUser response. 
+  // The private route loader remains responsible for access control.
   const isAuthenticated = Boolean(user)
 
   return (
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center px-2 py-2">
-          {/* A versão horizontal mantém o nome legível na largura limitada da sidebar. */}
+          {/* The horizontal version keeps the name readable within the narrow sidebar. */}
           <img
             alt="DevLog"
             className="h-16 w-auto object-contain"
@@ -84,41 +84,41 @@ export function AppSidebar() {
               <SidebarMenu>
                 <SidebarLink end to="/">
                   <CircleUserRound />
-                  <span>Início</span>
+                  <span>Home</span>
                 </SidebarLink>
               </SidebarMenu>
               <SidebarMenu>
                 <SidebarLink end to="/projects">
                   <FolderKanban />
-                  <span>Projetos</span>
+                  <span>Projects</span>
                 </SidebarLink>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : (
           <SidebarGroup>
-            <SidebarGroupLabel>Acesso</SidebarGroupLabel>
+            <SidebarGroupLabel>Access</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarLink to="/login">
                   <LogIn />
-                  <span>Entrar</span>
+                  <span>Sign in</span>
                 </SidebarLink>
 
                 <SidebarLink to="/register">
                   <UserPlus />
-                  <span>Criar conta</span>
+                  <span>Create account</span>
                 </SidebarLink>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
 
-        {/* Evita uma interface vazia enquanto a sessão ainda está sendo
-            verificada. A rota privada continua protegida pelo loader. */}
+        {/* Avoids an empty interface while the session is being
+            checked. The private route is still protected by its loader. */}
         {isPending ? (
           <p className="px-4 text-sm text-muted-foreground">
-            Verificando sessão...
+            Checking session...
           </p>
         ) : null}
       </SidebarContent>
@@ -126,9 +126,9 @@ export function AppSidebar() {
       <SidebarFooter>
         {user ? (
           <SidebarMenu>
-            {/* A conta fica no rodapé, como acontece em apps com navegação
-                lateral: a área principal concentra páginas e o rodapé
-                concentra ações relacionadas à sessão. */}
+            {/* The account sits in the footer, as in apps with sidebar
+                navigation: the main area groups pages and the footer
+                groups session actions. */}
             <SidebarLink to="/account">
               <CircleUserRound />
               <span className="truncate">{user.name}</span>
@@ -141,7 +141,7 @@ export function AppSidebar() {
                 type="button"
               >
                 <LogOut />
-                <span>{isLoggingOut ? 'Saindo...' : 'Sair'}</span>
+                <span>{isLoggingOut ? 'Signing out...' : 'Sign out'}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

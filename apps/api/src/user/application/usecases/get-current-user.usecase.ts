@@ -19,7 +19,7 @@ export class GetCurrentUserUseCase implements UseCaseContract<
     const user = await this.userRepository.findById(input.id);
 
     if (user === null) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException('User not found');
     }
 
     return UserOutputMapper.toOutput(user);

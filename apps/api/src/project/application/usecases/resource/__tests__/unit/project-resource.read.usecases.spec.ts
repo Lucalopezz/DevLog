@@ -32,7 +32,7 @@ function makeResource(projectId = PROJECT_ID): ProjectResourceEntity {
   return new ProjectResourceEntity(
     {
       projectId,
-      label: 'Documentação da API',
+      label: 'Documentation da API',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     },
@@ -41,7 +41,7 @@ function makeResource(projectId = PROJECT_ID): ProjectResourceEntity {
 }
 
 describe('SearchProjectResourceUseCase', () => {
-  it('busca recursos somente dentro do projeto autorizado', async () => {
+  it('searches resources only within the authorized project', async () => {
     const project = makeProject();
     const resource = makeResource();
     const projectRepository = {
@@ -58,7 +58,7 @@ describe('SearchProjectResourceUseCase', () => {
           sortDir: 'asc',
           filter: {
             projectId: PROJECT_ID,
-            label: 'documentação',
+            label: 'documentation',
             type: ProjectResourceType.DOCUMENTATION,
           },
         }),
@@ -76,7 +76,7 @@ describe('SearchProjectResourceUseCase', () => {
       perPage: 10,
       sort: 'label',
       sortDir: 'asc',
-      label: 'documentação',
+      label: 'documentation',
       url: 'docs.example.com',
       type: ProjectResourceType.DOCUMENTATION,
     });
@@ -89,7 +89,7 @@ describe('SearchProjectResourceUseCase', () => {
         sortDir: 'asc',
         filter: {
           projectId: PROJECT_ID,
-          label: 'documentação',
+          label: 'documentation',
           url: 'docs.example.com',
           type: ProjectResourceType.DOCUMENTATION,
         },
@@ -100,7 +100,7 @@ describe('SearchProjectResourceUseCase', () => {
         expect.objectContaining({
           id: RESOURCE_ID,
           projectId: PROJECT_ID,
-          label: 'Documentação da API',
+          label: 'Documentation da API',
         }),
       ],
       total: 1,
@@ -110,7 +110,7 @@ describe('SearchProjectResourceUseCase', () => {
     });
   });
 
-  it('não busca recursos de projeto de outro usuário', async () => {
+  it("does not search resources in another user's project", async () => {
     const projectRepository = {
       findById: jest.fn().mockResolvedValue(makeProject(OTHER_USER_ID)),
     } as unknown as jest.Mocked<ProjectRepository>;
@@ -151,7 +151,7 @@ describe('GetProjectResourceUseCase', () => {
     };
   }
 
-  it('retorna o recurso quando ele pertence ao projeto do usuário', async () => {
+  it('returns the resource when it belongs to the user project', async () => {
     const { useCase } = makeUseCase();
 
     const output = await useCase.execute({
@@ -163,12 +163,12 @@ describe('GetProjectResourceUseCase', () => {
     expect(output).toMatchObject({
       id: RESOURCE_ID,
       projectId: PROJECT_ID,
-      label: 'Documentação da API',
+      label: 'Documentation da API',
       type: ProjectResourceType.DOCUMENTATION,
     });
   });
 
-  it('não retorna recurso de projeto de outro usuário', async () => {
+  it("does not return a resource in another user's project", async () => {
     const { useCase, projectResourceRepository } = makeUseCase(
       makeProject(OTHER_USER_ID),
     );
@@ -184,7 +184,7 @@ describe('GetProjectResourceUseCase', () => {
     expect(projectResourceRepository.findById.mock.calls).toHaveLength(0);
   });
 
-  it('não retorna recurso que pertence a outro projeto', async () => {
+  it('does not return a resource belonging to another project', async () => {
     const { useCase } = makeUseCase(
       makeProject(),
       makeResource(OTHER_PROJECT_ID),
@@ -199,7 +199,7 @@ describe('GetProjectResourceUseCase', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('retorna erro quando o recurso não existe', async () => {
+  it('returns an error when the resource does not exist', async () => {
     const { useCase } = makeUseCase(makeProject(), null);
 
     await expect(

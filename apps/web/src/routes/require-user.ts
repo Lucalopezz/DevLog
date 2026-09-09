@@ -5,10 +5,10 @@ import type { User } from "@/features/auth/types/auth";
 import { queryClient } from "@/lib/query-client";
 
 /**
- * Executa antes de toda rota protegida.
+ * Runs before every protected route.
  *
- * `query` é a API recomendada pela versão atual do TanStack Query. Ele usa o
- * mesmo cache que `useGetUser`, sem criar uma segunda fonte de verdade.
+ * `query` is the API recommended by the current TanStack Query version. It uses the
+ * same cache as `useGetUser`, without creating a second source of truth.
  */
 export async function requireUser(): Promise<User> {
   try {
@@ -27,8 +27,8 @@ export async function requireUser(): Promise<User> {
 }
 
 /**
- * Loader para páginas destinadas apenas a visitantes.
- * Uma resposta 401 é esperada nesse caso: significa que não há sessão.
+ * Loader for pages intended only for guests.
+ * A 401 response is expected here: it means there is no session.
  */
 export async function redirectAuthenticatedUser(): Promise<void> {
   try {
@@ -44,8 +44,8 @@ export async function redirectAuthenticatedUser(): Promise<void> {
       return
     }
 
-    // O redirect é uma Response lançada de propósito e deve continuar sendo
-    // tratado pelo React Router.
+    // The redirect is a deliberately thrown Response and must still be
+    // handled by React Router.
     throw error
   }
 }

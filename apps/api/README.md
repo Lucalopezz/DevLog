@@ -1,64 +1,56 @@
 # DevLog API
 
-Backend do DevLog. A API transforma o diário técnico em recursos persistidos,
-organizados por usuário e projeto: entradas sobre problemas e aprendizados,
-tentativas de solução, tags, tecnologias, comandos e links úteis.
+DevLog backend. The API turns the technical journal into persisted resources organized by user and project: entries about issues and lessons learned, solution attempts, tags, technologies, commands, and useful links.
 
-## Estado atual
+## Current state
 
-A API já possui os módulos de:
+The API includes modules for:
 
-- autenticação por JWT em cookie `httpOnly`;
-- cadastro e edição do usuário autenticado;
-- projetos, com status, arquivamento e restauração;
-- entradas técnicas dos tipos `ISSUE` e `LEARNING`;
-- tentativas de solução e resolução/reabertura de problemas;
-- tags associadas às entradas;
-- tecnologias, comandos e recursos vinculados a projetos.
+- JWT authentication through an `httpOnly` cookie;
+- Registration and editing of the authenticated user;
+- Projects, including status, archiving, and restoration;
+- `ISSUE` and `LEARNING` technical entries;
+- Solution attempts and issue resolution/reopening;
+- Tags associated with entries;
+- Technologies, commands, and resources linked to projects.
 
-Todas as rotas, exceto o cadastro de usuário e o fluxo de autenticação, exigem
-um usuário autenticado. O prefixo global da API é `/api`.
+All routes except user registration and the authentication flow require an authenticated user. The global API prefix is `/api`.
 
-## Tecnologias e responsabilidades
+## Technologies and responsibilities
 
-- **NestJS** organiza a aplicação em módulos e expõe os controllers HTTP.
-- **Prisma** mapeia o domínio para o PostgreSQL e versiona o banco por meio de
-  migrations.
-- **PostgreSQL** armazena usuários, projetos e registros técnicos.
-- **Jest** cobre regras unitárias, integração com o banco e fluxos HTTP.
-- **Cookie de sessão** transporta o JWT. O cliente precisa enviar credenciais
-  nas requisições cross-origin.
+- **NestJS** organizes the application into modules and exposes HTTP controllers.
+- **Prisma** maps the domain to PostgreSQL and versions the database through migrations.
+- **PostgreSQL** stores users, projects, and technical entries.
+- **Jest** covers unit rules, database integration, and HTTP flows.
+- The **session cookie** carries the JWT. Clients must send credentials in cross-origin requests.
 
-## Organização do código
+## Code organization
 
-Cada recurso possui uma fronteira própria em `src/`:
+Each resource has its own boundary in `src/`:
 
 ```text
 src/
-  auth/              # login, logout, guard e usuário autenticado
-  user/              # cadastro e perfil
-  project/           # projetos e seus recursos auxiliares
-  technical-entry/   # entradas, tags e tentativas de solução
-  tag/               # catálogo de tags do usuário
-  shared/            # banco, configuração, pipes, filtros e presenters
-  app.module.ts      # composição dos módulos
-  main.ts            # inicialização e configuração global
+  auth/              # Login, logout, guard, and authenticated user
+  user/              # Registration and profile
+  project/           # Projects and supporting resources
+  technical-entry/   # Entries, tags, and solution attempts
+  tag/               # User tag catalog
+  shared/            # Database, configuration, pipes, filters, and presenters
+  app.module.ts      # Module composition
+  main.ts            # Bootstrap and global configuration
 ```
 
-Dentro das features, a separação principal é:
+Within features, the main layers are:
 
-- `domain/`: entidades, regras e contratos do domínio;
-- `application/`: casos de uso e DTOs de entrada/saída;
-- `infrastructure/`: controllers, módulos, repositórios Prisma e presenters.
+- `domain/`: entities, rules, and domain contracts;
+- `application/`: use cases and input/output DTOs;
+- `infrastructure/`: controllers, modules, Prisma repositories, and presenters.
 
-Os casos de uso recebem o `userId` do `AuthGuard`, nunca do corpo enviado pelo
-cliente. Buscas e alterações validam a propriedade do recurso para impedir que
-um usuário acesse dados de outro. A justificativa dessa decisão está em
-[`docs/resource-ownership-validation.md`](docs/resource-ownership-validation.md).
+Use cases receive `userId` from `AuthGuard`, never from the client request body. Queries and mutations validate resource ownership to prevent access to another user's data. See [`docs/resource-ownership-validation.md`](docs/resource-ownership-validation.md) for the reasoning.
 
-## Configuração local
+## Local configuration
 
-Na raiz do monorepo, instale as dependências e inicie o PostgreSQL:
+Install dependencies and start PostgreSQL from the monorepo root:
 
 ```bash
 pnpm install
@@ -66,65 +58,60 @@ cp .env.example .env
 pnpm db:up
 ```
 
-Configure as variáveis da API em `apps/api/.env`:
+Configure API variables in `apps/api/.env`:
 
 ```bash
 cp apps/api/.env.example apps/api/.env
 ```
 
-O arquivo deve conter, no mínimo:
+The file should include at least:
 
-| Variável | Uso |
+| Variable | Purpose |
 | --- | --- |
-| `PORT` | Porta HTTP; padrão `3000` |
-| `NODE_ENV` | Ambiente, normalmente `development` |
-| `DATABASE_URL` | URL de conexão com o PostgreSQL |
-| `JWT_SECRET` | Segredo usado para assinar os tokens |
-| `CORS_ALLOWED_ORIGINS` | Origens permitidas pelo frontend |
+| `PORT` | HTTP port; defaults to `3000` |
+| `NODE_ENV` | Environment, usually `development` |
+| `DATABASE_URL` | PostgreSQL connection URL |
+| `JWT_SECRET` | Secret used to sign tokens |
+| `CORS_ALLOWED_ORIGINS` | Allowed frontend origins |
 
-Depois da primeira instalação, aplique as migrations e gere o cliente Prisma:
+After the first installation, generate Prisma Client and apply migrations:
 
 ```bash
 pnpm --filter api exec prisma generate
 pnpm --filter api exec prisma migrate deploy
 ```
 
-O serviço de configuração lê `JWT_EXPIRES_IN_SECONDS` para a duração do JWT.
-Os arquivos de exemplo ainda usam o nome legado `JWT_EXPIRES_IN`; se a duração
-precisar ser alterada, use o nome lido pelo serviço ou alinhe os exemplos em
-uma alteração futura.
+The configuration service reads `JWT_EXPIRES_IN_SECONDS` for JWT lifetime. Example files still use the legacy `JWT_EXPIRES_IN` name; to change the lifetime, use the name read by the service or align the examples in a future change.
 
-## Executar
+## Running
 
-Com o banco disponível:
+With the database available:
 
 ```bash
-# somente a API, com reload automático
+# API only, with automatic reload
 pnpm --filter api dev
 
-# todos os apps do monorepo
+# All monorepo apps
 pnpm dev
 ```
 
-Por padrão, a API fica disponível em `http://localhost:3000/api`.
+By default, the API is available at `http://localhost:3000/api`.
 
-## Principais grupos de rotas
+## Main route groups
 
-Os controllers são a fonte de verdade dos detalhes de payload e paginação.
-Este resumo ajuda a encontrar o ponto de entrada de cada caso de uso:
+Controllers are the source of truth for payload and pagination details. This overview helps locate each use case entry point:
 
-| Grupo | Exemplos | Acesso |
+| Group | Examples | Access |
 | --- | --- | --- |
-| Auth | `POST /api/auth/login`, `POST /api/auth/logout` | login/logout |
-| Users | `POST /api/users`, `GET /api/users/me` | cadastro / autenticado |
-| Projects | `GET`, `POST` e `PATCH /api/project/...` | autenticado |
-| Entries | `GET`, `POST`, `PATCH` e `DELETE /api/technical-entry/...` | autenticado |
-| Tags | `GET`, `POST` e `DELETE /api/tag/...` | autenticado |
+| Auth | `POST /api/auth/login`, `POST /api/auth/logout` | Login/logout |
+| Users | `POST /api/users`, `GET /api/users/me` | Registration / authenticated |
+| Projects | `GET`, `POST`, and `PATCH /api/project/...` | Authenticated |
+| Entries | `GET`, `POST`, `PATCH`, and `DELETE /api/technical-entry/...` | Authenticated |
+| Tags | `GET`, `POST`, and `DELETE /api/tag/...` | Authenticated |
 
-Projetos também expõem sub-recursos para entradas técnicas, tecnologias,
-comandos e recursos. Entradas expõem tags e tentativas de solução.
+Projects also expose subresources for technical entries, technologies, commands, and resources. Entries expose tags and solution attempts.
 
-## Testes e qualidade
+## Tests and quality
 
 ```bash
 pnpm --filter api lint
@@ -132,8 +119,7 @@ pnpm --filter api test
 pnpm --filter api test:cov
 ```
 
-Os testes de integração e end-to-end usam um PostgreSQL separado. Suba esse
-banco antes dos testes e encerre-o ao terminar:
+Integration and end-to-end tests use a separate PostgreSQL instance. Start it before testing and stop it afterward:
 
 ```bash
 pnpm --filter api db:test:up
@@ -142,13 +128,8 @@ pnpm --filter api test:e2e
 pnpm --filter api db:test:down
 ```
 
-O banco de testes usa `apps/api/.env.test` e, por padrão, a porta `5433`.
-`db:test:reset` remove os dados desse banco; use-o somente quando essa limpeza
-for intencional.
+The test database uses `apps/api/.env.test` and defaults to port `5433`. `db:test:reset` deletes its data; use it only when that cleanup is intentional.
 
-## Migrações
+## Migrations
 
-O schema está em [`prisma/schema.prisma`](prisma/schema.prisma) e as alterações
-versionadas ficam em [`prisma/migrations`](prisma/migrations). Durante o
-desenvolvimento, altere o schema com cuidado e registre uma migration antes de
-compartilhar a mudança com o restante do time.
+The schema lives in [`prisma/schema.prisma`](prisma/schema.prisma), and versioned changes live in [`prisma/migrations`](prisma/migrations). During development, change the schema carefully and record a migration before sharing the change with the team.

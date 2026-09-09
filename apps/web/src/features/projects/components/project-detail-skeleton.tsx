@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProjectDetailSkeleton() {
   return (
-    <div aria-label="Carregando projeto" className="space-y-8" role="status">
+    <div aria-label="Loading project" className="space-y-8" role="status">
       <div className="space-y-5">
         <Skeleton className="h-5 w-28" />
         <div className="flex items-start gap-4">

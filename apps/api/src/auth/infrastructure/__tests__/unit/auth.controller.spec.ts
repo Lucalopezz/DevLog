@@ -33,7 +33,7 @@ describe('AuthController', () => {
     process.env.NODE_ENV = originalNodeEnv;
   });
 
-  it('faz login, grava o token em cookie protegido e retorna somente o usuário', async () => {
+  it('signs in, stores the token in a protected cookie, and returns only the user', async () => {
     const response = makeResponse();
     const user = { id: 'user-id', name: 'Lucas', email: 'lucas@example.com' };
     execute.mockResolvedValue({ accessToken: 'access-token', user });
@@ -61,7 +61,7 @@ describe('AuthController', () => {
     ]);
   });
 
-  it('habilita o atributo secure do cookie em produção', async () => {
+  it('enables the cookie secure attribute in production', async () => {
     process.env.NODE_ENV = 'production';
     const response = makeResponse();
     execute.mockResolvedValue({
@@ -79,7 +79,7 @@ describe('AuthController', () => {
     );
   });
 
-  it('remove o cookie com os mesmos atributos relevantes no logout', () => {
+  it('clears the cookie using the same relevant attributes on logout', () => {
     const response = makeResponse();
 
     controller.logout(response);

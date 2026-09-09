@@ -2,11 +2,11 @@ import { CreateTagUseCaseInput } from '@/tag/application/usecases/create-tag.use
 import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateTagDto implements Omit<CreateTagUseCaseInput, 'userId'> {
-  @IsNotEmpty({ message: 'O nome é obrigatório' })
-  @IsString({ message: 'Parametro inválido' })
-  @MinLength(3, { message: 'O nome deve ter no mínimo 3 caracteres' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @IsString({ message: 'Invalid parameter' })
+  @MinLength(3, { message: 'Name must be at least 3 characters long' })
   @MaxLength(80, {
-    message: 'O nome deve ter no máximo 80 caracteres',
+    message: 'Name must be at most 80 characters long',
   })
   name: string;
 }

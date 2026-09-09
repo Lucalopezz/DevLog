@@ -4,7 +4,7 @@ import { SearchParams, SearchResult } from '../../searchable.repository';
 class StubEntity extends Entity<{ name: string }> {}
 
 describe('SearchParams', () => {
-  it('normaliza paginação e filtro inválidos para valores padrão seguros', () => {
+  it('normalizes invalid pagination and filters to safe defaults', () => {
     const params = new SearchParams({
       page: Number.NaN,
       perPage: -1,
@@ -20,7 +20,7 @@ describe('SearchParams', () => {
     expect(params.filter).toBeNull();
   });
 
-  it('mantém valores válidos de paginação, ordenação e filtro', () => {
+  it('preserves valid pagination, sorting, and filter values', () => {
     const params = new SearchParams({
       page: 2,
       perPage: 20,
@@ -40,7 +40,7 @@ describe('SearchParams', () => {
 });
 
 describe('SearchResult', () => {
-  it('calcula a última página e serializa entidades opcionalmente', () => {
+  it('calculates the last page and optionally serializes entities', () => {
     const item = new StubEntity({ name: 'Lucas' }, 'user-id');
     const result = new SearchResult({
       items: [item],

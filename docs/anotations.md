@@ -1,72 +1,72 @@
-# Tutorial guiado: primeira versão de Projects no frontend
+# Guided tutorial: the first Projects frontend version
 
-Este é o próximo exercício recomendado para o frontend do DevLog.
+This is the next recommended exercise for the DevLog frontend.
 
-Or run codex resume and select Documente a feature projects.
+Or resume the conversation about documenting the projects feature.
 
-## Objetivo deste exercício
+## Exercise goal
 
-Implementar uma primeira versão da tela de projetos com uma fatia vertical
-completa:
+Implement the first project screen as a complete vertical
+slice:
 
-1. criar um projeto;
-2. listar os projetos do usuário autenticado;
-3. pesquisar pelo nome;
-4. filtrar por status;
-5. paginar os resultados;
-6. mostrar estados de carregamento, erro e lista vazia;
-7. adicionar a rota privada `/projects` e o link na sidebar.
+1. Create a project;
+2. List projects owned by the authenticated user;
+3. Search by name;
+4. Filter by status;
+5. Paginate results;
+6. Show loading, error, and empty-list states;
+7. Add the private `/projects` route and sidebar link.
 
-Não implemente tudo de Projects de uma vez. A API também possui detalhes,
-tecnologias, comandos, recursos, arquivamento, restauração, edição e exclusão.
-Essas serão as próximas fatias da mesma feature.
+Do not implement all of Projects at once. The API also has details,
+technologies, commands, resources, archiving, restoration, editing, and deletion.
+These will be subsequent slices of the same feature.
 
-O motivo dessa ordem é didático: esta primeira entrega ensina o ciclo mais
-importante do frontend de dados remotos:
+This order is educational: the first delivery teaches the most
+important remote-data frontend cycle:
 
 ```text
-formulário
-  → validação local
+Form
+  → local validation
   → mutation HTTP
-  → resposta da API
-  → invalidação do cache
-  → nova consulta da lista
+  → API response
+  → cache invalidation
+  → new list query
   → interface atualizada
 ```
 
-Ao terminar, você terá uma feature útil e uma base que poderá reutilizar em
-Tags e Technical Entries.
+Afterward, you will have a useful feature and a foundation reusable in
+Tags and Technical Entries.
 
-## Decisão de escopo
+## Scope decision
 
-### O que entra agora
+### Included now
 
-- rota privada `/projects`;
-- consulta `GET /api/project`;
-- criação `POST /api/project`;
-- filtros de nome e status;
-- filtro padrão para exibir apenas projetos não arquivados;
-- paginação usando o `meta` devolvido pela API;
-- formulário com `name` obrigatório e `description` opcional.
+- Private `/projects` route;
+- Query through `GET /api/project`;
+- Creation through `POST /api/project`;
+- Name and status filters;
+- A default filter showing only unarchived projects;
+- Pagination using API `meta`;
+- A form with required `name` and optional `description`.
 
-### O que fica para depois
+### Deferred
 
-- página de detalhes `/projects/:id`;
-- edição;
-- arquivar, restaurar e excluir;
-- tecnologias;
-- comandos;
-- recursos;
-- debounce da busca;
-- testes automatizados do frontend, quando um test runner for configurado.
+- `/projects/:id` detail page;
+- Editing;
+- Archiving, restoration, and deletion;
+- Technologies;
+- Commands;
+- Resources;
+- Search debouncing;
+- Automated frontend tests once a test runner is configured.
 
-Essa separação evita duas dificuldades ao mesmo tempo: primeiro você aprende a
-listagem e a mutação; depois aprende relações entre recursos e ações sobre um
-recurso específico.
+This separation avoids tackling two difficulties together: first learn
+listing and mutations, then relationships between resources and actions on a
+specific resource.
 
-## Antes de codar: leia o contrato que já existe
+## Before coding: read the existing contract
 
-Confira estes arquivos antes de começar:
+Check these files before starting:
 
 - `apps/api/src/project/infrastructure/project.controller.ts`;
 - `apps/api/src/project/infrastructure/dto/project/create-project.dto.ts`;
@@ -76,23 +76,23 @@ Confira estes arquivos antes de começar:
 - `docs/usecases/projects.md`;
 - `docs/guides/frontend_structure.md`.
 
-O backend já está preparado. O frontend precisa apenas representar esse
-contrato sem duplicar regras que pertencem ao servidor.
+The backend is ready. The frontend only needs to represent that
+contract without duplicating server-owned rules.
 
-### Endpoints da primeira etapa
+### First-stage endpoints
 
-| Operação | Endpoint | Corpo ou parâmetros |
+| Operation | Endpoint | Body or parameters |
 | --- | --- | --- |
-| listar | `GET /api/project` | `page`, `perPage`, `name`, `status`, `archivedAt`, `sort`, `sortDir` |
-| criar | `POST /api/project` | `{ name, description? }` |
+| List | `GET /api/project` | `page`, `perPage`, `name`, `status`, `archivedAt`, `sort`, `sortDir` |
+| Create | `POST /api/project` | `{ name, description? }` |
 
-O `api` do frontend já possui `baseURL` com `/api` e
-`withCredentials: true`. Por isso, as funções da feature devem chamar
-`/project`, e não repetir `/api` nem configurar cookies novamente.
+The frontend `api` already has a `baseURL` including `/api` and
+`withCredentials: true`. Feature functions should therefore call
+`/project`, without repeating `/api` or configuring cookies again.
 
-### Resposta da listagem
+### List response
 
-A API retorna uma coleção com esta forma conceitual:
+The API returns a collection with this conceptual shape:
 
 ```ts
 {
@@ -106,13 +106,13 @@ A API retorna uma coleção com esta forma conceitual:
 }
 ```
 
-O campo `data` contém os projetos. O campo `meta` contém as informações para a
-paginação. Não calcule a quantidade de páginas no componente: o backend já
-calcula `lastPage` a partir da quantidade total de itens.
+`data` contains projects. `meta` contains pagination information.
+Do not calculate page count in the component: the backend already
+calculates `lastPage` from the total item count.
 
-### Modelo recebido pelo frontend
+### Model received by the frontend
 
-O presenter do backend devolve, entre outros, estes campos:
+The backend presenter returns these fields, among others:
 
 ```ts
 type Project = {
@@ -127,17 +127,17 @@ type Project = {
 }
 ```
 
-No frontend, datas vindas do JSON devem ser tipadas inicialmente como
-`string`. O navegador recebe texto ISO; transformar para `Date` só é necessário
-quando a apresentação exigir formatação ou comparação de datas.
+Initially type JSON dates in the frontend as
+`string`. The browser receives ISO text; convert to `Date` only
+when presentation requires date formatting or comparison.
 
-Os valores de status são do domínio da API. Os textos em português, cores e
-ícones são decisões de apresentação e devem ficar em um arquivo como
-`presentation.ts`, não dentro da função HTTP.
+Status values belong to the API domain. English labels, colors, and
+icons are presentation choices and belong in a file such as
+`presentation.ts`, outside the HTTP function.
 
-## Passo 1 — crie a estrutura da feature
+## Step 1 — create the feature structure
 
-Crie somente as pastas e arquivos que a primeira versão realmente precisa:
+Create only the directories and files the first version actually needs:
 
 ```text
 apps/web/src/features/projects/
@@ -159,96 +159,96 @@ apps/web/src/features/projects/
     └── project.ts
 ```
 
-A separação tem uma intenção:
+The separation is intentional:
 
-- `api/` conhece URLs e payloads HTTP;
-- `hooks/` conecta a API ao React Query;
-- `schemas/` conhece a validação do formulário;
-- `components/` conhece a interface de Projects;
-- `pages/` compõe a tela e conversa com a rota;
-- `presentation.ts` traduz valores do domínio para a interface;
-- `types/project.ts` mantém os contratos próprios da feature;
-- `api/types.ts` mantém contratos genéricos de transporte, como paginação.
+- `api/` knows HTTP URLs and payloads;
+- `hooks/` connects the API to React Query;
+- `schemas/` knows form validation;
+- `components/` knows the Projects interface;
+- `pages/` composes the screen and interacts with the route;
+- `presentation.ts` maps domain values to the interface;
+- `types/project.ts` keeps feature-specific contracts;
+- `api/types.ts` keeps generic transport contracts such as pagination.
 
-Não coloque chamadas de Axios diretamente em `ProjectsPage`. Isso faria a
-página conhecer transporte, cache e regras de consulta ao mesmo tempo.
+Do not call Axios directly in `ProjectsPage`. That would make the
+page responsible for transport, caching, and query rules together.
 
 ### Checkpoint
 
-Neste momento, os arquivos podem estar vazios. O importante é você conseguir
-explicar por que cada responsabilidade está em sua pasta.
+Files may be empty at this point. What matters is being able to
+explain why each responsibility belongs in its directory.
 
-## Passo 2 — modele os tipos do frontend
+## Step 2 — model frontend types
 
-Em `features/projects/types/project.ts`, declare:
+In `features/projects/types/project.ts`, declare:
 
-1. o union type `ProjectStatus` com `ACTIVE`, `INACTIVE` e `FINISHED`;
-2. o tipo `Project` recebido da API;
-3. o tipo `ProjectCollection`, reutilizando o `Pagination<T>` global de
+1. The `ProjectStatus` union with `ACTIVE`, `INACTIVE`, and `FINISHED`;
+2. The `Project` type received from the API;
+3. The `ProjectCollection` type, reusing the global `Pagination<T>` from
    `@/api/types`;
-4. o tipo dos parâmetros de busca;
-5. o tipo do payload de criação.
+4. The search parameter type;
+5. The creation payload type.
 
-Use tipos próprios do frontend em vez de importar classes do backend. O
-frontend e o backend são aplicações separadas; compartilhar uma classe de
-entidade criaria acoplamento entre camadas e poderia levar regras internas do
-domínio para o navegador.
+Use frontend-owned types instead of importing backend classes.
+Frontend and backend are separate applications; sharing an entity
+class would couple layers and could expose internal domain rules
+to the browser.
 
-Uma forma de pensar nos contratos é:
-
-```text
-Project                 ← um recurso
-ProjectCollection       ← resposta paginada
-ListProjectsParams      ← entrada da consulta
-CreateProjectInput      ← entrada da mutation
-```
-
-Inclua apenas campos que realmente serão usados agora, mas mantenha o tipo
-compatível com a resposta da API. `description` e `localPath` podem ser
-opcionais; `archivedAt` pode ser ausente em um projeto não arquivado.
-
-## Passo 3 — centralize textos e apresentação de status
-
-Em `features/projects/presentation.ts`, crie um mapa para cada status:
+One way to think about the contracts:
 
 ```text
-ACTIVE   → Ativo
-INACTIVE → Inativo
-FINISHED → Finalizado
+Project                 ← a resource
+ProjectCollection       ← paginated response
+ListProjectsParams      ← query input
+CreateProjectInput      ← mutation input
 ```
 
-Você também pode definir uma classe visual para cada um:
+Include only fields needed now, while keeping the type
+compatible with the API response. `description` and `localPath` may be
+optional; `archivedAt` may be absent on an unarchived project.
+
+## Step 3 — centralize status text and presentation
+
+In `features/projects/presentation.ts`, create a map for each status:
 
 ```text
-ACTIVE   → aparência positiva
-INACTIVE → aparência neutra
-FINISHED → aparência informativa
+ACTIVE   → Active
+INACTIVE → Inactive
+FINISHED → Finished
 ```
 
-O componente deve consultar esse mapa, em vez de espalhar ternários como
-`status === 'ACTIVE'` pela tela.
+You can also define a visual class for each:
 
-Isso é uma distinção importante: `ACTIVE` é um valor do domínio; “Ativo” é
-uma decisão de idioma da interface. Se a API mudar ou a aplicação ganhar
-outro idioma, a alteração fica concentrada na apresentação.
+```text
+ACTIVE   → positive appearance
+INACTIVE → neutral appearance
+FINISHED → informational appearance
+```
 
-## Passo 4 — implemente a função HTTP de listagem
+The component should consult this map instead of scattering ternaries such as
+`status === 'ACTIVE'` across the screen.
 
-Em `features/projects/api/list-projects.ts`:
+This distinction matters: `ACTIVE` is a domain value; “Active” is
+an interface language choice. If the API changes or another language is
+added, the change stays in presentation.
 
-1. importe `api` de `@/api/http`;
-2. importe os tipos da feature;
-3. crie uma função assíncrona `listProjects(params)`;
-4. faça `api.get<ProjectCollection>('/project', { params })`;
-5. retorne somente `response.data`.
+## Step 4 — implement the list HTTP function
 
-Não faça a requisição na montagem do componente com `useEffect`. A leitura é
-responsabilidade do React Query, porque ele fornece cache, deduplicação,
-estado de carregamento, erro e refetch.
+In `features/projects/api/list-projects.ts`:
 
-### Parâmetros iniciais sugeridos
+1. Import `api` from `@/api/http`;
+2. Import the feature types;
+3. Create an asynchronous `listProjects(params)` function;
+4. Call `api.get<ProjectCollection>('/project', { params })`;
+5. Return only `response.data`.
 
-Na primeira chamada, envie:
+Do not request data on component mount with `useEffect`. Reading is
+React Query's responsibility because it supplies caching, deduplication,
+loading, errors, and refetching.
+
+### Suggested initial parameters
+
+For the first call, send:
 
 ```text
 page=1
@@ -258,18 +258,18 @@ sort=createdAt
 sortDir=desc
 ```
 
-O valor textual `null` é entendido pelo DTO do backend como filtro
-`archivedAt: null`. Assim, a tela principal mostra projetos não arquivados.
-Se você omitir esse parâmetro, a API pode retornar arquivados e não arquivados
-juntos, porque a ausência do filtro tem outro significado.
+The backend DTO interprets the string `null` as the filter
+`archivedAt: null`, so the main screen shows unarchived projects.
+Omitting this parameter may return archived and unarchived projects
+together, because an absent filter has a different meaning.
 
-O status pode ficar ausente inicialmente. Dessa forma, a lista mostra projetos
-ativos, inativos e finalizados, desde que não estejam arquivados.
+Status can initially be omitted. The list then shows active, inactive,
+and finished projects, provided they are not archived.
 
-## Passo 5 — defina as query keys e crie `useProjects`
+## Step 5 — define query keys and create `useProjects`
 
-No mesmo arquivo da API ou em um pequeno arquivo `projects.keys.ts`, defina uma
-hierarquia de chaves:
+In the same API file or a small `projects.keys.ts`, define a
+key hierarchy:
 
 ```text
 projects
@@ -277,37 +277,37 @@ projects
     └── list(params)
 ```
 
-A chave da lista precisa incluir os parâmetros da busca. O React Query deve
-entender que estas são consultas diferentes:
+The list key must include search parameters. React Query must
+understand that these are different queries:
 
 ```text
 ['projects', 'list', { page: 1, name: 'api' }]
 ['projects', 'list', { page: 2, name: 'api' }]
 ```
 
-Em `hooks/use-projects.ts`:
+In `hooks/use-projects.ts`:
 
-1. use `useQuery` do `@tanstack/react-query`;
-2. receba os parâmetros como argumento;
-3. use a chave que inclui esses parâmetros;
-4. passe `listProjects` como `queryFn`;
-5. retorne o objeto do React Query.
+1. Use `useQuery` from `@tanstack/react-query`;
+2. Receive parameters as an argument;
+3. Use the key containing those parameters;
+4. Pass `listProjects` as `queryFn`;
+5. Return the React Query object.
 
-O componente não precisa saber se os dados vieram de cache ou da rede. Ele
-apenas observa `data`, `isPending`, `isError`, `error` e `refetch`.
+The component does not need to know whether data came from cache or the network.
+It only observes `data`, `isPending`, `isError`, `error`, and `refetch`.
 
-### Por que os parâmetros fazem parte da chave?
+### Why are parameters part of the key?
 
-Se a chave fosse apenas `['projects']`, a busca por “api” poderia reaproveitar
-incorretamente a resposta da busca por “web”. A chave representa a identidade
-da consulta, não apenas o nome do recurso.
+If the key were only `['projects']`, searching for “api” might incorrectly reuse
+the response for “web”. The key represents query identity,
+not just the resource name.
 
-## Passo 6 — configure a rota privada
+## Step 6 — configure the private route
 
-Atualize `apps/web/src/routes/router.tsx`:
+Update `apps/web/src/routes/router.tsx`:
 
-1. importe `ProjectsPage`;
-2. dentro do ramo que já usa `loader: requireUser`, adicione:
+1. Import `ProjectsPage`;
+2. Inside the branch already using `loader: requireUser`, add:
 
 ```tsx
 {
@@ -316,253 +316,253 @@ Atualize `apps/web/src/routes/router.tsx`:
 }
 ```
 
-Não crie um novo guard dentro da página. A rota já possui a proteção do
-`requireUser`. Lembre-se, porém, de que essa proteção é uma barreira de UX e
-de navegação; quem realmente protege os dados é o `AuthGuard` do backend.
+Do not create another guard inside the page. The route already has
+`requireUser` protection. Remember that this is a UX and navigation
+boundary; the backend `AuthGuard` actually protects the data.
 
-O fluxo ficará assim:
+The flow becomes:
 
 ```text
-acesso a /projects
-  → requireUser verifica a sessão
-  → sessão válida: ProjectsPage é renderizada
-  → sessão inválida: redirect para /login
+Access /projects
+  → requireUser checks the session
+  → valid session: render ProjectsPage
+  → invalid session: redirect to /login
 ```
 
-## Passo 7 — adicione o link da sidebar
+## Step 7 — add the sidebar link
 
-Em `apps/web/src/components/app-sidebar.tsx`:
+In `apps/web/src/components/app-sidebar.tsx`:
 
-1. escolha um ícone do `lucide-react`, como `FolderKanban`;
-2. importe o ícone;
-3. no menu autenticado, adicione um `SidebarLink` para `/projects`;
-4. confirme que o link está dentro do ramo exibido apenas para usuários
-   autenticados.
+1. Choose a `lucide-react` icon, such as `FolderKanban`;
+2. Import the icon;
+3. Add a `SidebarLink` to `/projects` in the authenticated menu;
+4. Confirm the link is inside the branch shown only to authenticated
+   users.
 
-O link deve usar `NavLink`, como o item “Início”. Assim, o React Router informa
-quando a rota está ativa e a sidebar aplica o estilo correspondente.
+The link should use `NavLink`, like the Home item. React Router then reports
+when the route is active, and the sidebar applies the matching style.
 
-Não duplique a lógica de autenticação na sidebar. `useGetUser` serve para
-decidir o que exibir; o loader continua sendo a barreira da rota.
+Do not duplicate authentication logic in the sidebar. `useGetUser` decides
+what to show; the loader remains the route boundary.
 
-## Passo 8 — monte primeiro a tela de listagem sem formulário
+## Step 8 — build the list screen before the form
 
-Implemente `features/projects/pages/projects-page.tsx` em pequenas partes.
+Implement `features/projects/pages/projects-page.tsx` in small parts.
 
-### 8.1 Cabeçalho
+### 8.1 Header
 
-Crie um `main` ou `section` com:
+Create a `main` or `section` with:
 
-- título “Projetos”;
-- texto explicando que são os projetos do usuário;
-- botão “Novo projeto” ou uma área de criação visível.
+- A Projects title;
+- Text explaining that these are the user's projects;
+- A New project button or visible creation area.
 
-Por enquanto, pode deixar o formulário sempre visível abaixo do cabeçalho. Isso
-reduz o escopo inicial. Transformar o formulário em modal ou drawer é um
-refinamento posterior.
+For now, the form can stay visible below the header. This
+reduces initial scope. Converting it to a modal or drawer is a
+later refinement.
 
-### 8.2 Estado da consulta
+### 8.2 Query state
 
-Chame `useProjects` com os parâmetros atuais. Existem duas opções para guardar
-esses parâmetros:
+Call `useProjects` with the current parameters. There are two ways to store
+these parameters:
 
-- estado local com `useState`, mais simples para a primeira implementação;
-- query string com `useSearchParams`, recomendada para esta tela.
+- Local `useState`, simpler for a first implementation;
+- A query string through `useSearchParams`, recommended for this screen.
 
-Use `useSearchParams` se quiser que a busca possa ser recarregada, compartilhada
-e navegada com os botões voltar e avançar do navegador. Nesse modelo, a URL é
-a fonte de verdade:
+Use `useSearchParams` to allow reloading, sharing, and navigating the search
+through browser back/forward buttons. In this model, the URL is
+the source of truth:
 
 ```text
 /projects?name=api&status=ACTIVE&page=1
 ```
 
-Converta valores da URL para os tipos esperados antes de chamar o hook. Por
-exemplo, `page` precisa virar número e um status desconhecido deve ser tratado
-como ausente.
+Convert URL values to expected types before calling the hook. For
+example, convert `page` to a number and treat an unknown status
+as absent.
 
-Uma estratégia prática é manter os campos de filtro como “rascunho” local e
-aplicar a busca somente quando o usuário enviar o formulário de filtros. Ao
-aplicar um novo filtro, volte para `page=1`; caso contrário, o usuário poderia
-estar na página 4 de uma busca antiga e receber uma página vazia na nova busca.
+A practical strategy keeps filter fields as a local draft and
+applies the search only when the filter form is submitted.
+Reset to `page=1` when applying a new filter; otherwise, the user might
+remain on page 4 of a previous search and get an empty page for the new one.
 
-### 8.3 Estados assíncronos
+### 8.3 Asynchronous states
 
-Renderize explicitamente cada estado:
+Render each state explicitly:
 
-1. `isPending`: skeletons ou uma mensagem “Carregando projetos...”;
-2. `isError`: mensagem compreensível e botão “Tentar novamente” usando
+1. `isPending`: skeletons or a Loading projects... message;
+2. `isError`: a clear message and a Try again button using
    `refetch`;
-3. resposta sem itens: estado vazio com convite para criar o primeiro projeto;
-4. resposta com itens: lista de projetos;
-5. refetch depois de uma consulta existente: mantenha os dados visíveis e,
-   se desejar, mostre um indicador menor de atualização.
+3. Response without items: an empty state inviting the user to create their first project;
+4. Response with items: the project list;
+5. Refetch after an existing query: keep data visible and,
+   optionally, show a smaller update indicator.
 
-Não trate `isPending` e lista vazia como a mesma coisa. `isPending` significa
-que ainda não sabemos o resultado; lista vazia significa que a API respondeu e
-não encontrou itens.
+Do not treat `isPending` and an empty list as the same state. `isPending` means
+the result is still unknown; an empty list means the API responded and
+found no items.
 
-### 8.4 Card ou linha de projeto
+### 8.4 Project card or row
 
-Em `components/project-list.tsx`, renderize cada projeto com:
+In `components/project-list.tsx`, render each project with:
 
-- nome;
-- descrição, quando existir;
-- badge com o status traduzido;
-- data de criação ou atualização formatada;
-- indicação de caminho local somente quando existir.
+- Name;
+- Description, when present;
+- A badge with the display status;
+- Formatted creation or update date;
+- Local path only when present.
 
-Use `project.id` como `key`, não o índice do array. O id representa a
-identidade do recurso mesmo quando a ordenação ou a paginação muda.
+Use `project.id` as `key`, not the array index. The ID represents
+resource identity even when sorting or pagination changes.
 
-Por enquanto, o card pode ser somente leitura. Não coloque botões de editar,
-arquivar ou excluir antes de implementar as mutations correspondentes.
+For now, the card can be read-only. Do not add edit, archive, or delete
+buttons before their mutations are implemented.
 
-## Passo 9 — implemente a paginação
+## Step 9 — implement pagination
 
-Depois que a lista básica funcionar, adicione:
+Once the basic list works, add:
 
-- botão “Anterior”;
-- botão “Próxima”;
-- texto `Página X de Y`;
-- opcionalmente, total de projetos.
+- A Previous button;
+- A Next button;
+- `Page X of Y` text;
+- Optionally, the total project count.
 
-Use `meta.currentPage` e `meta.lastPage`:
+Use `meta.currentPage` and `meta.lastPage`:
 
 ```text
-Anterior desabilitado quando currentPage <= 1
-Próxima desabilitada quando currentPage >= lastPage
+Previous disabled when currentPage <= 1
+Next disabled when currentPage >= lastPage
 ```
 
-Ao trocar de página, atualize apenas `page` nos parâmetros da consulta.
-Mantenha `name`, `status`, `archivedAt`, `sort` e `sortDir`; a paginação faz
-parte da mesma busca, não inicia uma busca sem filtros.
+When changing pages, update only `page` in query parameters.
+Keep `name`, `status`, `archivedAt`, `sort`, and `sortDir`; pagination belongs
+to the same search and must not start an unfiltered search.
 
-O backend usa `perPage` para calcular `lastPage`. O frontend não deve tentar
-reimplementar essa regra contando apenas os itens que recebeu, porque a página
-atual pode ter menos itens que o limite e ainda haver outras páginas.
+The backend uses `perPage` to calculate `lastPage`. The frontend should not
+reimplement this by counting received items, since the current page
+may have fewer items than the limit while other pages still exist.
 
-## Passo 10 — crie o schema do formulário
+## Step 10 — create the form schema
 
-Em `features/projects/schemas/project.schema.ts`, use Zod para representar as
-regras conhecidas antes de chamar a API:
+In `features/projects/schemas/project.schema.ts`, use Zod to represent
+known rules before calling the API:
 
-- `name`: texto obrigatório, mínimo de 3 e máximo de 150 caracteres;
-- `description`: texto opcional.
+- `name`: required text, 3 to 150 characters;
+- `description`: optional text.
 
-Esses limites aparecem no `CreateProjectDto` do backend e devem ser refletidos
-no formulário para dar feedback rápido ao usuário. Ainda assim, mantenha a
-validação no backend: o navegador pode ser burlado e diferentes clientes podem
-consumir a mesma API.
+These limits appear in backend `CreateProjectDto` and should be reflected
+in the form for immediate feedback. Keep backend validation
+because browsers can be bypassed and different clients may
+consume the same API.
 
-Use `zodResolver` com `useForm`, seguindo o padrão de
+Use `zodResolver` with `useForm`, following
 `features/auth/hooks/use-login-form.ts`.
 
-O fluxo do formulário é:
+The form flow is:
 
 ```text
-input controlado pelo React Hook Form
+Input controlled by React Hook Form
   → zodResolver
-  → se válido, onSubmit recebe os dados tipados
+  → if valid, onSubmit receives typed data
   → mutation chama POST /api/project
 ```
 
-Considere normalizar `name` com `trim()` antes de enviar. Isso melhora a
-experiência, mas não substitui a validação do backend. Decida conscientemente
-se espaços da descrição devem ser preservados.
+Consider normalizing `name` with `trim()` before submission. This improves
+the experience but does not replace backend validation. Deliberately decide
+whether description whitespace should be preserved.
 
-## Passo 11 — implemente `ProjectForm`
+## Step 11 — implement `ProjectForm`
 
-Em `components/project-form.tsx`:
+In `components/project-form.tsx`:
 
-1. crie o formulário com `useForm` e o schema;
-2. envolva os campos com o componente `Form` do projeto;
-3. use `FormInput` para o nome;
-4. use `FormField` + `FormControl` com um `textarea` para a descrição, ou
-   crie um `FormTextarea` reutilizável somente se essa necessidade aparecer em
+1. Create the form with `useForm` and the schema;
+2. Wrap fields with the project `Form` component;
+3. Use `FormInput` for name;
+4. Use `FormField` + `FormControl` with a description `textarea`, or
+   create a reusable `FormTextarea` only if the need appears in
    outras features;
-5. mostre `FormMessage` em cada campo;
-6. adicione um botão de submit;
-7. desabilite o botão enquanto a mutation estiver pendente;
-8. altere o texto para “Criando...” durante o envio;
-9. após sucesso, limpe o formulário;
-10. permita que a página decida onde o formulário será exibido.
+5. Show `FormMessage` for each field;
+6. Add a submit button;
+7. Disable it while the mutation is pending;
+8. Change its text to Creating... during submission;
+9. Reset the form after success;
+10. Let the page decide where the form is displayed.
 
-O `FormField` é importante porque conecta valor, erro, label e acessibilidade.
-Não use apenas `useState` para o valor e um `if` separado para erros; isso
-duplicaria responsabilidades que o padrão React Hook Form + shadcn já resolve.
+`FormField` connects value, error, label, and accessibility.
+Using only `useState` for values and separate `if` statements for errors
+would duplicate responsibilities handled by React Hook Form + shadcn.
 
-### Acessibilidade para observar
+### Accessibility checks
 
-Confirme no navegador que:
+Confirm in the browser that:
 
-- cada label aponta para seu input;
-- o campo inválido recebe `aria-invalid`;
-- a mensagem de erro é associada por `aria-describedby`;
-- o formulário pode ser usado somente com teclado;
-- o botão comunica o estado de envio e não permite submits repetidos.
+- Each label points to its input;
+- Invalid fields receive `aria-invalid`;
+- Error messages are associated through `aria-describedby`;
+- The form works with keyboard only;
+- The button communicates submission state and prevents repeated submissions.
 
-Esses detalhes já são favorecidos pelos componentes `FormLabel`, `FormControl`
-e `FormMessage` existentes.
+The existing `FormLabel`, `FormControl`, and
+`FormMessage` components already support these details.
 
-## Passo 12 — implemente a função HTTP de criação
+## Step 12 — implement the creation HTTP function
 
-Em `features/projects/api/create-project.ts`:
+In `features/projects/api/create-project.ts`:
 
-1. crie uma função `createProject(input)`;
-2. faça `api.post<Project>('/project', input)`;
-3. retorne `response.data`.
+1. Create a `createProject(input)` function;
+2. Call `api.post<Project>('/project', input)`;
+3. Return `response.data`.
 
-A função HTTP não deve exibir toast, navegar ou invalidar queries. Ela deve
-conhecer somente a comunicação com a API. Efeitos de interface pertencem ao
-hook ou ao componente que possui o contexto da tela.
+The HTTP function should only handle API communication, without
+toasts, navigation, or query invalidation. Interface effects belong to
+the hook or component that owns the screen context.
 
-## Passo 13 — crie `useCreateProject`
+## Step 13 — create `useCreateProject`
 
-Em `hooks/use-create-project.ts`, use `useMutation`.
+In `hooks/use-create-project.ts`, use `useMutation`.
 
 ### `mutationFn`
 
-Passe `createProject` como `mutationFn`. Isso conecta os dados validados do
-formulário ao POST.
+Pass `createProject` as `mutationFn`. This connects validated form
+data to POST.
 
 ### `onSuccess`
 
-Depois de criar:
+After creation:
 
-1. invalide as queries de listas de projetos;
-2. mostre `toast.success('Projeto criado com sucesso!')`;
-3. deixe o formulário ser resetado pelo componente ou informe esse sucesso
-   por callback;
-4. não navegue para detalhes, porque a tela de detalhes ainda não existe.
+1. Invalidate project list queries;
+2. Show `toast.success('Project created successfully!')`;
+3. Let the component reset the form or report success
+   through a callback;
+4. Do not navigate to details yet, since that screen does not exist at this stage.
 
-A invalidação é necessária porque a lista antiga continua correta apenas para o
-instante anterior à criação. Ao invalidar a chave de lista, o React Query
-refaz a consulta e traz a ordenação e a paginação oficiais do servidor.
+Invalidation is necessary because the old list is accurate only for
+the moment before creation. Invalidating the list key makes React Query
+refetch the server's authoritative sorting and pagination.
 
 ### `onError`
 
-Use `getApiErrorMessage` com uma mensagem de fallback, por exemplo:
+Use `getApiErrorMessage` with a fallback message, for example:
 
 ```text
-Não foi possível criar o projeto. Tente novamente.
+Could not create the project. Try again.
 ```
 
-O helper já normaliza o formato de erro do Nest, que pode ser uma string ou um
-array de mensagens. Assim, o hook não precisa conhecer detalhes do Axios.
+The helper normalizes Nest errors, which can be a string or an
+array of messages, so the hook does not need to know Axios details.
 
-### Por que invalidar em vez de inserir manualmente?
+### Why invalidate instead of inserting manually?
 
-Você poderia usar `queryClient.setQueryData` para colocar o projeto novo no
-início da lista. Isso é mais imediato, mas exige manter manualmente a ordenação,
-o total e todas as páginas afetadas. Na primeira versão, invalidar é mais
-simples e confiável. Depois de entender o fluxo, estude atualização otimista e
-atualização manual de cache.
+You could use `queryClient.setQueryData` to put the new project at
+the start of the list. This is immediate but requires manually maintaining sorting,
+totals, and every affected page. In the first version, invalidation is
+simpler and more reliable. After understanding the flow, study optimistic
+updates and manual cache updates.
 
-## Passo 14 — conecte formulário, página e mutation
+## Step 14 — connect form, page, and mutation
 
-Decida onde o hook de mutation será instanciado. Uma opção clara para estudar
-é instanciá-lo na página e passar para o formulário somente o necessário:
+Decide where to instantiate the mutation hook. One clear option for study
+is to instantiate it in the page and pass only what the form needs:
 
 ```text
 ProjectsPage
@@ -572,158 +572,158 @@ ProjectsPage
   └── ProjectList(data)
 ```
 
-O fluxo completo deve ser:
+The complete flow should be:
 
 ```text
-usuário preenche nome e descrição
-  → ProjectForm valida com Zod
-  → onSubmit entrega dados válidos à página
+User fills in name and description
+  → ProjectForm validates with Zod
+  → onSubmit passes valid data to the page
   → useCreateProject executa POST
-  → API retorna o projeto criado
+  → API returns the created project
   → hook invalida ['projects', 'lists']
   → useProjects refaz GET
-  → lista mostra o novo projeto
+  → list shows the new project
 ```
 
-Não faça `window.location.reload()`. O React Query já sabe atualizar a parte
-da interface que depende dos dados modificados.
+Do not call `window.location.reload()`. React Query already knows how to update
+the interface parts that depend on modified data.
 
-## Passo 15 — trate filtros sem criar requisições desnecessárias
+## Step 15 — handle filters without unnecessary requests
 
-Adicione um formulário separado para filtros:
+Add a separate filter form:
 
-- input de nome;
-- select nativo de status com a opção “Todos”;
-- botão “Buscar”;
-- botão “Limpar”.
+- Name input;
+- Native status select with an All option;
+- Search button;
+- Clear button.
 
-Ao buscar:
+When searching:
 
-1. remova parâmetros vazios;
-2. preserve `archivedAt=null`;
-3. defina `page=1`;
-4. atualize a query string ou o estado escolhido;
-5. deixe a mudança dos parâmetros gerar uma nova `queryKey`.
+1. Remove empty parameters;
+2. Preserve `archivedAt=null`;
+3. Set `page=1`;
+4. Update the query string or chosen state;
+5. Let parameter changes generate a new `queryKey`.
 
-Ao limpar, volte para o estado inicial. Não adicione debounce ainda: primeiro
-entenda a relação entre parâmetros, query key e resposta. Depois, se a busca
-for disparada a cada tecla, compare essa solução com um botão de envio e
-estude debounce com cuidado.
+When clearing, return to the initial state. Do not add debouncing yet:
+first understand parameters, query keys, and responses. Later, if search
+runs on every keystroke, compare it with explicit form submission and
+study debouncing carefully.
 
-### Atenção ao status
+### Status handling
 
-O valor vazio do select deve significar “não enviar `status`”. Não envie a
-string `"ALL"`, porque `ALL` não faz parte do enum aceito pelo backend.
+The empty select value means omit `status`. Do not send
+`"ALL"`, because `ALL` is not part of the backend enum.
 
-## Passo 16 — valide o comportamento manualmente
+## Step 16 — validate behavior manually
 
-Com a API, o banco e o frontend executando, verifique:
+With the API, database, and frontend running, verify:
 
-### Sessão
+### Session
 
-- visitante que acessa `/projects` é redirecionado para `/login`;
-- usuário autenticado consegue abrir `/projects`;
-- o link aparece na sidebar somente durante uma sessão válida.
+- Guests accessing `/projects` are redirected to `/login`;
+- Authenticated users can open `/projects`;
+- The sidebar link appears only during a valid session.
 
-### Listagem
+### Listing
 
-- carregamento mostra feedback visual;
-- lista mostra apenas projetos não arquivados por padrão;
-- status aparece traduzido;
-- descrição ausente não cria um espaço estranho;
-- lista vazia tem uma mensagem útil;
-- erro oferece nova tentativa;
-- paginação preserva os filtros.
+- Loading shows visual feedback;
+- The list shows only unarchived projects by default;
+- Status uses its English display label;
+- Missing descriptions do not create awkward gaps;
+- Empty lists have a useful message;
+- Errors offer a retry;
+- Pagination preserves filters.
 
-### Criação
+### Creation
 
-- nome vazio mostra erro local;
-- nome com menos de 3 caracteres mostra erro local;
-- nome com mais de 150 caracteres mostra erro local;
-- descrição é opcional;
-- botão não permite vários envios enquanto a requisição está pendente;
-- erro da API aparece em toast;
-- sucesso mostra toast e o novo projeto aparece sem recarregar a página.
+- An empty name shows a local error;
+- A name shorter than 3 characters shows a local error;
+- A name longer than 150 characters shows a local error;
+- Description is optional;
+- The button prevents multiple submissions while a request is pending;
+- API errors appear in a toast;
+- Success shows a toast and the new project appears without reloading the page.
 
-### Rede e cache
+### Network and cache
 
-Use o DevTools do React Query já configurado no projeto e o painel Network do
-navegador para observar:
+Use the configured React Query Devtools and the browser Network panel
+to observe:
 
-1. qual query key foi criada;
-2. quais parâmetros foram enviados;
-3. quando a query fica `pending`, `success` ou `error`;
-4. qual requisição acontece depois da criação;
-5. se o cookie é enviado pela configuração global do Axios.
+1. Which query key was created;
+2. Which parameters were sent;
+3. When the query becomes `pending`, `success`, or `error`;
+4. Which request follows creation;
+5. Whether the global Axios configuration sends the cookie.
 
-Esse acompanhamento é parte do exercício. Não basta a tela “parecer” correta;
-entenda quais eventos produziram cada mudança.
+This observation is part of the exercise. A screen that looks correct is not enough;
+understand which events caused each change.
 
-## Passo 17 — validação técnica
+## Step 17 — technical validation
 
-Depois de implementar a primeira versão, execute na raiz:
+After implementing the first version, run from the root:
 
 ```bash
 pnpm --filter web lint
 pnpm --filter web build
 ```
 
-Corrija os avisos de TypeScript e ESLint antes de continuar. Em especial,
-observe:
+Fix TypeScript and ESLint warnings before continuing. Pay particular attention to:
+Check:
 
-- tipos de `status` vindos de `URLSearchParams`, que são apenas `string`;
-- campos opcionais possivelmente `undefined`;
-- imports que não são usados;
-- componentes React exportados no mesmo arquivo de forma incompatível com o
+- `status` values from `URLSearchParams`, which are only strings;
+- Optional fields that may be `undefined`;
+- Unused imports;
+- React components exported in the same file in a way incompatible with
   Fast Refresh;
-- nomes de query keys usados de forma diferente entre query e mutation.
+- Query key names used inconsistently between query and mutation.
 
-Como o frontend ainda não possui test runner, a validação mínima desta etapa é
-lint, build e o roteiro manual acima.
+Since the frontend has no test runner yet, the minimum validation is
+lint, build, and the manual checklist above.
 
-## Critérios de conclusão da primeira fatia
+## First-slice completion criteria
 
-Considere Projects pronto para a próxima etapa quando:
+Projects is ready for the next stage when:
 
-- `/projects` é uma rota privada funcional;
-- a lista vem da API e usa os parâmetros corretamente;
-- filtros e paginação geram consultas diferentes no React Query;
-- a criação valida localmente e envia o payload correto;
-- o cache é invalidado após sucesso;
-- loading, erro e vazio são estados distintos;
-- a sidebar possui o link correto;
-- `pnpm --filter web lint` e `pnpm --filter web build` passam.
+- `/projects` is a working private route;
+- The list comes from the API and uses parameters correctly;
+- Filters and pagination produce distinct React Query queries;
+- Creation validates locally and sends the correct payload;
+- The cache is invalidated after success;
+- Loading, error, and empty states are distinct;
+- The sidebar has the correct link;
+- `pnpm --filter web lint` and `pnpm --filter web build` pass.
 
-## Próxima ordem depois desta etapa
+## Next steps after this stage
 
-Quando a primeira fatia estiver estável, avance nesta ordem:
+Once the first slice is stable, proceed in this order:
 
-1. `GET /api/project/:id` e página `/projects/:id`;
-2. tecnologias do projeto;
-3. comandos e recursos, cada um como uma pequena lista + mutation;
-4. arquivamento e restauração;
-5. exclusão com confirmação;
-6. melhorar paginação, debounce e atualização de cache.
+1. `GET /api/project/:id` and the `/projects/:id` page;
+2. Project technologies;
+3. Commands and resources, each as a small list + mutation;
+4. Archiving and restoration;
+5. Deletion with confirmation;
+6. Improve pagination, debouncing, and cache updates.
 
-O detalhe deve vir antes das ações complexas porque ele cria o contexto para
-tecnologias, comandos e recursos. Ao implementar cada nova operação, repita o
-mesmo raciocínio:
+Details should precede complex actions because they provide context for
+technologies, commands, and resources. Repeat the same reasoning for
+each new operation:
 
 ```text
-contrato da API
-  → tipo
-  → função HTTP
-  → query ou mutation
+API contract
+  → type
+  → HTTP function
+  → query or mutation
   → componente
-  → estados assíncronos
+  → asynchronous states
   → cache
-  → validação manual
+  → manual validation
 ```
 
-## Passo 18 — atualize os dados gerais do projeto
+## Step 18 — update general project details
 
-A atualização genérica já deve cuidar somente dos campos escalares do próprio
-projeto. No frontend, o fluxo fica distribuído assim:
+Generic updates should cover only the project's own scalar fields.
+The frontend flow is distributed as follows:
 
 ```text
 ProjectEditForm
@@ -731,103 +731,103 @@ ProjectEditForm
   → useUpdateProject
   → updateProject
   → PATCH /api/project/:id
-  → invalidação do detalhe e das listas
+  → detail and list invalidation
 ```
 
-`ProjectFormFields` concentra os campos compartilhados de nome e descrição.
-`ProjectForm` continua sendo o wrapper de criação e `ProjectEditForm` o wrapper
-de edição; dessa forma, a marcação e a acessibilidade são reutilizadas sem
-misturar as mutations ou os schemas de operações diferentes.
+`ProjectFormFields` groups shared name and description fields.
+`ProjectForm` remains the creation wrapper and `ProjectEditForm` the
+editing wrapper, reusing markup and accessibility without
+mixing mutations or schemas from different operations.
 
-Confira o contrato antes de criar a mutation:
+Check the contract before creating the mutation:
 
-| Campo | Tipo | Comportamento |
+| Field | Type | Behavior |
 | --- | --- | --- |
-| `name` | `string` | substitui o nome e continua obrigatório quando enviado |
-| `description` | `string \| null` | `null` remove a descrição |
-| `status` | `ACTIVE \| INACTIVE \| FINISHED` | altera o estado de trabalho |
-| `localPath` | `string \| null` | `null` remove o caminho local |
+| `name` | `string` | Replaces the name and remains required when supplied |
+| `description` | `string \| null` | `null` clears the description |
+| `status` | `ACTIVE \| INACTIVE \| FINISHED` | Changes the work state |
+| `localPath` | `string \| null` | `null` clears the local path |
 
-O `PATCH` é parcial: campo ausente preserva o valor salvo. O formulário de
-edição pode enviar todos os dados gerais atuais, mas a função HTTP não deve
-assumir que todo consumidor fará isso. Essa distinção é importante para não
-confundir “não alterar” com “limpar”.
+`PATCH` is partial: omission preserves the saved value. The edit form
+may send all current general details, but the HTTP function must not
+assume every consumer does so. This distinction prevents confusing
+leave unchanged with clear.
 
-Não inclua `archivedAt` no payload genérico. Arquivar e restaurar são transições
-de ciclo de vida e possuem endpoints próprios. Da mesma forma, tecnologias,
-comandos e recursos são agregados relacionados e devem continuar usando suas
-próprias mutations.
+Do not include `archivedAt` in the generic payload. Archiving and restoration
+are lifecycle transitions with dedicated endpoints. Likewise, technologies,
+commands, and resources are related entities and should keep using
+their own mutations.
 
-### Como adicionar o `localPath` ao formulário
+### Adding `localPath` to the form
 
-1. Inclua `localPath` nos tipos de entrada e nos valores controlados do
-   formulário.
-2. Inicialize o campo com `project.localPath ?? ''`; a interface trabalha com
-   string vazia para representar um campo visualmente vazio.
-3. Renderize um `FormInput` com label “Caminho local”. O componente conecta o
-   campo ao React Hook Form e mantém label, erro e acessibilidade associados.
-4. Antes do `PATCH`, aplique `trim()` e converta string vazia para `null`.
-   Assim, apagar o conteúdo no formulário remove o valor persistido.
-5. Após sucesso, invalide tanto `getProjectQueryKey(projectId)` quanto
-   `projectsKeys.lists()`. O detalhe precisa ser recarregado porque a resposta
-   do update não contém as coleções de tecnologias, comandos e recursos.
+1. Include `localPath` in input types and controlled
+   form values.
+2. Initialize it with `project.localPath ?? ''`; the interface uses
+   an empty string for a visually empty field.
+3. Render a `FormInput` labeled Local path. It connects the
+   field to React Hook Form and associates its label, error, and accessibility.
+4. Before `PATCH`, apply `trim()` and convert an empty string to `null`.
+   Clearing the form content then removes the persisted value.
+5. After success, invalidate both `getProjectQueryKey(projectId)` and
+   `projectsKeys.lists()`. Reload the detail because the update response
+   does not contain technology, command, and resource collections.
 
-O caminho é apenas uma referência informada pelo usuário; a API não deve
-presumir que o servidor consegue acessar o filesystem do navegador ou validar
-se a pasta existe.
+The path is only a user-supplied reference; the API must not
+assume the server can access the browser filesystem or verify
+whether the directory exists.
 
-## Passo 19 — marque um projeto como arquivado
+## Step 19 — archive a project
 
-Arquivamento não é uma edição comum. O endpoint específico é:
+Archiving is not a normal edit. Its dedicated endpoint is:
 
 ```text
 PATCH /api/project/:id/archive
 ```
 
-Implemente essa ação separadamente:
+Implement this action separately:
 
-1. crie `archiveProject(projectId)` em `features/projects/api/` sem body;
-2. crie `useArchiveProject` com `useMutation`;
-3. no sucesso, invalide o detalhe e as listas de projetos e mostre um toast;
-4. adicione um botão com confirmação na página de detalhe;
-5. desabilite ações de edição, tecnologias, comandos e recursos enquanto
+1. Create `archiveProject(projectId)` in `features/projects/api/` without a body;
+2. Create `useArchiveProject` with `useMutation`;
+3. On success, invalidate project details and lists and show a toast;
+4. Add a confirmation button on the detail page;
+5. Disable editing, technology, command, and resource actions while
    `archivedAt` existir;
-6. mantenha o projeto consultável e mostre o badge “Arquivado”;
-7. use `PATCH /api/project/:id/restore` para permitir a restauração em uma
+6. Keep the project queryable and show an Archived badge;
+7. Use `PATCH /api/project/:id/restore` to enable restoration in a
    mutation distinta.
 
-A operação é idempotente: repetir o arquivamento não deve trocar novamente a
-data. O `ProjectStatus` também não deve ser alterado automaticamente; ele é um
-eixo independente que preserva, por exemplo, um projeto `FINISHED` arquivado.
+The operation is idempotent: repeated archiving must not change the
+date again. `ProjectStatus` must not change automatically either; it is
+independent and preserves, for example, an archived `FINISHED` project.
 
-### O que não pertence à atualização geral?
+### What falls outside general updates?
 
-| Operação | Endpoint | Motivo da separação |
+| Operation | Endpoint | Reason for separation |
 | --- | --- | --- |
-| Arquivar/restaurar | `PATCH /api/project/:id/archive` e `PATCH /api/project/:id/restore` | transição de ciclo de vida |
-| Excluir | `DELETE /api/project/:id` | remoção física e confirmação explícita |
-| Tecnologia | `POST`/`DELETE /api/project/:id/technologies/...` | entidade relacionada |
-| Comando | `POST`/`PATCH`/`DELETE /api/project/:id/commands/...` | entidade relacionada |
-| Recurso | `POST`/`PATCH`/`DELETE /api/project/:id/resources/...` | entidade relacionada |
+| Archive/restore | `PATCH /api/project/:id/archive` and `PATCH /api/project/:id/restore` | Lifecycle transition |
+| Delete | `DELETE /api/project/:id` | Hard deletion and explicit confirmation |
+| Technology | `POST`/`DELETE /api/project/:id/technologies/...` | Related entity |
+| Command | `POST`/`PATCH`/`DELETE /api/project/:id/commands/...` | Related entity |
+| Resource | `POST`/`PATCH`/`DELETE /api/project/:id/resources/...` | Related entity |
 
-Antes de criar uma nova função, procure o caso de uso correspondente em
-`docs/usecases/projects.md`. O caso de uso é a fonte para decidir se a ação é
-uma atualização de dados gerais ou uma operação de domínio explícita.
+Before creating a function, find the corresponding use case in
+`docs/usecases/projects.md`. It determines whether the action is
+a general data update or an explicit domain operation.
 
-## Assuntos para estudar enquanto implementa
+## Topics to study while implementing
 
-- diferença entre estado local e estado remoto;
-- identidade de uma query e composição de `queryKey`;
+- Local state versus remote state;
+- Query identity and `queryKey` composition;
 - `useQuery` versus `useMutation`;
-- invalidação e atualização manual de cache;
-- diferença entre validação no cliente e validação no servidor;
-- `FormProvider`, `Controller` e acessibilidade em formulários;
-- loaders do React Router como barreira de navegação;
-- paginação baseada em metadados do servidor;
-- separação entre domínio, transporte e apresentação;
-- estados de UI: pending, error, empty, success e refetching.
+- Invalidation and manual cache updates;
+- Client validation versus server validation;
+- `FormProvider`, `Controller`, and form accessibility;
+- React Router loaders as navigation boundaries;
+- Pagination based on server metadata;
+- Domain, transport, and presentation separation;
+- UI states: pending, error, empty, success, and refetching.
 
-Se algo parecer difícil, implemente primeiro sem filtros e sem paginação,
-confirme o ciclo `GET → renderização`, depois adicione uma responsabilidade por
-vez. O objetivo deste arquivo é servir como roteiro de estudo, não como uma
-lista para copiar inteira de uma vez.
+If something is difficult, first implement without filters or pagination,
+confirm the `GET → render` cycle, then add one responsibility at a
+time. This file is a study guide, not a checklist to copy
+all at once.

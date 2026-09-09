@@ -2,21 +2,21 @@ import { CreateUserUseCaseInput } from '@/user/application/usecases/create-user.
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class CreateUserDto implements CreateUserUseCaseInput {
-  @IsString({ message: 'Parametro inválido' })
-  @IsNotEmpty({ message: 'O nome é obrigatório' })
-  @MinLength(3, { message: 'O nome deve ter no mínimo 3 caracteres' })
+  @IsString({ message: 'Invalid parameter' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @MinLength(3, { message: 'Name must be at least 3 characters long' })
   name: string;
 
-  @IsEmail({}, { message: 'Email inválido' })
-  @IsNotEmpty({ message: 'O email é obrigatório' })
+  @IsEmail({}, { message: 'Invalid email' })
+  @IsNotEmpty({ message: 'Email is required' })
   email: string;
 
-  @IsString({ message: 'Parametro inválido' })
-  @IsNotEmpty({ message: 'A senha é obrigatória' })
-  @MinLength(6, { message: 'A senha deve ter no mínimo 6 caracteres' })
+  @IsString({ message: 'Invalid parameter' })
+  @IsNotEmpty({ message: 'Password is required' })
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
   password: string;
 
-  @IsString({ message: 'Parametro inválido' })
-  @IsNotEmpty({ message: 'A confirmação de senha é obrigatória' })
+  @IsString({ message: 'Invalid parameter' })
+  @IsNotEmpty({ message: 'Password confirmation is required' })
   confirmPassword: string;
 }

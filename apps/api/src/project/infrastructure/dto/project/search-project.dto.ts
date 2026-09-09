@@ -18,22 +18,22 @@ export class SearchProjectDto implements Omit<
 > {
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'O número da página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Page number must be greater than zero' })
   page?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'Parametro inválido' })
-  @Min(1, { message: 'A quantidade por página deve ser maior que zero' })
+  @IsInt({ message: 'Invalid parameter' })
+  @Min(1, { message: 'Items per page must be greater than zero' })
   perPage?: number;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   name?: string;
 
   @IsOptional()
-  @IsEnum(ProjectStatusEnum, { message: 'Parametro inválido' })
+  @IsEnum(ProjectStatusEnum, { message: 'Invalid parameter' })
   status?: ProjectStatusEnum;
 
   @IsOptional()
@@ -44,14 +44,14 @@ export class SearchProjectDto implements Omit<
 
     return typeof value === 'string' ? new Date(value) : (value as unknown);
   })
-  @IsDate({ message: 'Parametro inválido' })
+  @IsDate({ message: 'Invalid parameter' })
   archivedAt?: Date | null;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   sort?: string;
 
   @IsOptional()
-  @IsIn(['asc', 'desc'], { message: 'Parametro inválido' })
+  @IsIn(['asc', 'desc'], { message: 'Invalid parameter' })
   sortDir?: 'asc' | 'desc';
 }

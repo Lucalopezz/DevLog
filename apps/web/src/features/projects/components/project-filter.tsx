@@ -20,15 +20,15 @@ export function ProjectFilters({
   onSearch,
   onClear,
 }: ProjectFiltersProps) {
-  // Estes valores são o "rascunho". Eles mudam enquanto o usuário digita,
-  // mas ainda não alteram a consulta da API.
+  // These values are the "draft". They change as the user types,
+  // but do not yet change the API query.
   const [name, setName] = useState(initialName);
   const [status, setStatus] = useState<ProjectStatus | "">(initialStatus ?? "");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // A consulta só será executada quando o usuário clicar em Buscar.
+    // The query runs only when the user clicks Search.
     onSearch({ name, status });
   }
 
@@ -42,13 +42,13 @@ export function ProjectFilters({
     <SearchForm onClear={handleClear} onSubmit={handleSubmit}>
       <div className="flex-1 space-y-2">
         <label className="text-sm font-medium" htmlFor="project-name-filter">
-          Nome
+          Name
         </label>
 
         <Input
           id="project-name-filter"
           onChange={(event) => setName(event.target.value)}
-          placeholder="Pesquisar por nome"
+          placeholder="Search by name"
           value={name}
         />
       </div>
@@ -62,17 +62,17 @@ export function ProjectFilters({
           className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm"
           id="project-status-filter"
           onChange={(event) => {
-            // O select entrega uma string. O type guard limita o valor ao
-            // enum aceito pelo backend e representa "Todos" com vazio.
+            // The select returns a string. The type guard restricts it to the
+            // enum accepted by the backend and represents "All" with an empty value.
             const nextStatus = event.target.value;
             setStatus(isProjectStatus(nextStatus) ? nextStatus : "");
           }}
           value={status}
         >
-          <option value="">Todos</option>
-          <option value="ACTIVE">Ativos</option>
-          <option value="INACTIVE">Inativos</option>
-          <option value="FINISHED">Finalizados</option>
+          <option value="">All</option>
+          <option value="ACTIVE">Actives</option>
+          <option value="INACTIVE">Inactives</option>
+          <option value="FINISHED">Finisheds</option>
         </select>
       </div>
     </SearchForm>

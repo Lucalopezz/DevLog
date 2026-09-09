@@ -80,8 +80,8 @@ export class ProjectEntity extends Entity<ProjectProps> {
   }
 
   update(props: ProjectUpdateProps): void {
-    // A aplicação decide se um update vazio é uma entrada válida. No domínio,
-    // ele é apenas um no-op e não deve modificar artificialmente updatedAt.
+    // The application decides whether an empty update is valid input. In the domain,
+    // it is simply a no-op and must not artificially change updatedAt.
     if (Object.values(props).every((value) => value === undefined)) {
       return;
     }
@@ -89,8 +89,8 @@ export class ProjectEntity extends Entity<ProjectProps> {
     this.ensureCanBeModified();
 
     const now = new Date();
-    // Os spreads condicionais preservam campos ausentes. Nos campos anuláveis,
-    // null é normalizado para undefined, que representa ausência no domínio.
+    // Conditional spreads preserve omitted fields. For nullable fields,
+    // null is normalized to undefined, which represents absence in the domain.
     const updatedProps = {
       ...this.props,
       ...(props.name !== undefined ? { name: props.name } : {}),
@@ -126,8 +126,8 @@ export class ProjectEntity extends Entity<ProjectProps> {
   }
 
   archive(): void {
-    // O retorno antecipado torna o comando idempotente: arquivar duas vezes não
-    // restaura nem altera novamente a data de atualização.
+    // Returning early makes the command idempotent: archiving twice does not
+    // restore the project or change the update timestamp again.
     if (this.archivedAt !== undefined) {
       return;
     }
@@ -146,8 +146,8 @@ export class ProjectEntity extends Entity<ProjectProps> {
   }
 
   restore(): void {
-    // Restaurar um projeto já ativo também é um no-op, mantendo a operação segura
-    // quando uma mesma requisição é repetida.
+    // Restoring an already active project is also a no-op, keeping the operation safe
+    // when the same request is repeated.
     if (this.archivedAt === undefined) {
       return;
     }
@@ -224,7 +224,7 @@ export class ProjectEntity extends Entity<ProjectProps> {
   ensureCanBeModified(): void {
     if (this.archivedAt !== undefined) {
       throw new EntityValidationError({
-        archivedAt: ['Projetos arquivados são somente leitura'],
+        archivedAt: ['Archived projects are read-only'],
       });
     }
   }

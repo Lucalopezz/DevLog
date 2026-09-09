@@ -1,11 +1,11 @@
-# Diagramas de sequência — registros técnicos
+# Sequence diagrams — technical entries
 
-## UC-30 — Criar registro técnico
+## UC-30 — Create technical entry
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as TechnicalEntryController
     participant UC as CreateTechnicalEntryUseCase
     participant URepo as UserRepository
@@ -13,234 +13,234 @@ sequenceDiagram
     participant Entry as TechnicalEntryEntity
     participant ERepo as TechnicalEntryRepository
 
-    Usuario->>C: POST /api/technical-entry
+    UserActor->>C: POST /api/technical-entry
     C->>UC: execute(dados, userId)
     UC->>URepo: findById(userId)
-    opt projeto informado
+    opt project supplied
         UC->>PRepo: findById(projectId)
-        alt ausente, alheio ou arquivado
-            UC-->>Usuario: 404 Projeto não encontrado
+        alt missing, owned by another user, or archived
+            UC-->>UserActor: 404 Project not found
         end
     end
-    alt usuário inexistente
-        UC-->>Usuario: 404 Usuário não encontrado
-    else dependências válidas
-        UC->>Entry: criar(dados)
-        Entry-->>UC: entrada válida ou erro 422
-        UC->>ERepo: insert(entrada)
-        UC-->>Usuario: registro criado
+    alt missing user
+        UC-->>UserActor: 404 User not found
+    else valid dependencies
+        UC->>Entry: create(data)
+        Entry-->>UC: valid entry or error 422
+        UC->>ERepo: insert(entry)
+        UC-->>UserActor: entry created
     end
 ```
 
-## UC-31 e UC-32 — Pesquisar e consultar registros
+## UC-31 and UC-32 — Search and retrieve entries
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as TechnicalEntryController
-    participant UC as Caso de uso de consulta
+    participant UC as Query use case
     participant PRepo as ProjectRepository
     participant ERepo as TechnicalEntryRepository
     participant LinkRepo as TechnicalEntryTagRepository
 
     alt UC-31 pesquisar registros
-        Usuario->>C: GET /api/technical-entry?filtros
+        UserActor->>C: GET /api/technical-entry?filters
         C->>UC: search(userId, filtros)
-        alt tipo LEARNING com status
-            UC-->>Usuario: 422 sem status para aprendizado
-        else filtros compatíveis
+        alt LEARNING type with status
+            UC-->>UserActor: 422 learning entries have no status
+        else compatible filters
             opt projectId informado
                 UC->>PRepo: findById(projectId)
-                PRepo-->>UC: projeto próprio ou 404
+                PRepo-->>UC: own project or 404
             end
-            UC->>ERepo: search(filtro inclui userId e archivedAt padrão null)
-            ERepo-->>UC: página de registros
+            UC->>ERepo: search(filter includes userId and archivedAt defaulting to null)
+            ERepo-->>UC: entry page
             UC->>LinkRepo: findTags(ids, userId)
             LinkRepo-->>UC: tags agrupadas
-            UC-->>Usuario: página com tags
+            UC-->>UserActor: page with tags
         end
-    else UC-32 consultar registro
-        Usuario->>C: GET /api/technical-entry/:id
+    else UC-32 get entry
+        UserActor->>C: GET /api/technical-entry/:id
         C->>UC: get(id, userId)
         UC->>ERepo: findById(id)
-        alt ausente ou alheio
-            UC-->>Usuario: 404 Not Found
-        else registro próprio
+        alt missing or belongs to another user
+            UC-->>UserActor: 404 Not Found
+        else own entry
             UC->>LinkRepo: findTags([id], userId)
             LinkRepo-->>UC: tags
-            UC-->>Usuario: registro com tags
+            UC-->>UserActor: entry with tags
         end
     end
 ```
 
-## UC-33 — Atualizar registro técnico
+## UC-33 — Update technical entry
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as TechnicalEntryController
     participant UC as UpdateTechnicalEntryUseCase
     participant ERepo as TechnicalEntryRepository
     participant PRepo as ProjectRepository
     participant Entry as TechnicalEntryEntity
 
-    Usuario->>C: PATCH /api/technical-entry/:id
-    C->>UC: execute(id, userId, alterações)
+    UserActor->>C: PATCH /api/technical-entry/:id
+    C->>UC: execute(id, userId, changes)
     UC->>ERepo: findById(id)
-    alt ausente ou alheio
-        UC-->>Usuario: 404 Not Found
-    else corpo sem alteração
-        UC-->>Usuario: 422 Unprocessable Entity
-    else atualização solicitada
-        opt novo projectId é string
+    alt missing or belongs to another user
+        UC-->>UserActor: 404 Not Found
+    else body without changes
+        UC-->>UserActor: 422 Unprocessable Entity
+    else update requested
+        opt new projectId is a string
             UC->>PRepo: findById(projectId)
-            alt projeto ausente, alheio ou arquivado
-                UC-->>Usuario: 404 Projeto não encontrado
+            alt project missing, owned by another user, or archived
+                UC-->>UserActor: 404 Project not found
             end
         end
-        UC->>Entry: update(alterações)
-        Note over Entry: null remove projeto/conclusão; ausente preserva
-        Entry-->>UC: entrada válida ou erro 422
-        UC->>ERepo: update(entrada)
-        UC-->>Usuario: registro atualizado
+        UC->>Entry: update(changes)
+        Note over Entry: null clears project/conclusion; omission preserves them
+        Entry-->>UC: valid entry or error 422
+        UC->>ERepo: update(entry)
+        UC-->>UserActor: entry updated
     end
 ```
 
-## UC-34 a UC-37 — Estado, arquivamento e exclusão
+## UC-34 through UC-37 — State, archiving, and deletion
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as TechnicalEntryController
-    participant UC as Caso de uso do registro
+    participant UC as Entry use case
     participant ERepo as TechnicalEntryRepository
     participant Entry as TechnicalEntryEntity
-    participant DB as Banco de dados
+    participant DB as Database
 
-    Usuario->>C: PATCH ou DELETE /api/technical-entry/:id
+    UserActor->>C: PATCH or DELETE /api/technical-entry/:id
     C->>UC: execute(id, userId, conclusion?)
     UC->>ERepo: findById(id)
-    alt ausente ou alheio
-        UC-->>Usuario: 404 Not Found
-    else UC-34 resolver
-        alt não é ISSUE OPEN
-            UC-->>Usuario: 422 transição inválida
+    alt missing or belongs to another user
+        UC-->>UserActor: 404 Not Found
+    else UC-34 resolve
+        alt not an OPEN ISSUE
+            UC-->>UserActor: 422 invalid transition
         else ISSUE OPEN
             UC->>Entry: conclude(conclusion)
-            Entry->>Entry: definir conclusion, resolvedAt e updatedAt
-            UC->>ERepo: update(entrada)
-            UC-->>Usuario: registro RESOLVED
+            Entry->>Entry: set conclusion, resolvedAt, and updatedAt
+            UC->>ERepo: update(entry)
+            UC-->>UserActor: RESOLVED entry
         end
-    else UC-35 reabrir
+    else UC-35 reopen
         UC->>Entry: reopen()
-        alt não é ISSUE RESOLVED
-            Entry-->>Usuario: 422 transição inválida
+        alt not a RESOLVED ISSUE
+            Entry-->>UserActor: 422 invalid transition
         else ISSUE RESOLVED
-            Entry->>Entry: remover resolvedAt e preservar histórico
-            UC->>ERepo: update(entrada)
-            UC-->>Usuario: registro OPEN
+            Entry->>Entry: clear resolvedAt and preserve history
+            UC->>ERepo: update(entry)
+            UC-->>UserActor: OPEN entry
         end
-    else UC-36 arquivar
+    else UC-36 archive
         UC->>Entry: archive()
-        Note over Entry: Idempotente se já arquivado
-        UC->>ERepo: update(entrada)
-        UC-->>Usuario: registro arquivado
-    else UC-37 excluir
+        Note over Entry: Idempotent when already archived
+        UC->>ERepo: update(entry)
+        UC-->>UserActor: archived entry
+    else UC-37 delete
         UC->>ERepo: delete(id)
         ERepo->>DB: DELETE registro
-        DB->>DB: excluir tentativas e atribuições em cascata
-        UC-->>Usuario: 204 No Content
+        DB->>DB: cascade deletion of attempts and assignments
+        UC-->>UserActor: 204 No Content
     end
 ```
 
-## UC-38 e UC-39 — Classificar registro com tags
+## UC-38 and UC-39 — Classify an entry with tags
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as TechnicalEntryController
-    participant UC as Caso de uso de atribuição
+    participant UC as Assignment use case
     participant ERepo as TechnicalEntryRepository
     participant TRepo as TagRepository
     participant LinkRepo as TechnicalEntryTagRepository
 
-    Usuario->>C: POST ou DELETE /api/technical-entry/:entryId/tags
+    UserActor->>C: POST or DELETE /api/technical-entry/:entryId/tags
     C->>UC: execute(entryId, tagId, userId)
     UC->>ERepo: findById(entryId)
     UC->>TRepo: findById(tagId)
-    alt registro ou tag ausente/alheio
-        UC-->>Usuario: 404 Not Found
-    else ambos pertencem ao usuário
+    alt entry or tag missing or belongs to another user
+        UC-->>UserActor: 404 Not Found
+    else both belong to the user
         UC->>LinkRepo: exists(entryId, tagId)
-        alt UC-38 atribuir e associação ausente
+        alt UC-38 assign and association missing
             UC->>LinkRepo: add(entryId, tagId)
-            UC-->>Usuario: tag atribuída
-        else UC-38 atribuir e já existe
-            UC-->>Usuario: tag atribuída (idempotente)
-        else UC-39 remover e existe
+            UC-->>UserActor: tag assigned
+        else UC-38 assign and already exists
+            UC-->>UserActor: tag assigned (idempotent)
+        else UC-39 remove and exists
             UC->>LinkRepo: remove(entryId, tagId)
-            UC-->>Usuario: 204 No Content
-        else UC-39 remover e já não existe
-            UC-->>Usuario: 204 No Content (idempotente)
+            UC-->>UserActor: 204 No Content
+        else UC-39 remove and already absent
+            UC-->>UserActor: 204 No Content (idempotent)
         end
     end
 ```
 
-## UC-40 a UC-43 — Tentativas de solução
+## UC-40 through UC-43 — Solution attempts
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as Usuário autenticado
+    actor UserActor as Authenticated user
     participant C as TechnicalEntryController
-    participant UC as Caso de uso de tentativa
+    participant UC as Attempt use case
     participant ERepo as TechnicalEntryRepository
     participant Entry as TechnicalEntryEntity
     participant ARepo as SolutionAttemptRepository
     participant Attempt as SolutionAttemptEntity
 
-    Usuario->>C: requisição em /solution-attempts
+    UserActor->>C: request to /solution-attempts
     C->>UC: execute(entryId, userId, dados?)
     UC->>ERepo: findById(entryId)
-    alt registro ausente ou alheio
-        UC-->>Usuario: 404 Not Found
-    else UC-40 adicionar
-        alt não é ISSUE ou está arquivado
-            UC-->>Usuario: 422 Unprocessable Entity
-        else ISSUE não arquivado
+    alt entry missing or belongs to another user
+        UC-->>UserActor: 404 Not Found
+    else UC-40 add
+        alt not an ISSUE or archived
+            UC-->>UserActor: 422 Unprocessable Entity
+        else unarchived ISSUE
             UC->>Entry: addSolutionAttempt(description, result)
             Entry-->>UC: nova tentativa
             UC->>ARepo: insert(tentativa)
-            UC-->>Usuario: tentativa criada
+            UC-->>UserActor: attempt created
         end
-    else UC-41 listar
+    else UC-41 list
         UC->>ARepo: search(entryId, filtros)
-        ARepo-->>UC: página de tentativas
-        UC-->>Usuario: página
-    else UC-42 atualizar descrição
+        ARepo-->>UC: attempt page
+        UC-->>UserActor: page
+    else UC-42 update description
         UC->>ARepo: findById(attemptId)
-        alt tentativa fora do registro
-            UC-->>Usuario: 404 Not Found
+        alt attempt outside entry
+            UC-->>UserActor: 404 Not Found
         else tentativa vinculada
             UC->>Attempt: updateDescription(description)
             UC->>ARepo: update(tentativa)
-            UC-->>Usuario: tentativa atualizada
+            UC-->>UserActor: attempt updated
         end
-    else UC-43 remover
+    else UC-43 remove
         UC->>ARepo: findById(attemptId)
-        alt tentativa fora do registro
-            UC-->>Usuario: 404 Not Found
+        alt attempt outside entry
+            UC-->>UserActor: 404 Not Found
         else tentativa vinculada
             UC->>ARepo: delete(attemptId)
-            UC-->>Usuario: 204 No Content
+            UC-->>UserActor: 204 No Content
         end
     end
 ```
 
-O fragmento combinado final evidencia uma assimetria atual: só a criação de
-tentativa verifica se o registro é `ISSUE` não arquivado. Consulta, atualização
-e remoção verificam propriedade e vínculo, mas não o arquivamento.
+The final combined fragment highlights a current asymmetry: only creating an
+attempt checks for an unarchived `ISSUE`. Queries, updates,
+and removal check ownership and membership, but not archiving.

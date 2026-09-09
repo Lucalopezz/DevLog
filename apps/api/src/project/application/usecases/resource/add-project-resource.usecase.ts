@@ -33,7 +33,7 @@ export class AddProjectResourceUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(input.projectId);
 
     if (!project || project.userId !== input.userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     const entity = project.addResource(

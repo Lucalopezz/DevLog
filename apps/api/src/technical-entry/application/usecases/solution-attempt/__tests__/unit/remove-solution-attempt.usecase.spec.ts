@@ -17,7 +17,7 @@ function makeEntry(id = ENTRY_ID, userId = USER_ID) {
   return new TechnicalEntryEntity(
     {
       userId,
-      title: 'Erro na API',
+      title: 'API error',
       context: 'Investigando o erro da API',
       type: TechnicalEntryType.ISSUE,
     },
@@ -29,7 +29,7 @@ function makeAttempt(technicalEntryId = ENTRY_ID) {
   return new SolutionAttemptEntity(
     {
       technicalEntryId,
-      description: 'Adicionar credentials na requisição',
+      description: 'Add credentials to the request',
       result: SolutionAttemptResult.PARTIAL,
     },
     ATTEMPT_ID,
@@ -50,7 +50,7 @@ describe('RemoveSolutionAttemptUseCase', () => {
     } as unknown as jest.Mocked<TechnicalEntryRepository>;
   });
 
-  it('remove uma tentativa da entrada do usuário autenticado', async () => {
+  it('removes an attempt from the authenticated user entry', async () => {
     solutionAttemptRepository.findById.mockResolvedValue(makeAttempt());
     const useCase = new RemoveSolutionAttemptUseCase(
       technicalEntryRepository,
@@ -68,7 +68,7 @@ describe('RemoveSolutionAttemptUseCase', () => {
     expect(solutionAttemptRepository.delete.mock.calls).toEqual([[ATTEMPT_ID]]);
   });
 
-  it('não remove uma tentativa inexistente', async () => {
+  it('does not remove a missing attempt', async () => {
     solutionAttemptRepository.findById.mockResolvedValue(null);
     const useCase = new RemoveSolutionAttemptUseCase(
       technicalEntryRepository,
@@ -86,7 +86,7 @@ describe('RemoveSolutionAttemptUseCase', () => {
     expect(solutionAttemptRepository.delete.mock.calls).toHaveLength(0);
   });
 
-  it('não remove uma tentativa de outro usuário ou de outra entrada', async () => {
+  it('does not remove an attempt belonging to another user or entry', async () => {
     technicalEntryRepository.findById.mockResolvedValue(
       makeEntry(ENTRY_ID, OTHER_USER_ID),
     );

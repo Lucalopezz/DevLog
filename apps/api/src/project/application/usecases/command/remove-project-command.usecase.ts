@@ -24,7 +24,7 @@ export class RemoveProjectCommandUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(input.projectId);
 
     if (!project || project.userId !== input.userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     project.ensureCanBeModified();
@@ -34,7 +34,7 @@ export class RemoveProjectCommandUseCase implements UseCaseContract<
     );
 
     if (!command || command.projectId !== project.id) {
-      throw new NotFoundException('Comando não encontrado');
+      throw new NotFoundException('Command not found');
     }
 
     await this.projectCommandRepository.delete(command.id);

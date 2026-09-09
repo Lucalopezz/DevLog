@@ -26,7 +26,7 @@ describe('ProjectTechnologyEntity', () => {
     jest.useRealTimers();
   });
 
-  it('cria uma tecnologia com versão opcional', () => {
+  it('creates a technology with an optional version', () => {
     const technology = new ProjectTechnologyEntity(
       makeProps({ version: undefined }),
     );
@@ -39,17 +39,17 @@ describe('ProjectTechnologyEntity', () => {
   });
 
   it.each([
-    ['projectId inválido', { projectId: 'project-1' }],
-    ['nome vazio', { name: '' }],
-    ['nome acima do limite', { name: 'a'.repeat(101) }],
-    ['versão acima do limite', { version: 'a'.repeat(51) }],
-  ])('rejeita %s', (_, overrides) => {
+    ['invalid projectId', { projectId: 'project-1' }],
+    ['empty name', { name: '' }],
+    ['name above the limit', { name: 'a'.repeat(101) }],
+    ['version above the limit', { version: 'a'.repeat(51) }],
+  ])('rejects %s', (_, overrides) => {
     expect(() => new ProjectTechnologyEntity(makeProps(overrides))).toThrow(
       EntityValidationError,
     );
   });
 
-  it('aceita os limites máximos de nome e versão', () => {
+  it('accepts maximum name and version lengths', () => {
     expect(
       () =>
         new ProjectTechnologyEntity(

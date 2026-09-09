@@ -1,46 +1,46 @@
 # DevLog
 
-O DevLog é uma aplicação pessoal para registrar conhecimento técnico adquirido durante o desenvolvimento de projetos.
+DevLog is a personal application for recording technical knowledge gained while developing projects.
 
-O projeto combina um diário técnico com um painel de projetos. Nele, será possível documentar problemas, tentativas de solução, aprendizados, tecnologias, comandos importantes e links úteis de cada projeto.
+It combines a technical journal with a project dashboard. Use it to document issues, solution attempts, lessons learned, technologies, important commands, and useful links for each project.
 
-## Funcionalidades planejadas
+## Planned features
 
-- Cadastro, login e logout de usuários;
-- Criação e organização de projetos;
-- Registros técnicos de problemas (`ISSUE`) e aprendizados (`LEARNING`);
-- Tentativas de solução, status de resolução e arquivamento de registros;
-- Tags, busca e filtros;
-- Tecnologias, comandos e recursos vinculados aos projetos.
+- User registration, login, and logout;
+- Project creation and organization;
+- Technical entries for issues (`ISSUE`) and lessons learned (`LEARNING`);
+- Solution attempts, resolution status, and entry archiving;
+- Tags, search, and filters;
+- Technologies, commands, and resources linked to projects.
 
-## Tecnologias
+## Technologies
 
-- Monorepo com pnpm Workspaces e Turborepo;
-- Backend em NestJS, Prisma e PostgreSQL;
-- Frontend em React, Vite e TypeScript;
-- Banco de dados em Docker.
+- Monorepo with pnpm Workspaces and Turborepo;
+- NestJS, Prisma, and PostgreSQL backend;
+- React, Vite, and TypeScript frontend;
+- Database running in Docker.
 
-## Estrutura
+## Structure
 
 ```text
 apps/
-  api/      # API NestJS
-  web/      # Interface React
-docker/     # Configuração do PostgreSQL
-docs/       # Decisões e guias do projeto
+  api/      # NestJS API
+  web/      # React interface
+docker/     # PostgreSQL configuration
+docs/       # Project decisions and guides
 ```
 
-## Como executar
+## Getting started
 
-Pré-requisitos: Node.js, pnpm 11.18.0 e Docker.
+Prerequisites: Node.js, pnpm 11.18.0, and Docker.
 
-1. Instale as dependências:
+1. Install dependencies:
 
    ```bash
    pnpm install
    ```
 
-2. Crie um arquivo `.env` na raiz com as credenciais do PostgreSQL, por exemplo:
+2. Create a root `.env` file with PostgreSQL credentials, for example:
 
    ```env
    POSTGRES_DB=devlog
@@ -49,46 +49,42 @@ Pré-requisitos: Node.js, pnpm 11.18.0 e Docker.
    POSTGRES_PORT=5432
    ```
 
-3. Inicie o banco de dados:
+3. Start the database:
 
    ```bash
    pnpm db:up
    ```
 
-4. Execute as aplicações em modo de desenvolvimento:
+4. Run the applications in development mode:
 
    ```bash
    pnpm dev
    ```
 
-Também é possível executá-las separadamente com `pnpm --filter api dev` e `pnpm --filter web dev`.
+You can also run them separately with `pnpm --filter api dev` and `pnpm --filter web dev`.
 
-## Comandos úteis
+## Useful commands
 
 ```bash
-pnpm build                    # Gera a build dos projetos
-pnpm lint                     # Executa o lint
-pnpm test                     # Executa os testes disponíveis
-pnpm --filter api test:integration # Executa a integração da API com o banco de teste
-pnpm --filter api test:e2e    # Executa os testes HTTP end-to-end da API
-pnpm db:down                  # Encerra o banco de dados
-pnpm db:logs                  # Exibe os logs do banco
+pnpm build                        # Build the projects
+pnpm lint                         # Run lint checks
+pnpm test                         # Run available tests
+pnpm --filter api test:integration # Run API integration tests against the test database
+pnpm --filter api test:e2e         # Run API HTTP end-to-end tests
+pnpm db:down                      # Stop the database
+pnpm db:logs                      # View database logs
 ```
 
-## Documentação
+## Documentation
 
-A documentação está organizada por tipo e possui um índice para ajudar a
-encontrar a resposta de uma dúvida:
+Documentation is organized by type, with an index to help you find answers:
 
-- [`docs/README.md`](docs/README.md): ponto de entrada da documentação, com o
-  mapa de dúvidas e arquivos correspondentes;
-- [`docs/decisions/`](docs/decisions/): decisões de produto, arquitetura e
-  banco de dados;
-- [`docs/guides/`](docs/guides/): explicações e fluxos técnicos;
-- [`docs/usecases/`](docs/usecases/): comportamento esperado e regras do
-  sistema;
-- [`docs/backlog/`](docs/backlog/): tarefas e pendências conhecidas.
+- [`docs/README.md`](docs/README.md): documentation entry point, mapping questions to relevant files;
+- [`docs/decisions/`](docs/decisions/): product, architecture, and database decisions;
+- [`docs/guides/`](docs/guides/): technical explanations and workflows;
+- [`docs/usecases/`](docs/usecases/): expected behavior and system rules;
+- [`docs/backlog/`](docs/backlog/): tasks and known pending work.
 
-Se você é novo no projeto, comece pelo
-[`docs/README.md`](docs/README.md) depois de ler as instruções de execução
-acima.
+If you are new to the project, start with [`docs/README.md`](docs/README.md) after reading the setup instructions above.
+
+English is the standard language for the application, documentation, API messages, and code comments. See [`AGENTS.md`](AGENTS.md) for repository guidelines.

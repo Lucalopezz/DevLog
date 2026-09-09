@@ -11,15 +11,15 @@ export class CreateProjectDto implements Omit<
   CreateProjectUseCaseInput,
   'userId'
 > {
-  @IsNotEmpty({ message: 'O nome é obrigatório' })
-  @IsString({ message: 'Parametro inválido' })
-  @MinLength(3, { message: 'O nome deve ter no mínimo 3 caracteres' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @IsString({ message: 'Invalid parameter' })
+  @MinLength(3, { message: 'Name must be at least 3 characters long' })
   @MaxLength(150, {
-    message: 'O nome deve ter no máximo 150 caracteres',
+    message: 'Name must be at most 150 characters long',
   })
   name: string;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   description?: string;
 }

@@ -12,27 +12,27 @@ export class UpdateTechnicalEntryDto implements Omit<
   UpdateTechnicalEntryUseCaseInput,
   'id' | 'userId'
 > {
-  // ValidateIf diferencia ausência de null: o campo pode ser omitido, mas null
-  // não é aceito onde o contrato exige uma string.
+  // ValidateIf distinguishes omission from null: the field may be omitted, but null
+  // is not accepted where the contract requires a string.
   @ValidateIf((_, value) => value !== undefined)
-  @IsString({ message: 'Parametro inválido' })
-  @MinLength(3, { message: 'O título deve ter no mínimo 3 caracteres' })
+  @IsString({ message: 'Invalid parameter' })
+  @MinLength(3, { message: 'Title must be at least 3 characters long' })
   @MaxLength(200, {
-    message: 'O título deve ter no máximo 200 caracteres',
+    message: 'Title must be at most 200 characters long',
   })
   title?: string;
 
   @ValidateIf((_, value) => value !== undefined)
-  @IsString({ message: 'Parametro inválido' })
-  @MinLength(3, { message: 'O contexto deve ter no mínimo 3 caracteres' })
+  @IsString({ message: 'Invalid parameter' })
+  @MinLength(3, { message: 'Context must be at least 3 characters long' })
   context?: string;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   conclusion?: string | null;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
-  @IsUUID('4', { message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
+  @IsUUID('4', { message: 'Invalid parameter' })
   projectId?: string | null;
 }

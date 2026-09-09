@@ -4,19 +4,19 @@ import { isAxiosError } from 'axios'
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Tempo que os dados ficam em cache antes de serem considerados "stale" (obsoletos)
-      // Não significa que os dados serão removidos do cache após esse tempo, 
-      // apenas que eles serão considerados obsoletos e podem ser refetchados se necessário
+      // How long cached data remains fresh before it becomes stale
+      // This does not mean data is removed from the cache after that time; 
+      // only that it becomes stale and can be refetched if needed
       staleTime: 30_000,
-      // Desativa a refetch automático dos dados quando a janela do navegador ganha foco
+      // Disables automatic refetching when the browser window gains focus
       refetchOnWindowFocus: false,
       retry: (failureCount, error) => {
-        // Se o erro for um erro do Axios e o status da resposta for menor que 500, não tenta refazer a requisição
-        // Erro do usuário (4xx) não deve ser tratado como um erro do servidor (5xx)
+        // For Axios errors with a response status below 500, do not retry the request
+        // Client errors (4xx) should be handled differently from server errors (5xx)
         if (isAxiosError(error) && error.response?.status && error.response.status < 500) {
           return false
         }
-        // Permite até 2 tentativas de refazer a requisição em caso de erro
+        // Allows up to 2 retries after an error
         return failureCount < 2
       },
     },

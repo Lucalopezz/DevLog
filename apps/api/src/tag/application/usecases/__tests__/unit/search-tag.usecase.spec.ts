@@ -19,7 +19,7 @@ describe('SearchTagUseCase', () => {
     useCase = new SearchTagUseCase(repository);
   });
 
-  it('converte a entrada em parâmetros de busca restritos ao usuário', async () => {
+  it('converts input to search parameters restricted to the user', async () => {
     repository.search.mockResolvedValue(
       new TagSearchResult({
         items: [],
@@ -53,7 +53,7 @@ describe('SearchTagUseCase', () => {
     });
   });
 
-  it('converte o resultado do repositório em uma saída paginada', async () => {
+  it('converts the repository result to paginated output', async () => {
     const tag = new TagEntity(
       {
         userId: USER_ID,

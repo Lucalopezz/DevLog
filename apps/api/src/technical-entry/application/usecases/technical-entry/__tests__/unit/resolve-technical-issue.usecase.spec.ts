@@ -26,7 +26,7 @@ function makeEntry(
   return new TechnicalEntryEntity(
     {
       userId: overrides.userId ?? USER_ID,
-      title: 'Erro na API',
+      title: 'API error',
       context: 'Investigando o erro da API',
       type: overrides.type ?? TechnicalEntryType.ISSUE,
       conclusion: overrides.conclusion,
@@ -52,7 +52,7 @@ describe('ResolveTechnicalIssueUseCase', () => {
     jest.useRealTimers();
   });
 
-  it('resolve uma ISSUE aberta e registra a conclusão e resolvedAt', async () => {
+  it('resolves an open ISSUE and records the conclusion and resolvedAt', async () => {
     jest.useFakeTimers();
     const resolvedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(resolvedAt);
@@ -75,7 +75,7 @@ describe('ResolveTechnicalIssueUseCase', () => {
     });
   });
 
-  it('permite resolver sem consultar ou exigir tentativa SUCCESSFUL', async () => {
+  it('allows resolution without querying or requiring a SUCCESSFUL attempt', async () => {
     const entry = makeEntry();
     const { repository } = makeRepository(entry);
     const useCase = new ResolveTechnicalIssueUseCase(repository);
@@ -84,12 +84,12 @@ describe('ResolveTechnicalIssueUseCase', () => {
       useCase.execute({
         id: ENTRY_ID,
         userId: USER_ID,
-        conclusion: 'Resolvido diretamente',
+        conclusion: 'Resolved diretamente',
       }),
     ).resolves.toMatchObject({ status: TechnicalEntryStatus.RESOLVED });
   });
 
-  it('rejeita conclusão vazia', async () => {
+  it('rejects an empty conclusion', async () => {
     const entry = makeEntry();
     const { repository } = makeRepository(entry);
     const useCase = new ResolveTechnicalIssueUseCase(repository);
@@ -106,7 +106,7 @@ describe('ResolveTechnicalIssueUseCase', () => {
     expect(entry.status).toBe(TechnicalEntryStatus.OPEN);
   });
 
-  it('rejeita entradas LEARNING', async () => {
+  it('rejects LEARNING entries', async () => {
     const entry = makeEntry({ type: TechnicalEntryType.LEARNING });
     const { repository } = makeRepository(entry);
     const useCase = new ResolveTechnicalIssueUseCase(repository);
@@ -122,9 +122,9 @@ describe('ResolveTechnicalIssueUseCase', () => {
     expect(repository.update.mock.calls).toHaveLength(0);
   });
 
-  it('não permite resolver novamente uma ISSUE já resolvida', async () => {
+  it('does not resolve an already resolved ISSUE again', async () => {
     const entry = makeEntry({
-      conclusion: 'Conclusão anterior',
+      conclusion: 'Previous conclusion',
       resolvedAt: new Date('2026-08-02T12:00:00.000Z'),
     });
     const { repository } = makeRepository(entry);
@@ -134,14 +134,14 @@ describe('ResolveTechnicalIssueUseCase', () => {
       useCase.execute({
         id: ENTRY_ID,
         userId: USER_ID,
-        conclusion: 'Nova conclusão',
+        conclusion: 'New conclusion',
       }),
     ).rejects.toBeInstanceOf(UnprocessableEntityException);
 
     expect(repository.update.mock.calls).toHaveLength(0);
   });
 
-  it('não resolve uma entrada de outro usuário', async () => {
+  it("does not resolve another user's entry", async () => {
     const entry = makeEntry({ userId: OTHER_USER_ID });
     const { repository } = makeRepository(entry);
     const useCase = new ResolveTechnicalIssueUseCase(repository);

@@ -12,7 +12,7 @@ function makeService(values: Record<string, unknown> = {}) {
 }
 
 describe('EnvConfigService', () => {
-  it('usa valores padrão seguros de desenvolvimento quando os opcionais estão ausentes', () => {
+  it('uses safe development defaults when optional values are absent', () => {
     const service = makeService();
 
     expect(service.getAppPort()).toBe(3000);
@@ -21,7 +21,7 @@ describe('EnvConfigService', () => {
     expect(service.getCorsAllowedOrigins()).toEqual([]);
   });
 
-  it('normaliza as origens de CORS configuradas', () => {
+  it('normalizes configured CORS origins', () => {
     const service = makeService({
       CORS_ALLOWED_ORIGINS: ' https://app.dev , ,https://admin.dev ',
     });
@@ -32,7 +32,7 @@ describe('EnvConfigService', () => {
     ]);
   });
 
-  it('permite a origem curinga somente em desenvolvimento', () => {
+  it('allows a wildcard origin only in development', () => {
     const service = makeService({
       NODE_ENV: 'production',
       CORS_ALLOWED_ORIGINS: '*',
@@ -43,7 +43,7 @@ describe('EnvConfigService', () => {
     );
   });
 
-  it('exige um segredo JWT', () => {
+  it('requires a JWT secret', () => {
     expect(() => makeService().getJwtSecret()).toThrow(
       'JWT_SECRET is required',
     );

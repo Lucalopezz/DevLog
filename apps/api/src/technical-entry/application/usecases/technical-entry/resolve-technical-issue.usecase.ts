@@ -35,23 +35,23 @@ export class ResolveTechnicalIssueUseCase implements UseCaseContract<
     );
 
     if (technicalEntry === null || technicalEntry.userId !== input.userId) {
-      throw new NotFoundException('Entrada técnica não encontrada');
+      throw new NotFoundException('Technical entry not found');
     }
 
     if (technicalEntry.type !== TechnicalEntryType.ISSUE) {
       throw new UnprocessableEntityException(
-        'Somente entradas do tipo ISSUE podem ser concluídas',
+        'Only ISSUE entries can be resolved',
       );
     }
 
     if (technicalEntry.status !== TechnicalEntryStatus.OPEN) {
       throw new UnprocessableEntityException(
-        'Somente entradas OPEN podem ser concluídas',
+        'Only OPEN entries can be resolved',
       );
     }
 
-    // A entidade valida a conclusão e registra resolvedAt de forma atômica
-    // para manter a transição de domínio em um único ponto.
+    // The entity validates the conclusion and records resolvedAt atomically
+    // to keep the domain transition in a single place.
     technicalEntry.conclude(input.conclusion);
 
     await this.technicalEntryRepository.update(technicalEntry);

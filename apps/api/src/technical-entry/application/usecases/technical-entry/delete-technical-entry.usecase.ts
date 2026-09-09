@@ -23,7 +23,7 @@ export class DeleteTechnicalEntryUseCase implements UseCaseContract<
     );
 
     if (technicalEntry === null || technicalEntry.userId !== input.userId) {
-      throw new NotFoundException('Entrada técnica não encontrada');
+      throw new NotFoundException('Technical entry not found');
     }
 
     await this.technicalEntryRepository.delete(input.id);

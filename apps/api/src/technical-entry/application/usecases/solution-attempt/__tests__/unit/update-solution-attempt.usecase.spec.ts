@@ -17,7 +17,7 @@ function makeEntry(id = ENTRY_ID, userId = USER_ID) {
   return new TechnicalEntryEntity(
     {
       userId,
-      title: 'Erro na API',
+      title: 'API error',
       context: 'Investigando o erro da API',
       type: TechnicalEntryType.ISSUE,
     },
@@ -29,7 +29,7 @@ function makeAttempt(technicalEntryId = ENTRY_ID) {
   return new SolutionAttemptEntity(
     {
       technicalEntryId,
-      description: 'Adicionar credentials na requisição',
+      description: 'Add credentials to the request',
       result: SolutionAttemptResult.PARTIAL,
     },
     ATTEMPT_ID,
@@ -50,7 +50,7 @@ describe('UpdateSolutionAttemptUseCase', () => {
     } as unknown as jest.Mocked<TechnicalEntryRepository>;
   });
 
-  it('atualiza somente a descrição e preserva o resultado', async () => {
+  it('updates only the description and preserves the result', async () => {
     const attempt = makeAttempt();
     solutionAttemptRepository.findById.mockResolvedValue(attempt);
     const useCase = new UpdateSolutionAttemptUseCase(
@@ -62,19 +62,19 @@ describe('UpdateSolutionAttemptUseCase', () => {
       attemptId: ATTEMPT_ID,
       userId: USER_ID,
       technicalEntryId: ENTRY_ID,
-      description: 'Corrigir o cabeçalho da requisição',
+      description: 'Fix the request header',
     });
 
     expect(output).toMatchObject({
       id: ATTEMPT_ID,
       technicalEntryId: ENTRY_ID,
-      description: 'Corrigir o cabeçalho da requisição',
+      description: 'Fix the request header',
       result: SolutionAttemptResult.PARTIAL,
     });
     expect(solutionAttemptRepository.update.mock.calls).toEqual([[attempt]]);
   });
 
-  it('não atualiza uma entrada de outro usuário', async () => {
+  it("does not update another user's entry", async () => {
     technicalEntryRepository.findById.mockResolvedValue(
       makeEntry(ENTRY_ID, OTHER_USER_ID),
     );
@@ -96,7 +96,7 @@ describe('UpdateSolutionAttemptUseCase', () => {
     expect(solutionAttemptRepository.update.mock.calls).toHaveLength(0);
   });
 
-  it('não atualiza uma tentativa vinculada a outra entrada', async () => {
+  it('does not update an attempt linked to another entry', async () => {
     const attempt = makeAttempt(OTHER_ENTRY_ID);
     solutionAttemptRepository.findById.mockResolvedValue(attempt);
     const useCase = new UpdateSolutionAttemptUseCase(

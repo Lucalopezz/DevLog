@@ -5,17 +5,17 @@ export class AddProjectTechnologyDto implements Omit<
   AddProjectTechnologyUseCaseInput,
   'userId' | 'projectId'
 > {
-  @IsNotEmpty({ message: 'O nome da tecnologia é obrigatório' })
-  @IsString({ message: 'O nome da tecnologia deve ser um texto' })
+  @IsNotEmpty({ message: 'Technology name is required' })
+  @IsString({ message: 'Technology name must be a string' })
   @MaxLength(100, {
-    message: 'O nome da tecnologia deve ter no máximo 100 caracteres',
+    message: 'Technology name must be at most 100 characters long',
   })
   name: string;
 
   @IsOptional()
-  @IsString({ message: 'A versão da tecnologia deve ser um texto' })
+  @IsString({ message: 'Technology version must be a string' })
   @MaxLength(50, {
-    message: 'A versão da tecnologia deve ter no máximo 50 caracteres',
+    message: 'Technology version must be at most 50 characters long',
   })
   version?: string;
 }

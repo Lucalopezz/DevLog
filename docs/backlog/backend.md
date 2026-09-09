@@ -1,411 +1,411 @@
-# Backlog do backend — DevLog
+# Backend backlog — DevLog
 
-Este documento lista as tarefas necessárias para implementar o backend do DevLog, seguindo os casos de uso e a ordem de implementação descritos em [`docs/usecases/cases.md`](../usecases/cases.md).
+This document lists the tasks needed to implement the DevLog backend, following the use cases and implementation order in [`docs/usecases/cases.md`](../usecases/cases.md).
 
-Escopo deste arquivo: API NestJS, camada de aplicação, domínio, persistência, autenticação, autorização e testes. O backlog do frontend será criado separadamente.
+Scope: NestJS API, application layer, domain, persistence, authentication, authorization, and tests. The frontend backlog will be created separately.
 
-O passo a passo da autenticação está em [`docs/guides/authentication_workflow.md`](../guides/authentication_workflow.md).
-
-> [!NOTE]
-> Uma tarefa só deve ser marcada como concluída quando existir implementação verificável no backend. A presença de uma tabela no Prisma, por exemplo, não significa que o caso de uso e os endpoints correspondentes já estejam prontos.
+The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](../guides/authentication_workflow.md).
 
 > [!NOTE]
-> Revisão em 2026-09-01: o escopo funcional principal do MVP está implementado e validado pelo build e pelos testes unitários da API (69 suítes, 335 testes). Permanecem abertas apenas lacunas funcionais explícitas (como filtro por tag e agregação completa de projeto), decisões pós-MVP e cobertura HTTP complementar.
+> Mark a task complete only when a verifiable backend implementation exists. A Prisma table alone, for example, does not mean its use case and endpoints are ready.
 
-## Regras transversais
+> [!NOTE]
+> Review on 2026-09-01: the main MVP functional scope is implemented and validated by the API build and unit tests (69 suites, 335 tests). Remaining work covers explicit functional gaps (such as tag filtering and complete project aggregation), post-MVP decisions, and additional HTTP coverage.
 
-- [x] Garantir que todo recurso tenha um proprietário verificável: `userId` direto em usuários, projetos, entradas e tags; recursos filhos usam a propriedade do projeto ou da entrada pai.
-- [x] Impedir leitura, alteração ou exclusão lógica de recursos pertencentes a outro usuário.
-- [x] Definir os estados e tipos documentados:
-  - [x] `TechnicalEntry.type`: `ISSUE` ou `LEARNING`.
-  - [x] Status de problema: a entidade retorna `OPEN` quando `resolvedAt` está vazio e `RESOLVED` quando está preenchido; no MVP, o status não possui coluna própria.
-  - [x] Status de projeto: `ACTIVE`, `INACTIVE` ou `FINISHED`; o enum, a validação e a atualização já existem. `archivedAt` é independente do status (e `INACTIVE` é mapeado para `PAUSED` no schema Prisma).
-  - [x] Resultado de tentativa: `FAILED`, `PARTIAL` ou `SUCCESSFUL` no schema Prisma.
-- [ ] Padronizar erros de validação, autenticação, autorização e recurso não encontrado.
-- [x] Definir DTOs, validações de entrada, respostas HTTP e contratos de cada endpoint.
-- [x] Criar testes unitários para as principais regras de domínio e casos de uso; as lacunas específicas de cobertura permanecem indicadas abaixo.
-- [ ] Criar testes end-to-end para os fluxos HTTP principais.
+## Cross-cutting rules
 
-## 1. Fundação compartilhada
+- [x] Ensure every resource has a verifiable owner: direct `userId` for users, projects, entries, and tags; children use their parent project or entry ownership.
+- [x] Prevent reading, changing, or logically deleting another user's resources.
+- [x] Define the documented states and types:
+  - [x] `TechnicalEntry.type`: `ISSUE` or `LEARNING`.
+  - [x] Issue status: the entity returns `OPEN` when `resolvedAt` is empty and `RESOLVED` when populated; the MVP has no separate status column.
+  - [x] Project status: `ACTIVE`, `INACTIVE`, or `FINISHED`; enum, validation, and updates exist. `archivedAt` is independent of status (`INACTIVE` maps to `PAUSED` in Prisma).
+  - [x] Attempt result: `FAILED`, `PARTIAL`, or `SUCCESSFUL` in Prisma.
+- [ ] Standardize validation, authentication, authorization, and resource-not-found errors.
+- [x] Define DTOs, input validation, HTTP responses, and contracts for every endpoint.
+- [x] Create unit tests for the main domain rules and use cases; specific coverage gaps remain listed below.
+- [ ] Create end-to-end tests for the main HTTP flows.
 
-- [x] Definir a estrutura dos módulos por feature em `apps/api/src/`. -> shared, user, auth e technicalEntry.
-- [x] Definir entidades, identificadores, datas de criação/atualização e estratégia de arquivamento lógico.
-- [x] Configurar o schema do banco e a migration inicial para usuários, projetos, entradas, tags e seus relacionamentos.
-- [x] Definir as interfaces de repositório compartilhadas e as de usuário, projeto, entrada técnica e tag.
-- [x] Implementar os adaptadores Prisma para usuário, projeto, entrada técnica, relação entrada × tag e tag.
-- [ ] Implementar tratamento global de exceções.
-- [x] Centralizar as configurações globais da API em `applyGlobalConfig`, incluindo prefixo `/api`, cookie parser, CORS, serialização e validação.
-- [x] Configurar `ValidationPipe` global com status `422`, `whitelist`, `forbidNonWhitelisted` e `transform`.
-- [x] Habilitar `credentials: true` no CORS para permitir o envio do cookie de autenticação nas requisições do frontend em outra origem.
-- [x] Configurar JWT em cookie HttpOnly; o logout atual remove o cookie porque a estratégia é stateless.
+## 1. Shared foundation
 
-## 2. Usuários e autenticação
+- [x] Define feature modules in `apps/api/src/`: shared, user, auth, and technical-entry.
+- [x] Define entities, identifiers, creation/update dates, and the logical archiving strategy.
+- [x] Configure the database schema and initial migration for users, projects, entries, tags, and relationships.
+- [x] Define shared repository interfaces and those for users, projects, technical entries, and tags.
+- [x] Implement Prisma adapters for users, projects, technical entries, entry/tag relationships, and tags.
+- [ ] Implement global exception handling.
+- [x] Centralize global API configuration in `applyGlobalConfig`, including `/api`, cookie parsing, CORS, serialization, and validation.
+- [x] Configure global `ValidationPipe` with status `422`, `whitelist`, `forbidNonWhitelisted`, and `transform`.
+- [x] Enable CORS `credentials: true` to send authentication cookies from a frontend on another origin.
+- [x] Configure JWT in an HttpOnly cookie; logout clears the cookie because the strategy is stateless.
+
+## 2. Users and authentication
 
 ### RegisterUser
 
-- [x] Criar o caso de uso `CreateUserUseCase`.
-- [x] Validar `name`, `email` e `password`.
-- [x] Rejeitar email já cadastrado. -> findUserByEmail
-- [x] Fazer hash da senha antes de persistir o usuário.
-- [x] Nunca retornar ou armazenar a senha em texto puro.
-- [x] Criar o endpoint de cadastro.
-- [ ] Testar cadastro válido, email inválido, email duplicado e senha fora dos critérios mínimos.
+- [x] Create `CreateUserUseCase`.
+- [x] Validate `name`, `email`, and `password`.
+- [x] Reject registered emails through findUserByEmail.
+- [x] Hash the password before persisting the user.
+- [x] Never return or store plaintext passwords.
+- [x] Create the registration endpoint.
+- [ ] Test valid registration, invalid and duplicate emails, and passwords below minimum requirements.
 
 ### AuthenticateUser
 
-- [x] Criar o caso de uso `AuthenticateUser`.
-- [x] Buscar o usuário por email.
-- [x] Comparar a senha informada com o hash armazenado.
-- [x] Retornar erro sem revelar se o email ou a senha está incorreto.
-- [x] Gerar JWT após autenticação válida.
-- [x] Enviar o token por cookie HttpOnly com `secure`, `sameSite`, `maxAge` e `path` configurados.
-- [x] Criar o endpoint `POST /api/auth/login`.
-- [x] Testar login válido, usuário inexistente, senha incorreta e criação do cookie.
+- [x] Create the `AuthenticateUser` use case.
+- [x] Find the user by email.
+- [x] Compare the supplied password with the stored hash.
+- [x] Return an error without revealing whether the email or password is wrong.
+- [x] Generate a JWT after valid authentication.
+- [x] Send the token in an HttpOnly cookie with configured `secure`, `sameSite`, `maxAge`, and `path` attributes.
+- [x] Create `POST /api/auth/login`.
+- [x] Test valid login, missing user, incorrect password, and cookie creation.
 
 ### GetCurrentUser
 
-- [x] Criar o caso de uso `GetCurrentUser`.
-- [x] Criar o guard que identifica o usuário autenticado pelo cookie JWT.
-- [x] Criar `GET /api/users/me`.
-- [x] Retornar apenas os dados públicos do usuário atual.
-- [ ] Testar acesso autenticado e acesso sem autenticação.
+- [x] Create the `GetCurrentUser` use case.
+- [x] Create the guard that identifies the authenticated user through the JWT cookie.
+- [x] Create `GET /api/users/me`.
+- [x] Return only current user public data.
+- [ ] Test authenticated and unauthenticated access.
 
 ### UpdateUser
 
-- [x] Criar o caso de uso `UpdateUser`.
-- [x] Permitir a alteração somente do nome do usuário.
-- [x] Manter o e-mail imutável após o cadastro.
-- [x] Criar `PATCH /api/users/me`, usando o usuário identificado pelo guard.
-- [ ] Testar atualização válida, usuário inexistente e tentativa de alteração sem autenticação.
+- [x] Create the `UpdateUser` use case.
+- [x] Allow changing only the user name.
+- [x] Keep email immutable after registration.
+- [x] Create `PATCH /api/users/me`, using the user identified by the guard.
+- [ ] Test valid updates, missing users, and unauthenticated update attempts.
 
 ### UpdateUserPassword
 
-- [x] Criar o caso de uso `UpdateUserPassword`.
-- [x] Validar a confirmação da nova senha.
-- [x] Fazer hash da nova senha antes de persistir.
-- [x] Criar `PATCH /api/users/me/password`, usando o usuário identificado pelo guard.
-- [x] Exigir autenticação e tornar `currentPassword` obrigatório para validar a senha atual; esse valor deve ser usado somente na validação e nunca persistido no banco.
-- [ ] Testar atualização válida, senha atual inválida, confirmação divergente e usuário inexistente.
+- [x] Create the `UpdateUserPassword` use case.
+- [x] Validate the new password confirmation.
+- [x] Hash the new password before persistence.
+- [x] Create `PATCH /api/users/me/password`, using the user identified by the guard.
+- [x] Require authentication and `currentPassword` to validate the current password; use it only for validation and never persist it.
+- [ ] Test valid updates, invalid current passwords, mismatched confirmation, and missing users.
 
 ### LogoutUser
 
-- [x] Criar o fluxo de logout stateless; não há sessão persistida para invalidar.
-- [x] Remover o cookie de autenticação.
-- [x] Criar o endpoint `POST /api/auth/logout`.
-- [ ] Testar encerramento da autenticação e comportamento de uma sessão inválida.
+- [x] Create a stateless logout flow; there is no persisted session to invalidate.
+- [x] Clear the authentication cookie.
+- [x] Create `POST /api/auth/logout`.
+- [ ] Test ending authentication and invalid-session behavior.
 
-## 3. Entradas técnicas — MVP inicial
+## 3. Technical entries — initial MVP
 
-> A camada de domínio possui entidade, enum, validação, contrato de repositório, mapper e repositório Prisma. Criação, listagem paginada, consulta individual, atualização, exclusão física, tentativas de solução e resolução já possuem casos de uso, presenters e endpoints protegidos pelo `AuthGuard`. A relação com projetos e tags já possui validações e agregação de tags nas respostas. A etapa ainda não está concluída: faltam tags na criação/alteração, arquivamento e testes HTTP completos.
+> The domain layer has an entity, enum, validation, repository contract, mapper, and Prisma repository. Creation, paginated listing, retrieval, updates, hard deletion, solution attempts, and resolution have use cases, presenters, and AuthGuard-protected endpoints. Project/tag relationships include validation and tag aggregation in responses. At this review stage, tags in creation/updates, archiving, and complete HTTP tests remained pending.
 
 ### CreateTechnicalEntry
 
-- [x] Criar a entidade de entrada técnica.
-- [x] Criar o caso de uso `CreateTechnicalEntry`.
-- [x] Validar `title`, `type`, `context` e `conclusion?` no DTO e no domínio.
-- [x] Adicionar `projectId?` ao fluxo de criação e validar sua referência.
-- [ ] Adicionar `tags?` ao fluxo de criação e validar suas referências.
-- [x] Aceitar somente os tipos `ISSUE` e `LEARNING` na entidade e no schema Prisma.
-- [x] Criar entradas do tipo `ISSUE` sem `resolvedAt`; a entidade considera a entrada `OPEN` enquanto essa data não estiver preenchida.
-- [x] Definir `TechnicalEntryStatus` no domínio e calcular o status na entidade, deixando o mapper responsável apenas por expor o valor na saída.
-- [x] Permitir conclusão opcional na criação, conforme o caso de uso.
-- [x] Associar opcionalmente a entrada a um projeto do mesmo usuário, rejeitando projeto inexistente, de outro usuário ou arquivado.
-- [ ] Associar as tags informadas somente se elas pertencerem ao mesmo usuário.
-- [x] Criar o endpoint autenticado `POST /api/technical-entry`.
-- [x] Testar criação de `ISSUE`, entrada sem projeto, projeto de outro usuário e projeto arquivado.
-- [ ] Completar testes de criação de `LEARNING`, dados inválidos, projeto inexistente e tags.
+- [x] Create the technical entry entity.
+- [x] Create the `CreateTechnicalEntry` use case.
+- [x] Validate `title`, `type`, `context`, and `conclusion?` in the DTO and domain.
+- [x] Add `projectId?` to creation and validate its reference.
+- [ ] Add `tags?` to creation and validate their references.
+- [x] Accept only `ISSUE` and `LEARNING` in the entity and Prisma schema.
+- [x] Create `ISSUE` entries without `resolvedAt`; the entity treats the entry as `OPEN` while this date is absent.
+- [x] Define `TechnicalEntryStatus` in the domain and derive status in the entity, leaving the mapper only to expose it.
+- [x] Allow an optional conclusion on creation, following the use case.
+- [x] Optionally associate the entry with a project owned by the same user, rejecting missing, foreign-owned, or archived projects.
+- [ ] Associate supplied tags only if they belong to the same user.
+- [x] Create authenticated `POST /api/technical-entry`.
+- [x] Test `ISSUE` creation, entries without projects, another user's project, and archived projects.
+- [ ] Complete creation tests for `LEARNING`, invalid data, missing projects, and tags.
 
 ### GetTechnicalEntry
 
-- [x] Criar o caso de uso `GetTechnicalEntry`.
-- [x] Disponibilizar busca por identificador no contrato e no repositório Prisma.
-- [x] Retornar a entrada com `projectId`, tags associadas e status derivado para `ISSUE`.
-- [ ] Retornar detalhes do projeto e, para `ISSUE`, tentativas e histórico de resolução.
-- [x] Garantir que uma entrada de outro usuário não seja encontrada pelo usuário atual.
-- [x] Criar o endpoint autenticado `GET /api/technical-entry/:id`.
-- [x] Testar a consulta básica e o isolamento entre usuários em teste unitário.
-- [ ] Testar entrada inexistente e o retorno completo com suas relações.
+- [x] Create the `GetTechnicalEntry` use case.
+- [x] Support lookup by identifier in the contract and Prisma repository.
+- [x] Return the entry with `projectId`, associated tags, and derived status for `ISSUE`.
+- [ ] Return project details and, for `ISSUE`, attempts and resolution history.
+- [x] Ensure the current user cannot find another user's entry.
+- [x] Create authenticated `GET /api/technical-entry/:id`.
+- [x] Unit-test basic retrieval and user isolation.
+- [ ] Test missing entries and complete responses with relationships.
 
 ### ListTechnicalEntries
 
-- [x] Criar o caso de uso de listagem, implementado como `SearchTechnicalEntryUseCase`.
-- [x] Disponibilizar paginação e ordenação no repositório Prisma.
-- [x] Disponibilizar no repositório filtros por `userId`, `projectId`, título, tipo e arquivamento.
-- [x] Listar somente entradas do usuário autenticado, sobrescrevendo qualquer dado externo com o `userId` obtido pelo guard.
-- [x] Definir `title` como o parâmetro oficial de busca textual e aplicar correspondência parcial case-insensitive no repositório.
-- [x] Implementar filtros por `projectId` e `type` no caso de uso/API.
-- [x] Validar, quando `projectId` é informado, que o projeto existe e pertence ao usuário autenticado.
-- [ ] Implementar o filtro por `tagId`; a relação com tags já existe, mas o filtro ainda não foi implementado.
-- [x] Implementar o filtro por `status`, validando o enum e traduzindo `OPEN`/`RESOLVED` para condições sobre `resolvedAt` restritas a `ISSUE`.
-- [x] Expor paginação e ordenação através de DTO, caso de uso e presenter de coleção.
-- [x] Manter `perPage` sem limite máximo por decisão de produto, preservando a liberdade do usuário sobre o tamanho da página.
-- [x] Criar o endpoint autenticado `GET /api/technical-entry`.
-- [x] Criar o endpoint autenticado `GET /api/project/:id/technical-entries`, reutilizando o caso de uso paginado de entradas.
-- [x] Testar conversão/validação do DTO, mapeamento do caso de uso e formato `data`/`meta` do presenter.
-- [x] Testar projeto inexistente ou pertencente a outro usuário no filtro de busca.
-- [ ] Testar o repositório Prisma, combinações de filtros e garantir via HTTP que resultados de outros usuários nunca sejam retornados.
+- [x] Create the listing use case as `SearchTechnicalEntryUseCase`.
+- [x] Support pagination and sorting in the Prisma repository.
+- [x] Support repository filters for `userId`, `projectId`, title, type, and archiving.
+- [x] List only authenticated user entries, overriding external values with the guard-provided `userId`.
+- [x] Define `title` as the official text search parameter and apply case-insensitive partial matching in the repository.
+- [x] Implement `projectId` and `type` filters in the use case/API.
+- [x] When `projectId` is supplied, validate that the project exists and belongs to the authenticated user.
+- [ ] Implement the `tagId` filter; the relationship exists, but filtering is not implemented.
+- [x] Implement `status` filtering, validating the enum and mapping `OPEN`/`RESOLVED` to `resolvedAt` conditions restricted to `ISSUE`.
+- [x] Expose pagination and sorting through the DTO, use case, and collection presenter.
+- [x] Keep `perPage` without a maximum, following the product decision to let users choose page size.
+- [x] Create authenticated `GET /api/technical-entry`.
+- [x] Create authenticated `GET /api/project/:id/technical-entries`, reusing the paginated entry use case.
+- [x] Test DTO conversion/validation, use case mapping, and presenter `data`/`meta` format.
+- [x] Test missing or foreign-owned projects in the search filter.
+- [ ] Test the Prisma repository and filter combinations, and verify through HTTP that other users' results are never returned.
 
 ### UpdateTechnicalEntry
 
-- [x] Criar o caso de uso `UpdateTechnicalEntry`.
-- [x] Permitir alterar `title`, `context` e `conclusion`; a conclusão só pode ser removida enquanto a entrada não estiver resolvida.
-- [x] Impedir alteração de `type` pela API depois da criação, omitindo o campo do DTO e do input do caso de uso.
-- [x] Permitir alterar ou remover o projeto somente depois de validar sua propriedade e seu estado não arquivado.
-- [ ] Permitir substituir ou remover tags pelo próprio `UpdateTechnicalEntry`; atualmente essa responsabilidade pertence aos casos de uso específicos de associação e remoção.
-- [x] Validar que o novo projeto pertença ao usuário e não esteja arquivado.
-- [x] Validar a propriedade das tags nos casos de uso de associação e remoção; `UpdateTechnicalEntry` não recebe tags diretamente.
-- [x] Criar o endpoint autenticado `PATCH /api/technical-entry/:id`.
-- [x] Rejeitar atualizações sem nenhum campo editável.
-- [x] Testar atualização de conteúdo, remoção de conclusão/projeto e isolamento entre usuários em teste unitário.
-- [ ] Testar entrada inexistente, projeto/tags de outro usuário, validação do DTO e tentativa de troca de tipo pela API.
+- [x] Create the `UpdateTechnicalEntry` use case.
+- [x] Allow changing `title`, `context`, and `conclusion`; clear the conclusion only while the entry is unresolved.
+- [x] Prevent changing `type` through the API after creation by omitting it from the DTO and use case input.
+- [x] Allow changing or removing the project only after validating ownership and unarchived state.
+- [ ] Allow replacing or removing tags through `UpdateTechnicalEntry`; currently dedicated assignment/removal use cases own this responsibility.
+- [x] Validate that the new project belongs to the user and is not archived.
+- [x] Validate tag ownership in assignment/removal use cases; `UpdateTechnicalEntry` does not receive tags directly.
+- [x] Create authenticated `PATCH /api/technical-entry/:id`.
+- [x] Reject updates without editable fields.
+- [x] Unit-test content updates, conclusion/project removal, and user isolation.
+- [ ] Test missing entries, foreign-owned projects/tags, DTO validation, and attempted type changes through the API.
 
-### DeleteTechnicalEntry — implementação atual a revisar
+### DeleteTechnicalEntry — current implementation to review
 
-- [x] Criar o caso de uso `DeleteTechnicalEntry` com verificação do proprietário.
-- [x] Criar o endpoint autenticado `DELETE /api/technical-entry/:id` com resposta `204 No Content`.
-- [x] Testar exclusão e isolamento entre usuários em teste unitário.
-- [x] Decidir se a exclusão física faz parte do produto ou se deve ser substituída por `ArchiveTechnicalEntry`, como definido nos casos de uso e na seção de arquivamento deste backlog. No MVP, a exclusão física permanece disponível em `DELETE /api/technical-entry/:id`; o arquivamento lógico é a alternativa explícita para preservar o registro.
-- [x] Documentar que a exclusão física de uma entrada também remove tentativas e relações com tags por `ON DELETE CASCADE`, conforme as relações no schema Prisma.
+- [x] Create `DeleteTechnicalEntry` with an ownership check.
+- [x] Create authenticated `DELETE /api/technical-entry/:id` returning `204 No Content`.
+- [x] Unit-test deletion and user isolation.
+- [x] Decide whether hard deletion remains part of the product or is replaced by `ArchiveTechnicalEntry`, as described in the use cases and archiving backlog. In the MVP, hard deletion remains available through `DELETE /api/technical-entry/:id`; logical archiving explicitly preserves the entry.
+- [x] Document that hard deletion also removes attempts and tag relationships through `ON DELETE CASCADE`, following the Prisma schema.
 
-### Pendências encontradas na revisão da etapa
+### Pending items found during review
 
-> As pendências de testes e2e abaixo foram adiadas até a etapa dedicada a testes HTTP; os fluxos unitários e de integração das tags já estão implementados.
+> The E2E items below were deferred to the dedicated HTTP testing stage; tag unit and integration flows are already implemented.
 
-- [x] Criar testes unitários para `CreateTechnicalEntryUseCase`.
-- [x] Criar testes da entidade técnica.
-- [ ] Ampliar os testes do repositório Prisma; a tradução do filtro de status e alguns fluxos de persistência estão cobertos, mas as demais combinações de filtros ainda não são exercitadas diretamente.
-- [x] Corrigir a configuração do Jest e2e para resolver os imports relativos `.js` do cliente Prisma gerado.
-- [x] Aplicar `applyGlobalConfig` também no bootstrap dos testes e2e, garantindo que eles exercitem o prefixo `/api`, validação, cookies e serialização usados em produção.
-- [ ] Substituir o teste e2e legado de `GET /` pelos fluxos de criação, listagem, consulta, atualização e exclusão de entradas técnicas.
-- [x] Validar UUIDs recebidos em `projectId` na criação/atualização e nos parâmetros `:id`; somente o `projectId` da busca já utiliza `@IsUUID`.
-- [x] Validar os limites persistidos pelo banco, especialmente `title` com no máximo 200 caracteres, para retornar erro de entrada em vez de erro de persistência.
-- [x] Corrigir o teste de saída paginada de `SearchTechnicalEntryUseCase` para sempre informar o `userId` obrigatório.
-- [x] Encapsular as transições de domínio: `conclude()` deve aceitar somente `ISSUE` e exigir conclusão, enquanto alteração de tipo, resolução e arquivamento não devem ficar disponíveis como atualizações genéricas.
-- [x] Padronizar os nomes de arquivos e símbolos que ainda usam `technicalEntry`/`techinicalEntry` para kebab-case e corrigir o typo, sem misturar essa refatoração com uma feature nova.
+- [x] Create unit tests for `CreateTechnicalEntryUseCase`.
+- [x] Create technical entity tests.
+- [ ] Expand Prisma repository tests; status filter mapping and some persistence flows are covered, but other filter combinations are not directly exercised.
+- [x] Fix Jest E2E configuration to resolve relative `.js` imports in generated Prisma Client.
+- [x] Apply `applyGlobalConfig` in E2E bootstrap so tests exercise production `/api`, validation, cookies, and serialization.
+- [ ] Replace the legacy `GET /` E2E test with technical entry creation, listing, retrieval, update, and deletion flows.
+- [x] Validate UUIDs in creation/update `projectId` and `:id` parameters; previously only search `projectId` used `@IsUUID`.
+- [x] Validate database limits, especially the 200-character `title` maximum, to return input errors instead of persistence errors.
+- [x] Fix the `SearchTechnicalEntryUseCase` paginated-output test to always supply required `userId`.
+- [x] Encapsulate domain transitions: `conclude()` must accept only `ISSUE` and require a conclusion; type changes, resolution, and archiving must not be generic updates.
+- [x] Standardize filenames and symbols still using `technicalEntry`/`techinicalEntry` to kebab-case and fix the typo separately from new features.
 
 ## 4. Tags
 
-### CreateTag e ListTags
+### CreateTag and ListTags
 
-- [x] Criar a entidade e o repositório de tags.
-- [x] Criar o caso de uso `CreateTag`.
-- [x] Validar `name`.
-- [x] Impedir duas tags com o mesmo nome para o mesmo usuário.
-- [x] Criar o caso de uso `ListTags`.
-- [x] Listar somente tags do usuário autenticado.
-- [x] Criar os endpoints de criação e listagem.
-- [x] Testar duplicidade, isolamento por usuário e listagem em testes unitários e de integração.
+- [x] Create the tag entity and repository.
+- [x] Create the `CreateTag` use case.
+- [x] Validate `name`.
+- [x] Prevent duplicate tag names for the same user.
+- [x] Create the `ListTags` use case.
+- [x] List only authenticated user tags.
+- [x] Create creation and listing endpoints.
+- [x] Unit- and integration-test duplicates, user isolation, and listing.
 
-### Relacionar tags e entradas
+### Relate tags and entries
 
-- [x] Criar a relação entre tags e entradas técnicas.
-- [x] Criar o caso de uso `AddTagToTechnicalEntry`.
-- [x] Validar que a tag e a entrada pertençam ao usuário autenticado.
-- [x] Impedir relação duplicada entre a mesma tag e a mesma entrada.
-- [x] Criar o caso de uso `RemoveTagFromTechnicalEntry`.
-- [x] Remover somente a relação, sem excluir a tag.
-- [x] Criar os endpoints de adicionar e remover relação.
-- [x] Testar relação válida, referências de outro usuário, idempotência e remoção sem apagar a tag.
+- [x] Create the tag/technical entry relationship.
+- [x] Create the `AddTagToTechnicalEntry` use case.
+- [x] Validate that the tag and entry belong to the authenticated user.
+- [x] Prevent duplicate relationships between the same tag and entry.
+- [x] Create the `RemoveTagFromTechnicalEntry` use case.
+- [x] Remove only the relationship, preserving the tag.
+- [x] Create endpoints to add and remove relationships.
+- [x] Test valid relationships, foreign-owned references, idempotency, and removal without deleting the tag.
 
-## 5. Projetos — MVP inicial
+## 5. Projects — initial MVP
 
 ### CreateProject
 
-- [x] Criar a entidade de projeto.
-- [x] Criar o caso de uso `CreateProject`.
-- [x] Validar `name` e `description?`; na criação o status é definido como `ACTIVE` e `localPath` ainda não faz parte do fluxo.
-- [x] Tornar o nome obrigatório.
-- [x] Associar o projeto ao usuário autenticado.
-- [x] Definir o status inicial do projeto como `ACTIVE` quando não informado.
-- [x] Criar o endpoint de criação.
-- [x] Testar criação válida, ausência de descrição e associação ao usuário correto.
-- [ ] Testar validações de entrada do DTO, incluindo nome ausente.
+- [x] Create the project entity.
+- [x] Create the `CreateProject` use case.
+- [x] Validate `name` and `description?`; creation sets `ACTIVE`, and `localPath` is not yet part of this flow.
+- [x] Require a name.
+- [x] Associate the project with the authenticated user.
+- [x] Default initial project status to `ACTIVE` when omitted.
+- [x] Create the creation endpoint.
+- [x] Test valid creation, missing description, and association with the correct user.
+- [ ] Test DTO input validation, including a missing name.
 
-### GetProject e ListProjects
+### GetProject and ListProjects
 
-- [x] Criar o caso de uso `GetProject`.
-- [ ] Retornar o projeto do usuário com tecnologias, comandos e recursos relacionados.
-- [x] Disponibilizar as entradas técnicas relacionadas por endpoint separado e paginado: `GET /api/project/:id/technical-entries`.
-- [x] Criar o caso de uso `ListProjects`.
-- [x] Listar somente projetos do usuário autenticado.
-- [x] Implementar inicialmente filtros por `name` e `status`.
-- [x] Implementar o filtro `archivedAt`.
-- [ ] Implementar o filtro por tecnologia como extensão planejada.
-- [x] Criar os endpoints de consulta individual e listagem.
-- [x] Testar regras dos casos de uso, filtros e isolamento entre usuários.
-- [ ] Testar os endpoints HTTP e a agregação das relações ainda não implementadas.
+- [x] Create the `GetProject` use case.
+- [ ] Return the user project with related technologies, commands, and resources.
+- [x] Expose related technical entries through a separate paginated endpoint: `GET /api/project/:id/technical-entries`.
+- [x] Create the `ListProjects` use case.
+- [x] List only authenticated user projects.
+- [x] Initially implement `name` and `status` filters.
+- [x] Implement the `archivedAt` filter.
+- [ ] Implement technology filtering as a planned extension.
+- [x] Create retrieval and listing endpoints.
+- [x] Test use case rules, filters, and user isolation.
+- [ ] Test HTTP endpoints and the relationship aggregation still to be implemented.
 
 ### UpdateProject
 
-- [x] Criar o caso de uso `UpdateProject`.
-- [x] Centralizar nome, descrição, status e caminho local no caso de uso principal.
-- [x] Usar campos opcionais para atualização parcial e `null` para remover descrição ou caminho local.
-- [x] Rejeitar atualizações sem nenhum campo editável.
-- [x] Garantir que somente o proprietário possa alterar o projeto.
-- [x] Criar o endpoint de atualização.
-- [x] Testar atualização válida, descrição/caminho e tentativa de alteração por outro usuário.
-- [x] Testar validações de entrada do DTO.
+- [x] Create the `UpdateProject` use case.
+- [x] Centralize name, description, status, and local path in the main use case.
+- [x] Use optional fields for partial updates and `null` to clear description or local path.
+- [x] Reject updates without editable fields.
+- [x] Ensure only the owner can change the project.
+- [x] Create the update endpoint.
+- [x] Test valid updates, description/path, and update attempts by another user.
+- [x] Test DTO input validation.
 
-## 6. Relação projeto × entrada técnica
+## 6. Project/technical entry relationship
 
-- [x] Permitir criar entrada sem projeto.
-- [x] Permitir vincular uma entrada a um projeto do mesmo usuário.
-- [x] Permitir alterar ou remover o projeto relacionado durante `UpdateTechnicalEntry`.
-- [x] Disponibilizar entradas relacionadas na rota paginada `GET /api/project/:id/technical-entries`.
-- [x] Arquivar um projeto altera somente o projeto e não remove nem desvincula suas entradas.
-- [ ] Testar o fluxo HTTP completo: criar projeto → criar entrada → relacionar entrada → consultar entradas do projeto.
+- [x] Allow creating an entry without a project.
+- [x] Allow linking an entry to a project owned by the same user.
+- [x] Allow changing or clearing the related project during `UpdateTechnicalEntry`.
+- [x] Expose related entries through paginated `GET /api/project/:id/technical-entries`.
+- [x] Archiving a project changes only the project and does not remove or unlink its entries.
+- [ ] Test the full HTTP flow: create project → create entry → link entry → query project entries.
 
-## 7. Problemas e tentativas de solução
+## 7. Issues and solution attempts
 
 ### AddSolutionAttempt
 
-- [x] Criar a entidade de tentativa de solução.
-- [x] Criar o caso de uso `AddSolutionAttempt`.
-- [x] Validar `entryId`, `description` e `result`.
-- [x] Permitir tentativas somente para entradas do tipo `ISSUE`.
-- [x] Aceitar somente `FAILED`, `PARTIAL` ou `SUCCESSFUL`.
-- [x] Impedir novas tentativas em entradas arquivadas.
-- [x] Garantir que a entrada pertença ao usuário autenticado.
-- [x] Criar o endpoint de inclusão de tentativa.
-- [ ] Testar tentativa em `ISSUE`, rejeição em `LEARNING`, resultado inválido e entrada arquivada.
+- [x] Create the solution attempt entity.
+- [x] Create the `AddSolutionAttempt` use case.
+- [x] Validate `entryId`, `description`, and `result`.
+- [x] Allow attempts only for `ISSUE` entries.
+- [x] Accept only `FAILED`, `PARTIAL`, or `SUCCESSFUL`.
+- [x] Prevent new attempts on archived entries.
+- [x] Ensure the entry belongs to the authenticated user.
+- [x] Create the add-attempt endpoint.
+- [ ] Test attempts on `ISSUE`, rejection on `LEARNING`, invalid results, and archived entries.
 
 ### UpdateSolutionAttempt
 
-- [x] Criar o caso de uso `UpdateSolutionAttempt`.
-- [x] Permitir editar somente a descrição (`description`) de uma tentativa existente.
-- [x] Manter o resultado/status (`result`) imutável; para alterar o status, registrar uma nova tentativa.
-- [x] Garantir que a tentativa e a entrada técnica pertençam ao usuário autenticado.
-- [x] Criar o endpoint autenticado `PATCH /api/technical-entry/:entryId/solution-attempts/:attemptId`.
-- [x] Testar atualização da descrição, preservação do resultado e isolamento entre usuários.
+- [x] Create the `UpdateSolutionAttempt` use case.
+- [x] Allow editing only the description (`description`) of an existing attempt.
+- [x] Keep the result/status (`result`) immutable; record a new attempt to change the status.
+- [x] Ensure the attempt and technical entry belong to the authenticated user.
+- [x] Create authenticated `PATCH /api/technical-entry/:entryId/solution-attempts/:attemptId`.
+- [x] Test description updates, result preservation, and user isolation.
 
 ### RemoveSolutionAttempt
 
-- [x] Criar o caso de uso `RemoveSolutionAttempt`.
-- [x] Permitir remover uma tentativa de solução existente somente pelo proprietário da entrada técnica.
-- [x] Criar o endpoint autenticado `DELETE /api/technical-entry/:entryId/solution-attempts/:attemptId`.
-- [x] Testar remoção, tentativa de remover uma tentativa inexistente e isolamento entre usuários.
+- [x] Create the `RemoveSolutionAttempt` use case.
+- [x] Allow removing an existing solution attempt only by the technical entry owner.
+- [x] Create authenticated `DELETE /api/technical-entry/:entryId/solution-attempts/:attemptId`.
+- [x] Test removal, missing-attempt removal, and user isolation.
 
 ### ListSolutionAttempts
 
-- [x] Criar o caso de uso de listagem paginada de tentativas.
-- [x] Permitir filtrar tentativas por resultado.
-- [x] Garantir que a entrada pertença ao usuário autenticado antes da consulta.
-- [x] Criar o endpoint `GET /api/technical-entry/:entryId/solution-attempts`.
-- [x] Testar listagem, filtro por resultado e isolamento por usuário.
+- [x] Create the paginated attempt listing use case.
+- [x] Allow filtering attempts by result.
+- [x] Ensure the entry belongs to the authenticated user before querying.
+- [x] Create `GET /api/technical-entry/:entryId/solution-attempts`.
+- [x] Test listing, result filtering, and user isolation.
 
 ### ResolveTechnicalIssue
 
-- [x] Criar o caso de uso `ResolveTechnicalIssue`.
-- [x] Permitir resolução somente para entradas do tipo `ISSUE`.
-- [x] Exigir `conclusion`.
-- [x] Alterar o status de `OPEN` para `RESOLVED`.
-- [x] Registrar `resolvedAt`.
-- [x] Permitir resolução mesmo sem uma tentativa `SUCCESSFUL`, conforme o caso de uso.
-- [x] Criar o endpoint `PATCH /api/technical-entry/:id/resolve`.
-- [x] Testar conclusão obrigatória, tipo inválido, transição de status e isolamento por usuário.
+- [x] Create the `ResolveTechnicalIssue` use case.
+- [x] Allow resolution only for `ISSUE` entries.
+- [x] Require `conclusion`.
+- [x] Change status from `OPEN` to `RESOLVED`.
+- [x] Record `resolvedAt`.
+- [x] Allow resolution without a `SUCCESSFUL` attempt, following the use case.
+- [x] Create `PATCH /api/technical-entry/:id/resolve`.
+- [x] Test required conclusion, invalid type, status transition, and user isolation.
 
 ### ReopenTechnicalIssue
 
-- [x] Criar o caso de uso `ReopenTechnicalIssue`.
-- [x] Alterar o status de `RESOLVED` para `OPEN`.
-- [x] Preservar tentativas, conclusão anterior e histórico necessário.
-- [x] Criar o endpoint `PATCH /api/technical-entry/:id/reopen`.
-- [x] Testar reabertura e preservação dos dados anteriores.
+- [x] Create the `ReopenTechnicalIssue` use case.
+- [x] Change status from `RESOLVED` to `OPEN`.
+- [x] Preserve attempts, the previous conclusion, and required history.
+- [x] Create `PATCH /api/technical-entry/:id/reopen`.
+- [x] Test reopening and preservation of previous data.
 
-## 8. Detalhes de projetos
+## 8. Project details
 
 ### Project Technologies
 
-- [x] Criar a entidade ou relação de tecnologia do projeto.
-- [x] Criar o caso de uso `AddProjectTechnology`.
-- [x] Validar `projectId`, `name` e `version?` no domínio.
-- [x] Garantir que o projeto pertença ao usuário.
-- [x] Impedir a mesma tecnologia duas vezes no mesmo projeto.
-- [x] Criar o caso de uso `RemoveProjectTechnology`.
-- [x] Remover a tecnologia sem remover tags ou entradas técnicas com o mesmo nome.
-- [x] Criar os endpoints de adicionar e remover tecnologia.
-- [x] Testar duplicidade, autorização e independência entre tecnologias.
-- [ ] **Pós-MVP:** permitir atualizar `name` e `version` de uma tecnologia do projeto.
+- [x] Create the project technology entity or relationship.
+- [x] Create the `AddProjectTechnology` use case.
+- [x] Validate `projectId`, `name`, and `version?` in the domain.
+- [x] Ensure the project belongs to the user.
+- [x] Prevent the same technology appearing twice in a project.
+- [x] Create the `RemoveProjectTechnology` use case.
+- [x] Remove a technology without removing tags or technical entries with the same name.
+- [x] Create add/remove technology endpoints.
+- [x] Test duplicates, authorization, and technology independence.
+- [ ] **Post-MVP:** allow updating project technology `name` and `version`.
 
 ### Project Commands
 
-- [x] Criar a entidade de comando do projeto.
-- [x] Criar o caso de uso `AddProjectCommand`.
-- [x] Criar o caso de uso `SearchProjectCommand`.
-- [x] Criar o caso de uso `GetProjectCommand`.
-- [x] Validar `projectId`, `title`, `command` e `description?`.
-- [x] Criar o caso de uso `UpdateProjectCommand`.
-- [x] Criar o caso de uso `RemoveProjectCommand`.
-- [x] Garantir propriedade do projeto em todas as operações.
-- [x] Criar os endpoints de adicionar, listar, consultar, atualizar e remover comando.
-- [x] Testar ciclo completo e tentativa de acesso por outro usuário.
+- [x] Create the project command entity.
+- [x] Create the `AddProjectCommand` use case.
+- [x] Create the `SearchProjectCommand` use case.
+- [x] Create the `GetProjectCommand` use case.
+- [x] Validate `projectId`, `title`, `command`, and `description?`.
+- [x] Create the `UpdateProjectCommand` use case.
+- [x] Create the `RemoveProjectCommand` use case.
+- [x] Ensure project ownership in every operation.
+- [x] Create endpoints to add, list, retrieve, update, and remove commands.
+- [x] Test the full lifecycle and access attempts by another user.
 
 ### Project Resources
 
-- [x] Criar a entidade de recurso do projeto.
-- [x] Criar o caso de uso `AddProjectResource`.
-- [x] Criar o caso de uso `SearchProjectResource`.
-- [x] Criar o caso de uso `GetProjectResource`.
-- [x] Validar `projectId`, `label`, `url` e `type?`.
-- [x] Validar a URL do recurso.
-- [x] Criar o caso de uso `UpdateProjectResource`.
-- [x] Criar o caso de uso `RemoveProjectResource`.
-- [x] Garantir propriedade do projeto em todas as operações.
-- [x] Criar os endpoints de adicionar, listar, consultar, atualizar e remover recurso.
-- [x] Testar ciclo completo, URL inválida e autorização.
+- [x] Create the project resource entity.
+- [x] Create the `AddProjectResource` use case.
+- [x] Create the `SearchProjectResource` use case.
+- [x] Create the `GetProjectResource` use case.
+- [x] Validate `projectId`, `label`, `url`, and `type?`.
+- [x] Validate the resource URL.
+- [x] Create the `UpdateProjectResource` use case.
+- [x] Create the `RemoveProjectResource` use case.
+- [x] Ensure project ownership in every operation.
+- [x] Create endpoints to add, list, retrieve, update, and remove resources.
+- [x] Test the full lifecycle, invalid URLs, and authorization.
 
-## 9. Arquivamento
+## 9. Archiving
 
-### ArchiveProject e RestoreProject
+### ArchiveProject and RestoreProject
 
-- [x] Criar casos de uso explícitos e idempotentes para arquivamento e restauração.
-- [x] Alterar o projeto para arquivado sem exclusão física, preenchendo `archivedAt`.
-- [x] Definir a relação entre `archivedAt` e `ProjectStatus` (`ACTIVE`, `INACTIVE` ou `FINISHED`).
-- [x] Impedir operações incompatíveis com projeto arquivado conforme as regras do domínio.
-- [x] Preservar tecnologias, comandos e recursos relacionados; a preservação das entradas técnicas já está coberta na relação projeto × entrada.
-- [x] Criar os endpoints autenticados `PATCH /api/project/:id/archive` e `PATCH /api/project/:id/restore`.
-- [x] Testar arquivamento, restauração e autorização no caso de uso.
-- [x] Testar a preservação dos relacionamentos por HTTP.
+- [x] Create explicit, idempotent archiving and restoration use cases.
+- [x] Archive the project without hard deletion by setting `archivedAt`.
+- [x] Define the relationship between `archivedAt` and `ProjectStatus` (`ACTIVE`, `INACTIVE`, or `FINISHED`).
+- [x] Prevent operations incompatible with archived projects according to domain rules.
+- [x] Preserve related technologies, commands, and resources; entry preservation is covered by the project/entry relationship.
+- [x] Create authenticated `PATCH /api/project/:id/archive` and `PATCH /api/project/:id/restore`.
+- [x] Test archiving, restoration, and authorization in the use case.
+- [x] Test relationship preservation through HTTP.
 
-`archivedAt` é um eixo independente de `ProjectStatus`: arquivar não troca
-`ACTIVE`, `INACTIVE` ou `FINISHED`, e restaurar recupera o mesmo status. Enquanto
-arquivado, o agregado fica somente leitura; consultas continuam disponíveis,
-mas alterações no projeto, em tecnologias, comandos e recursos exigem a
-restauração explícita.
+`archivedAt` is independent of `ProjectStatus`: archiving does not change
+`ACTIVE`, `INACTIVE`, or `FINISHED`, and restoration recovers the same status. While
+archived, the aggregate is read-only; queries remain available,
+but changes to the project, technologies, commands, and resources require
+explicit restoration.
 
 ### ArchiveTechnicalEntry
 
-- [x] Criar o caso de uso `ArchiveTechnicalEntry`.
-- [x] Implementar arquivamento lógico da entrada sem exclusão física.
-- [x] Definir o comportamento de entradas arquivadas na listagem e na consulta detalhada.
-- [x] Impedir novas tentativas de solução em entrada arquivada.
-- [x] Criar o endpoint de arquivamento.
-- [x] Testar arquivamento, preservação do histórico e isolamento por usuário.
+- [x] Create the `ArchiveTechnicalEntry` use case.
+- [x] Implement logical entry archiving without hard deletion.
+- [x] Define archived entry behavior in lists and detail queries.
+- [x] Prevent new solution attempts on archived entries.
+- [x] Create the archiving endpoint.
+- [x] Test archiving, history preservation, and user isolation.
 
-A listagem omite entradas arquivadas por padrão (`archivedAt = null`), enquanto
-a consulta detalhada continua retornando a entrada e seu histórico. O endpoint
-`PATCH /api/technical-entry/:id/archive` é autenticado e idempotente.
+Listing omits archived entries by default (`archivedAt = null`), while
+detail queries still return the entry and its history. The endpoint
+`PATCH /api/technical-entry/:id/archive` is authenticated and idempotent.
 
-## 10. Entrega incremental sugerida
+## 10. Suggested incremental delivery
 
-- [x] Entregar a fundação compartilhada; permanecem abertas a padronização global de erros e a cobertura HTTP.
-- [x] Entregar cadastro, login, usuário atual e logout.
-- [x] Entregar criação, consulta, listagem e atualização de entradas técnicas.
-- [x] Entregar criação, listagem e relacionamento de tags.
-- [x] Entregar criação, consulta, listagem e atualização de projetos.
-- [x] Entregar relacionamento entre projetos e entradas.
-- [x] Entregar tentativas, resolução e reabertura de problemas.
-- [x] Entregar tecnologias, comandos e recursos de projetos.
-- [x] Entregar arquivamento de projetos e entradas.
-- [ ] Revisar documentação da API e atualizar os testes de regressão a cada etapa.
+- [x] Deliver the shared foundation; global error standardization and HTTP coverage remain open.
+- [x] Deliver registration, login, current user, and logout.
+- [x] Deliver technical entry creation, retrieval, listing, and updates.
+- [x] Deliver tag creation, listing, and relationships.
+- [x] Deliver project creation, retrieval, listing, and updates.
+- [x] Deliver project/entry relationships.
+- [x] Deliver attempts, resolution, and issue reopening.
+- [x] Deliver project technologies, commands, and resources.
+- [x] Deliver project and entry archiving.
+- [ ] Review API documentation and update regression tests at every stage.
 
-## Critério de conclusão do backend do MVP
+## MVP backend completion criteria
 
-- [x] Um usuário consegue se cadastrar, autenticar, consultar a própria conta e sair.
-- [x] Um usuário autenticado consegue criar e consultar projetos.
-- [x] Um usuário autenticado consegue criar, atualizar, listar e consultar entradas técnicas.
-- [x] Entradas podem ser relacionadas a projetos e tags do mesmo usuário.
-- [ ] A listagem de entradas suporta busca e filtros documentados.
-- [x] Problemas podem registrar tentativas, ser resolvidos e reabertos.
-- [x] Nenhum usuário consegue acessar dados de outro usuário.
-- [ ] Os principais fluxos possuem testes unitários e end-to-end.
+- [x] A user can register, authenticate, view their own account, and sign out.
+- [x] An authenticated user can create and retrieve projects.
+- [x] An authenticated user can create, update, list, and retrieve technical entries.
+- [x] Entries can be linked to projects and tags owned by the same user.
+- [ ] Entry listing supports the documented search and filters.
+- [x] Issues can record attempts, be resolved, and be reopened.
+- [x] No user can access another user's data.
+- [ ] Main flows have unit and end-to-end tests.

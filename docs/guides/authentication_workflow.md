@@ -1,78 +1,78 @@
-# Plano prático de autenticação da API
+# Practical API authentication plan
 
-Este documento descreve a implementação da autenticação da API do DevLog usando:
+This document describes DevLog API authentication using:
 
 - JWT como credencial;
-- cookie HttpOnly para transportar e armazenar o JWT no navegador;
-- AuthGuard para proteger endpoints;
-- request.user para transportar a identidade autenticada;
-- autorização por proprietário para impedir acesso aos dados de outro usuário.
+- An HttpOnly cookie to transport and store the JWT in the browser;
+- AuthGuard to protect endpoints;
+- request.user to carry authenticated identity;
+- Ownership authorization to prevent access to another user's data.
 
-O objetivo é implementar primeiro um fluxo simples e completo. Refresh tokens, revogação persistida de sessões e rotação de tokens ficam documentados como uma segunda etapa.
+The goal is to implement a simple, complete flow first. Refresh tokens, persisted session revocation, and token rotation are documented as a second stage.
 
-> Este é um plano de implementação. Aplique e valide cada fase antes de iniciar a próxima.
+> This is an implementation plan. Apply and validate each phase before starting the next.
 
-## 1. Decisão arquitetural
+## 1. Architectural decision
 
-Cookie e JWT não são alternativas:
+Cookies and JWTs are not alternatives:
 
 ~~~text
 JWT
-  -> representa a identidade autenticada e possui assinatura/expiração
+  -> represents authenticated identity and has a signature/expiration
 
 Cookie HttpOnly
-  -> impede que o JavaScript do frontend leia o JWT
+  -> prevents frontend JavaScript from reading the JWT
 
 AuthGuard
-  -> extrai o JWT do cookie e valida a assinatura
+  -> extracts the JWT from the cookie and validates its signature
 
 request.user
-  -> transporta o usuário autenticado para o controller/caso de uso
+  -> carries the authenticated user to the controller/use case
 
-Autorização
-  -> verifica se esse usuário pode acessar o recurso solicitado
+Authorization
+  -> checks whether this user can access the requested resource
 ~~~
 
-O fluxo principal será:
+The main flow is:
 
 ~~~text
 POST /auth/login
-  -> valida email e senha
-  -> gera JWT com sub = user.id
-  -> envia o JWT em cookie HttpOnly
+  -> validates email and password
+  -> generates a JWT with sub = user.id
+  -> sends the JWT in an HttpOnly cookie
 
 GET /users/me
-  -> AuthGuard lê o cookie
-  -> verifica o JWT
-  -> coloca { id } em request.user
-  -> GetCurrentUserUseCase busca o usuário
+  -> AuthGuard reads the cookie
+  -> verifies the JWT
+  -> puts { id } in request.user
+  -> GetCurrentUserUseCase finds the user
 ~~~
 
-O frontend não deve receber o token no corpo da resposta, nem armazená-lo em localStorage ou sessionStorage.
+The frontend must not receive the token in the response body or store it in localStorage or sessionStorage.
 
-## 2. Estado atual da API
+## 2. API state at the start of this plan
 
-Estas peças já existem:
+These pieces already existed:
 
-- @nestjs/jwt em apps/api/package.json;
-- cookie-parser e seus tipos;
+- @nestjs/jwt in apps/api/package.json;
+- cookie-parser and its types;
 - HashProvider usando bcryptjs;
 - UserRepository.findByEmail();
-- JWT_SECRET e JWT_EXPIRES_IN_SECONDS parcialmente previstos em EnvConfigService;
-- GET /users/me, ainda sem autenticação completa.
+- JWT_SECRET and JWT_EXPIRES_IN_SECONDS partially anticipated in EnvConfigService;
+- GET /users/me, without complete authentication.
 
-Pendências identificadas no código atual:
+Pending items identified in that code:
 
-- cookie-parser está instalado, mas não é registrado em main.ts;
-- CORS possui configuração prevista, mas não é habilitado com credenciais;
-- UserOutput ainda contém o hash da senha;
-- getCurrentUser() usa userId sem declará-lo;
-- UserModule ainda não exporta os providers que AuthModule precisará usar;
-- apps/api/.env.example não documenta JWT e CORS.
+- cookie-parser was installed but not registered in main.ts;
+- CORS configuration was anticipated but not enabled with credentials;
+- UserOutput still contained the password hash;
+- getCurrentUser() used userId without declaring it;
+- UserModule did not yet export the providers AuthModule needed;
+- apps/api/.env.example did not document JWT and CORS.
 
-## 3. Estrutura final esperada
+## 3. Expected final structure
 
-Mantenha a organização por feature usada pelo projeto:
+Keep the project's feature organization:
 
 ~~~text
 apps/api/src/auth/
@@ -97,49 +97,49 @@ apps/api/src/auth/
     └── authenticated-user.ts
 ~~~
 
-### Responsabilidade de cada arquivo
+### File responsibilities
 
-| Arquivo | Responsabilidade |
+| File | Responsibility |
 | --- | --- |
-| authenticate-user.usecase.ts | Buscar usuário e comparar senha |
-| token-provider.ts | Contrato abstrato para criar/verificar tokens |
-| jwt-token.service.ts | Adaptar JwtService ao contrato da aplicação |
-| auth.controller.ts | Receber login, criar/remover cookie e retornar resposta HTTP |
-| auth.guard.ts | Ler cookie, validar JWT e criar request.user |
-| current-user.decorator.ts | Acessar request.user sem repetir código |
-| auth.module.ts | Registrar e conectar os providers |
+| authenticate-user.usecase.ts | Find the user and compare passwords |
+| token-provider.ts | Abstract contract for creating/verifying tokens |
+| jwt-token.service.ts | Adapt JwtService to the application contract |
+| auth.controller.ts | Receive login, create/clear cookies, and return HTTP responses |
+| auth.guard.ts | Read the cookie, validate JWT, and populate request.user |
+| current-user.decorator.ts | Access request.user without duplicated code |
+| auth.module.ts | Register and connect providers |
 
-O caso de uso não deve conhecer Response, Request, Express ou cookies. Cookie é detalhe de transporte HTTP; o caso de uso deve saber apenas que precisa gerar um token.
+The use case must not know Response, Request, Express, or cookies. Cookies are HTTP transport details; the use case only needs to know it must generate a token.
 
-## 4. Fase 0 — preparar configuração e corrigir vazamentos
+## 4. Phase 0 — prepare configuration and fix leaks
 
-### 4.1 Atualizar o .env.example
+### 4.1 Update .env.example
 
-Edite apps/api/.env.example e documente:
+Edit apps/api/.env.example and document:
 
 ~~~env
 PORT=3000
 NODE_ENV=development
 
-JWT_SECRET=substitua-por-um-segredo-longo-e-aleatorio
+JWT_SECRET=replace-with-a-long-random-secret
 JWT_EXPIRES_IN_SECONDS=3600
 
 CORS_ALLOWED_ORIGINS=http://localhost:5173
 ~~~
 
-Gere um segredo real localmente com um gerador apropriado. Não use o valor de exemplo em produção e não faça commit do .env real.
+Generate a real secret locally with an appropriate generator. Do not use the example in production or commit the actual .env.
 
-### 4.2 Corrigir o nome da configuração
+### 4.2 Fix the configuration name
 
 Renomeie:
 
-para:
+to:
 
 ~~~ts
 getJwtExpiresInSeconds()
 ~~~
 
-Atualize também EnvConfig e todos os consumidores:
+Also update EnvConfig and every consumer:
 
 ~~~ts
 getJwtExpiresInSeconds(): number {
@@ -149,9 +149,9 @@ getJwtExpiresInSeconds(): number {
 }
 ~~~
 
-### 4.3 Parar de transportar senha no output público
+### 4.3 Stop carrying passwords in public output
 
-Hoje UserOutput contém password, embora UserPresenter não o mostre. O output público não deve carregar esse campo:
+At this stage, UserOutput contained password even though UserPresenter hid it. Public output must not carry this field:
 
 ~~~ts
 export type UserOutput = {
@@ -163,17 +163,17 @@ export type UserOutput = {
 };
 ~~~
 
-Atualize também UserOutputMapper.toOutput() para não incluir password no objeto retornado. O repositório ainda pode hidratar a entidade com o hash para o login, mas o mapper público não deve copiá-lo.
+Also update UserOutputMapper.toOutput() to omit password. The repository can still hydrate the entity with the hash for login, but the public mapper must not copy it.
 
-O hash continua necessário internamente para autenticar, mas nunca deve sair da camada de persistência/aplicação pública.
+The hash remains necessary internally for authentication, but must never leave the persistence/public application boundary.
 
-### 4.4 Corrigir o endpoint me
+### 4.4 Fix the me endpoint
 
-Remova o userId inexistente do controller. Ele será obtido pelo AuthGuard por meio de request.user ou do decorator CurrentUser.
+Remove the undeclared userId from the controller. AuthGuard will provide it through request.user or CurrentUser.
 
-Não resolva o usuário atual por um identificador enviado pelo frontend. O identificador confiável deve vir do token validado.
+Do not identify the current user through an ID supplied by the frontend. The trusted ID must come from the validated token.
 
-### Checkpoint da fase 0
+### Phase 0 checkpoint
 
 Execute:
 
@@ -183,11 +183,11 @@ pnpm --filter api lint
 pnpm --filter api build
 ~~~
 
-Só avance quando a configuração e o projeto compilarem novamente.
+Continue only when configuration and the project compile again.
 
-## 5. Fase 1 — criar contratos e tipos
+## 5. Phase 1 — create contracts and types
 
-### 5.1 Tipo do usuário autenticado
+### 5.1 Authenticated user type
 
 Crie src/auth/types/authenticated-user.ts:
 
@@ -197,9 +197,9 @@ export type AuthenticatedUser = {
 };
 ~~~
 
-No primeiro momento, o JWT precisa carregar somente o identificador do usuário. Não coloque senha, hash, dados sensíveis ou objetos grandes no payload.
+Initially, the JWT only needs the user ID. Do not put passwords, hashes, sensitive data, or large objects in the payload.
 
-### 5.2 Contrato do provider de token
+### 5.2 Token provider contract
 
 Crie src/auth/application/providers/token-provider.ts:
 
@@ -214,9 +214,9 @@ export interface TokenProvider {
 }
 ~~~
 
-O caso de uso depende desse contrato, e não diretamente de JwtService. Assim, a aplicação não fica presa ao JWT caso futuramente você queira usar sessão persistida.
+The use case depends on this contract rather than directly on JwtService. This avoids tying the application to JWT if persisted sessions are adopted later.
 
-### 5.3 DTO de login
+### 5.3 Login DTO
 
 Crie src/auth/application/dto/authenticate-user.input.ts:
 
@@ -224,19 +224,19 @@ Crie src/auth/application/dto/authenticate-user.input.ts:
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class AuthenticateUserDto {
-  @IsEmail({}, { message: 'Email inválido' })
-  @IsNotEmpty({ message: 'O email é obrigatório' })
+  @IsEmail({}, { message: 'Invalid email' })
+  @IsNotEmpty({ message: 'Email is required' })
   email: string;
 
-  @IsString({ message: 'A senha deve ser um texto' })
-  @IsNotEmpty({ message: 'A senha é obrigatória' })
+  @IsString({ message: 'Password must be a string' })
+  @IsNotEmpty({ message: 'Password is required' })
   password: string;
 }
 ~~~
 
-A regra de login deve retornar a mesma mensagem para email inexistente e senha incorreta. Isso evita revelar quais emails estão cadastrados.
+Login must return the same message for an unknown email and an incorrect password. This avoids revealing which emails are registered.
 
-### 5.4 Constante do cookie
+### 5.4 Cookie constant
 
 Crie src/auth/infrastructure/constants/auth.constants.ts:
 
@@ -244,11 +244,11 @@ Crie src/auth/infrastructure/constants/auth.constants.ts:
 export const ACCESS_TOKEN_COOKIE = 'devlog_access_token';
 ~~~
 
-Usar uma constante evita divergência entre login, guard e logout.
+A constant prevents differences between login, guard, and logout.
 
-## 6. Fase 2 — configurar JWT e módulos
+## 6. Phase 2 — configure JWT and modules
 
-### 6.1 Implementar o adapter JWT
+### 6.1 Implement the JWT adapter
 
 Crie src/auth/infrastructure/providers/jwt-token.service.ts:
 
@@ -274,23 +274,23 @@ export class JwtTokenService implements TokenProvider {
 }
 ~~~
 
-A assinatura e a verificação usarão a mesma configuração do JwtModule. A expiração também será validada pelo JwtService.
+Signing and verification use the same JwtModule configuration. JwtService also validates expiration.
 
-### 6.2 Exportar dependências do UserModule
+### 6.2 Export UserModule dependencies
 
-O AuthModule não deve criar outro repositório nem acessar Prisma diretamente. Faça o UserModule exportar os contratos utilizados pelo caso de uso:
+AuthModule must not create another repository or access Prisma directly. Make UserModule export the contracts used by the use case:
 
 ~~~ts
 @Module({
-  // controllers e providers existentes
+  // Existing controllers and providers
   exports: ['UserRepository', 'HashProvider'],
 })
 export class UserModule {}
 ~~~
 
-Mantenha os mesmos tokens usados em inject. Uma alternativa futura é criar um FindUserByEmailUseCase no módulo de usuário e exportar esse caso de uso.
+Keep the same tokens used in inject. A future alternative is exporting a FindUserByEmailUseCase from the user module.
 
-### 6.3 Criar o AuthModule
+### 6.3 Create AuthModule
 
 Crie src/auth/infrastructure/auth.module.ts:
 
@@ -335,9 +335,9 @@ import { AuthenticateUserUseCase } from '../application/usecases/authenticate-us
 export class AuthModule {}
 ~~~
 
-O token TokenProvider precisa ser usado exatamente no inject do caso de uso. Se preferir, declare uma constante para esse injection token.
+The TokenProvider token must match the use case inject token exactly. A constant may be used for this injection token.
 
-### 6.4 Importar o AuthModule na aplicação
+### 6.4 Import AuthModule into the application
 
 Atualize src/app.module.ts:
 
@@ -355,9 +355,9 @@ import { AuthModule } from './auth/infrastructure/auth.module';
 export class AppModule {}
 ~~~
 
-Depois desta fase, a aplicação já deve iniciar com JWT_SECRET configurado, mesmo antes de o login estar pronto.
+After this phase, the application should start with JWT_SECRET configured, even before login is ready.
 
-### Checkpoint da fase 2
+### Phase 2 checkpoint
 
 Verifique:
 
@@ -366,9 +366,9 @@ pnpm --filter api build
 pnpm --filter api test
 ~~~
 
-Se aparecer erro de dependência no Nest, confira primeiro os tokens em exports e inject. A causa mais comum será um provider não exportado pelo UserModule.
+If Nest reports a dependency error, first check exports and inject tokens. A provider not exported from UserModule is the most likely cause.
 
-## 7. Fase 3 — implementar o caso de uso de autenticação
+## 7. Phase 3 — implement the authentication use case
 
 Crie src/auth/application/usecases/authenticate-user.usecase.ts:
 
@@ -413,7 +413,7 @@ export class AuthenticateUserUseCase {
       : false;
 
     if (!user || !passwordIsValid) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const accessToken = await this.tokenProvider.generate({
@@ -432,20 +432,20 @@ export class AuthenticateUserUseCase {
 }
 ~~~
 
-O fluxo do caso de uso é:
+The use case flow is:
 
-1. procurar o usuário por email;
-2. comparar a senha recebida com o hash;
-3. responder erro genérico se o usuário não existir ou a senha falhar;
-4. gerar o token somente depois da validação;
-5. retornar dados públicos e o token para o controller;
-6. nunca retornar senha ou hash ao cliente.
+1. Find the user by email;
+2. Compare the supplied password with the hash;
+3. Return a generic error if the user does not exist or the password fails;
+4. Generate the token only after validation;
+5. Return public data and the token to the controller;
+6. Never return a password or hash to the client.
 
-Se a entidade continuar chamando o hash de password, documente que esse campo contém um hash, não a senha original. Uma melhoria futura seria renomeá-lo para passwordHash.
+If the entity continues to call the hash password, document that it contains a hash rather than the original password. Renaming it to passwordHash is a possible future improvement.
 
-## 8. Fase 4 — implementar login e logout HTTP
+## 8. Phase 4 — implement HTTP login and logout
 
-### 8.1 Registrar cookies e CORS no bootstrap
+### 8.1 Register cookies and CORS during bootstrap
 
 Atualize src/main.ts:
 
@@ -478,9 +478,9 @@ async function bootstrap() {
 }
 ~~~
 
-Se preferir, use EnvConfigService para centralizar porta e CORS. O importante é não usar origin '*' junto com credentials true.
+EnvConfigService may centralize port and CORS configuration. Never combine origin '*' with credentials true.
 
-### 8.2 Criar o controller
+### 8.2 Create the controller
 
 Crie src/auth/infrastructure/auth.controller.ts:
 
@@ -536,13 +536,13 @@ export class AuthController {
 }
 ~~~
 
-O decorator Res passthrough permite configurar o cookie sem assumir o controle completo da resposta do Nest.
+Res passthrough lets the controller configure cookies without taking over the entire Nest response.
 
-Use uma função compartilhada para montar as opções do cookie quando o projeto tiver mais endpoints que criem ou limpem cookies. As opções de clearCookie precisam manter o mesmo path e domain, quando houver.
+Use a shared function for cookie options when more endpoints create or clear cookies. clearCookie options must keep the same path and domain, when applicable.
 
-### 8.3 Configuração por ambiente
+### 8.3 Environment-specific configuration
 
-Desenvolvimento local:
+Local development:
 
 ~~~text
 httpOnly: true
@@ -550,26 +550,26 @@ secure: false
 sameSite: 'lax'
 ~~~
 
-Produção HTTPS no mesmo site:
+Same-site HTTPS production:
 
 ~~~text
 httpOnly: true
 secure: true
-sameSite: 'strict' ou 'lax'
+sameSite: 'strict' or 'lax'
 ~~~
 
-Se frontend e API forem realmente sites diferentes, normalmente será necessário:
+If the frontend and API are on different sites, the usual configuration is:
 
 ~~~text
 sameSite: 'none'
 secure: true
 ~~~
 
-Nesse cenário, adicione proteção CSRF antes de liberar operações de escrita.
+In that scenario, add CSRF protection before enabling write operations.
 
-## 9. Fase 5 — implementar guard e decorator
+## 9. Phase 5 — implement the guard and decorator
 
-### 9.1 Criar o guard
+### 9.1 Create the guard
 
 Crie src/auth/infrastructure/auth.guard.ts:
 
@@ -620,9 +620,9 @@ export class AuthGuard implements CanActivate {
 }
 ~~~
 
-O guard deve fazer somente autenticação. Ele não deve decidir se o usuário pode editar determinado projeto ou entrada.
+The guard handles authentication only. It must not decide whether a user can edit a specific project or entry.
 
-### 9.2 Criar o decorator CurrentUser
+### 9.2 Create the CurrentUser decorator
 
 Crie src/auth/infrastructure/decorators/current-user.decorator.ts:
 
@@ -638,16 +638,16 @@ export const CurrentUser = createParamDecorator(
 );
 ~~~
 
-Em uma rota protegida, o guard deve ter sido executado antes do controller.
+On a protected route, the guard must run before the controller.
 
 ## 10. Fase 6 — proteger endpoints existentes
 
-No UserController:
+In UserController:
 
 ~~~ts
 @Post()
 async create(@Body() createUserDto: CreateUserDto) {
-  // cadastro continua público
+  // Registration remains public
 }
 
 @UseGuards(AuthGuard)
@@ -661,7 +661,7 @@ async getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
 }
 ~~~
 
-As rotas de atualização também devem exigir autenticação:
+Update routes must also require authentication:
 
 ~~~ts
 @UseGuards(AuthGuard)
@@ -671,13 +671,13 @@ As rotas de atualização também devem exigir autenticação:
 @Patch(':id/password')
 ~~~
 
-Não basta verificar que existe um JWT. O caso de uso precisa garantir que:
+Checking that a JWT exists is insufficient. The use case must ensure:
 
 ~~~ts
 input.userId === input.resource.userId
 ~~~
 
-Para o próprio perfil, prefira usar o usuário autenticado como origem do identificador:
+For a user's own profile, derive the identifier from the authenticated user:
 
 ~~~ts
 await updateUserUseCase.execute({
@@ -686,24 +686,24 @@ await updateUserUseCase.execute({
 });
 ~~~
 
-Assim o frontend não escolhe livremente qual usuário será alterado.
+This prevents the frontend from freely choosing which user to change.
 
-Nos futuros módulos de projetos, entradas e tags:
+In future project, entry, and tag modules:
 
 ~~~text
 guard identifica userId
-  -> controller passa userId ao caso de uso
-  -> caso de uso consulta recurso por id + userId
-  -> recurso de outro usuário é tratado como inexistente
+  -> controller passes userId to the use case
+  -> use case queries the resource by id + userId
+  -> another user's resource is treated as missing
 ~~~
 
-Prefira consultas com resourceId e userId juntos, como findByIdAndUserId(resourceId, userId), em vez de buscar apenas por ID e lembrar de verificar ownership depois.
+Prefer queries combining resourceId and userId, such as findByIdAndUserId(resourceId, userId), instead of querying only by ID and remembering to check ownership afterward.
 
-## 11. Fase 7 — integrar o frontend
+## 11. Phase 7 — integrate the frontend
 
-O frontend não precisa ler o cookie. Ele apenas precisa enviar credenciais.
+The frontend does not need to read the cookie. It only needs to send credentials.
 
-Com fetch:
+With fetch:
 
 ~~~ts
 await fetch('http://localhost:3000/auth/login', {
@@ -716,7 +716,7 @@ await fetch('http://localhost:3000/auth/login', {
 });
 ~~~
 
-Depois:
+Then:
 
 ~~~ts
 await fetch('http://localhost:3000/users/me', {
@@ -724,69 +724,69 @@ await fetch('http://localhost:3000/users/me', {
 });
 ~~~
 
-Se usar Axios, configure withCredentials: true na instância.
+For Axios, configure withCredentials: true on the instance.
 
-O frontend deve tratar 401 Unauthorized como usuário não autenticado e redirecionar para login. Não tente recuperar o JWT do cookie.
+The frontend should treat 401 Unauthorized as unauthenticated and redirect to login. Do not try to retrieve the JWT from the cookie.
 
-## 12. Fase 8 — CSRF e regras de segurança
+## 12. Phase 8 — CSRF and security rules
 
-Como a autenticação depende de cookie:
+Because authentication relies on cookies:
 
-- não altere estado com GET;
-- use SameSite=Lax ou Strict quando a arquitetura permitir;
-- use Secure=true em produção com HTTPS;
-- use origens CORS explícitas;
-- nunca use origin '*' com credentials true;
-- valide Origin ou Referer em operações sensíveis;
-- se a API for cross-site, implemente token CSRF em header customizado;
-- não registre cookies ou tokens nos logs;
-- não coloque token em URL, query string ou resposta JSON;
-- use um segredo JWT forte e diferente por ambiente.
+- Do not change state through GET;
+- Use SameSite=Lax or Strict when the architecture allows;
+- Use Secure=true in production with HTTPS;
+- Use explicit CORS origins;
+- Never combine origin '*' with credentials true;
+- Validate Origin or Referer for sensitive operations;
+- For cross-site APIs, implement a CSRF token in a custom header;
+- Do not log cookies or tokens;
+- Do not put tokens in URLs, query strings, or JSON responses;
+- Use a strong, different JWT secret for each environment.
 
-Para o MVP local, SameSite=Lax e CORS explícito são suficientes para começar, mas não devem ser tratados como substitutos universais de uma estratégia CSRF.
+For the local MVP, SameSite=Lax and explicit CORS are a starting point, but they are not universal substitutes for a CSRF strategy.
 
-## 13. Fase 9 — testes unitários
+## 13. Phase 9 — unit tests
 
 ### AuthenticateUserUseCase
 
-- usuário existente e senha correta gera token;
-- email inexistente retorna UnauthorizedException;
-- senha incorreta retorna UnauthorizedException;
-- email inexistente e senha incorreta não revelam qual dado falhou;
-- TokenProvider.generate() recebe sub igual ao id do usuário;
-- output não contém senha nem hash.
+- An existing user with a correct password generates a token;
+- An unknown email returns UnauthorizedException;
+- An incorrect password returns UnauthorizedException;
+- Unknown emails and incorrect passwords do not reveal which value failed;
+- TokenProvider.generate() receives sub equal to the user ID;
+- Output contains neither password nor hash.
 
 ### JwtTokenService
 
-- gera token com payload esperado;
-- verifica token válido;
-- rejeita token inválido;
-- rejeita token expirado.
+- Generates a token with the expected payload;
+- Verifies a valid token;
+- Rejects an invalid token;
+- Rejects an expired token;
 
 ### AuthGuard
 
-- rejeita request sem cookie;
-- rejeita cookie inválido;
-- rejeita JWT sem sub;
-- coloca id em request.user quando válido.
+- Rejects a request without a cookie;
+- Rejects an invalid cookie;
+- Rejects a JWT without sub;
+- Sets id in request.user when valid.
 
-## 14. Fase 10 — testes end-to-end
+## 14. Phase 10 — end-to-end tests
 
-Adicione um fluxo em apps/api/test usando supertest:
+Add a flow in apps/api/test using supertest:
 
 ~~~text
 1. POST /users
 2. POST /auth/login
-3. verificar status 200
-4. verificar Set-Cookie com HttpOnly
-5. usar o cookie no GET /users/me
-6. verificar que o usuário correto foi retornado
-7. chamar GET /users/me sem cookie e esperar 401
+3. Check status 200
+4. Check Set-Cookie for HttpOnly
+5. Use the cookie in GET /users/me
+6. Verify that the correct user is returned
+7. Call GET /users/me without a cookie and expect 401
 8. POST /auth/logout
-9. verificar que o cookie foi limpo
+9. Verify that the cookie is cleared
 ~~~
 
-O supertest pode preservar cookies usando um agent:
+Supertest can preserve cookies through an agent:
 
 ~~~ts
 const agent = request.agent(app.getHttpServer());
@@ -799,37 +799,37 @@ await agent
 await agent.get('/users/me').expect(200);
 ~~~
 
-Também teste que um usuário não consegue acessar ou modificar projeto, entrada ou perfil pertencente a outro usuário.
+Also test that a user cannot access or modify another user's project, entry, or profile.
 
-## 15. Fase 11 — guard por rota ou global
+## 15. Phase 11 — per-route or global guard
 
-Comece usando @UseGuards(AuthGuard) explicitamente nas rotas protegidas. Isso deixa claro quais endpoints exigem autenticação.
+Start with explicit @UseGuards(AuthGuard) on protected routes. This makes authentication requirements visible.
 
-Quando a API tiver muitos endpoints protegidos, avalie um guard global. Nesse caso, será necessário marcar explicitamente login, cadastro e outras rotas públicas com metadata, por exemplo @Public().
+When many endpoints are protected, consider a global guard. Login, registration, and other public routes must then be explicitly marked with metadata, such as @Public().
 
-Para a primeira implementação, o guard por rota é mais fácil de testar e compreender.
+For the first implementation, a per-route guard is easier to test and understand.
 
-## 16. Fase 12 — evolução para refresh token e sessões
+## 16. Phase 12 — refresh tokens and sessions
 
-O MVP com um único access token possui esta limitação:
+The single-access-token MVP has this limitation:
 
 ~~~text
-logout remove o cookie do navegador
-mas um JWT já emitido continua válido até expirar
+Logout clears the browser cookie
+but an issued JWT remains valid until expiration
 ~~~
 
-Quando essa limitação for relevante:
+When this limitation matters:
 
 ~~~text
 access token JWT: 10–15 minutos
-refresh token: valor aleatório e opaco
+Refresh token: random opaque value
 refresh token: cookie HttpOnly
-hash do refresh token: tabela Session no banco
-logout: revoga a sessão
-refresh: rotaciona o token
+Refresh token hash: Session table in the database
+Logout: revokes the session
+Refresh: rotates the token
 ~~~
 
-Não armazene o refresh token puro no banco. Armazene somente um hash associado a:
+Do not store plaintext refresh tokens in the database. Store only a hash associated with:
 
 ~~~text
 userId
@@ -839,37 +839,37 @@ revokedAt?
 createdAt
 ~~~
 
-Essa evolução exige migration e casos de uso adicionais:
+This extension requires a migration and additional use cases:
 
 - CreateSession;
 - RefreshAccessToken;
 - RevokeSession;
 - LogoutUser.
 
-Não misture essa etapa com a primeira implementação. Primeiro faça login, guard, me, logout e testes funcionarem com um access token curto.
+Keep this separate from the first implementation. First make login, guard, me, logout, and tests work with a short-lived access token.
 
-## 17. Ordem recomendada de execução
+## 17. Recommended implementation order
 
-1. Corrigir UserOutput para não transportar hash.
-2. Corrigir configuração JWT e atualizar .env.example.
-3. Registrar cookie-parser, CORS e credentials no bootstrap.
-4. Criar AuthenticatedUser, TokenProvider e constante do cookie.
-5. Exportar UserRepository e HashProvider pelo UserModule.
-6. Criar e registrar JwtTokenService.
-7. Criar AuthModule e importá-lo no AppModule.
+1. Fix UserOutput so it does not carry a hash.
+2. Fix JWT configuration and update .env.example.
+3. Register cookie-parser, CORS, and credentials at bootstrap.
+4. Create AuthenticatedUser, TokenProvider, and the cookie constant.
+5. Export UserRepository and HashProvider from UserModule.
+6. Create and register JwtTokenService.
+7. Create AuthModule and import it into AppModule.
 8. Implementar AuthenticateUserUseCase.
-9. Implementar POST /auth/login e POST /auth/logout.
-10. Implementar AuthGuard e CurrentUser.
+9. Implement POST /auth/login and POST /auth/logout.
+10. Implement AuthGuard and CurrentUser.
 11. Proteger GET /users/me.
-12. Proteger atualização de usuário e validar ownership.
-13. Integrar credentials: 'include' no frontend.
-14. Criar testes unitários.
-15. Criar testes end-to-end.
-16. Só depois avaliar refresh tokens e sessões persistidas.
+12. Protect user updates and validate ownership.
+13. Integrate credentials: 'include' in the frontend.
+14. Create unit tests.
+15. Create end-to-end tests.
+16. Only then evaluate refresh tokens and persisted sessions.
 
-## 18. Comandos de validação
+## 18. Validation commands
 
-Execute a partir da raiz:
+Run from the root:
 
 ~~~bash
 pnpm --filter api format
@@ -882,39 +882,39 @@ pnpm --filter api build
 Valide manualmente:
 
 ~~~text
-POST /auth/login com credenciais válidas  -> 200 + Set-Cookie
-POST /auth/login com senha inválida       -> 401
+POST /auth/login with valid credentials -> 200 + Set-Cookie
+POST /auth/login with invalid password  -> 401
 GET  /users/me sem cookie                 -> 401
-GET  /users/me com cookie                 -> 200
+GET  /users/me with cookie              -> 200
 POST /auth/logout                         -> cookie expirado
 ~~~
 
-## 19. Critérios de conclusão
+## 19. Completion criteria
 
-A primeira versão estará concluída quando:
+The first version is complete when:
 
-- o login validar email e senha usando o hash existente;
-- o JWT for assinado com JWT_SECRET vindo do ambiente;
-- o JWT for enviado somente em cookie HttpOnly;
-- Secure for configurado corretamente por ambiente;
-- CORS aceitar somente origens configuradas e permitir credenciais;
-- o guard rejeitar cookie ausente, inválido ou expirado;
-- request.user.id vier exclusivamente do JWT validado;
-- GET /users/me funcionar somente autenticado;
-- logout limpar o cookie;
-- nenhuma resposta pública contiver senha ou hash;
-- recursos futuros forem consultados com userId;
-- testes cobrirem login, guard, me, logout e ausência de autenticação.
+- Login validates email and password using the existing hash;
+- JWT is signed with JWT_SECRET from the environment;
+- JWT is sent only in an HttpOnly cookie;
+- Secure is configured correctly for each environment;
+- CORS accepts only configured origins and allows credentials;
+- The guard rejects missing, invalid, or expired cookies;
+- request.user.id comes exclusively from the validated JWT;
+- GET /users/me works only when authenticated;
+- Logout clears the cookie;
+- No public response contains a password or hash;
+- Future resources are queried with userId;
+- Tests cover login, guard, me, logout, and unauthenticated access.
 
-## 20. O que estudar durante a implementação
+## 20. Topics to study during implementation
 
-- diferença entre autenticação e autorização;
-- inversão de dependência usando interfaces e providers;
-- ciclo de vida de um request no NestJS;
-- ordem guard -> controller -> caso de uso;
-- assinatura, payload e expiração de JWT;
-- diferença entre HttpOnly, Secure e SameSite;
-- CORS e credenciais no navegador;
-- por que cookies exigem preocupação com CSRF;
-- isolamento multiusuário usando userId;
-- diferença entre apagar cookie e revogar sessão no servidor.
+- Authentication versus authorization;
+- Dependency inversion through interfaces and providers;
+- The NestJS request lifecycle;
+- The guard -> controller -> use case order;
+- JWT signing, payload, and expiration;
+- HttpOnly, Secure, and SameSite differences;
+- CORS and browser credentials;
+- Why cookies require CSRF consideration;
+- Multiuser isolation through userId;
+- Clearing a cookie versus revoking a server session.

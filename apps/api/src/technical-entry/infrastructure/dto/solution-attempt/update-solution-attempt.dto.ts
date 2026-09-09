@@ -5,7 +5,7 @@ export class UpdateSolutionAttemptDto implements Omit<
   UpdateSolutionAttemptUseCaseInput,
   'userId' | 'technicalEntryId' | 'attemptId'
 > {
-  @IsNotEmpty({ message: 'A descrição da tentativa é obrigatória' })
-  @IsString({ message: 'A descrição da tentativa deve ser um texto' })
+  @IsNotEmpty({ message: 'Attempt description is required' })
+  @IsString({ message: 'Attempt description must be a string' })
   description: string;
 }

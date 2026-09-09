@@ -37,7 +37,7 @@ describe('ProjectResourcePrismaRepository', () => {
     return new ProjectResourceEntity(
       {
         projectId: PROJECT_ID,
-        label: 'Documentação da API',
+        label: 'Documentation da API',
         url: 'https://docs.example.com/devlog',
         type: ProjectResourceType.DOCUMENTATION,
         createdAt,
@@ -53,7 +53,7 @@ describe('ProjectResourcePrismaRepository', () => {
     return {
       id: RESOURCE_ID,
       projectId: PROJECT_ID,
-      label: 'Documentação da API',
+      label: 'Documentation da API',
       url: 'https://docs.example.com/devlog',
       type: PrismaProjectResourceType.DOCUMENTATION,
       createdAt,
@@ -61,7 +61,7 @@ describe('ProjectResourcePrismaRepository', () => {
     };
   }
 
-  it('declara somente campos seguros para ordenação', () => {
+  it('declares only safe sorting fields', () => {
     expect(repository.sortableFields).toEqual([
       'label',
       'type',
@@ -70,7 +70,7 @@ describe('ProjectResourcePrismaRepository', () => {
     ]);
   });
 
-  it('insere a entidade convertida para o modelo do Prisma', async () => {
+  it('inserts the entity converted to the Prisma model', async () => {
     const entity = makeEntity();
 
     await repository.insert(entity);
@@ -79,7 +79,7 @@ describe('ProjectResourcePrismaRepository', () => {
       data: {
         id: RESOURCE_ID,
         projectId: PROJECT_ID,
-        label: 'Documentação da API',
+        label: 'Documentation da API',
         url: 'https://docs.example.com/devlog',
         type: PrismaProjectResourceType.DOCUMENTATION,
         createdAt: entity.createdAt,
@@ -88,7 +88,7 @@ describe('ProjectResourcePrismaRepository', () => {
     });
   });
 
-  it('lista todos os recursos convertidos em entidades', async () => {
+  it('lists all resources converted to entities', async () => {
     findMany.mockResolvedValueOnce([makeModel()]);
 
     const result = await repository.findAll();
@@ -103,7 +103,7 @@ describe('ProjectResourcePrismaRepository', () => {
     });
   });
 
-  it('busca por id e converte o modelo encontrado em entidade', async () => {
+  it('finds by ID and converts the model to an entity', async () => {
     findUnique.mockResolvedValueOnce(makeModel());
 
     const result = await repository.findById(RESOURCE_ID);
@@ -115,7 +115,7 @@ describe('ProjectResourcePrismaRepository', () => {
     expect(result).toMatchObject({ id: RESOURCE_ID, projectId: PROJECT_ID });
   });
 
-  it('retorna null quando não encontra um recurso pelo id', async () => {
+  it('returns null when no resource is found by ID', async () => {
     await expect(repository.findById(RESOURCE_ID)).resolves.toBeNull();
 
     expect(findUnique).toHaveBeenCalledWith({
@@ -123,7 +123,7 @@ describe('ProjectResourcePrismaRepository', () => {
     });
   });
 
-  it('atualiza somente os dados mutáveis e a data de atualização', async () => {
+  it('updates only mutable data and the update date', async () => {
     const entity = makeEntity();
 
     await repository.update(entity);
@@ -131,7 +131,7 @@ describe('ProjectResourcePrismaRepository', () => {
     expect(update).toHaveBeenCalledWith({
       where: { id: RESOURCE_ID },
       data: {
-        label: 'Documentação da API',
+        label: 'Documentation da API',
         url: 'https://docs.example.com/devlog',
         type: PrismaProjectResourceType.DOCUMENTATION,
         updatedAt: entity.updatedAt,
@@ -139,7 +139,7 @@ describe('ProjectResourcePrismaRepository', () => {
     });
   });
 
-  it('remove o recurso pelo id', async () => {
+  it('removes the resource by ID', async () => {
     await repository.delete(RESOURCE_ID);
 
     expect(deleteResource).toHaveBeenCalledWith({
@@ -147,7 +147,7 @@ describe('ProjectResourcePrismaRepository', () => {
     });
   });
 
-  it('aplica filtros, paginação e ordenação e devolve o resultado tipado', async () => {
+  it('applies filters, pagination, and sorting and returns the typed result', async () => {
     count.mockResolvedValueOnce(1);
     findMany.mockResolvedValueOnce([makeModel()]);
     const params = new ProjectResourceSearchParams({
@@ -157,7 +157,7 @@ describe('ProjectResourcePrismaRepository', () => {
       sortDir: 'asc',
       filter: {
         projectId: PROJECT_ID,
-        label: 'documentação',
+        label: 'documentation',
         url: 'docs.example.com',
         type: ProjectResourceType.DOCUMENTATION,
       },
@@ -167,7 +167,7 @@ describe('ProjectResourcePrismaRepository', () => {
 
     const where = {
       projectId: PROJECT_ID,
-      label: { contains: 'documentação', mode: 'insensitive' },
+      label: { contains: 'documentation', mode: 'insensitive' },
       url: { contains: 'docs.example.com', mode: 'insensitive' },
       type: PrismaProjectResourceType.DOCUMENTATION,
     };
@@ -190,7 +190,7 @@ describe('ProjectResourcePrismaRepository', () => {
     expect(result.items[0]).toBeInstanceOf(ProjectResourceEntity);
   });
 
-  it('usa os filtros vazios e a ordenação padrão para um sort não permitido', async () => {
+  it('uses empty filters and default sorting for a disallowed sort', async () => {
     await repository.search(
       new ProjectResourceSearchParams({
         sort: 'url',

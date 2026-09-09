@@ -1,146 +1,120 @@
-# Organização do frontend
+# Frontend organization
 
-## Regra principal
+## Main rule
 
-O frontend é organizado por **domínio dentro de `features/`**. Cada domínio
-mantém próximos os artefatos que mudam juntos: chamadas à API, tipos, hooks,
-componentes e páginas.
+The frontend is organized by **domain inside `features/`**. Each domain keeps artifacts that change together close to one another: API calls, types, hooks, components, and pages.
 
-Essa escolha evita pastas globais como `services/`, `types/` ou `components/`
-virarem gavetas de código sem relação clara. Código global existe apenas quando
-não conhece o domínio do DevLog.
+This prevents global `services/`, `types/`, or `components/` directories from becoming collections of unrelated code. Global code should have no knowledge of DevLog domains.
 
-## Estrutura atual
+## Structure
 
 ```text
 apps/web/src/
-  api/                         # infraestrutura HTTP compartilhada
+  api/                         # Shared HTTP infrastructure
     http.ts
-  app/                         # composição global da aplicação
+  app/                         # Global application composition
     providers/
       app-providers.tsx
-  assets/                      # arquivos importados pelo código
-  components/                  # interface reutilizável e sem domínio
+  assets/                      # Files imported by code
+  components/                  # Reusable, domain-independent interface
     ui/
     markdown.tsx
-  features/                    # domínios e funcionalidades do produto
+  features/                    # Product domains and features
     auth/
       hooks/
         use-login-form.ts
-      login.schema.ts
-      types.ts
+      schemas/
+        login.schema.ts
+      types/
+        auth.ts
     home/
       pages/
         home-page.tsx
-  lib/                         # utilitários e configurações sem domínio
+  lib/                         # Domain-independent utilities and configuration
     date.ts
     query-client.ts
     utils.ts
-  routes/                      # definição das rotas e guards futuros
+  routes/                      # Route definitions and guards
     router.tsx
-  index.css                    # estilos globais e tokens do tema
-  main.tsx                     # ponto de entrada do React
+  index.css                    # Global styles and theme tokens
+  main.tsx                     # React entry point
 ```
 
-Diretórios globais como `hooks/`, `types/` e `test/` serão criados somente
-quando houver código compartilhado que justifique sua existência. Não criamos
-pastas vazias para uma necessidade futura.
+Create global directories such as `hooks/`, `types/`, and `test/` only when shared code justifies them. Do not create empty directories for future needs.
 
-## Estrutura de uma feature
+## Feature structure
 
-Quando um domínio crescer, sua pasta pode assumir esta forma:
+As a domain grows, its directory may take this shape:
 
 ```text
 features/projects/
-  api/                         # requisições, query keys e mapeamentos do domínio
+  api/                         # Requests, query keys, and domain mappings
     list-projects.ts
     create-project.ts
-  hooks/                       # hooks específicos de projetos
+  hooks/                       # Project-specific hooks
     use-projects.ts
     use-create-project.ts
-  pages/                       # telas atendidas pelas rotas desse domínio
+  pages/                       # Screens served by domain routes
     projects-page.tsx
-    project-details-page.tsx
-  components/                  # UI que conhece Project e só é usada nesse domínio
+    project-detail-page.tsx
+  components/                  # UI that knows Project and belongs to this domain
     project-form.tsx
     project-card.tsx
-  types.ts                     # contratos e tipos próprios do domínio
-  presentation.ts              # labels, cores e formatos destinados à interface
-  index.ts                     # opcional: API pública intencional da feature
+  types.ts                     # Domain contracts and types
+  presentation.ts              # Interface labels, colors, and formats
+  index.ts                     # Optional, intentional public feature API
 ```
 
-As subpastas e os arquivos são opcionais. Por exemplo, uma feature pequena
-com apenas uma página não precisa começar com `api/`, `hooks/` e
-`components/` vazios.
+Subdirectories and files are optional. A small feature with one page does not need empty `api/`, `hooks/`, and `components/` directories.
 
-Os próximos domínios esperados do DevLog são `projects`, `tags` e
-`technical-entries`. Funcionalidades como criar, arquivar ou resolver um
-registro permanecem inicialmente dentro do domínio correspondente. Somente
-extraia uma ação para uma feature própria se ela ganhar complexidade ou passar
-a ser reutilizada em fluxos distintos.
+Expected DevLog domains include `projects`, `tags`, and `technical-entries`. Actions such as creating, archiving, or resolving an entry initially stay in their domain. Extract an action into its own feature only when it becomes complex or is reused across distinct flows.
 
-## Responsabilidade das pastas raiz
+## Root directory responsibilities
 
-| Pasta | Deve conter | Não deve conter |
+| Directory | Should contain | Should not contain |
 | --- | --- | --- |
-| `api/` | Cliente Axios, interceptores e tipos genéricos de resposta/paginação. | Requisições de `Project`, `Tag` ou `TechnicalEntry`. |
-| `app/` | Providers, configuração global e composição da aplicação. | Páginas ou regras de um domínio. |
-| `assets/` | Imagens e fontes importadas por TypeScript/CSS. | Arquivos públicos servidos diretamente; esses ficam em `public/`. |
-| `components/` | Componentes genéricos, shadcn e UI sem conhecimento do domínio. | `ProjectCard`, `TagForm` ou componentes exclusivos de uma feature. |
-| `features/` | Código específico de um domínio do produto. | Configuração global de React Query, Axios ou tema. |
-| `lib/` | Utilitários puros e configurações reutilizáveis, como data, `cn` e Query Client. | Regras ou tipos de domínio. |
-| `routes/` | Definições de rota, loaders/actions e guards. | Implementação extensa das páginas. |
+| `api/` | Axios client, interceptors, generic response/pagination types. | `Project`, `Tag`, or `TechnicalEntry` requests. |
+| `app/` | Providers, global configuration, application composition. | Domain pages or rules. |
+| `assets/` | Images and fonts imported by TypeScript/CSS. | Directly served public files; use `public/`. |
+| `components/` | Generic components, shadcn, domain-independent UI. | `ProjectCard`, `TagForm`, or feature-exclusive components. |
+| `features/` | Product domain-specific code. | Global React Query, Axios, or theme configuration. |
+| `lib/` | Pure utilities and reusable configuration, such as dates, `cn`, and Query Client. | Domain rules or types. |
+| `routes/` | Route definitions, loaders/actions, and guards. | Extensive page implementation. |
 
-## Dependências e imports
+## Dependencies and imports
 
-O fluxo esperado de dependências é:
+The expected dependency flow is:
 
 ```text
-api, lib e components  →  features  →  routes e app
+api, lib, and components → features → routes and app
 ```
 
-- `api/`, `lib/` e `components/` não podem importar de uma feature.
-- Uma feature pode importar infraestrutura e UI compartilhadas.
-- `routes/` aponta para páginas de features, mas não contém a regra de negócio
-  dessas páginas.
-- Não faça deep import de uma feature para outra. Se uma dependência entre
-  domínios for realmente necessária, exponha somente o contrato desejado no
-  `index.ts` da feature fornecedora.
-- Prefira imports diretos dentro da própria feature. O `index.ts` é uma borda
-  pública deliberada, não um arquivo obrigatório de reexports.
+- `api/`, `lib/`, and `components/` must not import from a feature.
+- A feature may import shared infrastructure and UI.
+- `routes/` points to feature pages but does not contain their business rules.
+- Avoid deep imports between features. If a cross-domain dependency is necessary, expose only the required contract through the supplying feature's `index.ts`.
+- Prefer direct imports within a feature. `index.ts` is a deliberate public boundary, not a mandatory re-export file.
 
-## API e estado remoto
+## API and remote state
 
-O arquivo `api/http.ts` é a única configuração do Axios: URL base, cookies e
-futuros comportamentos genuinamente globais. A chamada de um recurso fica no
-domínio que o conhece:
+`api/http.ts` is the single Axios configuration: base URL, cookies, and future global behaviors. Resource calls belong to the domain that knows them:
 
 ```text
 features/projects/api/list-projects.ts
 features/projects/hooks/use-projects.ts
 ```
 
-O primeiro arquivo chama `api`; o segundo encapsula a query do React Query.
-Assim, uma página não precisa conhecer URL, `queryKey`, cache ou transformação
-da resposta.
+The first file calls `api`; the second wraps the React Query query. Pages therefore do not need to know the URL, `queryKey`, caching, or response transformation.
 
-## Formulários e apresentação
+## Forms and presentation
 
-Schemas Zod, tipos inferidos e hooks do React Hook Form permanecem na feature
-do formulário. Em `auth`, por exemplo, `login.schema.ts`, `types.ts` e
-`hooks/use-login-form.ts` formam uma unidade.
+Zod schemas, inferred types, and React Hook Form hooks stay in the form's feature. In `auth`, for example, `schemas/login.schema.ts`, `types/auth.ts`, and `hooks/use-login-form.ts` form a unit.
 
-Use `presentation.ts` para detalhes de exibição que não devem vazar para a
-API: textos de status, cor de badges, ícones e formatos específicos. A API
-pode devolver `PAUSED`; a interface pode decidir que o rótulo apresentado é
-“Pausado” nesse arquivo.
+Use `presentation.ts` for display details that should not leak into the API: status text, badge colors, icons, and specific formats. For example, a `PAUSED` API value could be displayed as “Paused” by that map. Use English display text throughout.
 
-## Testes
+## Tests
 
-Quando o frontend receber um runner de testes, `src/test/` deve guardar apenas
-infraestrutura compartilhada: setup, handlers do MSW, renderizadores e
-factories. Testes de comportamento devem ficar próximos da feature que
-protegem, por exemplo:
+When the frontend gains a test runner, `src/test/` should hold shared infrastructure only: setup, MSW handlers, renderers, and factories. Behavior tests should stay near the feature they protect:
 
 ```text
 features/projects/
@@ -148,5 +122,4 @@ features/projects/
   components/project-form.spec.tsx
 ```
 
-Essa proximidade torna mais fácil remover ou alterar uma funcionalidade sem
-deixar testes órfãos em uma pasta global.
+This proximity makes it easier to remove or change a feature without leaving orphaned tests in a global directory.

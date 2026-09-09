@@ -33,7 +33,7 @@ function makeCommand(projectId = PROJECT_ID): ProjectCommandEntity {
       projectId,
       title: 'Subir ambiente local',
       command: 'docker compose up -d',
-      description: 'Inicia os serviços do projeto',
+      description: 'Start project services',
       executionOrder: 0,
     },
     COMMAND_ID,
@@ -41,7 +41,7 @@ function makeCommand(projectId = PROJECT_ID): ProjectCommandEntity {
 }
 
 describe('SearchProjectCommandUseCase', () => {
-  it('busca comandos somente dentro do projeto autorizado', async () => {
+  it('searches commands only within the authorized project', async () => {
     const project = makeProject();
     const command = makeCommand();
     const projectRepository = {
@@ -74,7 +74,7 @@ describe('SearchProjectCommandUseCase', () => {
       sortDir: 'asc',
       title: 'ambiente',
       command: 'docker',
-      description: 'serviços',
+      description: 'services',
     });
 
     expect(projectCommandRepository.search.mock.calls[0]?.[0]).toEqual(
@@ -87,7 +87,7 @@ describe('SearchProjectCommandUseCase', () => {
           projectId: PROJECT_ID,
           title: 'ambiente',
           command: 'docker',
-          description: 'serviços',
+          description: 'services',
         },
       }),
     );
@@ -106,7 +106,7 @@ describe('SearchProjectCommandUseCase', () => {
     });
   });
 
-  it('não busca comandos de projeto de outro usuário', async () => {
+  it("does not search commands in another user's project", async () => {
     const projectRepository = {
       findById: jest.fn().mockResolvedValue(makeProject(OTHER_USER_ID)),
     } as unknown as jest.Mocked<ProjectRepository>;
@@ -147,7 +147,7 @@ describe('GetProjectCommandUseCase', () => {
     };
   }
 
-  it('retorna o comando quando ele pertence ao projeto do usuário', async () => {
+  it('returns the command when it belongs to the user project', async () => {
     const { useCase } = makeUseCase();
 
     const output = await useCase.execute({
@@ -163,7 +163,7 @@ describe('GetProjectCommandUseCase', () => {
     });
   });
 
-  it('não retorna comando de projeto de outro usuário', async () => {
+  it("does not return a command in another user's project", async () => {
     const { useCase, projectCommandRepository } = makeUseCase(
       makeProject(OTHER_USER_ID),
     );
@@ -179,7 +179,7 @@ describe('GetProjectCommandUseCase', () => {
     expect(projectCommandRepository.findById.mock.calls).toHaveLength(0);
   });
 
-  it('não retorna comando que pertence a outro projeto', async () => {
+  it('does not return a command belonging to another project', async () => {
     const { useCase } = makeUseCase(
       makeProject(),
       makeCommand(OTHER_PROJECT_ID),
@@ -194,7 +194,7 @@ describe('GetProjectCommandUseCase', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('retorna erro quando o comando não existe', async () => {
+  it('returns an error when the command does not exist', async () => {
     const { useCase } = makeUseCase(makeProject(), null);
 
     await expect(

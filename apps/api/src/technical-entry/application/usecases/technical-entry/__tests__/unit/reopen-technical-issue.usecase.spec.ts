@@ -24,10 +24,10 @@ function makeEntry(
   return new TechnicalEntryEntity(
     {
       userId: overrides.userId ?? USER_ID,
-      title: 'Erro na API',
+      title: 'API error',
       context: 'Investigando o erro da API',
       type: overrides.type ?? TechnicalEntryType.ISSUE,
-      conclusion: overrides.conclusion ?? 'A configuração foi corrigida',
+      conclusion: overrides.conclusion ?? 'The configuration was fixed',
       resolvedAt: overrides.open
         ? undefined
         : (overrides.resolvedAt ?? new Date('2026-08-02T12:00:00.000Z')),
@@ -48,7 +48,7 @@ function makeRepository(entry: TechnicalEntryEntity | null = makeEntry()) {
 }
 
 describe('ReopenTechnicalIssueUseCase', () => {
-  it('reabre uma ISSUE resolvida e preserva a conclusão', async () => {
+  it('reopens a resolved ISSUE and preserves the conclusion', async () => {
     const entry = makeEntry();
     const { repository } = makeRepository(entry);
     const useCase = new ReopenTechnicalIssueUseCase(repository);
@@ -61,13 +61,13 @@ describe('ReopenTechnicalIssueUseCase', () => {
     expect(repository.update.mock.calls).toEqual([[entry]]);
     expect(output).toMatchObject({
       id: ENTRY_ID,
-      conclusion: 'A configuração foi corrigida',
+      conclusion: 'The configuration was fixed',
       status: TechnicalEntryStatus.OPEN,
     });
     expect(output.resolvedAt).toBeUndefined();
   });
 
-  it('rejeita uma ISSUE que ainda está aberta', async () => {
+  it('rejects an ISSUE that is still open', async () => {
     const entry = makeEntry({ open: true });
     const { repository } = makeRepository(entry);
     const useCase = new ReopenTechnicalIssueUseCase(repository);
@@ -83,7 +83,7 @@ describe('ReopenTechnicalIssueUseCase', () => {
     expect(repository.update.mock.calls).toHaveLength(0);
   });
 
-  it('rejeita entradas LEARNING', async () => {
+  it('rejects LEARNING entries', async () => {
     const entry = makeEntry({ type: TechnicalEntryType.LEARNING, open: true });
     const { repository } = makeRepository(entry);
     const useCase = new ReopenTechnicalIssueUseCase(repository);
@@ -99,7 +99,7 @@ describe('ReopenTechnicalIssueUseCase', () => {
     expect(repository.update.mock.calls).toHaveLength(0);
   });
 
-  it('não reabre uma entrada de outro usuário', async () => {
+  it("does not reopen another user's entry", async () => {
     const entry = makeEntry({ userId: OTHER_USER_ID });
     const { repository } = makeRepository(entry);
     const useCase = new ReopenTechnicalIssueUseCase(repository);
@@ -112,13 +112,13 @@ describe('ReopenTechnicalIssueUseCase', () => {
     expect(entry.status).toBe(TechnicalEntryStatus.RESOLVED);
   });
 
-  it('mantém a invariável de reabertura no domínio', () => {
+  it('keeps the reopening invariant in the domain', () => {
     const entry = makeEntry();
 
     entry.reopen();
 
     expect(entry.status).toBe(TechnicalEntryStatus.OPEN);
-    expect(entry.conclusion).toBe('A configuração foi corrigida');
+    expect(entry.conclusion).toBe('The configuration was fixed');
     expect(entry.resolvedAt).toBeUndefined();
 
     expect(() => entry.reopen()).toThrow(EntityValidationError);

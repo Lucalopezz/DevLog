@@ -5,6 +5,6 @@ export class AssignTagToTechnicalEntryDto implements Omit<
   AssignTagToTechnicalEntryInput,
   'technicalEntryId' | 'userId'
 > {
-  @IsUUID('4', { message: 'O ID da tag deve ser um UUID válido' })
+  @IsUUID('4', { message: 'Tag ID must be a valid UUID' })
   tagId: string;
 }

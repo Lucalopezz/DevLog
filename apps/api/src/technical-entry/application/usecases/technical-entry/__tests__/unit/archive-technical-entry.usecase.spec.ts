@@ -12,7 +12,7 @@ function makeEntry(userId = USER_ID): TechnicalEntryEntity {
   return new TechnicalEntryEntity(
     {
       userId,
-      title: 'Falha ao iniciar a API',
+      title: 'Failed to start the API',
       context: 'A porta estava ocupada',
       type: TechnicalEntryType.ISSUE,
     },
@@ -30,7 +30,7 @@ function makeRepository(entry: TechnicalEntryEntity | null) {
 describe('ArchiveTechnicalEntryUseCase', () => {
   afterEach(() => jest.useRealTimers());
 
-  it('arquiva a entrada do usuário de forma idempotente', async () => {
+  it('archives the user entry idempotently', async () => {
     jest.useFakeTimers();
     const archivedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(archivedAt);
@@ -48,9 +48,9 @@ describe('ArchiveTechnicalEntryUseCase', () => {
   });
 
   it.each([
-    ['inexistente', null],
-    ['de outro usuário', makeEntry(OTHER_USER_ID)],
-  ])('não arquiva uma entrada %s', async (_description, entry) => {
+    ['missing', null],
+    ['belonging to another user', makeEntry(OTHER_USER_ID)],
+  ])('does not archive an entry %s', async (_description, entry) => {
     const repository = makeRepository(entry);
     const useCase = new ArchiveTechnicalEntryUseCase(repository);
 

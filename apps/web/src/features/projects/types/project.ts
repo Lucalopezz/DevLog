@@ -11,9 +11,9 @@ export type ProjectTechnology = {
 };
 
 /**
- * Valida valores que vieram de fontes externas, como URLSearchParams ou um
- * elemento <select>. Depois desta verificação, o TypeScript pode tratá-los
- * como ProjectStatus com segurança.
+ * Validates values from external sources, such as URLSearchParams or a
+ * <select> element. After this check, TypeScript can safely treat them
+ * as ProjectStatus.
  */
 export function isProjectStatus(
   value: string | null | undefined,
@@ -38,12 +38,12 @@ export type Project = {
 export type ProjectCollection = Pagination<Project>;
 
 /**
- * Parâmetros que o frontend pode enviar para GET /api/project.
+ * Parameters the frontend can send to GET /api/project.
  *
- * userId não aparece aqui porque o usuário autenticado é aplicado pelo
- * backend a partir da sessão; o navegador não deve escolher o proprietário.
- * archivedAt é string porque será serializado na query string. O valor
- * especial "null" representa projetos não arquivados na API.
+ * userId is omitted because the backend derives the authenticated user
+ * from the session; the browser must not choose the owner.
+ * archivedAt is a string because it is serialized in the query string. The
+ * special value "null" represents unarchived projects in the API.
  */
 export type ListProjectsParams = {
   page?: number;
@@ -55,7 +55,7 @@ export type ListProjectsParams = {
   sortDir?: "asc" | "desc";
 };
 
-/** Valores editados no formulário antes de serem convertidos em query params. */
+/** Values edited in the form before conversion to query parameters. */
 export type ProjectSearchFormValues = {
   name: string;
   status: ProjectStatus | "";
@@ -67,11 +67,11 @@ export type CreateProjectInput = {
 };
 
 /**
- * Campos diretos que o endpoint PATCH aceita.
+ * Direct fields accepted by the PATCH endpoint.
  *
- * O contrato é parcial de propósito: a ausência preserva o valor atual e
- * `null` remove os campos opcionais. Transições de ciclo de vida, como
- * arquivar e restaurar, não fazem parte deste payload.
+ * The contract is intentionally partial: omission preserves the current value and
+ * `null` clears optional fields. Lifecycle transitions, such as
+ * archiving and restoring, are not part of this payload.
  */
 export type UpdateProjectInput = {
   name?: string;

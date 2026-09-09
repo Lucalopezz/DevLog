@@ -8,7 +8,7 @@ const PROJECT_ID = '123e4567-e89b-42d3-a456-426614174010';
 
 const makeDto = (overrides: Record<string, unknown> = {}) =>
   plainToInstance(CreateTechnicalEntryDto, {
-    title: 'Título da entrada',
+    title: 'Entry title',
     context: 'Contexto da entrada',
     type: TechnicalEntryType.ISSUE,
     ...overrides,
@@ -23,13 +23,13 @@ describe('CreateTechnicalEntryDto', () => {
     expect(withoutProject).toHaveLength(0);
   });
 
-  it('rejeita projectId inválido', async () => {
+  it('rejects an invalid projectId', async () => {
     const errors = await validate(makeDto({ projectId: 'project-1' }));
 
     expect(errors.map((error) => error.property)).toContain('projectId');
   });
 
-  it('aceita title com 200 caracteres e rejeita 201', async () => {
+  it('accepts a 200-character title and rejects 201', async () => {
     const validErrors = await validate(makeDto({ title: 'a'.repeat(200) }));
     const invalidErrors = await validate(makeDto({ title: 'a'.repeat(201) }));
 

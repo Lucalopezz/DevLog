@@ -16,37 +16,36 @@ export function ProjectPagination({
 
   return (
     <nav
-      aria-label="Paginação de projetos"
+      aria-label="Project pagination"
       className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <p aria-live="polite" className="text-sm text-muted-foreground">
-        Página {meta.currentPage} de {meta.lastPage} ·{' '}
-        {meta.total.toLocaleString('pt-BR')} projeto(s)
+        Page {meta.currentPage} of {meta.lastPage} ·{' '}
+        {meta.total.toLocaleString('en-US')} project(s)
       </p>
 
       <div className="flex items-center gap-2">
         <Button
-          aria-label="Ir para a página anterior"
+          aria-label="Go to the previous page"
           disabled={isFirstPage || isFetching}
           onClick={() => onPageChange(meta.currentPage - 1)}
           type="button"
           variant="outline"
         >
           <ChevronLeft data-icon="inline-start" />
-          Anterior
+          Previous
         </Button>
         <Button
-          aria-label="Ir para a próxima página"
+          aria-label="Go to the next page"
           disabled={isLastPage || isFetching}
           onClick={() => onPageChange(meta.currentPage + 1)}
           type="button"
           variant="outline"
         >
-          Próxima
+          Next
           <ChevronRight data-icon="inline-end" />
         </Button>
       </div>
     </nav>
   );
 }
-

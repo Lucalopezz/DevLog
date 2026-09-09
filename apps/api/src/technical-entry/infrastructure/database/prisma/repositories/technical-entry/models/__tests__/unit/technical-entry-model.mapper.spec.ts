@@ -3,7 +3,7 @@ import { TechnicalEntryType as PrismaTechnicalEntryType } from '@generated/prism
 import { TechnicalEntryModelMapper } from '../../technical-entry-model.mapper';
 
 describe('TechnicalEntryModelMapper', () => {
-  it('converte o tipo de domínio para o tipo do Prisma', () => {
+  it('converts the domain type to the Prisma type', () => {
     expect(
       TechnicalEntryModelMapper.toPrismaType(TechnicalEntryType.ISSUE),
     ).toBe(PrismaTechnicalEntryType.ISSUE);
@@ -12,13 +12,13 @@ describe('TechnicalEntryModelMapper', () => {
     ).toBe(PrismaTechnicalEntryType.LEARNING);
   });
 
-  it('converte o tipo do Prisma para o tipo de domínio', () => {
+  it('converts the Prisma type to the domain type', () => {
     const model = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       userId: '123e4567-e89b-42d3-a456-426614174001',
       projectId: null,
-      title: 'Título válido',
-      context: 'Contexto válido',
+      title: 'Valid title',
+      context: 'Valid context',
       conclusion: null,
       type: PrismaTechnicalEntryType.LEARNING,
       resolvedAt: null,

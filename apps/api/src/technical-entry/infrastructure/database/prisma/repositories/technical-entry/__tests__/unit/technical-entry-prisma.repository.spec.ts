@@ -23,36 +23,33 @@ describe('TechnicalEntryPrismaRepository', () => {
   it.each([
     [TechnicalEntryStatus.OPEN, null],
     [TechnicalEntryStatus.RESOLVED, { not: null }],
-  ])(
-    'traduz o status %s para o filtro resolvedAt',
-    async (status, resolvedAt) => {
-      await repository.search(
-        new TechnicalEntrySearchParams({
-          filter: {
-            userId: 'user-1',
-            status,
-          },
-        }),
-      );
+  ])('maps status %s to the resolvedAt filter', async (status, resolvedAt) => {
+    await repository.search(
+      new TechnicalEntrySearchParams({
+        filter: {
+          userId: 'user-1',
+          status,
+        },
+      }),
+    );
 
-      const expectedWhere = {
-        userId: 'user-1',
-        AND: [
-          {
-            type: PrismaTechnicalEntryType.ISSUE,
-            resolvedAt,
-          },
-        ],
-      };
+    const expectedWhere = {
+      userId: 'user-1',
+      AND: [
+        {
+          type: PrismaTechnicalEntryType.ISSUE,
+          resolvedAt,
+        },
+      ],
+    };
 
-      expect(count).toHaveBeenCalledWith({ where: expectedWhere });
-      expect(findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ where: expectedWhere }),
-      );
-    },
-  );
+    expect(count).toHaveBeenCalledWith({ where: expectedWhere });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expectedWhere }),
+    );
+  });
 
-  it('preserva a interseção quando type e status são incompatíveis', async () => {
+  it('preserves the intersection when type and status are incompatible', async () => {
     await repository.search(
       new TechnicalEntrySearchParams({
         filter: {

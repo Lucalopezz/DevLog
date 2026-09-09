@@ -1,26 +1,22 @@
 # DevLog Web
 
-Frontend do DevLog. Esta aplicação será a interface para consultar projetos,
-registrar problemas e aprendizados e recuperar soluções técnicas já
-experimentadas.
+DevLog frontend. This application provides the interface for browsing projects, recording issues and lessons learned, and finding previously attempted technical solutions.
 
-## Estado atual
+## Current state
 
-O frontend está na etapa de fundação. A rota `/` exibe uma tela inicial que
-confirma a infraestrutura montada, mas as telas completas de login, projetos e
-entradas ainda serão construídas.
+The frontend includes its application foundation, authentication screens, account details, project listing, creation, editing, and project details. The `/` route shows the initial infrastructure demonstration. Technical entry workflows continue to evolve.
 
-Já estão preparados:
+The foundation includes:
 
-- roteamento com React Router;
-- cliente HTTP Axios apontando para a API e enviando cookies;
-- cache e sincronização de dados remotos com TanStack Query;
-- validação de formulários com React Hook Form e Zod;
-- componentes de interface baseados em Tailwind CSS, shadcn/ui e Radix;
-- notificações com Sonner e renderização de conteúdo Markdown;
-- React Query Devtools somente em desenvolvimento.
+- React Router routing;
+- An Axios HTTP client configured for the API and cookies;
+- Remote data caching and synchronization with TanStack Query;
+- React Hook Form and Zod form validation;
+- Tailwind CSS, shadcn/ui, and Radix interface components;
+- Sonner notifications and Markdown rendering;
+- React Query Devtools in development only.
 
-## Tecnologias
+## Technologies
 
 - React 19 + TypeScript;
 - Vite;
@@ -28,95 +24,82 @@ Já estão preparados:
 - TanStack Query;
 - Axios;
 - Tailwind CSS 4;
-- shadcn/ui, Radix UI e Lucide;
+- shadcn/ui, Radix UI, and Lucide;
 - React Hook Form + Zod;
-- date-fns com localização `pt-BR`.
+- date-fns with the `en-US` locale.
 
-## Organização do código
+## Code organization
 
 ```text
 src/
-  api/                 # cliente HTTP e configuração da API
-  app/providers/       # providers globais da aplicação
-  components/          # componentes compartilhados e primitives de UI
-  features/            # código organizado por funcionalidade
-    auth/              # schema, tipos e hooks do login
-    home/              # página inicial atual
-  lib/                 # query client, datas e utilitários
-  routes/              # definição das rotas do navegador
-  main.tsx             # ponto de entrada do React
-  index.css            # Tailwind, tema e tokens visuais
+  api/                 # HTTP client and API configuration
+  app/providers/       # Global application providers
+  components/          # Shared components and UI primitives
+  features/            # Code organized by feature
+    auth/              # Authentication schemas, types, hooks, and screens
+    home/              # Current home page
+    projects/          # Project APIs, forms, hooks, and screens
+  lib/                 # Query client, dates, and utilities
+  routes/              # Browser route definitions
+  main.tsx             # React entry point
+  index.css            # Tailwind, theme, and visual tokens
 ```
 
-As funcionalidades devem ficar em `features/` quando tiverem regras próprias.
-Componentes realmente reutilizáveis pertencem a `components/`; regras
-transversais, como datas e cache, pertencem a `lib/`.
+Features with their own rules belong in `features/`. Reusable components belong in `components/`; cross-cutting concerns such as dates and caching belong in `lib/`.
 
-## Configuração local
+## Local configuration
 
-A partir da raiz do monorepo:
+From the monorepo root:
 
 ```bash
 pnpm install
 cp apps/web/.env.example apps/web/.env
 ```
 
-`VITE_API_URL` define a URL base usada por `src/api/http.ts`:
+`VITE_API_URL` defines the base URL used by `src/api/http.ts`:
 
 ```env
 VITE_API_URL=http://localhost:3000/api
 ```
 
-Se a variável não existir, esse mesmo endereço será usado como fallback. A API
-precisa estar rodando e liberando a origem do Vite no `CORS_ALLOWED_ORIGINS`.
+If the variable is absent, the same address is used as a fallback. The API must be running and allow the Vite origin in `CORS_ALLOWED_ORIGINS`.
 
-## Executar
+## Running
 
 ```bash
-# inicia o Vite com hot module replacement
+# Start Vite with hot module replacement
 pnpm --filter web dev
 
-# valida tipos e gera a build de produção
+# Validate types and create a production build
 pnpm --filter web build
 
-# executa o lint
+# Run lint checks
 pnpm --filter web lint
 
-# visualiza localmente a build gerada
+# Preview the generated build locally
 pnpm --filter web preview
 ```
 
-O Vite normalmente disponibiliza o app em `http://localhost:5173`.
+Vite usually serves the app at `http://localhost:5173`.
 
-## Decisões importantes da base
+## Foundation decisions
 
-### Comunicação com a API
+### API communication
 
-Use a instância `api` de `src/api/http.ts` para novas chamadas. Ela já define
-`withCredentials: true`, necessário porque o backend armazena o JWT em cookie
-seguro. Evite criar instâncias Axios isoladas, pois isso pode quebrar a
-autenticação ou produzir URLs inconsistentes.
+Use the `api` instance from `src/api/http.ts` for new calls. It sets `withCredentials: true`, required because the backend stores the JWT in a protected cookie. Isolated Axios instances may break authentication or produce inconsistent URLs.
 
-### Dados remotos
+### Remote data
 
-O `queryClient` considera os dados frescos por 30 segundos, não refaz buscas ao
-retomar o foco da janela e evita novas tentativas para erros HTTP `4xx`. Essa
-política diferencia erro de validação ou autorização de falha temporária do
-servidor.
+`queryClient` treats data as fresh for 30 seconds, does not refetch on window focus, and avoids retries for HTTP `4xx` errors. This policy distinguishes validation or authorization errors from temporary server failures.
 
-### Formulários e UI
+### Forms and UI
 
-O hook `useLoginForm` é a referência para formulários: o schema Zod descreve os
-dados e o React Hook Form controla o estado e a validação. Para estilos, use os
-tokens e componentes já definidos em `src/index.css` e `src/components/ui`,
-mantendo a composição com classes Tailwind.
+`useLoginForm` is the form reference: Zod describes the data, and React Hook Form controls state and validation. Use the tokens and components in `src/index.css` and `src/components/ui`, composing styles with Tailwind classes.
 
-## Próximos pontos naturais
+All interface text, accessibility labels, validation messages, and notifications must be in English. Dates and numbers use `en-US`.
 
-1. criar a tela e o fluxo de login usando o endpoint `/api/auth/login`;
-2. carregar o usuário atual com `/api/users/me` e proteger rotas privadas;
-3. adicionar listagem e edição de projetos e entradas técnicas;
-4. conectar tags, tentativas de solução e os sub-recursos dos projetos.
+## Next areas to develop
 
-Ainda não há um test runner configurado para o web. Até essa camada existir,
-as verificações mínimas para mudanças no frontend são `lint` e `build`.
+Continue technical entry creation and editing, then connect tag and solution attempt workflows and editing of project subresources.
+
+The web app does not yet have a test runner. Until one is added, the minimum checks for frontend changes are `lint` and `build`.

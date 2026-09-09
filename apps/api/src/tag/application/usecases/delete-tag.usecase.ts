@@ -19,7 +19,7 @@ export class DeleteTagUseCase implements UseCaseContract<
     const tag = await this.tagRepository.findById(input.id);
 
     if (tag === null || tag.userId !== input.userId) {
-      throw new NotFoundException('Tag não encontrada');
+      throw new NotFoundException('Tag not found');
     }
 
     await this.tagRepository.delete(input.id);

@@ -5,11 +5,11 @@ export default function AccountPage() {
   const { data: user, isPending } = useGetUser()
 
   if (isPending) {
-    return <p className="text-muted-foreground">Carregando conta...</p>
+    return <p className="text-muted-foreground">Loading account...</p>
   }
 
-  // O loader da rota já impede este caso, mas manter a proteção torna o
-  // componente seguro caso ele seja reutilizado em outra rota futuramente.
+  // The route loader already prevents this case, but keeping this guard makes the
+  // component safe if it is reused on another route in the future.
   if (!user) {
     return null
   }
@@ -19,16 +19,16 @@ export default function AccountPage() {
       <header className="flex items-center gap-3">
         <CircleUserRound className="size-8" />
         <div>
-          <h1 className="text-2xl font-semibold">Conta do usuário</h1>
+          <h1 className="text-2xl font-semibold">User account</h1>
           <p className="text-sm text-muted-foreground">
-            Informações da sua sessão no DevLog.
+            Your DevLog session information.
           </p>
         </div>
       </header>
 
       <dl className="space-y-4 rounded-xl border bg-card p-6">
         <div>
-          <dt className="text-sm font-medium text-muted-foreground">Nome</dt>
+          <dt className="text-sm font-medium text-muted-foreground">Name</dt>
           <dd>{user.name}</dd>
         </div>
         <div>

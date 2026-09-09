@@ -6,13 +6,13 @@ export class AddSolutionAttemptDto implements Omit<
   AddSolutionAttemptUseCaseInput,
   'userId' | 'technicalEntryId'
 > {
-  @IsNotEmpty({ message: 'A descrição da tentativa é obrigatória' })
-  @IsString({ message: 'A descrição da tentativa deve ser um texto' })
+  @IsNotEmpty({ message: 'Attempt description is required' })
+  @IsString({ message: 'Attempt description must be a string' })
   description: string;
 
-  @IsNotEmpty({ message: 'O resultado da tentativa é obrigatório' })
+  @IsNotEmpty({ message: 'Attempt result is required' })
   @IsEnum(SolutionAttemptResult, {
-    message: 'O resultado da tentativa deve ser válido',
+    message: 'Attempt result must be valid',
   })
   result: SolutionAttemptResult;
 }

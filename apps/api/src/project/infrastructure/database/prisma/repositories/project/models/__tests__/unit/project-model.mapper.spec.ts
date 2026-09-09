@@ -32,7 +32,7 @@ describe('ProjectModelMapper', () => {
     [PrismaProjectStatus.PAUSED, ProjectStatusEnum.INACTIVE],
     [PrismaProjectStatus.FINISHED, ProjectStatusEnum.FINISHED],
   ])(
-    'converte o status %s do Prisma para o domínio',
+    'converts status %s from Prisma to the domain',
     (prismaStatus, domainStatus) => {
       const entity = ProjectModelMapper.toEntity(
         makeModel({ status: prismaStatus }),
@@ -50,7 +50,7 @@ describe('ProjectModelMapper', () => {
     [ProjectStatusEnum.INACTIVE, PrismaProjectStatus.PAUSED],
     [ProjectStatusEnum.FINISHED, PrismaProjectStatus.FINISHED],
   ])(
-    'converte o status %s do domínio para o Prisma',
+    'converts status %s from the domain to Prisma',
     (domainStatus, prismaStatus) => {
       expect(ProjectModelMapper.toPrismaStatus(domainStatus)).toBe(
         prismaStatus,
@@ -58,7 +58,7 @@ describe('ProjectModelMapper', () => {
     },
   );
 
-  it('converte entidade para persistência preservando opcionais', () => {
+  it('converts an entity for persistence while preserving optional fields', () => {
     const archivedAt = new Date('2026-08-02T00:00:00.000Z');
     const entity = new ProjectEntity(
       {
@@ -87,7 +87,7 @@ describe('ProjectModelMapper', () => {
     });
   });
 
-  it('rejeita status persistido ou de domínio desconhecido', () => {
+  it('rejects unknown persisted or domain status', () => {
     expect(() =>
       ProjectModelMapper.toEntity(
         makeModel({ status: 'UNKNOWN' as PrismaProjectStatus }),
@@ -98,7 +98,7 @@ describe('ProjectModelMapper', () => {
     ).toThrow(ValidationError);
   });
 
-  it('encapsula erro de validação ao hidratar uma entidade inválida', () => {
+  it('wraps validation errors when hydrating an invalid entity', () => {
     expect(() => ProjectModelMapper.toEntity(makeModel({ name: '' }))).toThrow(
       ValidationError,
     );

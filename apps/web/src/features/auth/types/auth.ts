@@ -8,7 +8,7 @@ export type User = {
   email: string
 }
 
-// Infere o tipo de dados do formulário a partir do schema do Zod
+// Infers the form data type from the Zod schema
 export type LoginFormData = z.infer<typeof loginSchema>
 
 export type RegisterFormData = z.infer<typeof registerSchema>

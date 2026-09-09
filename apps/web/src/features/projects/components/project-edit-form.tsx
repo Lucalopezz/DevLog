@@ -27,11 +27,11 @@ function nullableText(value: string) {
 }
 
 /**
- * Formulário dos dados gerais do projeto.
+ * Form for general project details.
  *
- * O formulário mantém strings vazias para facilitar a edição. No submit, elas
- * viram `null`, pois esse é o sinal do contrato da API para limpar descrição ou
- * caminho local; omitir um campo teria o significado diferente de preservá-lo.
+ * The form keeps empty strings to simplify editing. On submission, they
+ * become `null`, the API contract signal to clear the description or
+ * local path; omitting a field would instead preserve it.
  */
 export function ProjectEditForm({
   open,
@@ -54,8 +54,8 @@ export function ProjectEditForm({
       })
       onOpenChange(false)
     } catch {
-      // O hook já apresenta o erro via toast; o catch impede uma Promise
-      // rejeitada não tratada no evento de submit.
+      // The hook already displays errors in a toast; catch prevents an unhandled
+      // Promise rejection in the submit event.
     }
   }
 
@@ -67,10 +67,10 @@ export function ProjectEditForm({
       <DialogContent className="gap-6 border-border/60 bg-card p-7 shadow-2xl ring-0 sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight">
-            Editar projeto
+            Edit project
           </DialogTitle>
           <DialogDescription className="leading-6">
-            Atualize os dados gerais usados para identificar e organizar este projeto.
+            Update the general details used to identify and organize this project.
           </DialogDescription>
         </DialogHeader>
 
@@ -81,10 +81,10 @@ export function ProjectEditForm({
             onSubmit={form.handleSubmit(onSubmit)}
           >
             {/*
-              Aqui o mesmo componente recebe outro `control`, criado por
-              useProjectEditForm. Os campos compartilhados se comportam igual,
-              mas o wrapper continua responsável pelo PATCH e por seus dados
-              adicionais, status e localPath.
+              Here the same component receives another `control`, created by
+              useProjectEditForm. The shared fields behave the same way,
+              but the wrapper remains responsible for PATCH and its additional
+              fields, status and localPath.
             */}
             <ProjectFormFields
               control={form.control}
@@ -103,9 +103,9 @@ export function ProjectEditForm({
                       className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={isLoading}
                     >
-                      <option value="ACTIVE">Ativo</option>
-                      <option value="INACTIVE">Inativo</option>
-                      <option value="FINISHED">Finalizado</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="INACTIVE">Inactive</option>
+                      <option value="FINISHED">Finished</option>
                     </select>
                   </FormControl>
                   <FormMessage />
@@ -117,9 +117,9 @@ export function ProjectEditForm({
               autoComplete="off"
               control={form.control}
               disabled={isLoading}
-              label="Caminho local"
+              label="Local path"
               name="localPath"
-              placeholder="/workspace/meu-projeto"
+              placeholder="/workspace/my-project"
             />
 
             <DialogFooter className="mx-0 mt-1 mb-0 border-t-0 bg-transparent p-0">
@@ -128,10 +128,10 @@ export function ProjectEditForm({
                 type="button"
                 variant="outline"
               >
-                Cancelar
+                Cancel
               </Button>
               <Button disabled={isLoading} type="submit">
-                {isLoading ? 'Salvando...' : 'Salvar alterações'}
+                {isLoading ? 'Saving...' : 'Save changes'}
               </Button>
             </DialogFooter>
           </form>

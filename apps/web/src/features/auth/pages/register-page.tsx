@@ -26,8 +26,8 @@ export default function RegisterPage() {
     try {
       await registerMutation.mutateAsync(data)
     } catch {
-      // O hook exibe o erro do servidor via toast; o catch evita uma Promise
-      // rejeitada não tratada no evento de submit.
+      // The hook displays server errors in a toast; catch prevents an unhandled
+      // Promise rejection in the submit event.
     }
   }
 
@@ -36,9 +36,9 @@ export default function RegisterPage() {
   return (
     <section className="mx-auto w-full max-w-md space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold">Criar conta</h1>
+        <h1 className="text-2xl font-semibold">Create account</h1>
         <p className="text-sm text-muted-foreground">
-          Crie seu usuário para começar a registrar seus aprendizados.
+          Create your account to start recording what you learn.
         </p>
       </header>
 
@@ -51,7 +51,7 @@ export default function RegisterPage() {
           <FormInput
             autoComplete="name"
             control={form.control}
-            label="Nome"
+            label="Name"
             name="name"
           />
           <FormInput
@@ -64,26 +64,26 @@ export default function RegisterPage() {
           <FormInput
             autoComplete="new-password"
             control={form.control}
-            label="Senha"
+            label="Password"
             name="password"
             type="password"
           />
           <FormInput
             autoComplete="new-password"
             control={form.control}
-            label="Confirmar senha"
+            label="Confirm password"
             name="confirmPassword"
             type="password"
           />
 
           <Button className="w-full" disabled={isLoading} type="submit">
-            {isLoading ? 'Criando...' : 'Criar conta'}
+            {isLoading ? 'Creating...' : 'Create account'}
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
-            Já possui uma conta?{' '}
+            Already have an account?{' '}
             <Link className="underline underline-offset-4" to="/login">
-              Entrar
+              Sign in
             </Link>
           </p>
         </form>

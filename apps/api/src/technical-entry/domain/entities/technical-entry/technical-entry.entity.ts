@@ -54,16 +54,16 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   ): SolutionAttemptEntity {
     if (this.type !== TechnicalEntryType.ISSUE) {
       throw new EntityValidationError({
-        type: ['Somente ISSUE pode possuir tentativas de solução'],
+        type: ['Only ISSUE entries can have solution attempts'],
       });
     }
 
     if (this.archivedAt) {
       throw new EntityValidationError({
-        archivedAt: ['Entradas arquivadas não podem receber tentativas'],
+        archivedAt: ['Archived entries cannot receive attempts'],
       });
     }
-    // Retorna uma nova instância de SolutionAttemptEntity associada a este TechnicalEntryEntity
+    // Return a new SolutionAttemptEntity associated with this TechnicalEntryEntity
     return new SolutionAttemptEntity({
       technicalEntryId: this.id,
       description,
@@ -72,15 +72,15 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   }
 
   update(props: TechnicalEntryUpdateProps): void {
-    // A aplicação decide se um update vazio é uma entrada válida. No domínio,
-    // ele é apenas um no-op e não deve modificar artificialmente updatedAt.
+    // The application decides whether an empty update is valid input. In the domain,
+    // it is simply a no-op and must not artificially change updatedAt.
     if (Object.values(props).every((value) => value === undefined)) {
       return;
     }
 
     const now = new Date();
-    // Os spreads condicionais diferenciam campo ausente de campo nulo:
-    // ausente preserva o valor atual; null remove uma associação ou conclusão.
+    // Conditional spreads distinguish omitted fields from null fields:
+    // omission preserves the current value; null clears an association or conclusion.
     const updatedProps = {
       ...this.props,
       ...(props.title !== undefined ? { title: props.title } : {}),
@@ -118,13 +118,13 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   conclude(conclusion: string): void {
     if (this.type !== TechnicalEntryType.ISSUE) {
       throw new EntityValidationError({
-        type: ['Somente entradas do tipo ISSUE podem ser concluídas'],
+        type: ['Only ISSUE entries can be resolved'],
       });
     }
 
     if (this.resolvedAt !== undefined) {
       throw new EntityValidationError({
-        resolvedAt: ['Somente entradas abertas podem ser concluídas'],
+        resolvedAt: ['Only open entries can be resolved'],
       });
     }
 
@@ -165,7 +165,7 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
 
     TechnicalEntryEntity.validate(updatedProps);
 
-    // A conclusão e as tentativas fazem parte do histórico e são preservadas.
+    // The conclusion and attempts are part of the history and are preserved.
     this.resolvedAt = undefined;
     this.updatedAt = now;
   }
@@ -273,8 +273,8 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
       throw new EntityValidationError(technicalEntryValidator.errors ?? {});
     }
 
-    // Essa regra cruzada não cabe em um validador de campo isolado: somente ISSUE
-    // participa do ciclo OPEN/RESOLVED.
+    // This cross-field rule cannot live in an isolated field validator: only ISSUE
+    // entries participate in the OPEN/RESOLVED lifecycle.
     if (
       props.type !== TechnicalEntryType.ISSUE &&
       props.resolvedAt !== undefined
@@ -284,11 +284,11 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
       });
     }
 
-    // resolvedAt e conclusion formam uma invariável: uma entrada resolvida nunca
-    // pode existir sem uma conclusão textual.
+    // resolvedAt and conclusion form an invariant: a resolved entry must always
+    // have a textual conclusion.
     if (props.resolvedAt !== undefined && !props.conclusion?.trim()) {
       throw new EntityValidationError({
-        conclusion: ['Uma entrada resolvida deve possuir uma conclusão'],
+        conclusion: ['A resolved entry must have a conclusion'],
       });
     }
   }

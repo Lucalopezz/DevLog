@@ -14,26 +14,26 @@ export class UpdateProjectDto implements Omit<
   UpdateProjectUseCaseInput,
   'id' | 'userId'
 > {
-  // ValidateIf ignora somente campos ausentes. Diferente de IsOptional, ele não
-  // ignora null, então campos não anuláveis continuam sendo validados.
+  // ValidateIf skips only omitted fields. Unlike IsOptional, it does not
+  // skip null, so non-nullable fields are still validated.
   @ValidateIf((_, value) => value !== undefined)
-  @IsNotEmpty({ message: 'O nome é obrigatório' })
-  @IsString({ message: 'Parametro inválido' })
-  @MinLength(3, { message: 'O nome deve ter no mínimo 3 caracteres' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @IsString({ message: 'Invalid parameter' })
+  @MinLength(3, { message: 'Name must be at least 3 characters long' })
   @MaxLength(150, {
-    message: 'O nome deve ter no máximo 150 caracteres',
+    message: 'Name must be at most 150 characters long',
   })
   name?: string;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   description?: string | null;
 
   @ValidateIf((_, value) => value !== undefined)
-  @IsEnum(ProjectStatusEnum, { message: 'Parametro inválido' })
+  @IsEnum(ProjectStatusEnum, { message: 'Invalid parameter' })
   status?: ProjectStatusEnum;
 
   @IsOptional()
-  @IsString({ message: 'Parametro inválido' })
+  @IsString({ message: 'Invalid parameter' })
   localPath?: string | null;
 }

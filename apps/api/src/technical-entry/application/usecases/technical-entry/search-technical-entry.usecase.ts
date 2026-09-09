@@ -53,15 +53,15 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
   async execute(
     input: SearchTechnicalEntryUseCaseInput,
   ): Promise<SearchTechnicalEntryUseCaseOutput> {
-    // Valida se o tipo de entrada é LEARNING e se o status foi fornecido
-    // As entradas do tipo LEARNING não possuem status, então se o status for fornecido para esse tipo,
-    //  lançamos uma exceção
+    // Check whether the entry type is LEARNING and a status was supplied
+    // LEARNING entries have no status, so reject a status supplied for this type.
+    // Throw an exception
     if (
       input.type === TechnicalEntryType.LEARNING &&
       input.status !== undefined
     ) {
       throw new UnprocessableEntityException(
-        'Entradas do tipo LEARNING não possuem status',
+        'LEARNING entries do not have a status',
       );
     }
 
@@ -70,7 +70,7 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
     if (input.projectId !== undefined) {
       const project = await this.projectRepository.findById(input.projectId);
       if (!project || project.userId !== input.userId) {
-        throw new NotFoundException('Projeto não encontrado');
+        throw new NotFoundException('Project not found');
       }
       filter.projectId = input.projectId;
     }
@@ -79,7 +79,7 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
     if (input.type) filter.type = input.type;
     if (input.status) filter.status = input.status;
 
-    // Se for passado data de arquivamento, adiciona ao filtro, caso contrário, define como null para buscar apenas entradas não arquivadas
+    // Add the supplied archive date to the filter; otherwise, use null to find only unarchived entries
     filter.archivedAt = input.archivedAt ?? null;
 
     const params = new TechnicalEntrySearchParams({
@@ -93,7 +93,7 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
     const result = await this.technicalEntryRepository.search(params);
     // "entry-1" => [tag1, tag2]
     const tagsByEntry = await this.technicalEntryTagRepository.findTags({
-      // Passa os IDs das entradas técnicas encontradas para buscar as tags associadas
+      // Use the IDs of the retrieved technical entries to look up their associated tags
       technicalEntryIds: result.items.map((item) => item.id),
       userId: input.userId,
     });

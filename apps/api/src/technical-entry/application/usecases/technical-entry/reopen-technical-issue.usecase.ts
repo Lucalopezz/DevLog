@@ -29,11 +29,11 @@ export class ReopenTechnicalIssueUseCase implements UseCaseContract<
     );
 
     if (technicalEntry === null || technicalEntry.userId !== input.userId) {
-      throw new NotFoundException('Entrada técnica não encontrada');
+      throw new NotFoundException('Technical entry not found');
     }
 
-    // A entidade é a única fonte das regras da transição. Assim, qualquer
-    // chamador de reopen() recebe a mesma proteção, não apenas este caso de uso.
+    // The entity is the single source of transition rules. This gives every
+    // caller of reopen() the same protection, beyond this use case.
     technicalEntry.reopen();
 
     await this.technicalEntryRepository.update(technicalEntry);

@@ -30,7 +30,7 @@ describe('TagPrismaRepository (integration)', () => {
     await prisma.$disconnect();
   });
 
-  it('lista somente tags do usuário e preserva a tag após consulta', async () => {
+  it('lists only user tags and preserves the tag after querying', async () => {
     await prisma.user.createMany({
       data: [
         {

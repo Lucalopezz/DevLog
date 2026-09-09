@@ -1,10 +1,10 @@
-# Diagramas de classes
+# Class diagrams
 
-## Modelo de domínio
+## Domain model
 
-Este é o diagrama principal para estudo de UML. Ele prioriza conceitos do
-negócio e omite getters, setters, DTOs, presenters e detalhes do ORM. Atributos
-com `?` são opcionais; atributos seguidos de `/` são derivados.
+This is the main diagram for studying UML. It prioritizes business
+concepts and omits getters, setters, DTOs, presenters, and ORM details. Attributes
+with `?` are optional; attributes followed by `/` are derived.
 
 ```mermaid
 classDiagram
@@ -169,15 +169,15 @@ User "1" -- "0..*" Project : possui
 User "1" -- "0..*" TechnicalEntry : possui
 User "1" -- "0..*" Tag : possui
 
-Project "1" *-- "0..*" ProjectTechnology : compõe
-Project "1" *-- "0..*" ProjectCommand : compõe
-Project "1" *-- "0..*" ProjectResource : compõe
+Project "1" *-- "0..*" ProjectTechnology : composes
+Project "1" *-- "0..*" ProjectCommand : composes
+Project "1" *-- "0..*" ProjectResource : composes
 Project "0..1" <-- "0..*" TechnicalEntry : contextualiza
-TechnicalEntry "1" *-- "0..*" SolutionAttempt : compõe
+TechnicalEntry "1" *-- "0..*" SolutionAttempt : composes
 
 TechnicalEntry "1" -- "0..*" TechnicalEntryTag : participa
 Tag "1" -- "0..*" TechnicalEntryTag : participa
-Tag ..> TagName : normaliza com
+Tag ..> TagName : normalizes with
 
 Project --> ProjectStatus
 ProjectResource --> ProjectResourceType
@@ -186,26 +186,26 @@ TechnicalEntry ..> TechnicalEntryStatus : deriva
 SolutionAttempt --> SolutionAttemptResult
 ```
 
-### Leitura dos relacionamentos
+### Reading the relationships
 
-- `Project` compõe tecnologia, comando e recurso porque esses objetos são
-  criados dentro de um projeto, não fazem sentido sem ele e são excluídos em
-  cascata.
-- `TechnicalEntry` compõe `SolutionAttempt` pela mesma relação de ciclo de vida.
-- `TechnicalEntry` apenas se associa a `Project`: o vínculo é opcional e, ao
-  excluir o projeto, a entrada sobrevive com `projectId` vazio.
-- `TechnicalEntryTag` materializa a associação muitos-para-muitos e guarda a
-  data da atribuição. O Mermaid não possui notação nativa de “association
-  class”, então o estereótipo explicita seu papel.
-- `User` aparece com associações de propriedade, não como composição do modelo
-  de domínio. Embora o banco use cascata ao excluir usuário, esses objetos são
-  agregados manipulados por casos de uso e repositórios próprios.
+- `Project` composes technologies, commands, and resources because these objects
+  are created within a project, have no meaning without it, and are deleted
+  in a cascade.
+- `TechnicalEntry` composes `SolutionAttempt` through the same lifecycle relationship.
+- `TechnicalEntry` only associates with `Project`: the link is optional, and when
+  the project is deleted, the entry survives with an empty `projectId`.
+- `TechnicalEntryTag` materializes the many-to-many association and stores
+  the assignment date. Mermaid has no native association class notation,
+  so the stereotype makes its role explicit.
+- `User` has ownership associations rather than domain composition.
+  Although the database cascades user deletion, these objects are
+  aggregates handled by their own use cases and repositories.
 
-## Visão técnica das camadas
+## Technical layer view
 
-Este segundo diagrama não substitui o modelo de domínio. Ele mostra o padrão
-arquitetural repetido nos módulos NestJS e explica por que controller, caso de
-uso e repositório não aparecem como classes de negócio acima.
+This second diagram does not replace the domain model. It shows the
+architectural pattern repeated across NestJS modules and explains why controllers,
+use cases, and repositories are not business classes in the diagram above.
 
 ```mermaid
 classDiagram
@@ -260,29 +260,29 @@ class BcryptjsHashProvider {
   <<infrastructure>>
 }
 
-Controller --> AuthGuard : protege rota
+Controller --> AuthGuard : protects route
 Controller --> UseCase : executa
-Controller --> Presenter : formata saída
-UseCase --> Repository : depende da abstração
+Controller --> Presenter : formats output
+UseCase --> Repository : depends on abstraction
 UseCase --> DomainEntity : coordena
 PrismaRepository ..|> Repository
 PrismaRepository --> PrismaService
 JwtTokenService ..|> TokenProvider
 BcryptjsHashProvider ..|> HashProvider
 AuthGuard --> TokenProvider
-UseCase --> TokenProvider : autenticação
+UseCase --> TokenProvider : authentication
 UseCase --> HashProvider : credenciais
 ```
 
-O princípio central é **inversão de dependência**: a aplicação conhece
-contratos de repositório e provedores; as implementações Prisma, JWT e bcrypt
-ficam na infraestrutura. Isso permite testar casos de uso com doubles sem
-carregar banco ou servidor HTTP.
+The central principle is **dependency inversion**: the application knows
+repository and provider contracts; Prisma, JWT, and bcrypt implementations
+live in infrastructure. This allows testing use cases with doubles without
+loading a database or HTTP server.
 
-## Mapeamento de estado do projeto
+## Project state mapping
 
-No domínio e na API, os valores são `ACTIVE`, `INACTIVE` e `FINISHED`. No enum
-Prisma/PostgreSQL, são `ACTIVE`, `PAUSED` e `FINISHED`. O
-`ProjectModelMapper` traduz `INACTIVE` ↔ `PAUSED`; portanto não se trata de
-herança nem de dois estados simultâneos, mas de uma fronteira de tradução entre
+The domain and API use `ACTIVE`, `INACTIVE`, and `FINISHED`. The
+Prisma/PostgreSQL enum uses `ACTIVE`, `PAUSED`, and `FINISHED`.
+`ProjectModelMapper` translates `INACTIVE` ↔ `PAUSED`; this is not
+inheritance or two simultaneous states, but a translation boundary between
 modelos.

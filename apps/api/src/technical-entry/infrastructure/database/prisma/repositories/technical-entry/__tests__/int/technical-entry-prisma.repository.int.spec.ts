@@ -53,7 +53,7 @@ function makeEntry(
       title: overrides.title ?? 'NestJS entry',
       context: 'Contexto persistido',
       type: overrides.type ?? TechnicalEntryType.ISSUE,
-      conclusion: overrides.resolvedAt ? 'Problema resolvido' : undefined,
+      conclusion: overrides.resolvedAt ? 'Issue resolvido' : undefined,
       resolvedAt: overrides.resolvedAt,
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -86,7 +86,7 @@ describe('TechnicalEntryPrismaRepository (integration)', () => {
     await prisma.$disconnect();
   });
 
-  it('aplica status, texto e isolamento do usuário na busca', async () => {
+  it('applies status, text, and user isolation when searching', async () => {
     await userRepository.insert(makeUser(USER_ID, 'entry-owner'));
     await userRepository.insert(makeUser(OTHER_USER_ID, 'entry-other'));
     await entryRepository.insert(makeEntry(ENTRY_ID, USER_ID));
@@ -122,7 +122,7 @@ describe('TechnicalEntryPrismaRepository (integration)', () => {
     });
   });
 
-  it('persiste e remove a relação entre entrada e tag sem apagar a tag', async () => {
+  it('persists and removes the entry/tag relationship without deleting the tag', async () => {
     await userRepository.insert(makeUser(USER_ID, 'relation-owner'));
     await entryRepository.insert(makeEntry(ENTRY_ID, USER_ID));
     await tagRepository.insert(

@@ -48,7 +48,7 @@ export class SolutionAttemptModelMapper {
     }
   }
 
-  // Mapeia o result para o tipo do Prisma, usado no toPersistence e no update do repositório
+  // Map result to the Prisma type used by toPersistence and repository updates
   static toPrismaResult(
     result: SolutionAttemptResult,
   ): PrismaSolutionAttemptResult {

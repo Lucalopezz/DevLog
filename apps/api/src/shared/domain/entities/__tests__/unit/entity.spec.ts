@@ -12,8 +12,8 @@ class StubEntity extends Entity<StubeProps> {
   }
 }
 
-describe('Testes unitários de Entity', () => {
-  it('deve definir propriedades e id', () => {
+describe('Entity unit tests', () => {
+  it('should set properties and ID', () => {
     const props = {
       prop1: 'value1',
       prop2: 42,
@@ -24,7 +24,7 @@ describe('Testes unitários de Entity', () => {
     expect(entity._id).not.toBeNull();
     expect(uuidValidate(entity._id)).toBeTruthy();
   });
-  it('deve aceitar um UUID válido', () => {
+  it('should accept a valid UUID', () => {
     const props = {
       prop1: 'value1',
       prop2: 42,
@@ -36,7 +36,7 @@ describe('Testes unitários de Entity', () => {
     expect(entity._id).toBe(id);
   });
 
-  it('deve converter uma entidade para JSON', () => {
+  it('should convert an entity to JSON', () => {
     const props = {
       prop1: 'value1',
       prop2: 42,

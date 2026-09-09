@@ -18,7 +18,7 @@ function makeEntry(userId = USER_ID) {
   return new TechnicalEntryEntity(
     {
       userId,
-      title: 'Erro na API',
+      title: 'API error',
       context: 'Investigando o erro da API',
       type: TechnicalEntryType.ISSUE,
     },
@@ -30,7 +30,7 @@ function makeAttempt() {
   return new SolutionAttemptEntity(
     {
       technicalEntryId: ENTRY_ID,
-      description: 'Adicionar credentials na requisição',
+      description: 'Add credentials to the request',
       result: SolutionAttemptResult.SUCCESSFUL,
     },
     '123e4567-e89b-42d3-a456-426614174011',
@@ -50,7 +50,7 @@ describe('ListSolutionAttemptsUseCase', () => {
     } as unknown as jest.Mocked<TechnicalEntryRepository>;
   });
 
-  it('valida a entrada e lista suas tentativas com paginação', async () => {
+  it('validates the entry and lists its attempts with pagination', async () => {
     solutionAttemptRepository.search.mockResolvedValue(
       new SolutionAttemptSearchResult({
         items: [makeAttempt()],
@@ -93,7 +93,7 @@ describe('ListSolutionAttemptsUseCase', () => {
     });
   });
 
-  it('não lista tentativas de uma entrada de outro usuário', async () => {
+  it("does not list attempts for another user's entry", async () => {
     technicalEntryRepository.findById.mockResolvedValue(
       makeEntry(OTHER_USER_ID),
     );

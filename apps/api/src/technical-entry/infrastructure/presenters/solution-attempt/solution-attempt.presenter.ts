@@ -23,9 +23,9 @@ export class SolutionAttemptPresenter {
 export class SolutionAttemptCollectionPresenter extends CollectionPresenter<SolutionAttemptPresenter> {
   data: SolutionAttemptPresenter[];
 
-  // Separando os itens do output e o resto das propriedades de paginação
-  // O resto das propriedades de paginação são passadas para o construtor da classe pai (CollectionPresenter)
-  // Os itens são mapeados para a classe SolutionAttemptPresenter e atribuídos à propriedade data
+  // Separate output items from the remaining pagination properties
+  // Pass the remaining pagination properties to the parent class constructor (CollectionPresenter)
+  // Map items to SolutionAttemptPresenter and assign them to the data property
   constructor(output: ListSolutionAttemptsUseCaseOutput) {
     const { items, ...paginationProps } = output;
     super(paginationProps);

@@ -10,7 +10,7 @@ export type TechnicalEntryOutput = {
   context: string;
   conclusion?: string;
   type: TechnicalEntryType;
-  // Status infereido a partir do campo resolvedAt. Se resolvedAt for nulo, o status é 'OPEN', caso contrário, é 'RESOLVED'.
+  // Infer status from resolvedAt: null means 'OPEN'; otherwise, the status is 'RESOLVED'.
   status?: 'OPEN' | 'RESOLVED';
   resolvedAt?: Date;
   archivedAt?: Date;

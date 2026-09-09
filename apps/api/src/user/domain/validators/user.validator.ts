@@ -10,30 +10,30 @@ import { ClassValidatorFields } from '@/shared/domain/validators/class-validator
 
 export class UserRules {
   @MaxLength(120, {
-    message: 'O nome deve ter no máximo 120 caracteres',
+    message: 'Name must be at most 120 characters long',
   })
-  @IsString({ message: 'O nome deve ser um texto' })
-  @IsNotEmpty({ message: 'O nome é obrigatório' })
+  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Name is required' })
   name: string;
 
   @MaxLength(255, {
-    message: 'O e-mail deve ter no máximo 255 caracteres',
+    message: 'Email must be at most 255 characters long',
   })
-  @IsEmail({}, { message: 'O e-mail deve ser válido' })
-  @IsNotEmpty({ message: 'O e-mail é obrigatório' })
+  @IsEmail({}, { message: 'Email must be valid' })
+  @IsNotEmpty({ message: 'Email is required' })
   email: string;
 
   @MaxLength(255, {
-    message: 'A senha deve ter no máximo 255 caracteres',
+    message: 'Password must be at most 255 characters long',
   })
-  @IsString({ message: 'A senha deve ser um texto' })
-  @IsNotEmpty({ message: 'A senha é obrigatória' })
+  @IsString({ message: 'Password must be a string' })
+  @IsNotEmpty({ message: 'Password is required' })
   password: string;
 
-  @IsDate({ message: 'A data de criação deve ser válida' })
+  @IsDate({ message: 'Creation date must be valid' })
   createdAt: Date;
 
-  @IsDate({ message: 'A data de atualização deve ser válida' })
+  @IsDate({ message: 'Update date must be valid' })
   updatedAt: Date;
 
   constructor({ name, email, password, createdAt, updatedAt }: UserProps) {

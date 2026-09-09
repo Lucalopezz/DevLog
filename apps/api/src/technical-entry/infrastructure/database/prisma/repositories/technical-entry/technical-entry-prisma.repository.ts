@@ -145,8 +145,8 @@ export class TechnicalEntryPrismaRepository implements TechnicalEntryRepository 
   private _buildOrderBy(
     props: TechnicalEntrySearchParams,
   ): Prisma.TechnicalEntryOrderByWithRelationInput {
-    // Se o campo de ordenação for fornecido e estiver na lista de campos ordenáveis, use-o.
-    // Caso contrário, ordene por createdAt em ordem decrescente.
+    // Use the supplied sort field if it belongs to the list of sortable fields.
+    // Otherwise, order by createdAt descending.
     if (props.sort && this.sortableFields.includes(props.sort)) {
       return { [props.sort]: props.sortDir ?? 'asc' };
     }

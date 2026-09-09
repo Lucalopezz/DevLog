@@ -1,84 +1,84 @@
-# DevLog — Decisões do Projeto
+# DevLog — Project decisions
 
-## 1. Objetivo
+## 1. Goal
 
-Criar uma aplicação pessoal para registrar conhecimento técnico adquirido durante o desenvolvimento de projetos.
+Create a personal application for recording technical knowledge gained while developing projects.
 
-O foco principal será o **diário técnico**, permitindo documentar problemas, tentativas, soluções e aprendizados. Os projetos funcionarão como contexto para esses registros, contendo informações técnicas e operacionais sobre cada aplicação.
+The primary focus is the **technical journal**, documenting issues, attempts, solutions, and lessons learned. Projects provide context for entries and hold technical and operational information about each application.
 
-A proposta é que o sistema responda perguntas como:
+The system should answer questions such as:
 
-- Em qual projeto esse problema aconteceu?
-- Quais tentativas foram realizadas?
-- Qual foi a solução final?
-- Quais tecnologias estavam envolvidas?
-- Como esse projeto é executado localmente?
-- Onde estão seus repositórios e documentações?
+- In which project did this issue occur?
+- Which attempts were made?
+- What was the final solution?
+- Which technologies were involved?
+- How is this project run locally?
+- Where are its repositories and documentation?
 
 ---
 
-## 2. Decisão principal de produto
+## 2. Main product decision
 
-O sistema será uma junção de dois conceitos:
+The system combines two concepts:
 
-1. **Diário técnico**, como funcionalidade principal.
-2. **Painel de projetos**, como contexto e organização dos registros técnicos.
+1. **Technical journal**, as the primary feature.
+2. **Project dashboard**, providing context and organization for technical entries.
 
-Um registro técnico poderá estar relacionado a um projeto, mas essa relação será opcional.
+A technical entry may relate to a project, but the relationship is optional.
 
-Exemplo:
+Example:
 
 ```text
-Registro técnico: Cookie HttpOnly não era enviado
-Projeto: API da Barbearia
-Tags: NestJS, Next.js, cookies, autenticação
+Technical entry: HttpOnly cookie was not being sent
+Project: Barbershop API
+Tags: NestJS, Next.js, cookies, authentication
 ```
 
-O projeto não será tratado como uma tag.
+A project is not treated as a tag.
 
-- **Projeto** representa o contexto em que algo aconteceu.
-- **Tag** representa o assunto ou tecnologia relacionada.
+- **Project** represents the context in which something happened.
+- **Tag** represents the related topic or technology.
 
-No MVP, um registro técnico poderá estar associado a no máximo um projeto.
+In the MVP, a technical entry may be associated with at most one project.
 
 ---
 
-## 3. Escopo do MVP
+## 3. MVP scope
 
-### 3.1 Autenticação
+### 3.1 Authentication
 
-- Cadastro de usuário.
+- User registration.
 - Login.
 - Logout.
-- Autenticação com cookie `HttpOnly`.
-- Cada usuário poderá acessar apenas seus próprios dados.
+- Authentication with an `HttpOnly` cookie.
+- Each user can access only their own data.
 
-### 3.2 Diário técnico
+### 3.2 Technical journal
 
-- Criar registros técnicos.
-- Editar registros.
-- Arquivar registros.
-- Relacionar um registro a um projeto.
-- Adicionar tags.
-- Pesquisar e filtrar registros.
-- Registrar tentativas de solução.
-- Marcar um problema como resolvido.
-- Reabrir um problema resolvido.
+- Create technical entries.
+- Edit entries.
+- Archive entries.
+- Link an entry to a project.
+- Add tags.
+- Search and filter entries.
+- Record solution attempts.
+- Mark an issue as resolved.
+- Reopen a resolved issue.
 
-### 3.3 Projetos
+### 3.3 Projects
 
-- Criar projetos.
-- Editar projetos.
-- Arquivar projetos.
-- Registrar tecnologias utilizadas.
-- Registrar comandos importantes.
-- Registrar links e recursos.
-- Informar caminho local do projeto.
-- Visualizar os registros técnicos relacionados.
+- Create projects.
+- Edit projects.
+- Archive projects.
+- Record technologies used.
+- Record important commands.
+- Record links and resources.
+- Provide the project's local path.
+- View related technical entries.
 
 ---
 
-## 4. Entidades principais
+## 4. Main entities
 
 ### 4.1 User
 
@@ -108,7 +108,7 @@ Project
 - archivedAt
 ```
 
-O projeto servirá como contexto técnico para os registros do diário.
+The project provides technical context for journal entries.
 
 ### 4.3 TechnicalEntry
 
@@ -127,7 +127,7 @@ TechnicalEntry
 - archivedAt
 ```
 
-Tipos iniciais:
+Initial types:
 
 ```text
 ISSUE
@@ -136,26 +136,26 @@ LEARNING
 
 #### ISSUE
 
-Usado para problemas técnicos encontrados durante o desenvolvimento.
+Used for technical issues encountered during development.
 
-Exemplo:
+Example:
 
 ```text
-Título: Cookie não é enviado ao backend
-Contexto: Next.js e NestJS executando em portas diferentes
-Conclusão: Foi necessário configurar credentials, CORS e atributos do cookie
+Title: Cookie is not sent to the backend
+Context: Next.js and NestJS running on different ports
+Conclusion: Credentials, CORS, and cookie attributes needed configuration
 ```
 
 #### LEARNING
 
-Usado para aprendizados que não surgiram necessariamente de um erro.
+Used for lessons learned that did not necessarily arise from an error.
 
-Exemplo:
+Example:
 
 ```text
-Título: Server Components podem renderizar Client Components
-Contexto: Organização de formulários no Next.js
-Conclusão: A fronteira client deve ficar próxima da parte interativa
+Title: Server Components can render Client Components
+Context: Organizing forms in Next.js
+Conclusion: The client boundary should stay close to the interactive part
 ```
 
 ### 4.4 SolutionAttempt
@@ -169,7 +169,7 @@ SolutionAttempt
 - createdAt
 ```
 
-Resultados possíveis:
+Possible results:
 
 ```text
 FAILED
@@ -177,16 +177,16 @@ PARTIAL
 SUCCESSFUL
 ```
 
-Tentativas existirão apenas para registros do tipo `ISSUE`.
+Attempts exist only for `ISSUE` entries.
 
-`SolutionAttempt` será uma entidade própria, persistida em uma tabela própria, mas não será um aggregate root independente. Ela pertencerá ao agregado de `TechnicalEntry`, que será responsável por permitir ou rejeitar a inclusão de uma nova tentativa.
+`SolutionAttempt` is an entity persisted in its own table, but it is not an independent aggregate root. It belongs to the `TechnicalEntry` aggregate, which allows or rejects new attempts.
 
 ```text
 TechnicalEntry (aggregate root)
 └── SolutionAttempt
 ```
 
-Uma tentativa não será um recurso global do usuário nem será modelada como filha de `Project`. Mesmo quando a `TechnicalEntry` estiver relacionada a um projeto, o histórico da resolução continuará pertencendo à entrada técnica.
+An attempt is not a global user resource or a child of `Project`. Even when `TechnicalEntry` is linked to a project, resolution history still belongs to the technical entry.
 
 ### 4.5 Tag
 
@@ -197,7 +197,7 @@ Tag
 - userId
 ```
 
-Relação muitos-para-muitos:
+Many-to-many relationship:
 
 ```text
 TechnicalEntryTag
@@ -205,14 +205,14 @@ TechnicalEntryTag
 - tagId
 ```
 
-Exemplos de tags:
+Tag examples:
 
 ```text
 NestJS
 Laravel
 Docker
 Cookies
-Banco de dados
+Database
 Deploy
 Linux
 ```
@@ -227,7 +227,7 @@ ProjectTechnology
 - version?
 ```
 
-Exemplos:
+Examples:
 
 ```text
 NestJS 11
@@ -236,7 +236,7 @@ PostgreSQL 17
 Next.js 16
 ```
 
-`ProjectTechnology` é uma entidade própria pertencente ao agregado de `Project`. Não é uma tecnologia global reutilizável: seu nome e sua versão representam o uso da tecnologia naquele projeto.
+`ProjectTechnology` is an entity in the `Project` aggregate. It is not a reusable global technology: its name and version describe technology usage within that project.
 
 ### 4.7 ProjectCommand
 
@@ -250,14 +250,14 @@ ProjectCommand
 - executionOrder?
 ```
 
-Exemplo:
+Example:
 
 ```text
-Título: Subir ambiente local
-Comando: docker compose up -d
+Title: Start the local environment
+Command: docker compose up -d
 ```
 
-`ProjectCommand` é uma entidade própria pertencente ao agregado de `Project`. Seu ciclo de vida é controlado pelo projeto e o comando não deve ser acessado como um recurso independente.
+`ProjectCommand` is an entity in the `Project` aggregate. The project controls its lifecycle, and it must not be accessed as an independent resource.
 
 ### 4.8 ProjectResource
 
@@ -270,7 +270,7 @@ ProjectResource
 - type
 ```
 
-Tipos possíveis:
+Possible types:
 
 ```text
 REPOSITORY
@@ -280,11 +280,11 @@ EXTERNAL_URL
 OTHER
 ```
 
-`ProjectResource` também é uma entidade própria pertencente ao agregado de `Project`, seguindo a mesma regra de ciclo de vida de tecnologias e comandos.
+`ProjectResource` is also an entity in the `Project` aggregate, following the same lifecycle rule as technologies and commands.
 
 ---
 
-## 5. Relações
+## 5. Relationships
 
 ```text
 User
@@ -296,17 +296,17 @@ Project
  ├── Technologies
  ├── Commands
  ├── Resources
- └── TechnicalEntries (relação opcional)
+ └── TechnicalEntries (optional relationship)
 
 TechnicalEntry
- ├── Project opcional
+ ├── Optional Project
  ├── Tags
  └── SolutionAttempts
 ```
 
-### 5.1 Limites dos agregados
+### 5.1 Aggregate boundaries
 
-A existência de uma relação entre duas entidades não significa que elas pertençam ao mesmo agregado. `Project` e `TechnicalEntry` são aggregate roots separados:
+A relationship between two entities does not mean they belong to the same aggregate. `Project` and `TechnicalEntry` are separate aggregate roots:
 
 ```text
 Project (aggregate root)
@@ -318,27 +318,27 @@ TechnicalEntry (aggregate root)
  └── SolutionAttempt
 ```
 
-A relação entre `Project` e `TechnicalEntry` é apenas contextual e opcional:
+The relationship between `Project` and `TechnicalEntry` is contextual and optional:
 
 ```text
-Project ──────── relação opcional ──────── TechnicalEntry
+Project ──────── optional relationship ──────── TechnicalEntry
 ```
 
-Isso permite que uma entrada técnica exista sem projeto, seja vinculada ou desvinculada posteriormente e permaneça preservada quando o projeto for arquivado. Portanto, `TechnicalEntry` não deve ser tratada, modificada ou ter seu ciclo de vida gerenciado como parte do agregado de `Project`.
+This allows a technical entry to exist without a project, be linked or unlinked later, and remain preserved when the project is archived. `TechnicalEntry` must therefore not be handled, changed, or have its lifecycle managed as part of the `Project` aggregate.
 
-As responsabilidades ficam separadas da seguinte forma:
+Responsibilities are separated as follows:
 
-| Agregado | Entidades filhas | Regra de pertencimento |
+| Aggregate | Child entities | Ownership rule |
 | --- | --- | --- |
-| `Project` | `ProjectTechnology`, `ProjectCommand`, `ProjectResource` | Cada entidade pertence a um único projeto e não existe fora dele. |
-| `TechnicalEntry` | `SolutionAttempt` | Cada tentativa pertence a uma única entrada e só existe para `ISSUE`. |
-| `Tag` | Nenhuma das entidades acima | É um recurso independente do usuário, relacionado às entradas por `TechnicalEntryTag`. |
+| `Project` | `ProjectTechnology`, `ProjectCommand`, `ProjectResource` | Each entity belongs to one project and cannot exist outside it. |
+| `TechnicalEntry` | `SolutionAttempt` | Each attempt belongs to one entry and exists only for `ISSUE`. |
+| `Tag` | None of the entities above | Independent user resource related to entries through `TechnicalEntryTag`. |
 
-As entidades filhas podem ter classes, tabelas e repositórios próprios para representar sua persistência. Porém, os casos de uso devem entrar pelo aggregate root correspondente e respeitar suas invariantes. A existência de um repositório próprio não transforma a entidade filha em um aggregate root.
+Child entities may have their own classes, tables, and repositories for persistence. However, use cases must enter through the appropriate aggregate root and respect its invariants. A dedicated repository does not make a child entity an aggregate root.
 
-### 5.2 Organização modular definida
+### 5.2 Defined module organization
 
-Os módulos devem refletir os limites dos agregados:
+Modules should reflect aggregate boundaries:
 
 ```text
 project/
@@ -386,43 +386,43 @@ technical-entry/
                 └── solution-attempt-prisma.repository.ts
 ```
 
-O `AddSolutionAttempt` deve buscar a `TechnicalEntry`, validar o usuário autenticado, o tipo `ISSUE` e o arquivamento, e somente então criar a entidade filha. O endpoint deve permanecer aninhado ao contexto da entrada:
+`AddSolutionAttempt` must find the `TechnicalEntry`, validate the authenticated user, `ISSUE` type, and archive state, and only then create the child entity. The endpoint stays nested in the entry context:
 
 ```text
 POST /technical-entry/:entryId/solution-attempts
 ```
 
-Da mesma forma, operações sobre tecnologias, comandos e recursos devem validar o `projectId`, o proprietário do projeto e o pertencimento do recurso antes de executar a alteração.
+Likewise, operations on technologies, commands, and resources must validate `projectId`, project ownership, and resource membership before making changes.
 
 ---
 
-## 6. Regras de negócio iniciais
+## 6. Initial business rules
 
-### Autorização
+### Authorization
 
-- Um usuário só pode acessar seus próprios projetos, registros e tags.
-- Um registro só pode ser associado a um projeto do mesmo usuário.
-- Uma tag só pode ser utilizada pelo usuário que a criou.
+- A user can access only their own projects, entries, and tags.
+- An entry can only be linked to a project belonging to the same user.
+- A tag can only be used by its creator.
 
-### Registros técnicos
+### Technical entries
 
-- Apenas registros do tipo `ISSUE` podem possuir tentativas de solução.
-- Um problema resolvido deve possuir uma conclusão.
-- Reabrir um problema preserva todo o histórico de tentativas.
-- Registros arquivados não aparecem na listagem principal.
+- Only `ISSUE` entries can have solution attempts.
+- A resolved issue must have a conclusion.
+- Reopening an issue preserves the entire attempt history.
+- Archived entries do not appear in the main list.
 
-### Projetos
+### Projects
 
-- Projetos arquivados não aparecem na listagem principal.
-- Um projeto arquivado não deve receber novos registros técnicos.
-- Comandos, tecnologias e recursos pertencem a um único projeto.
+- Archived projects do not appear in the main list.
+- An archived project must not receive new technical entries.
+- Commands, technologies, and resources belong to a single project.
 
-### Segurança
+### Security
 
-- O sistema não armazenará senhas, tokens, chaves ou valores reais de arquivos `.env`.
-- Poderá armazenar apenas os nomes das variáveis esperadas.
+- The system will not store passwords, tokens, keys, or real `.env` values.
+- It may store only the names of expected variables.
 
-Exemplo:
+Example:
 
 ```text
 DATABASE_URL
@@ -432,9 +432,9 @@ COOKIE_DOMAIN
 
 ---
 
-## 7. Casos de uso do MVP
+## 7. MVP use cases
 
-### Autenticação
+### Authentication
 
 ```text
 RegisterUser
@@ -442,7 +442,7 @@ AuthenticateUser
 LogoutUser
 ```
 
-### Projetos
+### Projects
 
 ```text
 CreateProject
@@ -455,11 +455,11 @@ AddProjectCommand
 AddProjectResource
 ```
 
-### Escopo de tecnologias no MVP
+### MVP technology scope
 
-No MVP, `ProjectTechnology` será criada, listada e removida. A alteração de `name` ou `version` não fará parte da primeira versão e fica registrada como funcionalidade de pós-MVP. Consequentemente, a entidade de domínio não precisa expor uma operação de atualização agora.
+In the MVP, `ProjectTechnology` can be created, listed, and removed. Editing `name` or `version` is a post-MVP feature, so the domain entity does not need an update operation yet.
 
-### Diário técnico
+### Technical journal
 
 ```text
 CreateTechnicalEntry
@@ -473,82 +473,82 @@ ResolveTechnicalIssue
 ReopenTechnicalIssue
 ```
 
-A associação entre registro e projeto poderá ser feita durante a criação ou atualização do registro, sem exigir obrigatoriamente um caso de uso separado.
+The entry/project association can be set while creating or updating an entry, without requiring a separate use case.
 
 ---
 
-## 8. Telas iniciais
+## 8. Initial screens
 
 ### `/login`
 
-- Login do usuário.
+- User login.
 
 ### `/register`
 
-- Cadastro do usuário.
+- User registration.
 
 ### `/entries`
 
-Lista geral do diário técnico.
+Main technical journal list.
 
-Filtros:
+Filters:
 
 ```text
-Pesquisa
-Projeto
-Tipo
+Search
+Project
+Type
 Tag
 Status
 ```
 
 ### `/entries/[id]`
 
-Exibe:
+Displays:
 
 ```text
-Título
-Tipo
-Contexto
-Tentativas
-Conclusão
-Projeto relacionado
+Title
+Type
+Context
+Attempts
+Conclusion
+Related project
 Tags
 Status
 ```
 
 ### `/projects`
 
-Lista de projetos cadastrados.
+List of registered projects.
 
 ### `/projects/[id]`
 
-Exibe:
+Displays:
 
 ```text
-Informações gerais
-Tecnologias
-Comandos
-Links e recursos
-Registros técnicos relacionados
+General information
+Technologies
+Commands
+Links and resources
+Related technical entries
 ```
 
-Não será criada inicialmente uma tela exclusiva para tags. Elas poderão ser criadas e utilizadas durante a edição dos registros.
+There will initially be no dedicated tag screen. Tags can be created and used while editing entries.
 
 ---
 
-## 9. Arquitetura planejada
+## 9. Planned architecture
 
 ### Backend
 
 - NestJS.
-- DDD aplicado apenas onde houver regras reais.
+- Apply DDD only where real rules exist.
 - Clean Architecture.
-- Testes unitários de domínio e casos de uso.
-- Testes de integração para persistência e controllers.
+- Unit tests for domain and use cases.
+- Integration tests for persistence and controllers.
 - PostgreSQL.
-- Prisma ou outra ferramenta de persistência escolhida durante a implementação.
+- Prisma or another persistence tool chosen during implementation.
 
-Estrutura sugerida:
+Suggested structure:
 
 ```text
 src/
@@ -560,7 +560,7 @@ src/
     tags/
 ```
 
-Estrutura interna de um módulo:
+Internal module structure:
 
 ```text
 domain/
@@ -571,22 +571,22 @@ infrastructure/
 ### Frontend
 
 - Next.js.
-- Server Components por padrão.
-- Client Components apenas onde houver interação.
+- Server Components by default.
+- Client Components only where interaction is needed.
 - React Hook Form.
 - Zod.
-- TanStack Query quando necessário.
-- Shadcn UI, caso seja utilizado no projeto.
+- TanStack Query when needed.
+- Shadcn UI, if adopted in the project.
 
-### Deploy local
+### Local deployment
 
 - Docker Compose.
 - Next.js.
 - NestJS.
 - PostgreSQL.
-- Nginx ou Caddy como proxy reverso.
+- Nginx or Caddy as a reverse proxy.
 
-Topologia planejada:
+Planned topology:
 
 ```text
 Browser
@@ -600,69 +600,69 @@ Reverse Proxy
 
 ---
 
-## 10. Ordem de implementação
+## 10. Implementation order
 
 ```text
-1. Autenticação básica
-2. Registros técnicos
-3. Tags e busca
-4. Projetos
-5. Relação entre registros e projetos
-6. Tentativas e resolução de problemas
-7. Tecnologias, comandos e links dos projetos
-8. Testes de integração
+1. Basic authentication
+2. Technical entries
+3. Tags and search
+4. Projects
+5. Entry/project relationships
+6. Attempts and issue resolution
+7. Project technologies, commands, and links
+8. Integration tests
 9. Frontend
-10. Deploy local com Docker Compose e proxy reverso
+10. Local deployment with Docker Compose and a reverse proxy
 ```
 
-O diário técnico deve ser implementado antes do painel detalhado de projetos, pois ele é o núcleo do produto.
+The technical journal should be implemented before the detailed project dashboard because it is the product core.
 
 ---
 
-## 11. Definição de MVP concluído
+## 11. MVP completion definition
 
-O MVP será considerado concluído quando for possível:
+The MVP is complete when users can:
 
-1. Criar uma conta e autenticar com cookie `HttpOnly`.
-2. Criar um projeto.
-3. Adicionar tecnologias, comandos e links ao projeto.
-4. Criar um registro técnico.
-5. Relacionar opcionalmente o registro a um projeto.
-6. Adicionar tags ao registro.
-7. Registrar tentativas de solução em um problema.
-8. Marcar o problema como resolvido.
-9. Reabrir um problema preservando o histórico.
-10. Pesquisar registros por título, conteúdo, projeto ou tag.
-11. Executar toda a aplicação com Docker Compose.
-12. Acessar frontend e backend por um proxy reverso local.
-
----
-
-## 12. Funcionalidades fora do MVP
-
-Não serão incluídas inicialmente:
-
-- Editor Markdown avançado.
-- Upload de arquivos.
-- Compartilhamento entre usuários.
-- Comentários.
-- Integração com GitHub.
-- Integração com inteligência artificial.
-- Kanban ou gerenciamento de tarefas.
-- Execução de comandos pelo navegador.
-- Acesso SSH.
-- Monitoramento contínuo.
-- Leitura de logs em tempo real.
-
-Essas funcionalidades aumentariam o escopo sem fortalecer o objetivo principal do projeto.
+1. Create an account and authenticate with an `HttpOnly` cookie.
+2. Create a project.
+3. Add technologies, commands, and links to the project.
+4. Create a technical entry.
+5. Optionally link the entry to a project.
+6. Add tags to the entry.
+7. Record solution attempts for an issue.
+8. Mark the issue as resolved.
+9. Reopen an issue while preserving its history.
+10. Search entries by title, content, project, or tag.
+11. Run the entire application with Docker Compose.
+12. Access frontend and backend through a local reverse proxy.
 
 ---
 
-## 13. Evolução futura: ambientes e serviços
+## 12. Features outside the MVP
 
-Futuramente, o painel de projetos poderá evoluir para documentar ambientes e serviços.
+The initial version will not include:
 
-Modelo possível:
+- Advanced Markdown editor.
+- File uploads.
+- Sharing between users.
+- Comments.
+- GitHub integration.
+- Artificial intelligence integration.
+- Kanban or task management.
+- Browser command execution.
+- SSH access.
+- Continuous monitoring.
+- Real-time log viewing.
+
+These features would increase scope without strengthening the main project goal.
+
+---
+
+## 13. Future extension: environments and services
+
+The project dashboard may later document environments and services.
+
+Possible model:
 
 ```text
 Project
@@ -680,7 +680,7 @@ Environment
 - type
 ```
 
-Tipos possíveis:
+Possible types:
 
 ```text
 LOCAL
@@ -703,43 +703,43 @@ Service
 - status
 ```
 
-Exemplo:
+Example:
 
 ```text
-Projeto: GAM
-Ambiente: Local
+Project: GAM
+Environment: Local
 
-Serviços:
+Services:
 - frontend — localhost:5173
 - backend — localhost:3000
 - postgres — localhost:5432
 - proxy — localhost:80
 ```
 
-Possíveis evoluções:
+Possible extensions:
 
-- Dependências entre serviços.
-- Portas e domínios.
-- Histórico de disponibilidade.
+- Service dependencies.
+- Ports and domains.
+- Availability history.
 - Health checks.
-- Informações de deployment.
-- Comandos para iniciar e parar serviços.
+- Deployment information.
+- Commands to start and stop services.
 
-A primeira evolução deverá ser apenas documental.
+The first extension should be documentation only.
 
-Executar comandos, acessar Docker, abrir SSH, ler logs ou controlar serviços transforma essa funcionalidade em outro nível de complexidade e segurança. Isso só deverá ser considerado depois que o núcleo estiver estável.
+Executing commands, accessing Docker, opening SSH connections, reading logs, or controlling services introduces a different level of complexity and security. Consider it only after the core is stable.
 
 ---
 
-## 14. Resumo da decisão
+## 14. Decision summary
 
-O produto será uma base pessoal de conhecimento técnico organizada pelo contexto dos projetos.
+The product is a personal technical knowledge base organized by project context.
 
 ```text
-Diário técnico = núcleo do produto
-Projetos = contexto e organização
-Tags = classificação por assunto ou tecnologia
-Serviços e ambientes = evolução futura
+Technical journal = product core
+Projects = context and organization
+Tags = classification by topic or technology
+Services and environments = future extension
 ```
 
-A prioridade será construir uma aplicação pequena, útil e utilizável desde cedo, evitando adicionar funcionalidades que desviem do objetivo principal.
+The priority is a small, useful application that can be used early, avoiding features that distract from its main goal.

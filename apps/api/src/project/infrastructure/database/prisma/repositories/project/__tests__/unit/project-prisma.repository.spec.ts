@@ -68,7 +68,7 @@ describe('ProjectPrismaRepository', () => {
     deleteProject.mockResolvedValue(undefined);
   });
 
-  it('declara somente campos seguros para ordenação', () => {
+  it('declares only safe sorting fields', () => {
     expect(repository.sortableFields).toEqual([
       'createdAt',
       'updatedAt',
@@ -76,7 +76,7 @@ describe('ProjectPrismaRepository', () => {
     ]);
   });
 
-  it('insere a entidade convertida para persistência', async () => {
+  it('inserts the entity converted for persistence', async () => {
     await repository.insert(makeEntity());
 
     expect(create.mock.calls).toEqual([
@@ -101,7 +101,7 @@ describe('ProjectPrismaRepository', () => {
   it.each([
     ['todos', () => repository.findAll(), undefined],
     [
-      'do proprietário',
+      'belonging to the owner',
       () => repository.findByOwnerId(USER_ID),
       { userId: USER_ID },
     ],
@@ -117,7 +117,7 @@ describe('ProjectPrismaRepository', () => {
     expect(findMany.mock.calls[0]).toEqual(where ? [{ where }] : []);
   });
 
-  it('busca por id e trata ausência', async () => {
+  it('finds by ID and handles absence', async () => {
     findUnique.mockResolvedValueOnce(makeModel()).mockResolvedValueOnce(null);
 
     await expect(repository.findById(PROJECT_ID)).resolves.toMatchObject({
@@ -126,7 +126,7 @@ describe('ProjectPrismaRepository', () => {
     await expect(repository.findById('missing-id')).resolves.toBeNull();
   });
 
-  it('atualiza os campos mutáveis e remove pelo id', async () => {
+  it('updates mutable fields and deletes by ID', async () => {
     const entity = makeEntity();
 
     await repository.update(entity);
@@ -146,7 +146,7 @@ describe('ProjectPrismaRepository', () => {
     expect(deleteProject).toHaveBeenCalledWith({ where: { id: PROJECT_ID } });
   });
 
-  it('aplica filtros, paginação e ordenação permitida', async () => {
+  it('applies filters, pagination, and allowed sorting', async () => {
     count.mockResolvedValue(1);
     findMany.mockResolvedValue([makeModel()]);
     const archivedAt = new Date('2026-08-02T00:00:00.000Z');
@@ -180,7 +180,7 @@ describe('ProjectPrismaRepository', () => {
     expect(result).toMatchObject({ total: 1, currentPage: 2, perPage: 10 });
   });
 
-  it('usa filtro vazio e ordenação padrão para sort não permitido', async () => {
+  it('uses empty filters and default sorting for a disallowed sort', async () => {
     await repository.search(new ProjectSearchParams({ sort: 'status' }));
 
     expect(findMany).toHaveBeenCalledWith({

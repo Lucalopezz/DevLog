@@ -4,7 +4,7 @@ import { validate } from 'class-validator';
 import { UpdateProjectCommandDto } from '../../update-project-command.dto';
 
 describe('UpdateProjectCommandDto', () => {
-  it('aceita atualização parcial', async () => {
+  it('accepts partial updates', async () => {
     const dto = plainToInstance(UpdateProjectCommandDto, {
       command: 'pnpm build',
     });
@@ -12,7 +12,7 @@ describe('UpdateProjectCommandDto', () => {
     expect(await validate(dto)).toHaveLength(0);
   });
 
-  it('aceita null para remover descrição e ordem', async () => {
+  it('accepts null to clear description and order', async () => {
     const dto = plainToInstance(UpdateProjectCommandDto, {
       description: null,
       executionOrder: null,
@@ -21,7 +21,7 @@ describe('UpdateProjectCommandDto', () => {
     expect(await validate(dto)).toHaveLength(0);
   });
 
-  it('rejeita título nulo e ordem negativa', async () => {
+  it('rejects a null title and negative order', async () => {
     const dto = plainToInstance(UpdateProjectCommandDto, {
       title: null,
       executionOrder: -1,

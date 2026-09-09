@@ -14,8 +14,8 @@ function makeProps(
 ): TechnicalEntryProps {
   return {
     userId: USER_ID,
-    title: 'Falha ao iniciar a API',
-    context: 'A porta configurada já estava em uso',
+    title: 'Failed to start the API',
+    context: 'The configured port was already in use',
     type: TechnicalEntryType.ISSUE,
     createdAt: new Date('2026-08-01T00:00:00.000Z'),
     updatedAt: new Date('2026-08-01T00:00:00.000Z'),
@@ -28,7 +28,7 @@ describe('TechnicalEntryEntity', () => {
     jest.useRealTimers();
   });
 
-  it('conclui uma ISSUE registrando a conclusão', () => {
+  it('resolves an ISSUE and records the conclusion', () => {
     jest.useFakeTimers();
     const concludedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(concludedAt);
@@ -42,7 +42,7 @@ describe('TechnicalEntryEntity', () => {
     expect(entry.status).toBe('RESOLVED');
   });
 
-  it('não permite concluir uma entrada LEARNING', () => {
+  it('does not resolve a LEARNING entry', () => {
     const entry = new TechnicalEntryEntity(
       makeProps({
         type: TechnicalEntryType.LEARNING,
@@ -58,7 +58,7 @@ describe('TechnicalEntryEntity', () => {
   });
 
   it.each(['', '   '])(
-    'não permite concluir uma ISSUE sem conclusão válida (%p)',
+    'does not resolve an ISSUE without a valid conclusion (%p)',
     (conclusion) => {
       const entry = new TechnicalEntryEntity(makeProps());
 
@@ -68,15 +68,15 @@ describe('TechnicalEntryEntity', () => {
     },
   );
 
-  it('mantém resolução e arquivamento fora da atualização de conteúdo', () => {
+  it('keeps resolution and archiving outside content updates', () => {
     const resolvedAt = new Date('2026-08-01T01:00:00.000Z');
     const archivedAt = new Date('2026-08-01T02:00:00.000Z');
     const entry = new TechnicalEntryEntity(
-      makeProps({ resolvedAt, archivedAt, conclusion: 'Resolvido' }),
+      makeProps({ resolvedAt, archivedAt, conclusion: 'Resolved' }),
     );
 
     entry.update({
-      title: 'Título atualizado',
+      title: 'Updated title',
       context: 'Contexto atualizado',
     });
 
@@ -85,28 +85,28 @@ describe('TechnicalEntryEntity', () => {
     expect(entry.archivedAt).toEqual(archivedAt);
   });
 
-  it('aceita título com exatamente 200 caracteres', () => {
+  it('accepts a title with exactly 200 characters', () => {
     expect(
       () => new TechnicalEntryEntity(makeProps({ title: 'a'.repeat(200) })),
     ).not.toThrow();
   });
 
-  it('rejeita título com mais de 200 caracteres', () => {
+  it('rejects a title longer than 200 characters', () => {
     expect(
       () => new TechnicalEntryEntity(makeProps({ title: 'a'.repeat(201) })),
     ).toThrow(EntityValidationError);
   });
 
-  it('rejeita título acima do limite durante a atualização', () => {
+  it('rejects a title above the limit during an update', () => {
     const entry = new TechnicalEntryEntity(makeProps());
 
     expect(() => entry.update({ title: 'a'.repeat(201) })).toThrow(
       EntityValidationError,
     );
-    expect(entry.title).toBe('Falha ao iniciar a API');
+    expect(entry.title).toBe('Failed to start the API');
   });
 
-  it('vincula um projeto válido através da entidade', () => {
+  it('links a valid project through the entity', () => {
     const entry = new TechnicalEntryEntity(makeProps());
 
     entry.linkProject(PROJECT_ID);
@@ -114,14 +114,14 @@ describe('TechnicalEntryEntity', () => {
     expect(entry.projectId).toBe(PROJECT_ID);
   });
 
-  it('não vincula um projeto com UUID inválido', () => {
+  it('does not link a project with an invalid UUID', () => {
     const entry = new TechnicalEntryEntity(makeProps());
 
     expect(() => entry.linkProject('project-1')).toThrow(EntityValidationError);
     expect(entry.projectId).toBeUndefined();
   });
 
-  it('não permite remover a conclusão de uma entrada resolvida', () => {
+  it('does not clear the conclusion of a resolved entry', () => {
     const entry = new TechnicalEntryEntity(
       makeProps({
         conclusion: 'A porta foi liberada',
@@ -135,7 +135,7 @@ describe('TechnicalEntryEntity', () => {
     expect(entry.conclusion).toBe('A porta foi liberada');
   });
 
-  it('rejeita estado resolvido sem conclusão durante a criação', () => {
+  it('rejects a resolved state without a conclusion on creation', () => {
     expect(
       () =>
         new TechnicalEntryEntity(
@@ -144,7 +144,7 @@ describe('TechnicalEntryEntity', () => {
     ).toThrow(EntityValidationError);
   });
 
-  it('trata atualização sem campos como no-op e preserva updatedAt', () => {
+  it('treats an update with no fields as a no-op and preserves updatedAt', () => {
     const entry = new TechnicalEntryEntity(makeProps());
     const originalUpdatedAt = entry.updatedAt;
 
@@ -152,7 +152,7 @@ describe('TechnicalEntryEntity', () => {
     expect(entry.updatedAt).toEqual(originalUpdatedAt);
   });
 
-  it('arquiva de forma idempotente sem alterar resolução ou projeto', () => {
+  it('archives idempotently without changing resolution or project', () => {
     jest.useFakeTimers();
     const archivedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(archivedAt);
@@ -174,7 +174,7 @@ describe('TechnicalEntryEntity', () => {
     expect(entry.status).toBe('RESOLVED');
   });
 
-  it('impede novas tentativas após o arquivamento', () => {
+  it('prevents new attempts after archiving', () => {
     const entry = new TechnicalEntryEntity(makeProps());
     entry.archive();
 

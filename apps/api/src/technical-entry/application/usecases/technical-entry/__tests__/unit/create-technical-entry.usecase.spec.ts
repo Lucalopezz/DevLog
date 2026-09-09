@@ -38,13 +38,13 @@ describe('CreateTechnicalEntryUseCase', () => {
   }
 
   it.each([undefined, null])(
-    'cria uma entrada sem projeto quando projectId é %p',
+    'creates an entry without a project when projectId is %p',
     async (projectId) => {
       const { useCase, technicalEntryRepository } = makeUseCase();
 
       await useCase.execute({
         userId: USER_ID,
-        title: 'Título da entrada',
+        title: 'Entry title',
         context: 'Contexto da entrada',
         type: TechnicalEntryType.ISSUE,
         projectId,
@@ -57,12 +57,12 @@ describe('CreateTechnicalEntryUseCase', () => {
     },
   );
 
-  it('preserva um projectId válido na criação', async () => {
+  it('preserves a valid projectId on creation', async () => {
     const { useCase, technicalEntryRepository } = makeUseCase();
 
     await useCase.execute({
       userId: USER_ID,
-      title: 'Título da entrada',
+      title: 'Entry title',
       context: 'Contexto da entrada',
       type: TechnicalEntryType.ISSUE,
       projectId: PROJECT_ID,
@@ -73,12 +73,12 @@ describe('CreateTechnicalEntryUseCase', () => {
     expect(entry.projectId).toBe(PROJECT_ID);
   });
 
-  it('não consulta projeto quando projectId não é informado', async () => {
+  it('does not query a project when projectId is omitted', async () => {
     const { useCase, projectRepository } = makeUseCase();
 
     await useCase.execute({
       userId: USER_ID,
-      title: 'Título da entrada',
+      title: 'Entry title',
       context: 'Contexto da entrada',
       type: TechnicalEntryType.ISSUE,
     });
@@ -86,13 +86,13 @@ describe('CreateTechnicalEntryUseCase', () => {
     expect(projectRepository.findById.mock.calls).toHaveLength(0);
   });
 
-  it('rejeita projeto de outro usuário', async () => {
+  it("rejects another user's project", async () => {
     const { useCase } = makeUseCase({ userId: OTHER_USER_ID });
 
     await expect(
       useCase.execute({
         userId: USER_ID,
-        title: 'Título da entrada',
+        title: 'Entry title',
         context: 'Contexto da entrada',
         type: TechnicalEntryType.ISSUE,
         projectId: PROJECT_ID,
@@ -100,7 +100,7 @@ describe('CreateTechnicalEntryUseCase', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('rejeita projeto arquivado', async () => {
+  it('rejects an archived project', async () => {
     const { useCase } = makeUseCase({
       userId: USER_ID,
       archivedAt: new Date(),
@@ -109,7 +109,7 @@ describe('CreateTechnicalEntryUseCase', () => {
     await expect(
       useCase.execute({
         userId: USER_ID,
-        title: 'Título da entrada',
+        title: 'Entry title',
         context: 'Contexto da entrada',
         type: TechnicalEntryType.ISSUE,
         projectId: PROJECT_ID,

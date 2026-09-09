@@ -39,15 +39,15 @@ export class ProjectCommandEntity extends Entity<ProjectCommandProps> {
     super(completeProps, id);
   }
   update(props: ProjectCommandUpdateProps): void {
-    // A aplicação decide se um update vazio é uma entrada válida. No domínio,
-    // ele é apenas um no-op e não deve modificar artificialmente updatedAt.
+    // The application decides whether an empty update is valid input. In the domain,
+    // it is simply a no-op and must not artificially change updatedAt.
     if (Object.values(props).every((value) => value === undefined)) {
       return;
     }
 
     const now = new Date();
-    // Campos ausentes são preservados; null remove somente os campos cujo
-    // contrato permite remoção, convertendo-os para undefined no domínio.
+    // Omitted fields are preserved; null only clears fields whose
+    // contract allows clearing, converting them to undefined in the domain.
     const updatedProps = {
       ...this.props,
       ...(props.title !== undefined ? { title: props.title } : {}),

@@ -27,13 +27,13 @@ describe('CreateProjectUseCase', () => {
     };
   }
 
-  it('cria um projeto ativo associado ao usuário autenticado', async () => {
+  it('creates an active project associated with the authenticated user', async () => {
     const { useCase, insert } = makeUseCase();
 
     const output = await useCase.execute({
       userId: USER_ID,
       name: 'DevLog',
-      description: 'Projeto de estudos',
+      description: 'Study project',
     });
 
     const [project] = insert.mock.calls[0] as [ProjectEntity];
@@ -44,12 +44,12 @@ describe('CreateProjectUseCase', () => {
     expect(output).toMatchObject({
       id: project.id,
       name: 'DevLog',
-      description: 'Projeto de estudos',
+      description: 'Study project',
       status: 'ACTIVE',
     });
   });
 
-  it('permite criar um projeto sem descrição', async () => {
+  it('allows creating a project without a description', async () => {
     const { useCase, insert } = makeUseCase();
 
     await useCase.execute({
@@ -62,7 +62,7 @@ describe('CreateProjectUseCase', () => {
     expect(project.description).toBeUndefined();
   });
 
-  it('não cria o projeto quando o usuário não existe', async () => {
+  it('does not create the project when the user does not exist', async () => {
     const { useCase, insert, findById } = makeUseCase();
     findById.mockResolvedValue(null);
 

@@ -12,20 +12,20 @@ const projectDetailParams = {
 } as const;
 
 /**
- * Cada consulta usa uma chave própria porque as coleções têm ciclos de vida
- * diferentes. Assim, atualizar comandos não precisa invalidar tecnologias ou
- * entradas técnicas por acidente.
+ * Each query uses its own key because collections have different
+ * lifecycles. Updating commands does not need to invalidate technologies or
+ * technical entries accidentally.
  */
 export function useProjectTechnicalEntries(projectId: string, page = 1) {
   const params = { ...projectDetailParams, page };
 
   return useQuery({
-    // A página faz parte da chave para que o React Query mantenha cada página
-    // no cache e volte a ela sem misturar entradas de páginas diferentes.
+    // The page is part of the key so React Query can cache each page
+    // and return to it without mixing entries from different pages.
     queryKey: projectDetailKeys.technicalEntries(projectId, params),
     queryFn: () => listProjectTechnicalEntries(projectId, params),
-    // Evita uma chamada inválida durante a resolução dos parâmetros da rota.
-    // Enable é false quando projectId é uma string vazia, null ou undefined
+    // Avoids an invalid call while route parameters are being resolved.
+    // Enabled is false when projectId is an empty string, null, or undefined
     enabled: Boolean(projectId),
     retry: false,
   });
@@ -35,8 +35,8 @@ export function useProjectCommands(projectId: string, page = 1) {
   const params = { ...projectDetailParams, page };
 
   return useQuery({
-    // Comandos usam uma chave própria para serem invalidados sem afetar as
-    // outras coleções do projeto.
+    // Commands use their own key so they can be invalidated without affecting
+    // other project collections.
     queryKey: projectDetailKeys.commands(projectId, params),
     queryFn: () => listProjectCommands(projectId, params),
     enabled: Boolean(projectId),
@@ -48,8 +48,8 @@ export function useProjectResources(projectId: string, page = 1) {
   const params = { ...projectDetailParams, page };
 
   return useQuery({
-    // A mesma estratégia é repetida para recursos, mantendo o hook simples e
-    // deixando a coordenação entre API, cache e componente explícita.
+    // The same strategy applies to resources, keeping the hook simple and
+    // making coordination between API, cache, and component explicit.
     queryKey: projectDetailKeys.resources(projectId, params),
     queryFn: () => listProjectResources(projectId, params),
     enabled: Boolean(projectId),

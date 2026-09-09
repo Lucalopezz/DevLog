@@ -25,7 +25,7 @@ export class CreateTagUseCase implements UseCaseContract<
     const user = await this.userRepository.findById(userId);
 
     if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException('User not found');
     }
 
     const entity = new TagEntity({
@@ -39,7 +39,7 @@ export class CreateTagUseCase implements UseCaseContract<
     );
 
     if (tagExists) {
-      throw new ConflictException('Tag já cadastrada');
+      throw new ConflictException('Tag already registered');
     }
 
     await this.tagRepository.insert(entity);

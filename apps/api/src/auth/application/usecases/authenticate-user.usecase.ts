@@ -40,7 +40,7 @@ export class AuthenticateUserUseCase implements UseCaseContract<
       : false;
 
     if (!user || !passwordIsValid) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException('Invalid credentials');
     }
     const accessToken = await this.tokenProvider.generate({
       sub: user.id,

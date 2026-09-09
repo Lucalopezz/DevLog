@@ -32,10 +32,10 @@ export class AuthGuard implements CanActivate {
       const payload = await this.tokenProvider.verify(token);
 
       if (!payload.sub) {
-        throw new Error('Token sem subject');
+        throw new Error('Token without subject');
       }
 
-      // Adiciona o ID do usuário ao objeto de solicitação para uso posterior
+      // Add the user ID to the request object for later use
       request.user = { id: payload.sub };
       return true;
     } catch {

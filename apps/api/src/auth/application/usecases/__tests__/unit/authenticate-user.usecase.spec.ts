@@ -41,7 +41,7 @@ describe('AuthenticateUserUseCase', () => {
     jest.clearAllMocks();
   });
 
-  it('retorna um token e os dados públicos do usuário para credenciais válidas', async () => {
+  it('returns a token and public user data for valid credentials', async () => {
     const user = makeUser();
     findByEmail.mockResolvedValue(user);
     compareHash.mockResolvedValue(true);
@@ -58,7 +58,7 @@ describe('AuthenticateUserUseCase', () => {
     expect(generate).toHaveBeenCalledWith({ sub: user.id });
   });
 
-  it('rejeita um e-mail desconhecido sem comparar a senha', async () => {
+  it('rejects an unknown email without comparing the password', async () => {
     findByEmail.mockResolvedValue(null);
 
     await expect(
@@ -69,7 +69,7 @@ describe('AuthenticateUserUseCase', () => {
     expect(generate).not.toHaveBeenCalled();
   });
 
-  it('rejeita uma senha inválida sem emitir um token', async () => {
+  it('rejects an invalid password without issuing a token', async () => {
     findByEmail.mockResolvedValue(makeUser());
     compareHash.mockResolvedValue(false);
 

@@ -9,17 +9,17 @@ type SearchFormProps = {
 };
 
 /**
- * Estrutura visual compartilhada por formulários de busca.
+ * Shared visual structure for search forms.
  *
- * Este componente não conhece Project, Tag ou qualquer outro domínio. Ele
- * apenas organiza os campos recebidos por `children` e padroniza as ações de
- * buscar e limpar. Cada feature continua responsável por interpretar seus
- * próprios valores e montar os parâmetros da API.
+ * This component has no knowledge of Project, Tag, or any other domain. It
+ * only arranges the fields received through `children` and standardizes the
+ * search and clear actions. Each feature remains responsible for interpreting its
+ * own values and building the API parameters.
  */
 export function SearchForm({ children, onClear, onSubmit }: SearchFormProps) {
   return (
     <form
-      aria-label="Filtros de busca"
+      aria-label="Search filters"
       className="flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-end"
       onSubmit={onSubmit}
     >
@@ -29,9 +29,9 @@ export function SearchForm({ children, onClear, onSubmit }: SearchFormProps) {
 
       <div className="flex gap-2">
         <Button onClick={onClear} type="button" variant="outline">
-          Limpar
+          Clear
         </Button>
-        <Button type="submit">Buscar</Button>
+        <Button type="submit">Search</Button>
       </div>
     </form>
   );

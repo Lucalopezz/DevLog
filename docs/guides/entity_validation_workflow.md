@@ -1,10 +1,10 @@
-# Fluxo de validação de entidades
+# Entity validation workflow
 
-Este documento explica como a validação de domínio funciona atualmente na API do DevLog, usando `UserEntity` como exemplo.
+This document explains domain validation in the DevLog API, using `UserEntity` as an example.
 
-## Visão geral
+## Overview
 
-O fluxo atual pode ser representado assim:
+The workflow can be represented as follows:
 
 ```text
 UserEntity
@@ -13,7 +13,7 @@ UserValidatorFactory
    ↓
 UserValidator
    ↓
-UserRules + decorators do class-validator
+UserRules + class-validator decorators
    ↓
 ClassValidatorFields.validate()
    ↓
@@ -22,17 +22,17 @@ FieldsError
 EntityValidationError
 ```
 
-A responsabilidade de cada parte é diferente:
+Each part has a different responsibility:
 
-1. `UserRules` declara as regras específicas de um usuário.
-2. `ClassValidatorFields` executa as regras e organiza os erros.
-3. `UserValidator` conecta as regras de usuário ao validador genérico.
-4. `UserEntity` impede que uma entidade inválida seja criada ou atualizada.
-5. `EntityValidationError` transporta os erros para a camada que chamou a entidade.
+1. `UserRules` declares user-specific rules.
+2. `ClassValidatorFields` executes rules and organizes errors.
+3. `UserValidator` connects user rules to the generic validator.
+4. `UserEntity` prevents invalid entities from being created or updated.
+5. `EntityValidationError` carries errors to the layer that called the entity.
 
-## 1. O formato `FieldsError`
+## 1. The `FieldsError` format
 
-O arquivo [`validators-fields.interface.ts`](../../apps/api/src/shared/domain/validators/validators-fields.interface.ts) define o formato dos erros:
+[`validators-fields.interface.ts`](../../apps/api/src/shared/domain/validators/validators-fields.interface.ts) defines the error format:
 
 ```ts
 export type FieldsError = {
@@ -40,19 +40,19 @@ export type FieldsError = {
 };
 ```
 
-O objeto usa o nome do campo como chave e uma lista de mensagens como valor:
+The object uses field names as keys and lists of messages as values:
 
 ```ts
 {
-  name: ['O nome é obrigatório'],
-  email: ['O e-mail deve ser válido'],
-  password: ['A senha é obrigatória']
+  name: ['Name is required'],
+  email: ['Email must be valid'],
+  password: ['Password is required']
 }
 ```
 
-Um campo usa `string[]`, e não apenas `string`, porque mais de uma regra pode falhar ao mesmo tempo. Por exemplo, um valor pode estar vazio e também não respeitar outro requisito.
+A field uses `string[]`, rather than a single string, because multiple rules may fail together. For example, a value may be empty and also violate another requirement.
 
-A mesma interface define o contrato que os validadores devem seguir:
+The same interface defines the contract validators must follow:
 
 ```ts
 export interface ValidatorsFieldsInterface<PropsValidated extends object> {
@@ -62,15 +62,15 @@ export interface ValidatorsFieldsInterface<PropsValidated extends object> {
 }
 ```
 
-Assim, um validador informa três coisas:
+A validator reports three things:
 
-- se os dados são válidos, pelo retorno booleano de `validate`;
-- quais campos falharam, por meio de `errors`;
-- quais dados passaram na validação, por meio de `validatedData`.
+- Whether data is valid, through the boolean return value of `validate`;
+- Which fields failed, through `errors`;
+- Which data passed validation, through `validatedData`.
 
-## 2. O validador genérico compartilhado
+## 2. The shared generic validator
 
-O arquivo [`class-validator-fields.ts`](../../apps/api/src/shared/domain/validators/class-validator-fields.ts) contém a classe abstrata reutilizável:
+[`class-validator-fields.ts`](../../apps/api/src/shared/domain/validators/class-validator-fields.ts) contains the reusable abstract class:
 
 ```ts
 export abstract class ClassValidatorFields<
@@ -80,22 +80,22 @@ export abstract class ClassValidatorFields<
 }
 ```
 
-Ela não conhece usuários ou qualquer outra entidade. Sua função é executar o `class-validator`:
+It knows nothing about users or other entities. Its responsibility is to run `class-validator`:
 
 ```ts
 const validationErrors = validateSync(data);
 ```
 
-Antes de validar, ela limpa o estado anterior:
+Before validating, it clears previous state:
 
 ```ts
 this.errors = null;
 this.validatedData = null;
 ```
 
-Isso é importante porque uma mesma instância de validador poderia ser reutilizada. Sem essa limpeza, erros de uma validação anterior poderiam permanecer na próxima validação.
+The same validator instance could be reused. Without resetting it, errors from a previous validation could leak into the next one.
 
-Quando existem erros, o `class-validator` retorna objetos com várias informações internas. A classe compartilhada transforma esses objetos no formato simples de `FieldsError`:
+When errors occur, `class-validator` returns objects with internal details. The shared class converts them to the simple `FieldsError` format:
 
 ```ts
 this.errors = validationErrors.reduce<FieldsError>((acc, error) => {
@@ -104,45 +104,45 @@ this.errors = validationErrors.reduce<FieldsError>((acc, error) => {
 }, {});
 ```
 
-Em outras palavras:
+In other words:
 
 ```text
-erros internos do class-validator
+Internal class-validator errors
         ↓
-nome da propriedade + mensagens das constraints
+Property name + constraint messages
         ↓
 FieldsError
 ```
 
-Se não houver erro, os dados validados são armazenados e o método retorna `true`:
+If there are no errors, validated data is stored and the method returns `true`:
 
 ```ts
 this.validatedData = data;
 return true;
 ```
 
-Se houver erro, o método armazena `errors` e retorna `false`.
+If errors exist, the method stores `errors` and returns `false`.
 
-## 3. As regras específicas de `User`
+## 3. User-specific rules
 
-O arquivo [`user.validator.ts`](../../apps/api/src/user/domain/validators/user.validator.ts) declara a classe `UserRules`.
+[`user.validator.ts`](../../apps/api/src/user/domain/validators/user.validator.ts) declares `UserRules`.
 
-Ela contém os decorators do `class-validator`:
+It contains the `class-validator` decorators:
 
 ```ts
 @MaxLength(120, {
-  message: 'O nome deve ter no máximo 120 caracteres',
+  message: 'Name must be at most 120 characters long',
 })
-@IsString({ message: 'O nome deve ser um texto' })
-@IsNotEmpty({ message: 'O nome é obrigatório' })
+@IsString({ message: 'Name must be a string' })
+@IsNotEmpty({ message: 'Name is required' })
 name: string;
 ```
 
-Esses decorators descrevem as regras do campo `name`. O mesmo acontece com `email`, `password`, `createdAt` e `updatedAt`.
+These decorators describe the rules for `name`. The same applies to `email`, `password`, `createdAt`, and `updatedAt`.
 
-`UserRules` não herda de `ClassValidatorFields`. Ela é apenas o objeto que recebe os decorators. A classe compartilhada é quem executa esses decorators.
+`UserRules` does not inherit from `ClassValidatorFields`. It is the object decorated with rules; the shared class executes those decorators.
 
-Seu construtor copia as propriedades recebidas:
+Its constructor copies the supplied properties:
 
 ```ts
 constructor({ name, email, password, createdAt, updatedAt }: UserProps) {
@@ -150,11 +150,11 @@ constructor({ name, email, password, createdAt, updatedAt }: UserProps) {
 }
 ```
 
-Essa instância é necessária porque o `class-validator` lê os metadados dos decorators a partir da classe `UserRules`.
+The instance is needed because `class-validator` reads decorator metadata from the `UserRules` class.
 
-## 4. O papel de `UserValidator`
+## 4. The role of `UserValidator`
 
-`UserValidator` especializa o validador compartilhado:
+`UserValidator` specializes the shared validator:
 
 ```ts
 export class UserValidator extends ClassValidatorFields<UserRules> {
@@ -164,7 +164,7 @@ export class UserValidator extends ClassValidatorFields<UserRules> {
 }
 ```
 
-O propósito dessa classe é adaptar os dados de usuário para o formato esperado pelas regras:
+This class adapts user data to the format expected by the rules:
 
 ```text
 UserProps
@@ -174,7 +174,7 @@ new UserRules(data)
 ClassValidatorFields.validate()
 ```
 
-A factory cria o validador:
+The factory creates the validator:
 
 ```ts
 export class UserValidatorFactory {
@@ -184,11 +184,11 @@ export class UserValidatorFactory {
 }
 ```
 
-Hoje a factory é simples, mas mantém a entidade desacoplada da forma concreta de construção do validador. Caso futuramente sejam necessárias dependências ou outra implementação, a criação pode mudar sem alterar o uso na entidade.
+The factory is simple today, but it decouples the entity from concrete validator construction. If dependencies or another implementation become necessary, creation can change without changing entity usage.
 
-## 5. A entidade protege o estado do domínio
+## 5. The entity protects domain state
 
-O arquivo [`user.entity.ts`](../../apps/api/src/user/domain/entities/user.entity.ts) chama a validação no construtor:
+[`user.entity.ts`](../../apps/api/src/user/domain/entities/user.entity.ts) validates data in its constructor:
 
 ```ts
 constructor(
@@ -200,9 +200,9 @@ constructor(
 }
 ```
 
-Isso significa que uma `UserEntity` só pode ser criada se seus dados forem válidos.
+A `UserEntity` can therefore only be created with valid data.
 
-O método estático centraliza a integração com o validador:
+The static method centralizes validator integration:
 
 ```ts
 static validate(props: UserProps): void {
@@ -215,7 +215,7 @@ static validate(props: UserProps): void {
 }
 ```
 
-O fluxo de falha é:
+The failure flow is:
 
 ```text
 UserEntity.validate(props)
@@ -227,9 +227,9 @@ userValidator.errors
 throw new EntityValidationError(errors)
 ```
 
-A entidade não retorna uma entidade parcialmente válida. Ela interrompe a operação lançando uma exceção.
+The entity does not return a partially valid object. It stops the operation by throwing an exception.
 
-A validação também é executada durante alterações que podem modificar o estado:
+Validation also runs during changes that can modify state:
 
 ```ts
 updateName(name?: string): void {
@@ -240,15 +240,15 @@ updateName(name?: string): void {
 
   UserEntity.validate(updatedProps);
 
-  // alteração aplicada somente depois da validação
+  // Apply the change only after validation
 }
 ```
 
-Primeiro são montadas as propriedades futuras e validadas. Só depois o valor é aplicado. Essa ordem evita deixar a entidade em um estado inválido quando uma atualização falha.
+First, construct and validate the future properties. Only then apply the value. This prevents a failed update from leaving the entity invalid.
 
-## 6. O erro de domínio
+## 6. The domain error
 
-O arquivo [`entity-validation-error.ts`](../../apps/api/src/shared/domain/errors/entity-validation-error.ts) define o erro lançado pela entidade:
+[`entity-validation-error.ts`](../../apps/api/src/shared/domain/errors/entity-validation-error.ts) defines the error thrown by the entity:
 
 ```ts
 export class EntityValidationError extends Error {
@@ -259,36 +259,36 @@ export class EntityValidationError extends Error {
 }
 ```
 
-Existem duas informações diferentes nesse erro:
+The error contains two different kinds of information:
 
 ```ts
 error.message
 ```
 
-contém a mensagem geral:
+contains the general message:
 
 ```text
 Entity validation error
 ```
 
-Já:
+Whereas:
 
 ```ts
 error.error
 ```
 
-contém os detalhes por campo:
+contains field-level details:
 
 ```ts
 {
-  email: ['O e-mail deve ser válido'],
-  password: ['A senha é obrigatória']
+  email: ['Email must be valid'],
+  password: ['Password is required']
 }
 ```
 
-Portanto, a mensagem geral não substitui as mensagens dos campos. Ela identifica o tipo geral do problema, enquanto a propriedade `error` preserva os detalhes.
+The general message does not replace field messages. It identifies the overall error type, while `error` preserves the details.
 
-Um código que capture a exceção pode acessar as duas informações:
+Code catching the exception can access both:
 
 ```ts
 try {
@@ -301,27 +301,27 @@ try {
 }
 ```
 
-## 7. O que acontece atualmente na API HTTP?
+## 7. What happens in the HTTP API at this stage?
 
-O fluxo de domínio está implementado, mas ainda não está completo na camada HTTP.
+At the stage described here, the domain flow was implemented but the HTTP layer was incomplete.
 
-Atualmente, o controller de usuário ainda possui métodos vazios:
+The user controller still had empty methods:
 
 ```ts
 @Post()
 create(@Body() createUserDto: CreateUserDto) {}
 ```
 
-Além disso, o `CreateUserDto` ainda não possui propriedades ou regras:
+`CreateUserDto` also had no properties or rules:
 
 ```ts
 export class CreateUserDto {}
 ```
 
-Consequentemente, uma requisição HTTP ainda não percorre todo o fluxo abaixo:
+An HTTP request therefore did not yet travel through the entire flow below:
 
 ```text
-requisição HTTP
+HTTP request
    ↓
 Controller
    ↓
@@ -334,36 +334,36 @@ EntityValidationError
 resposta HTTP formatada
 ```
 
-Ainda falta implementar o tratamento da exceção na infraestrutura HTTP. Um exception filter ou outro mecanismo de tratamento deverá converter o erro de domínio em uma resposta semelhante a:
+HTTP exception handling still needed implementation. An exception filter or another handler should convert the domain error to a response such as:
 
 ```json
 {
   "message": "Entity validation error",
   "errors": {
-    "email": ["O e-mail deve ser válido"],
-    "password": ["A senha é obrigatória"]
+    "email": ["Email must be valid"],
+    "password": ["Password is required"]
   }
 }
 ```
 
-Sem esse tratamento, `error.message` continua sendo apenas `Entity validation error`, e os detalhes ficam disponíveis somente em `error.error` para o código que capturar a exceção.
+Without this handling, `error.message` is only `Entity validation error`, and details remain available solely in `error.error` to code catching the exception.
 
 ## 8. Datas recebidas pelo HTTP
 
-As regras de usuário usam `@IsDate()` para `createdAt` e `updatedAt`:
+User rules use `@IsDate()` for `createdAt` and `updatedAt`:
 
 ```ts
-@IsDate({ message: 'A data de criação deve ser válida' })
+@IsDate({ message: 'Creation date must be valid' })
 createdAt: Date;
 ```
 
-Uma data criada no código normalmente é um objeto `Date`:
+A date created in code is usually a `Date` object:
 
 ```ts
 new Date();
 ```
 
-Porém, uma requisição HTTP normalmente contém uma string JSON:
+An HTTP request, however, usually contains a JSON string:
 
 ```json
 {
@@ -371,44 +371,44 @@ Porém, uma requisição HTTP normalmente contém uma string JSON:
 }
 ```
 
-Antes de criar a entidade, essa string deverá ser convertida para `Date`, ou a camada de entrada deverá usar transformação adequada. Essa conversão pertence à fronteira da aplicação, e não deve ficar escondida dentro da entidade.
+Before creating the entity, convert that string to `Date` or use appropriate input transformation. This conversion belongs at the application boundary and must not be hidden inside the entity.
 
-## 9. Validações em camadas
+## 9. Layered validation
 
-O projeto pode possuir validações em mais de uma camada, com responsabilidades diferentes:
+The project can validate in multiple layers, each with a different responsibility:
 
 ```text
 DTO
-   ↓ valida formato da entrada HTTP
+   ↓ validates HTTP input format
 Use case
-   ↓ coordena a operação
+   ↓ coordinates the operation
 Entity
-   ↓ protege as regras do domínio
+   ↓ protects domain rules
 Repository
-   ↓ persiste os dados
+   ↓ persists data
 ```
 
-A validação da entidade é importante porque a entidade pode ser criada por diferentes entradas, não apenas pelo controller. Mesmo que alguém chame um use case, um teste ou outro adaptador, o domínio continua protegendo suas próprias regras.
+Entity validation matters because different entry points can create an entity, not only controllers. A use case, test, or another adapter still gets the same domain protection.
 
-Uma diferença importante é:
+A useful distinction is:
 
-- DTO: valida a entrada e o formato esperado pela API;
-- entidade: valida se o estado é aceitável para o domínio;
-- banco de dados: aplica restrições de persistência, como unicidade e existência de registros relacionados.
+- DTO: validates input and the format expected by the API;
+- Entity: validates whether the state is acceptable to the domain;
+- Database: enforces persistence constraints, such as uniqueness and the existence of related records.
 
-Essas validações podem se repetir parcialmente, mas não são substitutas perfeitas umas das outras.
+These validations may overlap partially, but they do not fully replace one another.
 
-## Resumo
+## Summary
 
-O fluxo de validação de usuário atualmente funciona assim:
+The user validation flow works as follows:
 
-1. `UserRules` declara as regras com decorators.
-2. `UserValidator` cria uma instância de `UserRules`.
-3. `ClassValidatorFields` executa o `class-validator`.
-4. Os erros são convertidos para `FieldsError`.
-5. `UserEntity` interrompe a criação ou atualização quando há erros.
-6. `EntityValidationError` recebe os erros detalhados.
-7. `error.message` contém apenas a mensagem geral.
-8. `error.error` contém os campos e suas mensagens.
+1. `UserRules` declares rules with decorators.
+2. `UserValidator` creates a `UserRules` instance.
+3. `ClassValidatorFields` runs `class-validator`.
+4. Errors are converted to `FieldsError`.
+5. `UserEntity` stops creation or updates when errors occur.
+6. `EntityValidationError` receives detailed errors.
+7. `error.message` contains only the general message.
+8. `error.error` contains fields and their messages.
 
-O domínio já possui a base da validação. Para exibir esses erros ao cliente HTTP, ainda falta conectar o controller, os DTOs, os use cases e o tratamento de exceções da API.
+The domain validation foundation exists. At the stage described here, exposing these errors to HTTP clients still required connecting controllers, DTOs, use cases, and API exception handling.

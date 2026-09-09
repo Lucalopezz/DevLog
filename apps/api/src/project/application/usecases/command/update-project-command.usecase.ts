@@ -39,7 +39,7 @@ export class UpdateProjectCommandUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(projectId);
 
     if (!project || project.userId !== userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     project.ensureCanBeModified();
@@ -48,7 +48,7 @@ export class UpdateProjectCommandUseCase implements UseCaseContract<
       input.commandId,
     );
     if (!entity || entity.projectId !== projectId) {
-      throw new NotFoundException('Comando do projeto não encontrado');
+      throw new NotFoundException('Project command not found');
     }
 
     if (
@@ -58,7 +58,7 @@ export class UpdateProjectCommandUseCase implements UseCaseContract<
       executionOrder === undefined
     ) {
       throw new UnprocessableEntityException(
-        'Informe ao menos um campo para atualizar o comando',
+        'Provide at least one field to update the command',
       );
     }
 

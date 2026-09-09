@@ -6,7 +6,7 @@ import { TechnicalEntryStatus } from '@/technical-entry/domain/entities/technica
 import { SearchTechnicalEntryDto } from '../../search-technical-entry.dto';
 
 describe('SearchTechnicalEntryDto', () => {
-  it('converte e valida os parâmetros de busca', async () => {
+  it('converts and validates search parameters', async () => {
     const dto = plainToInstance(SearchTechnicalEntryDto, {
       page: '2',
       perPage: '10',
@@ -27,7 +27,7 @@ describe('SearchTechnicalEntryDto', () => {
     expect(dto.archivedAt).toBeNull();
   });
 
-  it('rejeita parâmetros inválidos', async () => {
+  it('rejects invalid parameters', async () => {
     const dto = plainToInstance(SearchTechnicalEntryDto, {
       page: '0',
       perPage: 'invalid',

@@ -4,7 +4,7 @@ import { validate } from 'class-validator';
 import { ResolveTechnicalIssueDto } from '../../resolve-technical-issue.dto';
 
 describe('ResolveTechnicalIssueDto', () => {
-  it('exige uma conclusão textual', async () => {
+  it('requires a textual conclusion', async () => {
     const errors = await validate(
       plainToInstance(ResolveTechnicalIssueDto, {}),
     );
@@ -12,10 +12,10 @@ describe('ResolveTechnicalIssueDto', () => {
     expect(errors.map((error) => error.property)).toContain('conclusion');
   });
 
-  it('aceita uma conclusão', async () => {
+  it('accepts a conclusion', async () => {
     const errors = await validate(
       plainToInstance(ResolveTechnicalIssueDto, {
-        conclusion: 'A configuração foi corrigida',
+        conclusion: 'The configuration was fixed',
       }),
     );
 

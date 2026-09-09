@@ -33,7 +33,7 @@ export class UpdateProjectUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(input.id);
 
     if (project === null || project.userId !== input.userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     if (
@@ -43,7 +43,7 @@ export class UpdateProjectUseCase implements UseCaseContract<
       input.localPath === undefined
     ) {
       throw new UnprocessableEntityException(
-        'Informe ao menos um campo para atualizar o projeto',
+        'Provide at least one field to update the project',
       );
     }
 

@@ -14,7 +14,7 @@ function makeProps(
 
   return {
     projectId: PROJECT_ID,
-    label: 'Repositório principal',
+    label: 'Repository principal',
     url: 'https://github.com/example/devlog',
     type: ProjectResourceType.REPOSITORY,
     createdAt: date,
@@ -28,29 +28,29 @@ describe('ProjectResourceEntity', () => {
     jest.useRealTimers();
   });
 
-  it('cria um recurso com os dados válidos', () => {
+  it('creates a resource with valid data', () => {
     const resource = new ProjectResourceEntity(makeProps());
 
     expect(resource.projectId).toBe(PROJECT_ID);
-    expect(resource.label).toBe('Repositório principal');
+    expect(resource.label).toBe('Repository principal');
     expect(resource.url).toBe('https://github.com/example/devlog');
     expect(resource.type).toBe(ProjectResourceType.REPOSITORY);
   });
 
   it.each([
-    ['projectId inválido', { projectId: 'project-1' }],
-    ['rótulo vazio', { label: '' }],
-    ['rótulo acima do limite', { label: 'a'.repeat(121) }],
+    ['invalid projectId', { projectId: 'project-1' }],
+    ['empty label', { label: '' }],
+    ['label above the limit', { label: 'a'.repeat(121) }],
     ['URL vazia', { url: '' }],
-    ['URL inválida', { url: 'not-a-url' }],
-    ['tipo inválido', { type: 'UNKNOWN' as ProjectResourceType }],
-  ])('rejeita %s', (_, overrides) => {
+    ['Invalid URL', { url: 'not-a-url' }],
+    ['invalid type', { type: 'UNKNOWN' as ProjectResourceType }],
+  ])('rejects %s', (_, overrides) => {
     expect(() => new ProjectResourceEntity(makeProps(overrides))).toThrow(
       EntityValidationError,
     );
   });
 
-  it('aceita uma URL local', () => {
+  it('accepts a local URL', () => {
     expect(
       () =>
         new ProjectResourceEntity(
@@ -62,27 +62,27 @@ describe('ProjectResourceEntity', () => {
     ).not.toThrow();
   });
 
-  it('atualiza rótulo, URL e tipo', () => {
+  it('updates label, URL, and type', () => {
     jest.useFakeTimers();
     const updatedAt = new Date('2026-08-02T12:00:00.000Z');
     jest.setSystemTime(updatedAt);
     const resource = new ProjectResourceEntity(makeProps());
 
     resource.update({
-      label: 'Documentação da API',
+      label: 'Documentation da API',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
 
     expect(resource.projectId).toBe(PROJECT_ID);
-    expect(resource.label).toBe('Documentação da API');
+    expect(resource.label).toBe('Documentation da API');
     expect(resource.url).toBe('https://docs.example.com/devlog');
     expect(resource.type).toBe(ProjectResourceType.DOCUMENTATION);
     expect(resource.createdAt).toEqual(new Date('2026-08-01T00:00:00.000Z'));
     expect(resource.updatedAt).toEqual(updatedAt);
   });
 
-  it('valida os novos dados antes de alterar a entidade', () => {
+  it('validates new data before changing the entity', () => {
     const resource = new ProjectResourceEntity(makeProps());
     const originalUpdatedAt = resource.updatedAt;
 
@@ -93,7 +93,7 @@ describe('ProjectResourceEntity', () => {
     expect(resource.updatedAt).toBe(originalUpdatedAt);
   });
 
-  it('trata atualização sem campos como no-op e preserva updatedAt', () => {
+  it('treats an update with no fields as a no-op and preserves updatedAt', () => {
     const resource = new ProjectResourceEntity(makeProps());
     const originalUpdatedAt = resource.updatedAt;
 

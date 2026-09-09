@@ -21,33 +21,33 @@ import {
 type ProjectDetailTab = "overview" | "entries" | "commands" | "resources";
 
 const tabs: { id: ProjectDetailTab; label: string }[] = [
-  { id: "overview", label: "Visão geral" },
-  { id: "entries", label: "Entradas técnicas" },
-  { id: "commands", label: "Comandos" },
-  { id: "resources", label: "Recursos" },
+  { id: "overview", label: "Overview" },
+  { id: "entries", label: "Technical entries" },
+  { id: "commands", label: "Commands" },
+  { id: "resources", label: "Resources" },
 ];
 
 export default function ProjectDetailPage() {
   const { projectId = "" } = useParams<{ projectId: string }>();
 
-  // A aba é estado de interface, enquanto os dados continuam no React Query.
-  // Separar as responsabilidades evita refazer a consulta apenas porque o
-  // usuário alternou entre Visão geral, Entradas, Comandos e Recursos.
+  // The tab is interface state, while data stays in React Query.
+  // Separating responsibilities avoids refetching just because the
+  // user switched between Overview, Entries, Commands, and Resources.
   const [activeTab, setActiveTab] = useState<ProjectDetailTab>("overview");
   const [entriesPage, setEntriesPage] = useState(1);
   const [commandsPage, setCommandsPage] = useState(1);
   const [resourcesPage, setResourcesPage] = useState(1);
   const [isEditProjectDialogOpen, setIsEditProjectDialogOpen] = useState(false);
 
-  // Cada hook representa uma coleção independente da API. As páginas também
-  // são independentes: avançar em comandos não altera a página de recursos.
+  // Each hook represents an independent API collection. Pages are also
+  // independent: advancing commands does not change the resource page.
   const projectQuery = useGetProject(projectId);
   const technicalEntriesQuery = useProjectTechnicalEntries(projectId, entriesPage);
   const commandsQuery = useProjectCommands(projectId, commandsPage);
   const resourcesQuery = useProjectResources(projectId, resourcesPage);
 
-  // O projeto é o recurso pai. Por isso mostramos primeiro seu skeleton e só
-  // renderizamos as seções quando já existe um projeto para contextualizá-las.
+  // The project is the parent resource. Show its skeleton first and only
+  // render the sections once a project is available to provide context.
   if (projectQuery.isPending) return <ProjectDetailSkeleton />;
 
   if (projectQuery.isError || !projectQuery.data) {
@@ -63,14 +63,14 @@ export default function ProjectDetailPage() {
           </div>
           <div className="space-y-2">
             <h1 className="text-xl font-semibold" id="project-detail-error-title">
-              Projeto não encontrado
+              Project not found
             </h1>
             <p className="text-sm leading-6 text-muted-foreground">
-              O projeto pode ter sido removido ou não pertence à sua conta.
+              The project may have been removed or may not belong to your account.
             </p>
           </div>
           <Button asChild variant="outline">
-            <Link to="/projects">Voltar para projetos</Link>
+            <Link to="/projects">Back to projects</Link>
           </Button>
         </section>
       </main>
@@ -92,9 +92,9 @@ export default function ProjectDetailPage() {
         project={project}
       />
 
-      {/* Os papéis ARIA tornam a navegação compreensível para leitores de tela;
-          o foco visível mantém a mesma affordance para teclado e mouse. */}
-      <nav aria-label="Seções do projeto" className="overflow-x-auto border-b border-border/60">
+      {/* ARIA roles make navigation understandable to screen readers;
+          visible focus provides equivalent cues for keyboard and mouse users. */}
+      <nav aria-label="Project sections" className="overflow-x-auto border-b border-border/60">
         <div className="flex min-w-max gap-1" role="tablist">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -141,8 +141,8 @@ export default function ProjectDetailPage() {
 
         {activeTab === "entries" ? (
           <SectionFrame
-            description="Problemas e aprendizados ligados ao contexto deste projeto."
-            title="Entradas técnicas"
+            description="Issues and lessons learned in the context of this project."
+            title="Technical entries"
           >
             <TechnicalEntriesSection
               entries={technicalEntriesQuery.data?.data}
@@ -158,8 +158,8 @@ export default function ProjectDetailPage() {
 
         {activeTab === "commands" ? (
           <SectionFrame
-            description="Comandos recorrentes para configurar, executar e manter o projeto."
-            title="Comandos"
+            description="Recurring commands to set up, run, and maintain the project."
+            title="Commands"
           >
             <CommandsSection
               commands={commandsQuery.data?.data}
@@ -175,8 +175,8 @@ export default function ProjectDetailPage() {
 
         {activeTab === "resources" ? (
           <SectionFrame
-            description="Links e referências importantes para continuar o trabalho."
-            title="Recursos"
+            description="Useful links and references to continue your work."
+            title="Resources"
           >
             <ResourcesSection
               isError={resourcesQuery.isError}
@@ -194,7 +194,7 @@ export default function ProjectDetailPage() {
       {projectQuery.isFetching ? (
         <p aria-live="polite" className="flex items-center gap-2 text-sm text-muted-foreground">
           <RefreshCw className="size-4 animate-spin" />
-          Atualizando projeto...
+          Updating project...
         </p>
       ) : null}
     </main>

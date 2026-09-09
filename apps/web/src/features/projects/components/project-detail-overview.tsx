@@ -45,25 +45,25 @@ export function ProjectDetailOverview({
               <BookOpenText className="size-5 text-primary" />
             </span>
             <div>
-              <h2 className="font-semibold">Sobre o projeto</h2>
-              <p className="text-sm text-muted-foreground">Contexto para voltar ao trabalho</p>
+              <h2 className="font-semibold">About the project</h2>
+              <p className="text-sm text-muted-foreground">Context to get back to work</p>
             </div>
           </div>
 
           <p className="max-w-2xl whitespace-pre-wrap text-sm leading-7 text-card-foreground/80">
-            {project.description || "Este projeto ainda não possui uma descrição."}
+            {project.description || "This project does not have a description yet."}
           </p>
 
           <dl className="mt-8 grid gap-4 border-t border-border/60 pt-5 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-muted-foreground">Status atual</dt>
+              <dt className="text-muted-foreground">Current status</dt>
               <dd className="mt-1 flex items-center gap-2 font-medium">
                 <CircleDot className="size-4 text-primary" />
                 <span className={status.className.split(" ")[1]}>{status.label}</span>
               </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Última atualização</dt>
+              <dt className="text-muted-foreground">Last updated</dt>
               <dd className="mt-1 font-medium">
                 <time dateTime={project.updatedAt}>{formatRelativeDate(project.updatedAt)}</time>
               </dd>
@@ -77,8 +77,8 @@ export function ProjectDetailOverview({
               <Code2 className="size-5 text-primary" />
             </span>
             <div>
-              <h2 className="font-semibold">Tecnologias</h2>
-              <p className="text-sm text-muted-foreground">Stack registrada</p>
+              <h2 className="font-semibold">Technologies</h2>
+              <p className="text-sm text-muted-foreground">Recorded stack</p>
             </div>
           </div>
 
@@ -98,18 +98,18 @@ export function ProjectDetailOverview({
             </ul>
           ) : (
             <p className="text-sm leading-6 text-muted-foreground">
-              Nenhuma tecnologia foi registrada ainda.
+              No technologies have been recorded yet.
             </p>
           )}
         </section>
       </div>
 
       <section className="grid gap-3 sm:grid-cols-3">
-        {/* Os totais vêm de meta.total, não do tamanho da página atual. Assim
-            o resumo continua correto mesmo quando a coleção é paginada. */}
-        <Metric icon={Boxes} label="Entradas técnicas" value={technicalEntriesTotal} />
-        <Metric icon={Code2} label="Comandos" value={commandsTotal} />
-        <Metric icon={ExternalLink} label="Recursos" value={resourcesTotal} />
+        {/* Totals come from meta.total, not the current page size. This keeps
+            the summary accurate even when the collection is paginated. */}
+        <Metric icon={Boxes} label="Technical entries" value={technicalEntriesTotal} />
+        <Metric icon={Code2} label="Commands" value={commandsTotal} />
+        <Metric icon={ExternalLink} label="Resources" value={resourcesTotal} />
       </section>
     </div>
   );

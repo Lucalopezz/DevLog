@@ -48,7 +48,7 @@ export class SearchProjectCommandUseCase implements UseCaseContract<
     const project = await this.projectRepository.findById(projectId);
 
     if (!project || project.userId !== userId) {
-      throw new NotFoundException('Projeto não encontrado');
+      throw new NotFoundException('Project not found');
     }
 
     const filter: ProjectCommandFilter = { projectId };

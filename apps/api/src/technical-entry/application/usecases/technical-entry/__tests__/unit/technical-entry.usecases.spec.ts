@@ -76,7 +76,7 @@ function makeEntry(
     {
       userId: overrides.userId ?? USER_ID,
       projectId: overrides.projectId,
-      title: overrides.title ?? 'Título da entrada',
+      title: overrides.title ?? 'Entry title',
       context: overrides.context ?? 'Contexto da entrada',
       conclusion: overrides.conclusion,
       type: overrides.type ?? TechnicalEntryType.ISSUE,
@@ -98,9 +98,9 @@ function makeProjectRepository(
   } as unknown as jest.Mocked<ProjectRepository>;
 }
 
-describe('Casos de uso de entrada técnica', () => {
+describe('Technical entry use cases', () => {
   describe('GetTechnicalEntryUseCase', () => {
-    it('retorna a entrada completa do usuário autenticado', async () => {
+    it('returns the authenticated user complete entry', async () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({ projectId: PROJECT_ID });
       repository.entries.push(entry);
@@ -122,7 +122,7 @@ describe('Casos de uso de entrada técnica', () => {
       });
     });
 
-    it('não encontra uma entrada de outro usuário', async () => {
+    it("does not find another user's entry", async () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({ userId: OTHER_USER_ID });
       repository.entries.push(entry);
@@ -141,7 +141,7 @@ describe('Casos de uso de entrada técnica', () => {
   });
 
   describe('UpdateTechnicalEntryUseCase', () => {
-    it('atualiza o conteúdo e o projeto sem alterar o tipo', async () => {
+    it('updates content and project without changing the type', async () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({ type: TechnicalEntryType.ISSUE });
       repository.entries.push(entry);
@@ -153,25 +153,25 @@ describe('Casos de uso de entrada técnica', () => {
       const output = await useCase.execute({
         id: entry.id,
         userId: USER_ID,
-        title: 'Novo título',
+        title: 'New title',
         context: 'Novo contexto',
-        conclusion: 'Nova conclusão',
+        conclusion: 'New conclusion',
         projectId: OTHER_PROJECT_ID,
       });
 
       expect(output).toMatchObject({
-        title: 'Novo título',
+        title: 'New title',
         context: 'Novo contexto',
-        conclusion: 'Nova conclusão',
+        conclusion: 'New conclusion',
         projectId: OTHER_PROJECT_ID,
         type: TechnicalEntryType.ISSUE,
       });
     });
 
-    it('permite remover a conclusão e o projeto', async () => {
+    it('allows clearing the conclusion and project', async () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({
-        conclusion: 'Conclusão antiga',
+        conclusion: 'Old conclusion',
         projectId: PROJECT_ID,
       });
       repository.entries.push(entry);
@@ -191,7 +191,7 @@ describe('Casos de uso de entrada técnica', () => {
       expect(output.projectId).toBeUndefined();
     });
 
-    it('rejeita atualização sem campos', async () => {
+    it('rejects an update with no fields', async () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry();
       repository.entries.push(entry);
@@ -205,7 +205,7 @@ describe('Casos de uso de entrada técnica', () => {
       ).rejects.toBeInstanceOf(UnprocessableEntityException);
     });
 
-    it('não atualiza uma entrada de outro usuário', async () => {
+    it("does not update another user's entry", async () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({ userId: OTHER_USER_ID });
       repository.entries.push(entry);
@@ -223,7 +223,7 @@ describe('Casos de uso de entrada técnica', () => {
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('não vincula a entrada a um projeto de outro usuário', async () => {
+    it("does not link the entry to another user's project", async () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry();
       repository.entries.push(entry);
@@ -245,7 +245,7 @@ describe('Casos de uso de entrada técnica', () => {
   });
 
   describe('DeleteTechnicalEntryUseCase', () => {
-    it('remove a entrada do usuário autenticado', async () => {
+    it('removes the authenticated user entry', async () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry();
       repository.entries.push(entry);
@@ -256,7 +256,7 @@ describe('Casos de uso de entrada técnica', () => {
       expect(repository.entries).toHaveLength(0);
     });
 
-    it('não remove uma entrada de outro usuário', async () => {
+    it("does not remove another user's entry", async () => {
       const repository = new InMemoryTechnicalEntryRepository();
       const entry = makeEntry({ userId: OTHER_USER_ID });
       repository.entries.push(entry);

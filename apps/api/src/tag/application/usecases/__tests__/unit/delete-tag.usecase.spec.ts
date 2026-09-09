@@ -34,7 +34,7 @@ describe('DeleteTagUseCase', () => {
     useCase = new DeleteTagUseCase(repository);
   });
 
-  it('remove uma tag do usuário autenticado', async () => {
+  it('removes a tag belonging to the authenticated user', async () => {
     repository.findById.mockResolvedValue(makeTag());
 
     await useCase.execute({ id: 'tag-1', userId: USER_ID });
@@ -42,7 +42,7 @@ describe('DeleteTagUseCase', () => {
     expect(deleteTag).toHaveBeenCalledWith('tag-1');
   });
 
-  it('não revela nem remove uma tag de outro usuário', async () => {
+  it("does not reveal or remove another user's tag", async () => {
     repository.findById.mockResolvedValue(makeTag(OTHER_USER_ID));
 
     await expect(
@@ -51,7 +51,7 @@ describe('DeleteTagUseCase', () => {
     expect(deleteTag).not.toHaveBeenCalled();
   });
 
-  it('retorna not found quando a tag não existe', async () => {
+  it('returns not found when the tag does not exist', async () => {
     repository.findById.mockResolvedValue(null);
 
     await expect(

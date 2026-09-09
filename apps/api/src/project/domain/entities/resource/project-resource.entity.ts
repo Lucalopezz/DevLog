@@ -38,8 +38,8 @@ export class ProjectResourceEntity extends Entity<ProjectResourceProps> {
   }
 
   update(props: ProjectResourceUpdateProps): void {
-    // A aplicação decide se um update vazio é uma entrada válida. No domínio,
-    // ele é apenas um no-op e não deve modificar artificialmente updatedAt.
+    // The application decides whether an empty update is valid input. In the domain,
+    // it is simply a no-op and must not artificially change updatedAt.
     if (Object.values(props).every((value) => value === undefined)) {
       return;
     }
