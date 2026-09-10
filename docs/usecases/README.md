@@ -1,6 +1,9 @@
 # DevLog API use cases
 
-This is the **as-is** behavioral documentation of the API at commit `96ba26e`, analyzed on September 2, 2026. It describes what the code does at that snapshot without treating backlog or future intentions as implemented requirements.
+This is the **as-is** behavioral documentation of the API in the current
+working tree. It describes what the code implements now without treating
+backlog or future intentions as implemented requirements. Update this index and
+the relevant use case when an API behavior changes.
 
 ## Reading this documentation
 
@@ -52,6 +55,10 @@ The current code has no external secondary actor. The database, controllers, use
 - Attempts belong to a technical entry and depend on its lifecycle.
 - The entry/tag link has its own information (`createdAt`), so it appears as an association class.
 - The project/entry link is an optional association, not composition: deleting the project preserves the entry and only removes its reference.
+
+The web application exposes these project rules through the project detail
+Settings tab. Archive and restore use explicit lifecycle endpoints, while
+delete requires an unarchived project and confirmation in the interface.
 
 ## Points observed in the current code
 

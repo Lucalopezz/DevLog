@@ -8,7 +8,7 @@ The API includes modules for:
 
 - JWT authentication through an `httpOnly` cookie;
 - Registration and editing of the authenticated user;
-- Projects, including status, archiving, and restoration;
+- Projects, including status, editing, archiving, restoration, and deletion;
 - `ISSUE` and `LEARNING` technical entries;
 - Solution attempts and issue resolution/reopening;
 - Tags associated with entries;
@@ -46,7 +46,12 @@ Within features, the main layers are:
 - `application/`: use cases and input/output DTOs;
 - `infrastructure/`: controllers, modules, Prisma repositories, and presenters.
 
-Use cases receive `userId` from `AuthGuard`, never from the client request body. Queries and mutations validate resource ownership to prevent access to another user's data. See [`docs/resource-ownership-validation.md`](docs/resource-ownership-validation.md) for the reasoning.
+Use cases receive `userId` from `AuthGuard`, never from the client request body.
+Queries and mutations validate resource ownership to prevent access to another
+user's data. The project aggregate also enforces that archived projects are
+read-only and that deletion is allowed only after restoration. See the
+[project use cases](../docs/usecases/projects.md) and [database decisions](../docs/decisions/database.md)
+for the reasoning.
 
 ## Local configuration
 
@@ -105,11 +110,22 @@ Controllers are the source of truth for payload and pagination details. This ove
 | --- | --- | --- |
 | Auth | `POST /api/auth/login`, `POST /api/auth/logout` | Login/logout |
 | Users | `POST /api/users`, `GET /api/users/me` | Registration / authenticated |
-| Projects | `GET`, `POST`, and `PATCH /api/project/...` | Authenticated |
+| Projects | `GET`, `POST`, `PATCH`, and `DELETE /api/project/...` | Authenticated |
 | Entries | `GET`, `POST`, `PATCH`, and `DELETE /api/technical-entry/...` | Authenticated |
 | Tags | `GET`, `POST`, and `DELETE /api/tag/...` | Authenticated |
 
-Projects also expose subresources for technical entries, technologies, commands, and resources. Entries expose tags and solution attempts.
+Projects also expose subresources for technical entries, technologies,
+commands, and resources. Project lifecycle endpoints are:
+
+| Operation | Endpoint |
+| --- | --- |
+| Archive | `PATCH /api/project/:id/archive` |
+| Restore | `PATCH /api/project/:id/restore` |
+| Delete | `DELETE /api/project/:id` |
+
+Entries expose tags and solution attempts. Deleting a project cascades to its
+technologies, commands, and resources; associated technical entries remain and
+are unlinked from the deleted project.
 
 ## Tests and quality
 

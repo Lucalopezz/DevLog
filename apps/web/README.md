@@ -4,7 +4,16 @@ DevLog frontend. This application provides the interface for browsing projects, 
 
 ## Current state
 
-The frontend includes its application foundation, authentication screens, account details, project listing, creation, editing, and project details. The `/` route shows the initial infrastructure demonstration. Technical entry workflows continue to evolve.
+The frontend includes its application foundation, authentication screens,
+account details, and a working Projects experience. Users can list, search,
+filter, create, edit, and inspect projects. A project detail page contains
+`Overview`, `Technical entries`, `Commands`, `Resources`, and `Settings` tabs.
+The Settings tab supports project metadata, lifecycle actions, safe deletion,
+and read-only behavior for archived projects.
+
+The `/` route remains an initial infrastructure demonstration. Technical entry
+creation/editing and project subresource management continue to evolve in the
+frontend, while their API support is already available.
 
 The foundation includes:
 
@@ -38,7 +47,7 @@ src/
   features/            # Code organized by feature
     auth/              # Authentication schemas, types, hooks, and screens
     home/              # Current home page
-    projects/          # Project APIs, forms, hooks, and screens
+    projects/          # Project APIs, forms, lifecycle, settings, and screens
   lib/                 # Query client, dates, and utilities
   routes/              # Browser route definitions
   main.tsx             # React entry point
@@ -97,6 +106,21 @@ Use the `api` instance from `src/api/http.ts` for new calls. It sets `withCreden
 `useLoginForm` is the form reference: Zod describes the data, and React Hook Form controls state and validation. Use the tokens and components in `src/index.css` and `src/components/ui`, composing styles with Tailwind classes.
 
 All interface text, accessibility labels, validation messages, and notifications must be in English. Dates and numbers use `en-US`.
+
+## Current Projects surface
+
+The project detail route is `/projects/:projectId`. Its Settings tab is built
+from feature-local components and mutations:
+
+- `api/`: project fetch, update, archive, restore, and delete requests;
+- `hooks/`: React Query queries and lifecycle mutations with cache invalidation;
+- `components/project-settings-pane.tsx`: settings layout and project metadata;
+- `components/project-archive-btn.tsx`, `project-restore-btn.tsx`, and
+  `project-delete-btn.tsx`: confirmed lifecycle actions.
+
+Archived projects are displayed as read-only. Deletion requires typing the
+project name and redirects to `/projects` after success. The backend also
+requires an archived project to be restored before it can be deleted.
 
 ## Next areas to develop
 

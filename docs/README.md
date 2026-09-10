@@ -11,6 +11,7 @@ Use this table as your starting point. Most questions are addressed in the liste
 | What are the product goals, scope, and general decisions? | [`decisions/devlog-decisions.md`](decisions/devlog-decisions.md) |
 | How is the database modeled, and why are tables related this way? | [`decisions/database.md`](decisions/database.md) |
 | What does the API implement today? | [`usecases/README.md`](usecases/README.md) |
+| What does the frontend implement today? | [`../apps/web/README.md`](../apps/web/README.md) |
 | Where is the historical/planned MVP specification? | [`usecases/cases.md`](usecases/cases.md) |
 | Where are the UML diagrams? | [`diagrams/README.md`](diagrams/README.md) |
 | What remains to be implemented in the backend? | [`backlog/backend.md`](backlog/backend.md) |
@@ -59,3 +60,8 @@ Tracks planned implementation and known pending work. Use it to find what still 
 3. Read [`usecases/README.md`](usecases/README.md) for implemented rules.
 4. Choose a technical guide related to your question.
 5. Check [`backlog/backend.md`](backlog/backend.md) before implementing a new task.
+
+The current frontend Projects surface includes project details and a Settings
+tab for editing, archiving, restoring, metadata inspection, and confirmed
+deletion. The API behavior behind those actions is documented in
+[`usecases/projects.md`](usecases/projects.md).
