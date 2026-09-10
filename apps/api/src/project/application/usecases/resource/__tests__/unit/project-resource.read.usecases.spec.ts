@@ -32,7 +32,7 @@ function makeResource(projectId = PROJECT_ID): ProjectResourceEntity {
   return new ProjectResourceEntity(
     {
       projectId,
-      label: 'Documentation da API',
+      label: 'API documentation',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     },
@@ -100,7 +100,7 @@ describe('SearchProjectResourceUseCase', () => {
         expect.objectContaining({
           id: RESOURCE_ID,
           projectId: PROJECT_ID,
-          label: 'Documentation da API',
+          label: 'API documentation',
         }),
       ],
       total: 1,
@@ -163,7 +163,7 @@ describe('GetProjectResourceUseCase', () => {
     expect(output).toMatchObject({
       id: RESOURCE_ID,
       projectId: PROJECT_ID,
-      label: 'Documentation da API',
+      label: 'API documentation',
       type: ProjectResourceType.DOCUMENTATION,
     });
   });

@@ -1,327 +1,327 @@
-# Casos de uso — registros técnicos
+# Use cases — technical entries
 
-Todos os casos deste arquivo usam o ator **Usuário autenticado**. Um registro,
-tag, projeto ou tentativa fora do escopo do usuário é tratado como não
-encontrado, evitando revelar dados de outra conta.
+All use cases in this file use the **Authenticated user** actor. An entry,
+tag, project, or attempt outside the user's scope is treated as not
+found, avoiding disclosure of another account's data.
 
-## UC-30 — Criar registro técnico
+## UC-30 — Create technical entry
 
-| Campo          | Descrição                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                                                        |
-| Interesses     | Documentar um problema ou aprendizado e, opcionalmente, relacioná-lo a um projeto próprio. |
-| Pré-condições  | Conta existente; projeto informado deve ser próprio e não arquivado.                       |
-| Gatilho        | O usuário informa título, contexto, tipo e dados opcionais.                                |
-| Pós-condições  | Um registro não arquivado pertencente ao usuário é criado.                                 |
-| Endpoint       | `POST /api/technical-entry`                                                                |
+| Field          | Description                                                                      |
+| -------------- | -------------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                               |
+| Interests      | Document an issue or learning and optionally associate it with an owned project. |
+| Preconditions  | An existing account; the supplied project must be owned and unarchived.          |
+| Trigger        | The user provides a title, context, type, and optional data.                     |
+| Postconditions | An unarchived entry belonging to the user is created.                            |
+| Endpoint       | `POST /api/technical-entry`                                                      |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário informa título, contexto, tipo (`ISSUE` ou `LEARNING`), projeto e
-   conclusão opcionais.
-2. Se houver projeto, o sistema confirma propriedade e disponibilidade.
-3. O sistema valida e registra a entrada.
-4. O sistema apresenta o registro criado.
+1. The user provides a title, context, type (`ISSUE` or `LEARNING`), and optional project and
+   conclusion.
+2. If a project is supplied, the system verifies ownership and availability.
+3. The system validates and saves the entry.
+4. The system returns the created entry.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Projeto inexistente, alheio ou arquivado é tratado como não encontrado.
-- Dados inválidos impedem a criação.
-- Informar conclusão não marca automaticamente um `ISSUE` como resolvido.
+- A missing, another user's, or archived project is treated as not found.
+- Invalid data prevents creation.
+- Providing a conclusion does not automatically mark an `ISSUE` as resolved.
 
-## UC-31 — Pesquisar registros técnicos
+## UC-31 — Search technical entries
 
-| Campo          | Descrição                                                                  |
-| -------------- | -------------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                        |
-| Interesses     | Recuperar seu histórico por projeto, título, tipo, status ou arquivamento. |
-| Pré-condições  | Requisição autenticada.                                                    |
-| Gatilho        | O usuário solicita uma página com critérios opcionais.                     |
-| Pós-condições  | Nenhuma alteração de estado.                                               |
-| Endpoint       | `GET /api/technical-entry`                                                 |
+| Field          | Description                                                                  |
+| -------------- | ---------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                           |
+| Interests      | Retrieve personal history by project, title, type, status, or archive state. |
+| Preconditions  | Authenticated request.                                                       |
+| Trigger        | The user requests a page with optional criteria.                             |
+| Postconditions | No state change.                                                             |
+| Endpoint       | `GET /api/technical-entry`                                                   |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário informa filtros, paginação e ordenação opcionais.
-2. Se houver projeto, o sistema confirma sua propriedade.
-3. O sistema busca somente registros do usuário.
-4. O sistema reúne as tags de cada registro.
-5. O sistema apresenta os itens e metadados da página.
+1. The user provides optional filters, pagination, and sorting.
+2. If a project is supplied, the system verifies ownership.
+3. The system searches only the user's entries.
+4. The system gathers each entry's tags.
+5. The system returns page items and metadata.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Por padrão, somente registros não arquivados são buscados.
-- Status com tipo `LEARNING` é rejeitado, pois aprendizado não possui status.
-- Projeto alheio/inexistente ou critérios inválidos interrompem a pesquisa.
+- Only unarchived entries are searched by default.
+- A status with type `LEARNING` is rejected because learning entries have no status.
+- Another user's/missing project or invalid criteria stops the search.
 
-## UC-32 — Consultar registro técnico
+## UC-32 — View technical entry
 
-| Campo          | Descrição                                     |
-| -------------- | --------------------------------------------- |
-| Ator principal | Usuário autenticado                           |
-| Interesses     | Visualizar um registro próprio com suas tags. |
-| Pré-condições  | Registro pertencente ao usuário.              |
-| Gatilho        | O usuário seleciona o registro.               |
-| Pós-condições  | Nenhuma alteração de estado.                  |
-| Endpoint       | `GET /api/technical-entry/:id`                |
+| Field          | Description                        |
+| -------------- | ---------------------------------- |
+| Primary actor  | Authenticated user                 |
+| Interests      | View an owned entry with its tags. |
+| Preconditions  | An entry belonging to the user.    |
+| Trigger        | The user selects the entry.        |
+| Postconditions | No state change.                   |
+| Endpoint       | `GET /api/technical-entry/:id`     |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário indica o registro.
-2. O sistema confirma sua propriedade.
-3. O sistema reúne as tags atribuídas.
-4. O sistema apresenta registro e tags.
+1. The user specifies the entry.
+2. The system verifies ownership.
+3. The system gathers the assigned tags.
+4. The system returns the entry and tags.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Registro inexistente ou alheio é tratado como não encontrado.
-- Tentativas possuem uma consulta própria e não são agregadas nesta resposta.
+- A missing entry or another user's entry is treated as not found.
+- Attempts have a separate query and are not included in this response.
 
-## UC-33 — Atualizar registro técnico
+## UC-33 — Update technical entry
 
-| Campo          | Descrição                                                                |
-| -------------- | ------------------------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                                      |
-| Interesses     | Corrigir conteúdo ou associação do registro preservando campos omitidos. |
-| Pré-condições  | Registro pertencente ao usuário.                                         |
-| Gatilho        | O usuário informa ao menos um campo editável.                            |
-| Pós-condições  | Título, contexto, conclusão e/ou projeto são atualizados.                |
-| Endpoint       | `PATCH /api/technical-entry/:id`                                         |
+| Field          | Description                                                           |
+| -------------- | --------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                    |
+| Interests      | Correct entry content or association while preserving omitted fields. |
+| Preconditions  | An entry belonging to the user.                                       |
+| Trigger        | The user provides at least one editable field.                        |
+| Postconditions | The title, context, conclusion, and/or project are updated.           |
+| Endpoint       | `PATCH /api/technical-entry/:id`                                      |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema localiza o registro do usuário.
-2. Se um novo projeto for informado, confirma que é próprio e não arquivado.
-3. O sistema valida e aplica apenas os campos enviados.
-4. O sistema apresenta o registro atualizado.
+1. The system finds the user's entry.
+2. If a new project is supplied, it verifies that the project is owned and unarchived.
+3. The system validates and applies only the submitted fields.
+4. The system returns the updated entry.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Corpo sem campo editável é rejeitado.
-- `projectId: null` desvincula o projeto e `conclusion: null` remove a conclusão.
-- Registro arquivado ainda pode ser atualizado na implementação atual.
-- Alterar a conclusão por este endpoint não altera `resolvedAt`.
+- A request body without an editable field is rejected.
+- `projectId: null` unlinks the project and `conclusion: null` removes the conclusion.
+- An archived entry can still be updated in the current implementation.
+- Changing the conclusion through this endpoint does not change `resolvedAt`.
 
-## UC-34 — Resolver problema técnico
+## UC-34 — Resolve technical issue
 
-| Campo          | Descrição                                                                              |
-| -------------- | -------------------------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                                    |
-| Interesses     | Registrar a conclusão de um problema aberto.                                           |
-| Pré-condições  | Registro próprio, do tipo `ISSUE`, com status `OPEN`.                                  |
-| Gatilho        | O usuário informa a conclusão.                                                         |
-| Pós-condições  | Conclusão e data de resolução são registradas atomicamente; status passa a `RESOLVED`. |
-| Endpoint       | `PATCH /api/technical-entry/:id/resolve`                                               |
+| Field          | Description                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                                           |
+| Interests      | Record the conclusion of an open issue.                                                      |
+| Preconditions  | An owned entry of type `ISSUE` with status `OPEN`.                                           |
+| Trigger        | The user provides the conclusion.                                                            |
+| Postconditions | The conclusion and resolution timestamp are saved atomically; the status becomes `RESOLVED`. |
+| Endpoint       | `PATCH /api/technical-entry/:id/resolve`                                                     |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário indica o problema e sua conclusão.
-2. O sistema confirma tipo e estado aberto.
-3. O sistema registra conclusão e instante de resolução.
-4. O sistema apresenta o problema resolvido.
+1. The user specifies the issue and its conclusion.
+2. The system verifies the type and open state.
+3. The system saves the conclusion and resolution timestamp.
+4. The system returns the resolved issue.
 
-### Fluxos alternativos
+### Alternative flows
 
-- `LEARNING`, problema já resolvido ou conclusão inválida impedem a transição.
-- Registro arquivado ainda pode ser resolvido na implementação atual.
+- `LEARNING`, an already resolved issue, or an invalid conclusion prevents the transition.
+- An archived entry can still be resolved in the current implementation.
 
-## UC-35 — Reabrir problema técnico
+## UC-35 — Reopen technical issue
 
-| Campo          | Descrição                                                                                         |
-| -------------- | ------------------------------------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                                               |
-| Interesses     | Retomar um problema preservando seu histórico anterior.                                           |
-| Pré-condições  | Registro próprio, do tipo `ISSUE`, com status `RESOLVED`.                                         |
-| Gatilho        | O usuário solicita a reabertura.                                                                  |
-| Pós-condições  | A data de resolução é removida e o status volta a `OPEN`; conclusão e tentativas são preservadas. |
-| Endpoint       | `PATCH /api/technical-entry/:id/reopen`                                                           |
+| Field          | Description                                                                                                      |
+| -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                                                               |
+| Interests      | Resume an issue while preserving its previous history.                                                           |
+| Preconditions  | An owned entry of type `ISSUE` with status `RESOLVED`.                                                           |
+| Trigger        | The user requests reopening.                                                                                     |
+| Postconditions | The resolution timestamp is removed and the status returns to `OPEN`; the conclusion and attempts are preserved. |
+| Endpoint       | `PATCH /api/technical-entry/:id/reopen`                                                                          |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma que o registro é um problema resolvido do usuário.
-2. O sistema remove a data de resolução.
-3. O sistema apresenta o problema reaberto.
+1. The system confirms that the entry is a resolved issue belonging to the user.
+2. The system removes the resolution timestamp.
+3. The system returns the reopened issue.
 
-### Fluxos alternativos
+### Alternative flows
 
-- `LEARNING` ou problema já aberto não pode ser reaberto.
-- Registro arquivado ainda pode ser reaberto na implementação atual.
+- A `LEARNING` entry or an already open issue cannot be reopened.
+- An archived entry can still be reopened in the current implementation.
 
-## UC-36 — Arquivar registro técnico
+## UC-36 — Archive technical entry
 
-| Campo          | Descrição                                              |
+| Field          | Description                                                |
+| -------------- | ---------------------------------------------------------- |
+| Primary actor  | Authenticated user                                         |
+| Interests      | Remove an entry from default searches without deleting it. |
+| Preconditions  | An entry belonging to the user.                            |
+| Trigger        | The user requests archiving.                               |
+| Postconditions | The entry receives an archive timestamp.                   |
+| Endpoint       | `PATCH /api/technical-entry/:id/archive`                   |
+
+### Main flow
+
+1. The system verifies entry ownership.
+2. The system records the archive timestamp.
+3. The system returns the resulting state.
+
+### Alternative flows
+
+- If already archived, the operation is idempotent.
+- There is no restoration use case or endpoint in the current code.
+
+## UC-37 — Delete technical entry
+
+| Field          | Description                                                                        |
+| -------------- | ---------------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                                 |
+| Interests      | Permanently remove an entry and its dependent details.                             |
+| Preconditions  | An entry belonging to the user.                                                    |
+| Trigger        | The user requests deletion.                                                        |
+| Postconditions | The entry, attempts, and tag assignments are deleted; the tags and project remain. |
+| Endpoint       | `DELETE /api/technical-entry/:id`                                                  |
+
+### Main flow
+
+1. The system verifies entry ownership.
+2. The system deletes the entry and its dependent details.
+3. The system confirms without content.
+
+### Alternative flows
+
+- An archived entry can also be deleted.
+
+## UC-38 — Assign tag to entry
+
+| Field          | Description                                              |
+| -------------- | -------------------------------------------------------- |
+| Primary actor  | Authenticated user                                       |
+| Interests      | Classify an entry using an owned tag.                    |
+| Preconditions  | The entry and tag belong to the same authenticated user. |
+| Trigger        | The user chooses a tag for the entry.                    |
+| Postconditions | The entry–tag association exists.                        |
+| Endpoint       | `POST /api/technical-entry/:entryId/tags`                |
+
+### Main flow
+
+1. The system verifies ownership of the entry and tag.
+2. The system checks the association.
+3. If absent, the system creates the association.
+4. The system returns the assigned tag.
+
+### Alternative flows
+
+- If the association already exists, the operation is idempotent and only returns the tag.
+- An archived entry still accepts tag assignments in the current implementation.
+
+## UC-39 — Remove tag from entry
+
+| Field          | Description                                                |
+| -------------- | ---------------------------------------------------------- |
+| Primary actor  | Authenticated user                                         |
+| Interests      | Remove a classification without deleting the tag or entry. |
+| Preconditions  | The entry and tag belong to the user.                      |
+| Trigger        | The user requests removal of the association.              |
+| Postconditions | The entry–tag association does not exist.                  |
+| Endpoint       | `DELETE /api/technical-entry/:entryId/tags/:tagId`         |
+
+### Main flow
+
+1. The system verifies ownership of the entry and tag.
+2. If it exists, the system removes the association.
+3. The system confirms without content.
+
+### Alternative flows
+
+- An already absent association is treated as an idempotent success.
+- An archived entry still accepts tag removal.
+
+## UC-40 — Add solution attempt
+
+| Field          | Description                                            |
 | -------------- | ------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                    |
-| Interesses     | Retirar um registro das pesquisas padrão sem apagá-lo. |
-| Pré-condições  | Registro pertencente ao usuário.                       |
-| Gatilho        | O usuário solicita o arquivamento.                     |
-| Pós-condições  | O registro recebe data de arquivamento.                |
-| Endpoint       | `PATCH /api/technical-entry/:id/archive`               |
+| Primary actor  | Authenticated user                                     |
+| Interests      | Document an experiment and its outcome for an issue.   |
+| Preconditions  | An owned, unarchived entry of type `ISSUE`.            |
+| Trigger        | The user provides a description and outcome.           |
+| Postconditions | An attempt becomes part of the entry.                  |
+| Endpoint       | `POST /api/technical-entry/:entryId/solution-attempts` |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma a propriedade do registro.
-2. O sistema registra o arquivamento.
-3. O sistema apresenta o estado resultante.
+1. The system verifies the entry's ownership, type, and archive state.
+2. The system validates the description and outcome.
+3. The system saves and returns the attempt.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Se já estiver arquivado, a operação é idempotente.
-- Não há caso de uso ou endpoint de restauração no código atual.
+- `LEARNING`, an archived entry, or invalid data prevents addition.
+- An already resolved `ISSUE` can still receive a new attempt if it is not
+  archived.
 
-## UC-37 — Excluir registro técnico
+## UC-41 — List solution attempts
 
-| Campo          | Descrição                                                                            |
-| -------------- | ------------------------------------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                                                  |
-| Interesses     | Remover definitivamente um registro e seus detalhes dependentes.                     |
-| Pré-condições  | Registro pertencente ao usuário.                                                     |
-| Gatilho        | O usuário solicita a exclusão.                                                       |
-| Pós-condições  | Registro, tentativas e atribuições de tags são excluídos; tags e projeto permanecem. |
-| Endpoint       | `DELETE /api/technical-entry/:id`                                                    |
+| Field          | Description                                                    |
+| -------------- | -------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                             |
+| Interests      | Review an entry's experiments, including filtering by outcome. |
+| Preconditions  | An entry belonging to the user.                                |
+| Trigger        | The user requests attempts with optional criteria.             |
+| Postconditions | No state change.                                               |
+| Endpoint       | `GET /api/technical-entry/:entryId/solution-attempts`          |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma a propriedade do registro.
-2. O sistema exclui o registro e seus detalhes dependentes.
-3. O sistema confirma sem conteúdo.
+1. The system verifies entry ownership.
+2. The system filters by outcome, paginates, and sorts.
+3. The system returns the page of attempts.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Registro arquivado também pode ser excluído.
+- An archived entry can still be queried.
+- If there are no matches, the page is empty.
 
-## UC-38 — Atribuir tag ao registro
+## UC-42 — Update solution attempt
 
-| Campo          | Descrição                                              |
-| -------------- | ------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                    |
-| Interesses     | Classificar um registro usando uma tag própria.        |
-| Pré-condições  | Registro e tag pertencem ao mesmo usuário autenticado. |
-| Gatilho        | O usuário escolhe a tag para o registro.               |
-| Pós-condições  | A associação registro–tag existe.                      |
-| Endpoint       | `POST /api/technical-entry/:entryId/tags`              |
+| Field          | Description                                                                 |
+| -------------- | --------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                          |
+| Interests      | Correct an attempt's description within the correct entry.                  |
+| Preconditions  | An owned entry containing the attempt.                                      |
+| Trigger        | The user provides the new description.                                      |
+| Postconditions | The description and update timestamp are changed; the outcome is preserved. |
+| Endpoint       | `PATCH /api/technical-entry/:entryId/solution-attempts/:attemptId`          |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma a propriedade do registro e da tag.
-2. O sistema verifica a associação.
-3. Se ausente, o sistema cria a associação.
-4. O sistema apresenta a tag atribuída.
+1. The system verifies entry ownership.
+2. The system confirms that the attempt belongs to the specified entry.
+3. The system validates and updates the description.
+4. The system returns the attempt.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Se a associação já existir, a operação é idempotente e apenas apresenta a tag.
-- Registro arquivado ainda aceita atribuição na implementação atual.
+- An attempt belonging to another entry is treated as not found.
+- An archived entry does not prevent this update in the current code.
+- The outcome cannot be edited through this endpoint.
 
-## UC-39 — Remover tag do registro
+## UC-43 — Remove solution attempt
 
-| Campo          | Descrição                                              |
-| -------------- | ------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                    |
-| Interesses     | Retirar uma classificação sem excluir tag ou registro. |
-| Pré-condições  | Registro e tag pertencem ao usuário.                   |
-| Gatilho        | O usuário solicita a remoção da associação.            |
-| Pós-condições  | A associação registro–tag não existe.                  |
-| Endpoint       | `DELETE /api/technical-entry/:entryId/tags/:tagId`     |
-
-### Fluxo principal
-
-1. O sistema confirma a propriedade do registro e da tag.
-2. Se existir, o sistema remove a associação.
-3. O sistema confirma sem conteúdo.
-
-### Fluxos alternativos
-
-- Associação já ausente é tratada como sucesso idempotente.
-- Registro arquivado ainda aceita remoção de tag.
-
-## UC-40 — Adicionar tentativa de solução
-
-| Campo          | Descrição                                                 |
-| -------------- | --------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                       |
-| Interesses     | Documentar um experimento e seu resultado em um problema. |
-| Pré-condições  | Registro próprio, do tipo `ISSUE` e não arquivado.        |
-| Gatilho        | O usuário informa descrição e resultado.                  |
-| Pós-condições  | Uma tentativa passa a compor o registro.                  |
-| Endpoint       | `POST /api/technical-entry/:entryId/solution-attempts`    |
-
-### Fluxo principal
-
-1. O sistema confirma propriedade, tipo e arquivamento do registro.
-2. O sistema valida descrição e resultado.
-3. O sistema registra e apresenta a tentativa.
-
-### Fluxos alternativos
-
-- `LEARNING`, registro arquivado ou dados inválidos impedem a inclusão.
-- Um `ISSUE` já resolvido ainda pode receber nova tentativa se não estiver
-  arquivado.
-
-## UC-41 — Listar tentativas de solução
-
-| Campo          | Descrição                                                     |
-| -------------- | ------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                           |
-| Interesses     | Revisar experimentos de um registro, inclusive por resultado. |
-| Pré-condições  | Registro pertencente ao usuário.                              |
-| Gatilho        | O usuário solicita as tentativas com critérios opcionais.     |
-| Pós-condições  | Nenhuma alteração de estado.                                  |
-| Endpoint       | `GET /api/technical-entry/:entryId/solution-attempts`         |
-
-### Fluxo principal
-
-1. O sistema confirma a propriedade do registro.
-2. O sistema filtra por resultado, pagina e ordena.
-3. O sistema apresenta a página de tentativas.
-
-### Fluxos alternativos
-
-- Registro arquivado continua consultável.
-- Sem correspondências, a página é vazia.
-
-## UC-42 — Atualizar tentativa de solução
-
-| Campo          | Descrição                                                              |
-| -------------- | ---------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                    |
-| Interesses     | Corrigir a descrição de uma tentativa no registro correto.             |
-| Pré-condições  | Registro próprio contendo a tentativa.                                 |
-| Gatilho        | O usuário informa a nova descrição.                                    |
-| Pós-condições  | Descrição e data de atualização são alteradas; resultado é preservado. |
-| Endpoint       | `PATCH /api/technical-entry/:entryId/solution-attempts/:attemptId`     |
-
-### Fluxo principal
-
-1. O sistema confirma a propriedade do registro.
-2. O sistema confirma que a tentativa pertence ao registro indicado.
-3. O sistema valida e atualiza a descrição.
-4. O sistema apresenta a tentativa.
-
-### Fluxos alternativos
-
-- Tentativa de outro registro é tratada como não encontrada.
-- Registro arquivado não impede esta atualização no código atual.
-- O resultado não é editável por esse endpoint.
-
-## UC-43 — Remover tentativa de solução
-
-| Campo          | Descrição                                                           |
+| Field          | Description                                                         |
 | -------------- | ------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                 |
-| Interesses     | Retirar uma tentativa registrada no problema correto.               |
-| Pré-condições  | Registro próprio contendo a tentativa.                              |
-| Gatilho        | O usuário solicita a remoção.                                       |
-| Pós-condições  | A tentativa é excluída; o registro permanece.                       |
+| Primary actor  | Authenticated user                                                  |
+| Interests      | Remove an attempt recorded for the correct issue.                   |
+| Preconditions  | An owned entry containing the attempt.                              |
+| Trigger        | The user requests removal.                                          |
+| Postconditions | The attempt is deleted; the entry remains.                          |
 | Endpoint       | `DELETE /api/technical-entry/:entryId/solution-attempts/:attemptId` |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma a propriedade do registro e o vínculo da tentativa.
-2. O sistema exclui a tentativa.
-3. O sistema confirma sem conteúdo.
+1. The system verifies entry ownership and the attempt's association.
+2. The system deletes the attempt.
+3. The system confirms without content.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Tentativa fora do registro é tratada como não encontrada.
-- Registro arquivado não impede esta remoção no código atual.
+- An attempt outside the entry is treated as not found.
+- An archived entry does not prevent this removal in the current code.

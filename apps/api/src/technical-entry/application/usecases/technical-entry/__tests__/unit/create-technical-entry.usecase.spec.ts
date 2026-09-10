@@ -45,7 +45,7 @@ describe('CreateTechnicalEntryUseCase', () => {
       await useCase.execute({
         userId: USER_ID,
         title: 'Entry title',
-        context: 'Contexto da entrada',
+        context: 'Entry context',
         type: TechnicalEntryType.ISSUE,
         projectId,
       });
@@ -63,7 +63,7 @@ describe('CreateTechnicalEntryUseCase', () => {
     await useCase.execute({
       userId: USER_ID,
       title: 'Entry title',
-      context: 'Contexto da entrada',
+      context: 'Entry context',
       type: TechnicalEntryType.ISSUE,
       projectId: PROJECT_ID,
     });
@@ -79,7 +79,7 @@ describe('CreateTechnicalEntryUseCase', () => {
     await useCase.execute({
       userId: USER_ID,
       title: 'Entry title',
-      context: 'Contexto da entrada',
+      context: 'Entry context',
       type: TechnicalEntryType.ISSUE,
     });
 
@@ -93,7 +93,7 @@ describe('CreateTechnicalEntryUseCase', () => {
       useCase.execute({
         userId: USER_ID,
         title: 'Entry title',
-        context: 'Contexto da entrada',
+        context: 'Entry context',
         type: TechnicalEntryType.ISSUE,
         projectId: PROJECT_ID,
       }),
@@ -110,7 +110,7 @@ describe('CreateTechnicalEntryUseCase', () => {
       useCase.execute({
         userId: USER_ID,
         title: 'Entry title',
-        context: 'Contexto da entrada',
+        context: 'Entry context',
         type: TechnicalEntryType.ISSUE,
         projectId: PROJECT_ID,
       }),

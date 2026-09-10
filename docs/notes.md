@@ -27,11 +27,11 @@ important remote-data frontend cycle:
 ```text
 Form
   → local validation
-  → mutation HTTP
+  → HTTP mutation
   → API response
   → cache invalidation
   → new list query
-  → interface atualizada
+  → updated interface
 ```
 
 Afterward, you will have a useful feature and a foundation reusable in
@@ -464,7 +464,7 @@ The form flow is:
 Input controlled by React Hook Form
   → zodResolver
   → if valid, onSubmit receives typed data
-  → mutation chama POST /api/project
+  → mutation calls POST /api/project
 ```
 
 Consider normalizing `name` with `trim()` before submission. This improves
@@ -578,10 +578,10 @@ The complete flow should be:
 User fills in name and description
   → ProjectForm validates with Zod
   → onSubmit passes valid data to the page
-  → useCreateProject executa POST
+  → useCreateProject executes POST
   → API returns the created project
-  → hook invalida ['projects', 'lists']
-  → useProjects refaz GET
+  → hook invalidates ['projects', 'lists']
+  → useProjects repeats GET
   → list shows the new project
 ```
 
@@ -714,7 +714,7 @@ API contract
   → type
   → HTTP function
   → query or mutation
-  → componente
+  → component
   → asynchronous states
   → cache
   → manual validation

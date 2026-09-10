@@ -348,7 +348,7 @@ HTTP exception handling still needed implementation. An exception filter or anot
 
 Without this handling, `error.message` is only `Entity validation error`, and details remain available solely in `error.error` to code catching the exception.
 
-## 8. Datas recebidas pelo HTTP
+## 8. Dates received over HTTP
 
 User rules use `@IsDate()` for `createdAt` and `updatedAt`:
 

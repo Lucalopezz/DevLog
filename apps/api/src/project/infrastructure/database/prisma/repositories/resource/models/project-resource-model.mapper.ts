@@ -20,7 +20,7 @@ export class ProjectResourceModelMapper {
     try {
       return new ProjectResourceEntity(data, model.id);
     } catch {
-      throw new ValidationError('An entity not be loaded');
+      throw new ValidationError('An entity could not be loaded');
     }
   }
 

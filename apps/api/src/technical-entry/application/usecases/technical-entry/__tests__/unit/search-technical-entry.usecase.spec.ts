@@ -162,12 +162,12 @@ describe('SearchTechnicalEntryUseCase', () => {
     });
   });
 
-  it('inclui as tags associadas nas entradas', async () => {
+  it('includes associated tags in entries', async () => {
     const entry = new TechnicalEntryEntity(
       {
         userId: USER_ID,
         title: 'Tags in search',
-        context: 'Carregando tags associadas',
+        context: 'Loading associated tags',
         type: TechnicalEntryType.LEARNING,
         createdAt: new Date('2026-08-01T00:00:00.000Z'),
         updatedAt: new Date('2026-08-01T00:00:00.000Z'),

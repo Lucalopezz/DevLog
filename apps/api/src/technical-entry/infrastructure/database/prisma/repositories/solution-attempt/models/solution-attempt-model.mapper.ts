@@ -19,7 +19,7 @@ export class SolutionAttemptModelMapper {
     try {
       return new SolutionAttemptEntity(data, model.id);
     } catch {
-      throw new ValidationError('An entity not be loaded');
+      throw new ValidationError('An entity could not be loaded');
     }
   }
   static toPersistence(entity: SolutionAttemptEntity) {

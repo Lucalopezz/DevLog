@@ -81,11 +81,11 @@ describe('Project use cases', () => {
     const output = await useCase.execute({
       id: PROJECT_ID,
       userId: USER_ID,
-      name: 'DevLog atualizado',
+      name: 'Updated DevLog',
     });
 
     expect(repository.update.mock.calls[0]?.[0]).toBe(project);
-    expect(output.name).toBe('DevLog atualizado');
+    expect(output.name).toBe('Updated DevLog');
     expect(output.status).toBe(ProjectStatusEnum.ACTIVE);
   });
 
@@ -97,7 +97,7 @@ describe('Project use cases', () => {
       useCase.execute({
         id: PROJECT_ID,
         userId: USER_ID,
-        name: 'Tentativa indevida',
+        name: 'Unauthorized attempt',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 
@@ -114,7 +114,7 @@ describe('Project use cases', () => {
       useCase.execute({
         id: PROJECT_ID,
         userId: USER_ID,
-        name: 'Tentativa indevida',
+        name: 'Unauthorized attempt',
       }),
     ).rejects.toBeInstanceOf(EntityValidationError);
 
@@ -124,7 +124,7 @@ describe('Project use cases', () => {
   it('updates and clears optional fields through the main use case', async () => {
     const project = makeProject();
     project.update({
-      description: 'Description atual',
+      description: 'Current description',
       localPath: '/workspace/devlog',
     });
     const { repository } = makeRepository(project);

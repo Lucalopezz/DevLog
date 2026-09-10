@@ -18,7 +18,7 @@ function makeEntry(userId = USER_ID) {
     {
       userId,
       title: 'Technical entry',
-      context: 'Contexto da entrada',
+      context: 'Entry context',
       type: TechnicalEntryType.LEARNING,
     },
     ENTRY_ID,
@@ -90,7 +90,7 @@ describe('Tag and entry relationship use cases', () => {
 
     it.each([
       [
-        'entrada',
+        'entry',
         jest.fn().mockResolvedValue(null),
         jest.fn().mockResolvedValue(makeTag()),
       ],

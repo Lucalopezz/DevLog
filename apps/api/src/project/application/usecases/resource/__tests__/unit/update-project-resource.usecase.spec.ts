@@ -32,7 +32,7 @@ function makeResource(projectId = PROJECT_ID): ProjectResourceEntity {
   return new ProjectResourceEntity(
     {
       projectId,
-      label: 'Repository principal',
+      label: 'Main repository',
       url: 'https://github.com/example/devlog',
       type: ProjectResourceType.REPOSITORY,
     },
@@ -73,7 +73,7 @@ describe('UpdateProjectResourceUseCase', () => {
       userId: USER_ID,
       projectId: PROJECT_ID,
       resourceId: RESOURCE_ID,
-      label: 'Documentation da API',
+      label: 'API documentation',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
@@ -82,7 +82,7 @@ describe('UpdateProjectResourceUseCase', () => {
     expect(output).toMatchObject({
       id: RESOURCE_ID,
       projectId: PROJECT_ID,
-      label: 'Documentation da API',
+      label: 'API documentation',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
@@ -127,7 +127,7 @@ describe('UpdateProjectResourceUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         resourceId: RESOURCE_ID,
-        label: 'Resource indevido',
+        label: 'Unauthorized resource',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 
@@ -146,7 +146,7 @@ describe('UpdateProjectResourceUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         resourceId: RESOURCE_ID,
-        label: 'Resource indevido',
+        label: 'Unauthorized resource',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 

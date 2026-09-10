@@ -27,7 +27,7 @@ function makeCommand(projectId = PROJECT_ID): ProjectCommandEntity {
   return new ProjectCommandEntity(
     {
       projectId,
-      title: 'Subir ambiente local',
+      title: 'Start local environment',
       command: 'docker compose up -d',
     },
     COMMAND_ID,

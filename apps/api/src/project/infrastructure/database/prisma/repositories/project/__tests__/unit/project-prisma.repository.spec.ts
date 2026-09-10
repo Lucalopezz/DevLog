@@ -99,13 +99,13 @@ describe('ProjectPrismaRepository', () => {
   });
 
   it.each([
-    ['todos', () => repository.findAll(), undefined],
+    ['all', () => repository.findAll(), undefined],
     [
       'belonging to the owner',
       () => repository.findByOwnerId(USER_ID),
       { userId: USER_ID },
     ],
-  ])('lista %s os projetos convertidos', async (_case, execute, where) => {
+  ])('lists %s mapped projects', async (_case, execute, where) => {
     findMany.mockResolvedValue([makeModel()]);
 
     await expect(execute()).resolves.toEqual([

@@ -146,13 +146,13 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   reopen(): void {
     if (this.type !== TechnicalEntryType.ISSUE) {
       throw new EntityValidationError({
-        type: ['Somente entradas do tipo ISSUE podem ser reabertas'],
+        type: ['Only ISSUE entries can be reopened'],
       });
     }
 
     if (!this.resolvedAt) {
       throw new EntityValidationError({
-        resolvedAt: ['Somente entradas resolvidas podem ser reabertas'],
+        resolvedAt: ['Only resolved entries can be reopened'],
       });
     }
 
@@ -280,7 +280,7 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
       props.resolvedAt !== undefined
     ) {
       throw new EntityValidationError({
-        resolvedAt: ['Somente entradas do tipo ISSUE podem ser resolvidas'],
+        resolvedAt: ['Only ISSUE entries can be resolved'],
       });
     }
 

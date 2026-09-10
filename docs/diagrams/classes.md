@@ -165,24 +165,24 @@ Entity <|-- TechnicalEntry
 Entity <|-- SolutionAttempt
 Entity <|-- Tag
 
-User "1" -- "0..*" Project : possui
-User "1" -- "0..*" TechnicalEntry : possui
-User "1" -- "0..*" Tag : possui
+User "1" -- "0..*" Project : owns
+User "1" -- "0..*" TechnicalEntry : owns
+User "1" -- "0..*" Tag : owns
 
 Project "1" *-- "0..*" ProjectTechnology : composes
 Project "1" *-- "0..*" ProjectCommand : composes
 Project "1" *-- "0..*" ProjectResource : composes
-Project "0..1" <-- "0..*" TechnicalEntry : contextualiza
+Project "0..1" <-- "0..*" TechnicalEntry : provides context
 TechnicalEntry "1" *-- "0..*" SolutionAttempt : composes
 
-TechnicalEntry "1" -- "0..*" TechnicalEntryTag : participa
-Tag "1" -- "0..*" TechnicalEntryTag : participa
+TechnicalEntry "1" -- "0..*" TechnicalEntryTag : participates
+Tag "1" -- "0..*" TechnicalEntryTag : participates
 Tag ..> TagName : normalizes with
 
 Project --> ProjectStatus
 ProjectResource --> ProjectResourceType
 TechnicalEntry --> TechnicalEntryType
-TechnicalEntry ..> TechnicalEntryStatus : deriva
+TechnicalEntry ..> TechnicalEntryStatus : derives
 SolutionAttempt --> SolutionAttemptResult
 ```
 
@@ -261,17 +261,17 @@ class BcryptjsHashProvider {
 }
 
 Controller --> AuthGuard : protects route
-Controller --> UseCase : executa
+Controller --> UseCase : executes
 Controller --> Presenter : formats output
 UseCase --> Repository : depends on abstraction
-UseCase --> DomainEntity : coordena
+UseCase --> DomainEntity : coordinates
 PrismaRepository ..|> Repository
 PrismaRepository --> PrismaService
 JwtTokenService ..|> TokenProvider
 BcryptjsHashProvider ..|> HashProvider
 AuthGuard --> TokenProvider
 UseCase --> TokenProvider : authentication
-UseCase --> HashProvider : credenciais
+UseCase --> HashProvider : credentials
 ```
 
 The central principle is **dependency inversion**: the application knows
@@ -285,4 +285,4 @@ The domain and API use `ACTIVE`, `INACTIVE`, and `FINISHED`. The
 Prisma/PostgreSQL enum uses `ACTIVE`, `PAUSED`, and `FINISHED`.
 `ProjectModelMapper` translates `INACTIVE` ↔ `PAUSED`; this is not
 inheritance or two simultaneous states, but a translation boundary between
-modelos.
+models.

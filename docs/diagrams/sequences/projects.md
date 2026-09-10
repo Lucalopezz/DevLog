@@ -40,8 +40,8 @@ sequenceDiagram
 
     alt UC-11 search projects
         UserActor->>C: GET /api/project?filters
-        C->>UC: search(userId, filtros)
-        UC->>PRepo: search(filtro inclui userId)
+        C->>UC: search(userId, filters)
+        UC->>PRepo: search(filter includes userId)
         PRepo-->>UC: project page
         UC-->>UserActor: page
     else UC-12 get project
@@ -57,12 +57,12 @@ sequenceDiagram
         end
     else UC-13 project entries
         UserActor->>C: GET /api/project/:id/technical-entries
-        C->>UC: searchEntries(projectId, userId, filtros)
+        C->>UC: searchEntries(projectId, userId, filters)
         UC->>PRepo: findById(projectId)
         alt missing project or belongs to another user
             UC-->>UserActor: 404 Not Found
         else own project
-            UC->>ERepo: search(userId, projectId, filtros)
+            UC->>ERepo: search(userId, projectId, filters)
             ERepo-->>UC: entry page
             UC->>LinkRepo: findTags(entry IDs, userId)
             LinkRepo-->>UC: tags grouped by entry
@@ -84,7 +84,7 @@ sequenceDiagram
     participant DB as Database
 
     UserActor->>C: PATCH or DELETE /api/project/:id
-    C->>UC: execute(id, userId, dados?)
+    C->>UC: execute(id, userId, data?)
     UC->>PRepo: findById(id)
     alt missing or belongs to another user
         UC-->>UserActor: 404 Not Found
@@ -182,17 +182,17 @@ sequenceDiagram
     participant Command as ProjectCommandEntity
 
     UserActor->>C: request to /api/project/:projectId/commands
-    C->>UC: execute(dados, projectId, userId)
+    C->>UC: execute(data, projectId, userId)
     UC->>PRepo: findById(projectId)
     alt missing project or belongs to another user
         UC-->>UserActor: 404 Not Found
     else UC-20 add
-        UC->>Project: addCommand(dados)
+        UC->>Project: addCommand(data)
         Project-->>UC: command or error if archived
         UC->>CRepo: insert(command)
         UC-->>UserActor: command created
-    else UC-21 pesquisar
-        UC->>CRepo: search(projectId, filtros)
+    else UC-21 search
+        UC->>CRepo: search(projectId, filters)
         CRepo-->>UC: page
         UC-->>UserActor: command page
     else UC-22 get
@@ -238,7 +238,7 @@ sequenceDiagram
     participant Resource as ProjectResourceEntity
 
     UserActor->>C: request to /api/project/:projectId/resources
-    C->>UC: execute(dados, projectId, userId)
+    C->>UC: execute(data, projectId, userId)
     UC->>PRepo: findById(projectId)
     alt missing project or belongs to another user
         UC-->>UserActor: 404 Not Found
@@ -247,8 +247,8 @@ sequenceDiagram
         Project-->>UC: resource or error if archived
         UC->>RRepo: insert(resource)
         UC-->>UserActor: resource created
-    else UC-26 pesquisar
-        UC->>RRepo: search(projectId, filtros)
+    else UC-26 search
+        UC->>RRepo: search(projectId, filters)
         RRepo-->>UC: page
         UC-->>UserActor: resource page
     else UC-27 get

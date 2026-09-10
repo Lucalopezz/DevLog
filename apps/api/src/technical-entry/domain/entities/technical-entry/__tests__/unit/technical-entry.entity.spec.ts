@@ -34,9 +34,9 @@ describe('TechnicalEntryEntity', () => {
     jest.setSystemTime(concludedAt);
     const entry = new TechnicalEntryEntity(makeProps());
 
-    entry.conclude('A porta foi liberada');
+    entry.conclude('The port was released');
 
-    expect(entry.conclusion).toBe('A porta foi liberada');
+    expect(entry.conclusion).toBe('The port was released');
     expect(entry.resolvedAt).toEqual(concludedAt);
     expect(entry.updatedAt).toEqual(concludedAt);
     expect(entry.status).toBe('RESOLVED');
@@ -46,11 +46,11 @@ describe('TechnicalEntryEntity', () => {
     const entry = new TechnicalEntryEntity(
       makeProps({
         type: TechnicalEntryType.LEARNING,
-        conclusion: 'Resumo do aprendizado',
+        conclusion: 'Learning summary',
       }),
     );
 
-    expect(() => entry.conclude('Resumo do aprendizado')).toThrow(
+    expect(() => entry.conclude('Learning summary')).toThrow(
       EntityValidationError,
     );
     expect(entry.resolvedAt).toBeUndefined();
@@ -77,7 +77,7 @@ describe('TechnicalEntryEntity', () => {
 
     entry.update({
       title: 'Updated title',
-      context: 'Contexto atualizado',
+      context: 'Updated context',
     });
 
     expect(entry.type).toBe(TechnicalEntryType.ISSUE);
@@ -124,7 +124,7 @@ describe('TechnicalEntryEntity', () => {
   it('does not clear the conclusion of a resolved entry', () => {
     const entry = new TechnicalEntryEntity(
       makeProps({
-        conclusion: 'A porta foi liberada',
+        conclusion: 'The port was released',
         resolvedAt: new Date('2026-08-02T12:00:00.000Z'),
       }),
     );
@@ -132,7 +132,7 @@ describe('TechnicalEntryEntity', () => {
     expect(() => entry.update({ conclusion: null })).toThrow(
       EntityValidationError,
     );
-    expect(entry.conclusion).toBe('A porta foi liberada');
+    expect(entry.conclusion).toBe('The port was released');
   });
 
   it('rejects a resolved state without a conclusion on creation', () => {
@@ -159,7 +159,7 @@ describe('TechnicalEntryEntity', () => {
     const entry = new TechnicalEntryEntity(
       makeProps({
         projectId: PROJECT_ID,
-        conclusion: 'A porta foi liberada',
+        conclusion: 'The port was released',
         resolvedAt: new Date('2026-08-02T10:00:00.000Z'),
       }),
     );
@@ -180,7 +180,7 @@ describe('TechnicalEntryEntity', () => {
 
     expect(() =>
       entry.addSolutionAttempt(
-        'Reiniciar o processo',
+        'Restart the process',
         SolutionAttemptResult.FAILED,
       ),
     ).toThrow(EntityValidationError);

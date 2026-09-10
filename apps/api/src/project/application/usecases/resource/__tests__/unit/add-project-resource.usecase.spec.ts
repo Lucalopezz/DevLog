@@ -46,7 +46,7 @@ describe('AddProjectResourceUseCase', () => {
     const output = await useCase.execute({
       userId: USER_ID,
       projectId: PROJECT_ID,
-      label: 'Documentation da API',
+      label: 'API documentation',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
@@ -54,13 +54,13 @@ describe('AddProjectResourceUseCase', () => {
     expect(projectResourceRepository.insert.mock.calls).toHaveLength(1);
     expect(projectResourceRepository.insert.mock.calls[0]?.[0]).toMatchObject({
       projectId: PROJECT_ID,
-      label: 'Documentation da API',
+      label: 'API documentation',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
     expect(output).toMatchObject({
       projectId: PROJECT_ID,
-      label: 'Documentation da API',
+      label: 'API documentation',
       type: ProjectResourceType.DOCUMENTATION,
     });
   });
@@ -102,7 +102,7 @@ describe('AddProjectResourceUseCase', () => {
       useCase.execute({
         userId: USER_ID,
         projectId: PROJECT_ID,
-        label: 'Resource indevido',
+        label: 'Unauthorized resource',
         url: 'https://example.com/unsafe',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);

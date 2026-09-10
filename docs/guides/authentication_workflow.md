@@ -2,7 +2,7 @@
 
 This document describes DevLog API authentication using:
 
-- JWT como credencial;
+- JWT as a credential;
 - An HttpOnly cookie to transport and store the JWT in the browser;
 - AuthGuard to protect endpoints;
 - request.user to carry authenticated identity;
@@ -56,7 +56,7 @@ These pieces already existed:
 
 - @nestjs/jwt in apps/api/package.json;
 - cookie-parser and its types;
-- HashProvider usando bcryptjs;
+- HashProvider using bcryptjs;
 - UserRepository.findByEmail();
 - JWT_SECRET and JWT_EXPIRES_IN_SECONDS partially anticipated in EnvConfigService;
 - GET /users/me, without complete authentication.
@@ -131,7 +131,7 @@ Generate a real secret locally with an appropriate generator. Do not use the exa
 
 ### 4.2 Fix the configuration name
 
-Renomeie:
+Rename:
 
 to:
 
@@ -189,7 +189,7 @@ Continue only when configuration and the project compile again.
 
 ### 5.1 Authenticated user type
 
-Crie src/auth/types/authenticated-user.ts:
+Create src/auth/types/authenticated-user.ts:
 
 ~~~ts
 export type AuthenticatedUser = {
@@ -201,7 +201,7 @@ Initially, the JWT only needs the user ID. Do not put passwords, hashes, sensiti
 
 ### 5.2 Token provider contract
 
-Crie src/auth/application/providers/token-provider.ts:
+Create src/auth/application/providers/token-provider.ts:
 
 ~~~ts
 export type AccessTokenPayload = {
@@ -218,7 +218,7 @@ The use case depends on this contract rather than directly on JwtService. This a
 
 ### 5.3 Login DTO
 
-Crie src/auth/application/dto/authenticate-user.input.ts:
+Create src/auth/application/dto/authenticate-user.input.ts:
 
 ~~~ts
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
@@ -238,7 +238,7 @@ Login must return the same message for an unknown email and an incorrect passwor
 
 ### 5.4 Cookie constant
 
-Crie src/auth/infrastructure/constants/auth.constants.ts:
+Create src/auth/infrastructure/constants/auth.constants.ts:
 
 ~~~ts
 export const ACCESS_TOKEN_COOKIE = 'devlog_access_token';
@@ -250,7 +250,7 @@ A constant prevents differences between login, guard, and logout.
 
 ### 6.1 Implement the JWT adapter
 
-Crie src/auth/infrastructure/providers/jwt-token.service.ts:
+Create src/auth/infrastructure/providers/jwt-token.service.ts:
 
 ~~~ts
 import { Injectable } from '@nestjs/common';
@@ -292,7 +292,7 @@ Keep the same tokens used in inject. A future alternative is exporting a FindUse
 
 ### 6.3 Create AuthModule
 
-Crie src/auth/infrastructure/auth.module.ts:
+Create src/auth/infrastructure/auth.module.ts:
 
 ~~~ts
 import { Module } from '@nestjs/common';
@@ -339,7 +339,7 @@ The TokenProvider token must match the use case inject token exactly. A constant
 
 ### 6.4 Import AuthModule into the application
 
-Atualize src/app.module.ts:
+Update src/app.module.ts:
 
 ~~~ts
 import { AuthModule } from './auth/infrastructure/auth.module';
@@ -359,7 +359,7 @@ After this phase, the application should start with JWT_SECRET configured, even 
 
 ### Phase 2 checkpoint
 
-Verifique:
+Check:
 
 ~~~bash
 pnpm --filter api build
@@ -370,7 +370,7 @@ If Nest reports a dependency error, first check exports and inject tokens. A pro
 
 ## 7. Phase 3 — implement the authentication use case
 
-Crie src/auth/application/usecases/authenticate-user.usecase.ts:
+Create src/auth/application/usecases/authenticate-user.usecase.ts:
 
 ~~~ts
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
@@ -447,7 +447,7 @@ If the entity continues to call the hash password, document that it contains a h
 
 ### 8.1 Register cookies and CORS during bootstrap
 
-Atualize src/main.ts:
+Update src/main.ts:
 
 ~~~ts
 import cookieParser from 'cookie-parser';
@@ -482,7 +482,7 @@ EnvConfigService may centralize port and CORS configuration. Never combine origi
 
 ### 8.2 Create the controller
 
-Crie src/auth/infrastructure/auth.controller.ts:
+Create src/auth/infrastructure/auth.controller.ts:
 
 ~~~ts
 import {
@@ -571,7 +571,7 @@ In that scenario, add CSRF protection before enabling write operations.
 
 ### 9.1 Create the guard
 
-Crie src/auth/infrastructure/auth.guard.ts:
+Create src/auth/infrastructure/auth.guard.ts:
 
 ~~~ts
 import {
@@ -608,7 +608,7 @@ export class AuthGuard implements CanActivate {
       const payload = await this.tokenProvider.verify(token);
 
       if (!payload.sub) {
-        throw new Error('Token sem subject');
+        throw new Error('Token without a subject');
       }
 
       request.user = { id: payload.sub };
@@ -624,7 +624,7 @@ The guard handles authentication only. It must not decide whether a user can edi
 
 ### 9.2 Create the CurrentUser decorator
 
-Crie src/auth/infrastructure/decorators/current-user.decorator.ts:
+Create src/auth/infrastructure/decorators/current-user.decorator.ts:
 
 ~~~ts
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
@@ -640,7 +640,7 @@ export const CurrentUser = createParamDecorator(
 
 On a protected route, the guard must run before the controller.
 
-## 10. Fase 6 — proteger endpoints existentes
+## 10. Phase 6 — protect existing endpoints
 
 In UserController:
 
@@ -857,10 +857,10 @@ Keep this separate from the first implementation. First make login, guard, me, l
 5. Export UserRepository and HashProvider from UserModule.
 6. Create and register JwtTokenService.
 7. Create AuthModule and import it into AppModule.
-8. Implementar AuthenticateUserUseCase.
+8. Implement AuthenticateUserUseCase.
 9. Implement POST /auth/login and POST /auth/logout.
 10. Implement AuthGuard and CurrentUser.
-11. Proteger GET /users/me.
+11. Protect GET /users/me.
 12. Protect user updates and validate ownership.
 13. Integrate credentials: 'include' in the frontend.
 14. Create unit tests.
@@ -884,7 +884,7 @@ Valide manualmente:
 ~~~text
 POST /auth/login with valid credentials -> 200 + Set-Cookie
 POST /auth/login with invalid password  -> 401
-GET  /users/me sem cookie                 -> 401
+GET  /users/me without a cookie                 -> 401
 GET  /users/me with cookie              -> 200
 POST /auth/logout                         -> cookie expirado
 ~~~

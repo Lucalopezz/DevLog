@@ -45,7 +45,7 @@ describe('AddProjectCommandUseCase', () => {
     const output = await useCase.execute({
       userId: USER_ID,
       projectId: PROJECT_ID,
-      title: 'Subir ambiente local',
+      title: 'Start local environment',
       command: 'docker compose up -d',
       description: 'Start project services',
       executionOrder: 1,
@@ -54,14 +54,14 @@ describe('AddProjectCommandUseCase', () => {
     expect(projectCommandRepository.insert.mock.calls).toHaveLength(1);
     expect(projectCommandRepository.insert.mock.calls[0]?.[0]).toMatchObject({
       projectId: PROJECT_ID,
-      title: 'Subir ambiente local',
+      title: 'Start local environment',
       command: 'docker compose up -d',
       description: 'Start project services',
       executionOrder: 1,
     });
     expect(output).toMatchObject({
       projectId: PROJECT_ID,
-      title: 'Subir ambiente local',
+      title: 'Start local environment',
       command: 'docker compose up -d',
     });
     expect(output).not.toHaveProperty('name');
@@ -76,7 +76,7 @@ describe('AddProjectCommandUseCase', () => {
       useCase.execute({
         userId: USER_ID,
         projectId: PROJECT_ID,
-        title: 'Command indevido',
+        title: 'Unauthorized command',
         command: 'echo unsafe',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);

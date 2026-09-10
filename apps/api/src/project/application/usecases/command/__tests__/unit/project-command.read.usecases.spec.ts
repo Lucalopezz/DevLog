@@ -31,7 +31,7 @@ function makeCommand(projectId = PROJECT_ID): ProjectCommandEntity {
   return new ProjectCommandEntity(
     {
       projectId,
-      title: 'Subir ambiente local',
+      title: 'Start local environment',
       command: 'docker compose up -d',
       description: 'Start project services',
       executionOrder: 0,
@@ -56,7 +56,7 @@ describe('SearchProjectCommandUseCase', () => {
           perPage: 10,
           sort: 'title',
           sortDir: 'asc',
-          filter: { projectId: PROJECT_ID, title: 'ambiente' },
+          filter: { projectId: PROJECT_ID, title: 'environment' },
         }),
       ),
     } as unknown as jest.Mocked<ProjectCommandRepository>;
@@ -72,7 +72,7 @@ describe('SearchProjectCommandUseCase', () => {
       perPage: 10,
       sort: 'title',
       sortDir: 'asc',
-      title: 'ambiente',
+      title: 'environment',
       command: 'docker',
       description: 'services',
     });
@@ -85,7 +85,7 @@ describe('SearchProjectCommandUseCase', () => {
         sortDir: 'asc',
         filter: {
           projectId: PROJECT_ID,
-          title: 'ambiente',
+          title: 'environment',
           command: 'docker',
           description: 'services',
         },
@@ -96,7 +96,7 @@ describe('SearchProjectCommandUseCase', () => {
         expect.objectContaining({
           id: COMMAND_ID,
           projectId: PROJECT_ID,
-          title: 'Subir ambiente local',
+          title: 'Start local environment',
         }),
       ],
       total: 1,
@@ -159,7 +159,7 @@ describe('GetProjectCommandUseCase', () => {
     expect(output).toMatchObject({
       id: COMMAND_ID,
       projectId: PROJECT_ID,
-      title: 'Subir ambiente local',
+      title: 'Start local environment',
     });
   });
 

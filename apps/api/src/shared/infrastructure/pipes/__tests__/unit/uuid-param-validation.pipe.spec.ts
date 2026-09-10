@@ -52,7 +52,7 @@ describe('UuidParamValidationPipe', () => {
         metatype: String,
       };
 
-      await expect(pipe.transform('texto', metadata)).resolves.toBe('texto');
+      await expect(pipe.transform('text', metadata)).resolves.toBe('text');
     },
   );
 });

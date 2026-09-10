@@ -97,7 +97,7 @@ If a block like this exists:
 }
 ```
 
-ele pode ser removido.
+it can be removed.
 
 Besides duplicating configuration, its `version` value would be incorrect; this field requires only:
 

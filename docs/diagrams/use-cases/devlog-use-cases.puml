@@ -8,7 +8,7 @@ actor Guest
 actor "Authenticated user" as AuthUser
 Guest <|-- AuthUser
 
-rectangle "API DevLog" {
+rectangle "DevLog API" {
   package "Account and authentication" {
     usecase "Register user" as UC01
     usecase "Authenticate user" as UC02

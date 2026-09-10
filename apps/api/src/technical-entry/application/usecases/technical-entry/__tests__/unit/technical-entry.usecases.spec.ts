@@ -77,7 +77,7 @@ function makeEntry(
       userId: overrides.userId ?? USER_ID,
       projectId: overrides.projectId,
       title: overrides.title ?? 'Entry title',
-      context: overrides.context ?? 'Contexto da entrada',
+      context: overrides.context ?? 'Entry context',
       conclusion: overrides.conclusion,
       type: overrides.type ?? TechnicalEntryType.ISSUE,
       resolvedAt: overrides.resolvedAt,
@@ -154,14 +154,14 @@ describe('Technical entry use cases', () => {
         id: entry.id,
         userId: USER_ID,
         title: 'New title',
-        context: 'Novo contexto',
+        context: 'New context',
         conclusion: 'New conclusion',
         projectId: OTHER_PROJECT_ID,
       });
 
       expect(output).toMatchObject({
         title: 'New title',
-        context: 'Novo contexto',
+        context: 'New context',
         conclusion: 'New conclusion',
         projectId: OTHER_PROJECT_ID,
         type: TechnicalEntryType.ISSUE,
@@ -218,7 +218,7 @@ describe('Technical entry use cases', () => {
         useCase.execute({
           id: entry.id,
           userId: USER_ID,
-          title: 'Tentativa indevida',
+          title: 'Unauthorized attempt',
         }),
       ).rejects.toBeInstanceOf(NotFoundException);
     });

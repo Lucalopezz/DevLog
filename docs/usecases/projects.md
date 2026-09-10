@@ -1,447 +1,447 @@
-# Casos de uso — projetos e seus detalhes
+# Use cases — projects and their details
 
-Os casos UC-10 a UC-29 são exclusivos do usuário autenticado. Sempre que um
-projeto ou detalhe não existir, não pertencer ao usuário, ou não estiver dentro
-do projeto indicado, a API responde como recurso não encontrado. Essa política
-é repetida nos fluxos alternativos apenas quando muda o entendimento do caso.
+Use cases UC-10 through UC-29 are restricted to authenticated users. Whenever a
+project or detail does not exist, does not belong to the user, or is not within
+the specified project, the API responds with resource not found. This policy
+is repeated in alternative flows only when it changes the meaning of the use case.
 
-## UC-10 — Criar projeto
+## UC-10 — Create project
 
-| Campo          | Descrição                                                       |
+| Field          | Description                                                     |
 | -------------- | --------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                             |
-| Interesses     | Registrar um contexto de desenvolvimento próprio.               |
-| Pré-condições  | Conta da sessão existente.                                      |
-| Gatilho        | O usuário informa nome e descrição opcional.                    |
-| Pós-condições  | Projeto ativo, não arquivado e pertencente ao usuário é criado. |
+| Primary actor  | Authenticated user                                              |
+| Interests      | Record a personal development context.                          |
+| Preconditions  | The session account exists.                                     |
+| Trigger        | The user provides a name and optional description.              |
+| Postconditions | An active, unarchived project belonging to the user is created. |
 | Endpoint       | `POST /api/project`                                             |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário informa os dados do projeto.
-2. O sistema valida os dados e confirma a existência do usuário.
-3. O sistema cria o projeto com status `ACTIVE`.
-4. O sistema apresenta o projeto criado.
+1. The user provides the project details.
+2. The system validates the data and confirms that the user exists.
+3. The system creates the project with status `ACTIVE`.
+4. The system returns the created project.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Nome inválido, nome já usado pelo mesmo usuário ou conta inexistente impedem
-  a criação.
+- An invalid name, a name already used by the same user, or a missing account prevents
+  creation.
 
-## UC-11 — Pesquisar projetos
+## UC-11 — Search projects
 
-| Campo          | Descrição                                          |
-| -------------- | -------------------------------------------------- |
-| Ator principal | Usuário autenticado                                |
-| Interesses     | Localizar somente os próprios projetos.            |
-| Pré-condições  | Requisição autenticada.                            |
-| Gatilho        | O usuário solicita projetos com filtros opcionais. |
-| Pós-condições  | Nenhuma alteração de estado.                       |
-| Endpoint       | `GET /api/project`                                 |
-
-### Fluxo principal
-
-1. O usuário informa paginação, ordenação e filtros opcionais de nome, status e
-   arquivamento.
-2. O sistema restringe a busca ao proprietário autenticado.
-3. O sistema apresenta a página encontrada.
-
-### Fluxos alternativos
-
-- Sem correspondências, a página é vazia.
-- Sem filtro de arquivamento, projetos arquivados e não arquivados podem
-  aparecer.
-
-## UC-12 — Consultar projeto
-
-| Campo          | Descrição                                         |
+| Field          | Description                                       |
 | -------------- | ------------------------------------------------- |
-| Ator principal | Usuário autenticado                               |
-| Interesses     | Visualizar um projeto próprio e suas tecnologias. |
-| Pré-condições  | O projeto pertence ao usuário.                    |
-| Gatilho        | O usuário seleciona um projeto.                   |
-| Pós-condições  | Nenhuma alteração de estado.                      |
-| Endpoint       | `GET /api/project/:id`                            |
+| Primary actor  | Authenticated user                                |
+| Interests      | Find only the user's own projects.                |
+| Preconditions  | Authenticated request.                            |
+| Trigger        | The user requests projects with optional filters. |
+| Postconditions | No state change.                                  |
+| Endpoint       | `GET /api/project`                                |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário indica o projeto.
-2. O sistema confirma sua propriedade.
-3. O sistema reúne as tecnologias do projeto.
-4. O sistema apresenta o projeto e as tecnologias.
+1. The user provides pagination, sorting, and optional name, status, and
+   archive filters.
+2. The system restricts the search to the authenticated owner.
+3. The system returns the resulting page.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Projeto inexistente ou alheio é apresentado como não encontrado.
-- Comandos, recursos e registros não fazem parte desta resposta; possuem
-  consultas próprias.
+- If there are no matches, the page is empty.
+- Without an archive filter, both archived and unarchived projects may
+  appear.
 
-## UC-13 — Pesquisar registros de um projeto
+## UC-12 — View project
 
-| Campo          | Descrição                                                         |
-| -------------- | ----------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                               |
-| Interesses     | Ver os registros técnicos relacionados a um projeto próprio.      |
-| Pré-condições  | Projeto pertencente ao usuário.                                   |
-| Gatilho        | O usuário solicita os registros do projeto com filtros opcionais. |
-| Pós-condições  | Nenhuma alteração de estado.                                      |
-| Endpoint       | `GET /api/project/:id/technical-entries`                          |
+| Field          | Description                                 |
+| -------------- | ------------------------------------------- |
+| Primary actor  | Authenticated user                          |
+| Interests      | View an owned project and its technologies. |
+| Preconditions  | The project belongs to the user.            |
+| Trigger        | The user selects a project.                 |
+| Postconditions | No state change.                            |
+| Endpoint       | `GET /api/project/:id`                      |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário indica o projeto e os critérios de pesquisa.
-2. O sistema confirma a propriedade do projeto.
-3. O sistema busca registros do usuário ligados ao projeto.
-4. O sistema reúne as tags de cada registro e apresenta a página.
+1. The user specifies the project.
+2. The system verifies ownership.
+3. The system gathers the project's technologies.
+4. The system returns the project and its technologies.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Projeto inexistente/alheio ou combinação `LEARNING` com status é rejeitada.
-- Por padrão, registros arquivados não aparecem.
+- A missing project or another user's project is reported as not found.
+- Commands, resources, and entries are not included in this response; they have
+  separate queries.
 
-## UC-14 — Atualizar projeto
+## UC-13 — Search project entries
 
-| Campo          | Descrição                                                |
+| Field          | Description                                              |
 | -------------- | -------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                      |
-| Interesses     | Alterar dados de um projeto preservando campos omitidos. |
-| Pré-condições  | Projeto próprio e não arquivado.                         |
-| Gatilho        | O usuário informa ao menos um campo editável.            |
-| Pós-condições  | Campos informados e data de atualização são modificados. |
-| Endpoint       | `PATCH /api/project/:id`                                 |
+| Primary actor  | Authenticated user                                       |
+| Interests      | View technical entries associated with an owned project. |
+| Preconditions  | A project belonging to the user.                         |
+| Trigger        | The user requests project entries with optional filters. |
+| Postconditions | No state change.                                         |
+| Endpoint       | `GET /api/project/:id/technical-entries`                 |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário informa nome, descrição, status e/ou caminho local.
-2. O sistema confirma propriedade e possibilidade de edição.
-3. O sistema valida e registra somente os campos informados.
-4. O sistema apresenta o projeto atualizado.
+1. The user specifies the project and search criteria.
+2. The system verifies project ownership.
+3. The system searches for the user's entries associated with the project.
+4. The system gathers each entry's tags and returns the page.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Corpo sem campo editável é rejeitado.
-- `null` remove descrição ou caminho local; ausência preserva o valor.
-- Projeto arquivado é somente leitura.
+- A missing/another user's project or a combination of `LEARNING` with a status is rejected.
+- Archived entries are excluded by default.
 
-## UC-15 — Arquivar projeto
+## UC-14 — Update project
 
-| Campo          | Descrição                                                         |
-| -------------- | ----------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                               |
-| Interesses     | Retirar um projeto de uso corrente sem apagar seu histórico.      |
-| Pré-condições  | Projeto pertencente ao usuário.                                   |
-| Gatilho        | O usuário solicita o arquivamento.                                |
-| Pós-condições  | O projeto recebe data de arquivamento e se torna somente leitura. |
-| Endpoint       | `PATCH /api/project/:id/archive`                                  |
-
-### Fluxo principal
-
-1. O usuário indica o projeto.
-2. O sistema confirma sua propriedade e o arquiva.
-3. O sistema apresenta o estado resultante.
-
-### Fluxos alternativos
-
-- Se já estiver arquivado, a operação é idempotente e preserva as datas.
-
-## UC-16 — Restaurar projeto
-
-| Campo          | Descrição                                                          |
-| -------------- | ------------------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                                |
-| Interesses     | Reativar a edição de um projeto arquivado.                         |
-| Pré-condições  | Projeto pertencente ao usuário.                                    |
-| Gatilho        | O usuário solicita a restauração.                                  |
-| Pós-condições  | A data de arquivamento é removida; o status anterior é preservado. |
-| Endpoint       | `PATCH /api/project/:id/restore`                                   |
-
-### Fluxo principal
-
-1. O usuário indica o projeto.
-2. O sistema confirma sua propriedade e remove o arquivamento.
-3. O sistema apresenta o estado resultante.
-
-### Fluxos alternativos
-
-- Se já estiver não arquivado, a operação é idempotente.
-
-## UC-17 — Excluir projeto
-
-| Campo          | Descrição                                                                                               |
-| -------------- | ------------------------------------------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                                                     |
-| Interesses     | Remover definitivamente um projeto e seus detalhes sem apagar registros técnicos.                       |
-| Pré-condições  | Projeto próprio e não arquivado.                                                                        |
-| Gatilho        | O usuário solicita a exclusão.                                                                          |
-| Pós-condições  | Projeto, tecnologias, comandos e recursos são excluídos; registros relacionados permanecem sem projeto. |
-| Endpoint       | `DELETE /api/project/:id`                                                                               |
-
-### Fluxo principal
-
-1. O usuário indica o projeto.
-2. O sistema confirma propriedade e possibilidade de modificação.
-3. O sistema exclui o projeto e seus detalhes dependentes.
-4. O sistema desvincula os registros técnicos relacionados.
-
-### Fluxos alternativos
-
-- Projeto arquivado não pode ser excluído antes de ser restaurado.
-
-## UC-18 — Adicionar tecnologia ao projeto
-
-| Campo          | Descrição                                        |
-| -------------- | ------------------------------------------------ |
-| Ator principal | Usuário autenticado                              |
-| Interesses     | Documentar uma tecnologia e sua versão opcional. |
-| Pré-condições  | Projeto próprio e não arquivado.                 |
-| Gatilho        | O usuário informa nome e, opcionalmente, versão. |
-| Pós-condições  | A tecnologia passa a compor o projeto.           |
-| Endpoint       | `POST /api/project/:id/technologies`             |
-
-### Fluxo principal
-
-1. O usuário informa a tecnologia.
-2. O sistema confirma que o projeto pode ser modificado.
-3. O sistema confirma que o nome ainda não existe no projeto.
-4. O sistema registra a tecnologia e apresenta o projeto resultante.
-
-### Fluxos alternativos
-
-- Nome duplicado no projeto ou dados inválidos impedem a inclusão.
-
-## UC-19 — Remover tecnologia do projeto
-
-| Campo          | Descrição                                              |
-| -------------- | ------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                    |
-| Interesses     | Retirar uma tecnologia documentada no projeto.         |
-| Pré-condições  | Projeto próprio, não arquivado, contendo a tecnologia. |
-| Gatilho        | O usuário seleciona a tecnologia para remoção.         |
-| Pós-condições  | A tecnologia é excluída.                               |
-| Endpoint       | `DELETE /api/project/:id/technologies/:technologyId`   |
-
-### Fluxo principal
-
-1. O usuário indica projeto e tecnologia.
-2. O sistema confirma propriedade, vínculo e possibilidade de edição.
-3. O sistema exclui a tecnologia.
-
-### Fluxos alternativos
-
-- Tecnologia de outro projeto é tratada como não encontrada.
-- Não existe endpoint para atualizar tecnologia; é necessário remover e criar.
-
-## UC-20 — Adicionar comando ao projeto
-
-| Campo          | Descrição                                                       |
-| -------------- | --------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                             |
-| Interesses     | Guardar um comando reproduzível com contexto e ordem opcionais. |
-| Pré-condições  | Projeto próprio e não arquivado.                                |
-| Gatilho        | O usuário informa título e comando.                             |
-| Pós-condições  | O comando passa a compor o projeto.                             |
-| Endpoint       | `POST /api/project/:id/commands`                                |
-
-### Fluxo principal
-
-1. O usuário informa título, comando, descrição e ordem opcional.
-2. O sistema confirma que o projeto pode ser modificado.
-3. O sistema valida e registra o comando.
-4. O sistema apresenta o comando criado.
-
-### Fluxos alternativos
-
-- Dados inválidos ou projeto arquivado impedem a inclusão.
-
-## UC-21 — Pesquisar comandos do projeto
-
-| Campo          | Descrição                                 |
-| -------------- | ----------------------------------------- |
-| Ator principal | Usuário autenticado                       |
-| Interesses     | Localizar comandos de um projeto próprio. |
-| Pré-condições  | Projeto pertencente ao usuário.           |
-| Gatilho        | O usuário informa critérios opcionais.    |
-| Pós-condições  | Nenhuma alteração de estado.              |
-| Endpoint       | `GET /api/project/:projectId/commands`    |
-
-### Fluxo principal
-
-1. O sistema confirma a propriedade do projeto.
-2. O sistema filtra por título, comando e/ou descrição, pagina e ordena.
-3. O sistema apresenta a página.
-
-### Fluxos alternativos
-
-- Projeto arquivado continua consultável.
-- Sem correspondências, a página é vazia.
-
-## UC-22 — Consultar comando do projeto
-
-| Campo          | Descrição                                             |
+| Field          | Description                                           |
 | -------------- | ----------------------------------------------------- |
-| Ator principal | Usuário autenticado                                   |
-| Interesses     | Visualizar um comando específico no contexto correto. |
-| Pré-condições  | Projeto próprio contendo o comando.                   |
-| Gatilho        | O usuário seleciona o comando.                        |
-| Pós-condições  | Nenhuma alteração de estado.                          |
-| Endpoint       | `GET /api/project/:projectId/commands/:commandId`     |
+| Primary actor  | Authenticated user                                    |
+| Interests      | Change project data while preserving omitted fields.  |
+| Preconditions  | An owned, unarchived project.                         |
+| Trigger        | The user provides at least one editable field.        |
+| Postconditions | The supplied fields and update timestamp are changed. |
+| Endpoint       | `PATCH /api/project/:id`                              |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma a propriedade do projeto.
-2. O sistema confirma que o comando pertence a esse projeto.
-3. O sistema apresenta o comando.
+1. The user provides a name, description, status, and/or local path.
+2. The system verifies ownership and whether editing is allowed.
+3. The system validates and saves only the supplied fields.
+4. The system returns the updated project.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Projeto ou comando fora do escopo é tratado como não encontrado.
+- A request body without an editable field is rejected.
+- `null` removes the description or local path; omission preserves the value.
+- An archived project is read-only.
 
-## UC-23 — Atualizar comando do projeto
+## UC-15 — Archive project
 
-| Campo          | Descrição                                           |
-| -------------- | --------------------------------------------------- |
-| Ator principal | Usuário autenticado                                 |
-| Interesses     | Corrigir ou enriquecer um comando existente.        |
-| Pré-condições  | Projeto próprio, não arquivado, contendo o comando. |
-| Gatilho        | O usuário informa ao menos um campo editável.       |
-| Pós-condições  | Campos informados são atualizados.                  |
-| Endpoint       | `PATCH /api/project/:projectId/commands/:commandId` |
+| Field          | Description                                                      |
+| -------------- | ---------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                               |
+| Interests      | Remove a project from current use without deleting its history.  |
+| Preconditions  | A project belonging to the user.                                 |
+| Trigger        | The user requests archiving.                                     |
+| Postconditions | The project receives an archive timestamp and becomes read-only. |
+| Endpoint       | `PATCH /api/project/:id/archive`                                 |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma o projeto e o vínculo do comando.
-2. O sistema valida os campos informados.
-3. O sistema atualiza e apresenta o comando.
+1. The user specifies the project.
+2. The system verifies ownership and archives it.
+3. The system returns the resulting state.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Corpo vazio é rejeitado.
-- `null` remove descrição ou ordem; campos ausentes são preservados.
+- If already archived, the operation is idempotent and preserves timestamps.
 
-## UC-24 — Remover comando do projeto
+## UC-16 — Restore project
 
-| Campo          | Descrição                                              |
-| -------------- | ------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                    |
-| Interesses     | Excluir um comando que não deve mais compor o projeto. |
-| Pré-condições  | Projeto próprio, não arquivado, contendo o comando.    |
-| Gatilho        | O usuário solicita a remoção.                          |
-| Pós-condições  | O comando é excluído.                                  |
-| Endpoint       | `DELETE /api/project/:projectId/commands/:commandId`   |
+| Field          | Description                                                         |
+| -------------- | ------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                  |
+| Interests      | Re-enable editing of an archived project.                           |
+| Preconditions  | A project belonging to the user.                                    |
+| Trigger        | The user requests restoration.                                      |
+| Postconditions | The archive timestamp is removed; the previous status is preserved. |
+| Endpoint       | `PATCH /api/project/:id/restore`                                    |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma projeto, propriedade e vínculo do comando.
-2. O sistema exclui o comando e confirma sem conteúdo.
+1. The user specifies the project.
+2. The system verifies ownership and removes the archive timestamp.
+3. The system returns the resulting state.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Projeto arquivado ou comando fora do projeto impede a remoção.
+- If already unarchived, the operation is idempotent.
 
-## UC-25 — Adicionar recurso ao projeto
+## UC-17 — Delete project
 
-| Campo          | Descrição                                                      |
+| Field          | Description                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------ |
+| Primary actor  | Authenticated user                                                                                           |
+| Interests      | Permanently remove a project and its details without deleting technical entries.                             |
+| Preconditions  | An owned, unarchived project.                                                                                |
+| Trigger        | The user requests deletion.                                                                                  |
+| Postconditions | The project, technologies, commands, and resources are deleted; associated entries remain without a project. |
+| Endpoint       | `DELETE /api/project/:id`                                                                                    |
+
+### Main flow
+
+1. The user specifies the project.
+2. The system verifies ownership and whether modification is allowed.
+3. The system deletes the project and its dependent details.
+4. The system unlinks the associated technical entries.
+
+### Alternative flows
+
+- An archived project cannot be deleted until it is restored.
+
+## UC-18 — Add project technology
+
+| Field          | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| Primary actor  | Authenticated user                                   |
+| Interests      | Document a technology and its optional version.      |
+| Preconditions  | An owned, unarchived project.                        |
+| Trigger        | The user provides a name and, optionally, a version. |
+| Postconditions | The technology becomes part of the project.          |
+| Endpoint       | `POST /api/project/:id/technologies`                 |
+
+### Main flow
+
+1. The user provides the technology.
+2. The system confirms that the project can be modified.
+3. The system confirms that the name does not already exist in the project.
+4. The system saves the technology and returns the resulting project.
+
+### Alternative flows
+
+- A duplicate project technology name or invalid data prevents addition.
+
+## UC-19 — Remove project technology
+
+| Field          | Description                                             |
+| -------------- | ------------------------------------------------------- |
+| Primary actor  | Authenticated user                                      |
+| Interests      | Remove a technology documented in the project.          |
+| Preconditions  | An owned, unarchived project containing the technology. |
+| Trigger        | The user selects the technology for removal.            |
+| Postconditions | The technology is deleted.                              |
+| Endpoint       | `DELETE /api/project/:id/technologies/:technologyId`    |
+
+### Main flow
+
+1. The user specifies the project and technology.
+2. The system verifies ownership, association, and whether editing is allowed.
+3. The system deletes the technology.
+
+### Alternative flows
+
+- A technology belonging to another project is treated as not found.
+- There is no endpoint to update a technology; remove and recreate it instead.
+
+## UC-20 — Add project command
+
+| Field          | Description                                                  |
+| -------------- | ------------------------------------------------------------ |
+| Primary actor  | Authenticated user                                           |
+| Interests      | Save a reproducible command with optional context and order. |
+| Preconditions  | An owned, unarchived project.                                |
+| Trigger        | The user provides a title and command.                       |
+| Postconditions | The command becomes part of the project.                     |
+| Endpoint       | `POST /api/project/:id/commands`                             |
+
+### Main flow
+
+1. The user provides a title, command, description, and optional order.
+2. The system confirms that the project can be modified.
+3. The system validates and saves the command.
+4. The system returns the created command.
+
+### Alternative flows
+
+- Invalid data or an archived project prevents addition.
+
+## UC-21 — Search project commands
+
+| Field          | Description                            |
+| -------------- | -------------------------------------- |
+| Primary actor  | Authenticated user                     |
+| Interests      | Find commands in an owned project.     |
+| Preconditions  | A project belonging to the user.       |
+| Trigger        | The user provides optional criteria.   |
+| Postconditions | No state change.                       |
+| Endpoint       | `GET /api/project/:projectId/commands` |
+
+### Main flow
+
+1. The system verifies project ownership.
+2. The system filters by title, command, and/or description, paginates, and sorts.
+3. The system returns the page.
+
+### Alternative flows
+
+- An archived project can still be queried.
+- If there are no matches, the page is empty.
+
+## UC-22 — View project command
+
+| Field          | Description                                       |
+| -------------- | ------------------------------------------------- |
+| Primary actor  | Authenticated user                                |
+| Interests      | View a specific command in the correct context.   |
+| Preconditions  | An owned project containing the command.          |
+| Trigger        | The user selects the command.                     |
+| Postconditions | No state change.                                  |
+| Endpoint       | `GET /api/project/:projectId/commands/:commandId` |
+
+### Main flow
+
+1. The system verifies project ownership.
+2. The system confirms that the command belongs to this project.
+3. The system returns the command.
+
+### Alternative flows
+
+- An out-of-scope project or command is treated as not found.
+
+## UC-23 — Update project command
+
+| Field          | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| Primary actor  | Authenticated user                                   |
+| Interests      | Correct or enrich an existing command.               |
+| Preconditions  | An owned, unarchived project containing the command. |
+| Trigger        | The user provides at least one editable field.       |
+| Postconditions | The supplied fields are updated.                     |
+| Endpoint       | `PATCH /api/project/:projectId/commands/:commandId`  |
+
+### Main flow
+
+1. The system verifies the project and the command's association.
+2. The system validates the supplied fields.
+3. The system updates and returns the command.
+
+### Alternative flows
+
+- An empty request body is rejected.
+- `null` removes the description or order; omitted fields are preserved.
+
+## UC-24 — Remove project command
+
+| Field          | Description                                                    |
 | -------------- | -------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                            |
-| Interesses     | Guardar um link relevante classificado por tipo.               |
-| Pré-condições  | Projeto próprio e não arquivado.                               |
-| Gatilho        | O usuário informa rótulo, URL e tipo opcional.                 |
-| Pós-condições  | O recurso passa a compor o projeto; tipo omitido vira `OTHER`. |
-| Endpoint       | `POST /api/project/:projectId/resources`                       |
+| Primary actor  | Authenticated user                                             |
+| Interests      | Delete a command that should no longer be part of the project. |
+| Preconditions  | An owned, unarchived project containing the command.           |
+| Trigger        | The user requests removal.                                     |
+| Postconditions | The command is deleted.                                        |
+| Endpoint       | `DELETE /api/project/:projectId/commands/:commandId`           |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário informa o recurso.
-2. O sistema confirma que o projeto pode ser modificado.
-3. O sistema valida a URL e registra o recurso.
-4. O sistema apresenta o recurso criado.
+1. The system verifies the project, ownership, and command association.
+2. The system deletes the command and confirms without content.
 
-### Fluxos alternativos
+### Alternative flows
 
-- URL inválida, URL já usada no mesmo projeto ou projeto arquivado impedem a
-  inclusão.
+- An archived project or a command outside the project prevents removal.
 
-## UC-26 — Pesquisar recursos do projeto
+## UC-25 — Add project resource
 
-| Campo          | Descrição                                           |
+| Field          | Description                                                                    |
+| -------------- | ------------------------------------------------------------------------------ |
+| Primary actor  | Authenticated user                                                             |
+| Interests      | Save a relevant link classified by type.                                       |
+| Preconditions  | An owned, unarchived project.                                                  |
+| Trigger        | The user provides a label, URL, and optional type.                             |
+| Postconditions | The resource becomes part of the project; an omitted type defaults to `OTHER`. |
+| Endpoint       | `POST /api/project/:projectId/resources`                                       |
+
+### Main flow
+
+1. The user provides the resource.
+2. The system confirms that the project can be modified.
+3. The system validates the URL and saves the resource.
+4. The system returns the created resource.
+
+### Alternative flows
+
+- An invalid URL, a URL already used in the same project, or an archived project prevents
+  addition.
+
+## UC-26 — Search project resources
+
+| Field          | Description                                |
+| -------------- | ------------------------------------------ |
+| Primary actor  | Authenticated user                         |
+| Interests      | Find links documented in an owned project. |
+| Preconditions  | A project belonging to the user.           |
+| Trigger        | The user provides optional filters.        |
+| Postconditions | No state change.                           |
+| Endpoint       | `GET /api/project/:projectId/resources`    |
+
+### Main flow
+
+1. The system verifies project ownership.
+2. The system filters by label, URL, and/or type, paginates, and sorts.
+3. The system returns the resulting page.
+
+### Alternative flows
+
+- An archived project can still be queried.
+- If there are no matches, the page is empty.
+
+## UC-27 — View project resource
+
+| Field          | Description                                         |
 | -------------- | --------------------------------------------------- |
-| Ator principal | Usuário autenticado                                 |
-| Interesses     | Localizar links documentados em um projeto próprio. |
-| Pré-condições  | Projeto pertencente ao usuário.                     |
-| Gatilho        | O usuário informa filtros opcionais.                |
-| Pós-condições  | Nenhuma alteração de estado.                        |
-| Endpoint       | `GET /api/project/:projectId/resources`             |
+| Primary actor  | Authenticated user                                  |
+| Interests      | View a specific resource in the correct context.    |
+| Preconditions  | An owned project containing the resource.           |
+| Trigger        | The user selects the resource.                      |
+| Postconditions | No state change.                                    |
+| Endpoint       | `GET /api/project/:projectId/resources/:resourceId` |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma a propriedade do projeto.
-2. O sistema filtra por rótulo, URL e/ou tipo, pagina e ordena.
-3. O sistema apresenta a página encontrada.
+1. The system verifies project ownership.
+2. The system confirms that the resource belongs to this project.
+3. The system returns the resource.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Projeto arquivado continua consultável.
-- Sem correspondências, a página é vazia.
+- An out-of-scope project or resource is treated as not found.
 
-## UC-27 — Consultar recurso do projeto
+## UC-28 — Update project resource
 
-| Campo          | Descrição                                             |
+| Field          | Description                                           |
 | -------------- | ----------------------------------------------------- |
-| Ator principal | Usuário autenticado                                   |
-| Interesses     | Visualizar um recurso específico no contexto correto. |
-| Pré-condições  | Projeto próprio contendo o recurso.                   |
-| Gatilho        | O usuário seleciona o recurso.                        |
-| Pós-condições  | Nenhuma alteração de estado.                          |
-| Endpoint       | `GET /api/project/:projectId/resources/:resourceId`   |
-
-### Fluxo principal
-
-1. O sistema confirma a propriedade do projeto.
-2. O sistema confirma que o recurso pertence a esse projeto.
-3. O sistema apresenta o recurso.
-
-### Fluxos alternativos
-
-- Projeto ou recurso fora do escopo é tratado como não encontrado.
-
-## UC-28 — Atualizar recurso do projeto
-
-| Campo          | Descrição                                             |
-| -------------- | ----------------------------------------------------- |
-| Ator principal | Usuário autenticado                                   |
-| Interesses     | Corrigir rótulo, URL ou tipo de um recurso.           |
-| Pré-condições  | Projeto próprio, não arquivado, contendo o recurso.   |
-| Gatilho        | O usuário informa ao menos um campo editável.         |
-| Pós-condições  | Campos informados são atualizados.                    |
+| Primary actor  | Authenticated user                                    |
+| Interests      | Correct a resource's label, URL, or type.             |
+| Preconditions  | An owned, unarchived project containing the resource. |
+| Trigger        | The user provides at least one editable field.        |
+| Postconditions | The supplied fields are updated.                      |
 | Endpoint       | `PATCH /api/project/:projectId/resources/:resourceId` |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma o projeto e o vínculo do recurso.
-2. O sistema valida os campos informados.
-3. O sistema atualiza e apresenta o recurso.
+1. The system verifies the project and the resource's association.
+2. The system validates the supplied fields.
+3. The system updates and returns the resource.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Corpo vazio, URL inválida ou projeto arquivado impedem a atualização.
-- Os campos desse contrato não aceitam `null` para remoção.
+- An empty request body, invalid URL, or archived project prevents updating.
+- This contract's fields do not accept `null` for removal.
 
-## UC-29 — Remover recurso do projeto
+## UC-29 — Remove project resource
 
-| Campo          | Descrição                                              |
-| -------------- | ------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                    |
-| Interesses     | Excluir um link que não deve mais compor o projeto.    |
-| Pré-condições  | Projeto próprio, não arquivado, contendo o recurso.    |
-| Gatilho        | O usuário solicita a remoção.                          |
-| Pós-condições  | O recurso é excluído.                                  |
-| Endpoint       | `DELETE /api/project/:projectId/resources/:resourceId` |
+| Field          | Description                                                 |
+| -------------- | ----------------------------------------------------------- |
+| Primary actor  | Authenticated user                                          |
+| Interests      | Delete a link that should no longer be part of the project. |
+| Preconditions  | An owned, unarchived project containing the resource.       |
+| Trigger        | The user requests removal.                                  |
+| Postconditions | The resource is deleted.                                    |
+| Endpoint       | `DELETE /api/project/:projectId/resources/:resourceId`      |
 
-### Fluxo principal
+### Main flow
 
-1. O sistema confirma projeto, propriedade e vínculo do recurso.
-2. O sistema exclui o recurso e confirma sem conteúdo.
+1. The system verifies the project, ownership, and resource association.
+2. The system deletes the resource and confirms without content.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Projeto arquivado ou recurso fora do projeto impede a remoção.
+- An archived project or a resource outside the project prevents removal.

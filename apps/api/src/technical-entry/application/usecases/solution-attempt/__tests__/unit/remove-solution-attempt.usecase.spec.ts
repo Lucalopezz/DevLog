@@ -18,7 +18,7 @@ function makeEntry(id = ENTRY_ID, userId = USER_ID) {
     {
       userId,
       title: 'API error',
-      context: 'Investigando o erro da API',
+      context: 'Investigating the API error',
       type: TechnicalEntryType.ISSUE,
     },
     id,

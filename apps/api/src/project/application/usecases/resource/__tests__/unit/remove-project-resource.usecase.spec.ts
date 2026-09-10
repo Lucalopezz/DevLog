@@ -28,7 +28,7 @@ function makeResource(projectId = PROJECT_ID): ProjectResourceEntity {
   return new ProjectResourceEntity(
     {
       projectId,
-      label: 'Repository principal',
+      label: 'Main repository',
       url: 'https://github.com/example/devlog',
       type: ProjectResourceType.REPOSITORY,
     },

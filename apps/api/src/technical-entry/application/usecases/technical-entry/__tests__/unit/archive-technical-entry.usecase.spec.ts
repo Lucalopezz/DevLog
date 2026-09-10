@@ -13,7 +13,7 @@ function makeEntry(userId = USER_ID): TechnicalEntryEntity {
     {
       userId,
       title: 'Failed to start the API',
-      context: 'A porta estava ocupada',
+      context: 'The port was occupied',
       type: TechnicalEntryType.ISSUE,
     },
     ENTRY_ID,

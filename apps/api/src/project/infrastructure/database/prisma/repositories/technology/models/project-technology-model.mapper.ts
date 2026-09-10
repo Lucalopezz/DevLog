@@ -15,7 +15,7 @@ export class ProjectTechnologyModelMapper {
     try {
       return new ProjectTechnologyEntity(data, model.id);
     } catch {
-      throw new ValidationError('An entity not be loaded');
+      throw new ValidationError('An entity could not be loaded');
     }
   }
 

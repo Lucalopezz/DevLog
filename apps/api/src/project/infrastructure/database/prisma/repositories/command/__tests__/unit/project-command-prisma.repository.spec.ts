@@ -74,7 +74,7 @@ describe('ProjectCommandPrismaRepository', () => {
     ]);
   });
 
-  it('executa CRUD convertendo modelos e entidades', async () => {
+  it('performs CRUD while mapping models and entities', async () => {
     const entity = makeEntity();
     findMany.mockResolvedValue([makeModel()]);
     findUnique.mockResolvedValue(makeModel());

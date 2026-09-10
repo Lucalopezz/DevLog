@@ -61,7 +61,7 @@ describe('Project archive relationships (e2e)', () => {
               create: { name: 'NestJS', version: '11' },
             },
             commands: {
-              create: { title: 'Iniciar API', command: 'pnpm dev' },
+              create: { title: 'Start API', command: 'pnpm dev' },
             },
             resources: {
               create: {
@@ -73,7 +73,7 @@ describe('Project archive relationships (e2e)', () => {
             entries: {
               create: {
                 userId: USER_ID,
-                title: 'Entrada preservada',
+                title: 'Preserved entry',
                 context: 'Technical context',
                 type: TechnicalEntryType.ISSUE,
               },
@@ -135,7 +135,7 @@ describe('Project archive relationships (e2e)', () => {
       expect.objectContaining({ name: 'NestJS', version: '11' }),
     ]);
     expect(commandBody.data).toEqual([
-      expect.objectContaining({ title: 'Iniciar API' }),
+      expect.objectContaining({ title: 'Start API' }),
     ]);
     expect(resourceBody.data).toEqual([
       expect.objectContaining({ label: 'Documentation' }),
@@ -143,7 +143,7 @@ describe('Project archive relationships (e2e)', () => {
     expect(entryBody.data).toEqual([
       expect.objectContaining({
         projectId: PROJECT_ID,
-        title: 'Entrada preservada',
+        title: 'Preserved entry',
       }),
     ]);
   });

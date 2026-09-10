@@ -70,9 +70,9 @@ export function ProjectFilters({
           value={status}
         >
           <option value="">All</option>
-          <option value="ACTIVE">Actives</option>
-          <option value="INACTIVE">Inactives</option>
-          <option value="FINISHED">Finisheds</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+          <option value="FINISHED">Finished</option>
         </select>
       </div>
     </SearchForm>

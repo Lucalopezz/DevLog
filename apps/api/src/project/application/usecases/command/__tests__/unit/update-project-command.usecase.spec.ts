@@ -30,7 +30,7 @@ function makeCommand(projectId = PROJECT_ID): ProjectCommandEntity {
   return new ProjectCommandEntity(
     {
       projectId,
-      title: 'Subir ambiente local',
+      title: 'Start local environment',
       command: 'docker compose up -d',
       description: 'Start project services',
       executionOrder: 0,
@@ -73,7 +73,7 @@ describe('UpdateProjectCommandUseCase', () => {
       userId: USER_ID,
       projectId: PROJECT_ID,
       commandId: COMMAND_ID,
-      title: 'Parar ambiente local',
+      title: 'Stop local environment',
       command: 'docker compose down',
     });
 
@@ -81,7 +81,7 @@ describe('UpdateProjectCommandUseCase', () => {
     expect(output).toMatchObject({
       id: COMMAND_ID,
       projectId: PROJECT_ID,
-      title: 'Parar ambiente local',
+      title: 'Stop local environment',
       command: 'docker compose down',
       description: 'Start project services',
       executionOrder: 0,
@@ -98,7 +98,7 @@ describe('UpdateProjectCommandUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         commandId: COMMAND_ID,
-        title: 'Command indevido',
+        title: 'Unauthorized command',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 
@@ -148,7 +148,7 @@ describe('UpdateProjectCommandUseCase', () => {
         userId: USER_ID,
         projectId: PROJECT_ID,
         commandId: COMMAND_ID,
-        title: 'Command indevido',
+        title: 'Unauthorized command',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 

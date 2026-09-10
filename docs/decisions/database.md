@@ -4,7 +4,7 @@ The database keeps the **technical entry at its core**, with projects as optiona
 
 ### Main entities
 
-![Relational model](./banco.png)
+![Relational model](./database-model.png)
 
 ### Cardinalidades
 
@@ -579,7 +579,7 @@ entry.userId === currentUser.id
 
 ## Alternative not adopted
 
-Usar chaves estrangeiras compostas.
+Use composite foreign keys.
 
 In `projects`:
 

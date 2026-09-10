@@ -13,7 +13,7 @@ import { AuthGuard } from './auth.guard';
   imports: [
     forwardRef(() => UserModule),
     EnvConfigModule,
-    // Config do JwtModule
+    // JwtModule configuration
     JwtModule.registerAsync({
       imports: [EnvConfigModule],
       inject: [EnvConfigService],

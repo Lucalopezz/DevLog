@@ -11,7 +11,7 @@
     </linearGradient>
   </defs>
 
-  <!-- Ícone reduzido da marca: o PNG completo continua sendo usado na interface. -->
+  <!-- Compact brand icon: the full PNG is still used in the interface. -->
   <rect width="64" height="64" rx="15" fill="#061113" />
   <path d="M51 18h3a7 7 0 0 1 7 7v5a7 7 0 0 1-7 7h-3z" fill="url(#frame)" />
   <path d="M51 37h3a7 7 0 0 1 7 7v5a7 7 0 0 1-7 7h-3z" fill="url(#frame)" />

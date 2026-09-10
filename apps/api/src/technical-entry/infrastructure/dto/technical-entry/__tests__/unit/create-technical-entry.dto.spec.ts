@@ -9,13 +9,13 @@ const PROJECT_ID = '123e4567-e89b-42d3-a456-426614174010';
 const makeDto = (overrides: Record<string, unknown> = {}) =>
   plainToInstance(CreateTechnicalEntryDto, {
     title: 'Entry title',
-    context: 'Contexto da entrada',
+    context: 'Entry context',
     type: TechnicalEntryType.ISSUE,
     ...overrides,
   });
 
 describe('CreateTechnicalEntryDto', () => {
-  it('aceita projectId UUID e projectId nulo', async () => {
+  it('accepts a UUID or null projectId', async () => {
     const withProject = await validate(makeDto({ projectId: PROJECT_ID }));
     const withoutProject = await validate(makeDto({ projectId: null }));
 

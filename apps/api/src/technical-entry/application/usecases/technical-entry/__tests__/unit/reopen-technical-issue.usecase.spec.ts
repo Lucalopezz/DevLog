@@ -25,7 +25,7 @@ function makeEntry(
     {
       userId: overrides.userId ?? USER_ID,
       title: 'API error',
-      context: 'Investigando o erro da API',
+      context: 'Investigating the API error',
       type: overrides.type ?? TechnicalEntryType.ISSUE,
       conclusion: overrides.conclusion ?? 'The configuration was fixed',
       resolvedAt: overrides.open
@@ -76,7 +76,7 @@ describe('ReopenTechnicalIssueUseCase', () => {
       useCase.execute({ id: ENTRY_ID, userId: USER_ID }),
     ).rejects.toMatchObject({
       error: {
-        resolvedAt: ['Somente entradas resolvidas podem ser reabertas'],
+        resolvedAt: ['Only resolved entries can be reopened'],
       },
     });
 
@@ -92,7 +92,7 @@ describe('ReopenTechnicalIssueUseCase', () => {
       useCase.execute({ id: ENTRY_ID, userId: USER_ID }),
     ).rejects.toMatchObject({
       error: {
-        type: ['Somente entradas do tipo ISSUE podem ser reabertas'],
+        type: ['Only ISSUE entries can be reopened'],
       },
     });
 

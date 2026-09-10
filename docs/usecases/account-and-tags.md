@@ -1,216 +1,214 @@
-# Casos de uso — conta, autenticação e tags
+# Use cases — account, authentication, and tags
 
-As falhas de validação mencionadas abaixo incluem formato, tamanho e campos
-obrigatórios. As regras transversais estão no [índice](README.md).
+The validation failures mentioned below include format, length, and required
+fields. Cross-cutting rules are in the [index](README.md).
 
-## UC-01 — Cadastrar usuário
+## UC-01 — Register user
 
-| Campo          | Descrição                                                                                   |
-| -------------- | ------------------------------------------------------------------------------------------- |
-| Ator principal | Visitante                                                                                   |
-| Interesses     | O visitante quer criar sua conta; o sistema precisa manter e-mail único e proteger a senha. |
-| Pré-condições  | O visitante não precisa estar autenticado.                                                  |
-| Gatilho        | O visitante envia nome, e-mail, senha e confirmação.                                        |
-| Pós-condições  | Uma conta é criada com senha armazenada como hash; a senha não é devolvida.                 |
-| Endpoint       | `POST /api/users`                                                                           |
+| Field          | Description                                                                                                    |
+| -------------- | -------------------------------------------------------------------------------------------------------------- |
+| Primary actor  | Guest                                                                                                          |
+| Interests      | The guest wants to create an account; the system must enforce unique email addresses and protect the password. |
+| Preconditions  | The guest does not need to be authenticated.                                                                   |
+| Trigger        | The guest submits a name, email, password, and confirmation.                                                   |
+| Postconditions | An account is created with a hashed password; the password is not returned.                                    |
+| Endpoint       | `POST /api/users`                                                                                              |
 
-### Fluxo principal
+### Main flow
 
-1. O visitante informa seus dados.
-2. O sistema confirma que as duas senhas são iguais.
-3. O sistema confirma que o e-mail ainda não está cadastrado.
-4. O sistema protege a senha e registra a conta.
-5. O sistema apresenta os dados públicos do usuário.
+1. The guest provides their details.
+2. The system confirms that both passwords match.
+3. The system confirms that the email is not already registered.
+4. The system hashes the password and saves the account.
+5. The system returns the user's public data.
 
-### Fluxos alternativos
+### Alternative flows
 
-- 2a. As senhas divergem: o sistema rejeita o cadastro.
-- 3a. O e-mail já existe: o sistema informa conflito e não cria outra conta.
-- 1a. Algum dado é inválido: o sistema informa os erros de validação.
+- 2a. The passwords differ: the system rejects registration.
+- 3a. The email already exists: the system reports a conflict and does not create another account.
+- 1a. Some data is invalid: the system reports validation errors.
 
-## UC-02 — Autenticar usuário
+## UC-02 — Authenticate user
 
-| Campo          | Descrição                                                                                                             |
-| -------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Ator principal | Visitante                                                                                                             |
-| Interesses     | O visitante quer acessar seus dados; o sistema deve aceitar apenas credenciais válidas sem revelar qual campo falhou. |
-| Pré-condições  | Deve existir uma conta correspondente.                                                                                |
-| Gatilho        | O visitante informa e-mail e senha.                                                                                   |
-| Pós-condições  | Um token temporário é enviado em cookie HttpOnly e os dados públicos do usuário são apresentados.                     |
-| Endpoint       | `POST /api/auth/login`                                                                                                |
+| Field          | Description                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Primary actor  | Guest                                                                                                                     |
+| Interests      | The guest wants to access their data; the system must accept only valid credentials without revealing which field failed. |
+| Preconditions  | A matching account must exist.                                                                                            |
+| Trigger        | The guest provides an email and password.                                                                                 |
+| Postconditions | A temporary token is sent in an HttpOnly cookie and the user's public data is returned.                                   |
+| Endpoint       | `POST /api/auth/login`                                                                                                    |
 
-### Fluxo principal
+### Main flow
 
-1. O visitante informa as credenciais.
-2. O sistema localiza a conta pelo e-mail.
-3. O sistema compara a senha informada com a senha protegida.
-4. O sistema cria uma credencial de acesso vinculada ao usuário.
-5. O sistema inicia a sessão no cliente e apresenta o usuário autenticado.
+1. The guest provides their credentials.
+2. The system finds the account by email.
+3. The system compares the supplied password against the password hash.
+4. The system creates an access credential associated with the user.
+5. The system starts the client session and returns the authenticated user.
 
-### Fluxos alternativos
+### Alternative flows
 
-- 2a/3a. Conta inexistente ou senha incorreta: o sistema responde apenas
-  “Credenciais inválidas”.
-- 1a. O formato dos dados é inválido: o sistema rejeita a solicitação.
+- 2a/3a. Missing account or incorrect password: the system responds only with
+  “Invalid credentials”.
+- 1a. The data format is invalid: the system rejects the request.
 
-## UC-03 — Encerrar sessão
+## UC-03 — End session
 
-| Campo          | Descrição                                                     |
-| -------------- | ------------------------------------------------------------- |
-| Ator principal | Visitante ou usuário autenticado                              |
-| Interesses     | O ator quer que o cliente deixe de enviar a credencial atual. |
-| Pré-condições  | Nenhuma; a operação também funciona sem sessão válida.        |
-| Gatilho        | O ator solicita logout.                                       |
-| Pós-condições  | O cookie de acesso é removido do cliente.                     |
-| Endpoint       | `POST /api/auth/logout`                                       |
+| Field          | Description                                                        |
+| -------------- | ------------------------------------------------------------------ |
+| Primary actor  | Guest or authenticated user                                        |
+| Interests      | The actor wants the client to stop sending the current credential. |
+| Preconditions  | None; the operation also works without a valid session.            |
+| Trigger        | The actor requests logout.                                         |
+| Postconditions | The access cookie is removed from the client.                      |
+| Endpoint       | `POST /api/auth/logout`                                            |
 
-### Fluxo principal
+### Main flow
 
-1. O ator solicita o encerramento da sessão.
-2. O sistema instrui o cliente a remover o cookie de acesso.
-3. O sistema confirma a operação sem devolver conteúdo.
+1. The actor requests to end the session.
+2. The system instructs the client to remove the access cookie.
+3. The system confirms the operation without returning content.
 
-### Fluxos alternativos
+### Alternative flows
 
-- Não há fluxo de revogação no servidor; um token copiado antes do logout
-  permanece tecnicamente válido até expirar.
+- There is no server-side revocation flow; a token copied before logout
+  remains technically valid until it expires.
 
-## UC-04 — Consultar perfil atual
+## UC-04 — View current profile
 
-| Campo          | Descrição                                                                       |
-| -------------- | ------------------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                             |
-| Interesses     | O usuário quer consultar seus dados públicos; o sistema não deve expor a senha. |
-| Pré-condições  | Requisição autenticada.                                                         |
-| Gatilho        | O usuário solicita seu perfil.                                                  |
-| Pós-condições  | O estado do sistema não muda.                                                   |
-| Endpoint       | `GET /api/users/me`                                                             |
+| Field          | Description                                                                        |
+| -------------- | ---------------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                                 |
+| Interests      | The user wants to view their public data; the system must not expose the password. |
+| Preconditions  | Authenticated request.                                                             |
+| Trigger        | The user requests their profile.                                                   |
+| Postconditions | The system state does not change.                                                  |
+| Endpoint       | `GET /api/users/me`                                                                |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário solicita o próprio perfil.
-2. O sistema localiza a conta identificada pela sessão.
-3. O sistema apresenta identificador, nome, e-mail e datas.
+1. The user requests their own profile.
+2. The system finds the account identified by the session.
+3. The system returns the ID, name, email, and timestamps.
 
-### Fluxos alternativos
+### Alternative flows
 
-- 2a. A conta da sessão não existe mais: o sistema informa que o usuário não
-  foi encontrado.
-- A autenticação ausente ou inválida interrompe o caso antes do passo 1.
+- 2a. The session account no longer exists: the system reports that the user was not found.
+- Missing or invalid authentication stops the use case before step 1.
 
-## UC-05 — Atualizar perfil
+## UC-05 — Update profile
 
-| Campo          | Descrição                                                         |
-| -------------- | ----------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                               |
-| Interesses     | O usuário quer alterar seu nome mantendo sua identidade e e-mail. |
-| Pré-condições  | Requisição autenticada e conta existente.                         |
-| Gatilho        | O usuário informa o novo nome.                                    |
-| Pós-condições  | O nome e a data de atualização são alterados.                     |
-| Endpoint       | `PATCH /api/users/me`                                             |
+| Field          | Description                                                                 |
+| -------------- | --------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                          |
+| Interests      | The user wants to change their name while keeping their identity and email. |
+| Preconditions  | Authenticated request and existing account.                                 |
+| Trigger        | The user provides the new name.                                             |
+| Postconditions | The name and update timestamp are changed.                                  |
+| Endpoint       | `PATCH /api/users/me`                                                       |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário informa o novo nome.
-2. O sistema localiza sua conta.
-3. O sistema valida e registra o novo nome.
-4. O sistema apresenta o perfil atualizado.
+1. The user provides the new name.
+2. The system finds their account.
+3. The system validates and saves the new name.
+4. The system returns the updated profile.
 
-### Fluxos alternativos
+### Alternative flows
 
-- 2a. A conta não existe: o sistema informa que o usuário não foi encontrado.
-- 3a. O nome é inválido: nada é alterado e os erros são apresentados.
+- 2a. The account does not exist: the system reports that the user was not found.
+- 3a. The name is invalid: nothing changes and errors are returned.
 
-## UC-06 — Alterar senha
+## UC-06 — Change password
 
-| Campo          | Descrição                                                                                               |
-| -------------- | ------------------------------------------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                                                     |
-| Interesses     | O usuário quer trocar a senha; o sistema deve confirmar sua identidade e nunca persistir senha legível. |
-| Pré-condições  | Requisição autenticada e conta existente.                                                               |
-| Gatilho        | O usuário informa senha atual, nova senha e confirmação.                                                |
-| Pós-condições  | A nova senha protegida substitui a anterior.                                                            |
-| Endpoint       | `PATCH /api/users/me/password`                                                                          |
+| Field          | Description                                                                                                            |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                                                                     |
+| Interests      | The user wants to change their password; the system must verify their identity and never persist a plaintext password. |
+| Preconditions  | Authenticated request and existing account.                                                                            |
+| Trigger        | The user provides the current password, new password, and confirmation.                                                |
+| Postconditions | The new password hash replaces the previous one.                                                                       |
+| Endpoint       | `PATCH /api/users/me/password`                                                                                         |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário informa as três senhas.
-2. O sistema confirma que nova senha e confirmação coincidem.
-3. O sistema valida a senha atual.
-4. O sistema protege e registra a nova senha.
-5. O sistema apresenta o perfil atualizado.
+1. The user provides all three password fields.
+2. The system confirms that the new password and confirmation match.
+3. The system validates the current password.
+4. The system hashes and saves the new password.
+5. The system returns the updated profile.
 
-### Fluxos alternativos
+### Alternative flows
 
-- 2a. Nova senha e confirmação divergem: a troca é rejeitada.
-- 3a. A senha atual é inválida: a troca é rejeitada.
-- 1a. A conta não existe ou os dados são inválidos: nada é alterado.
+- 2a. The new password and confirmation differ: the change is rejected.
+- 3a. The current password is invalid: the change is rejected.
+- 1a. The account does not exist or the data is invalid: nothing changes.
 
-## UC-07 — Criar tag
+## UC-07 — Create tag
 
-| Campo          | Descrição                                                                                                       |
-| -------------- | --------------------------------------------------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                                                             |
-| Interesses     | O usuário quer criar uma classificação reutilizável; o sistema deve evitar duplicatas equivalentes por usuário. |
-| Pré-condições  | Requisição autenticada.                                                                                         |
-| Gatilho        | O usuário informa o nome da tag.                                                                                |
-| Pós-condições  | Uma tag normalizada pertencente ao usuário é criada.                                                            |
-| Endpoint       | `POST /api/tag`                                                                                                 |
+| Field          | Description                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                                                          |
+| Interests      | The user wants to create a reusable classification; the system must prevent equivalent duplicates per user. |
+| Preconditions  | Authenticated request.                                                                                      |
+| Trigger        | The user provides the tag name.                                                                             |
+| Postconditions | A normalized tag belonging to the user is created.                                                          |
+| Endpoint       | `POST /api/tag`                                                                                             |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário informa o nome.
-2. O sistema normaliza o nome para comparação.
-3. O sistema confirma que não existe tag equivalente desse usuário.
-4. O sistema cria e apresenta a tag.
+1. The user provides the name.
+2. The system normalizes the name for comparison.
+3. The system confirms that no equivalent tag exists for this user.
+4. The system creates and returns the tag.
 
-### Fluxos alternativos
+### Alternative flows
 
-- 3a. Já existe uma tag com o nome normalizado: o sistema informa conflito.
-- 1a. Nome inválido ou conta inexistente: a tag não é criada.
+- 3a. A tag with the normalized name already exists: the system reports a conflict.
+- 1a. Invalid name or missing account: the tag is not created.
 
-## UC-08 — Pesquisar tags
+## UC-08 — Search tags
 
-| Campo          | Descrição                                                                  |
-| -------------- | -------------------------------------------------------------------------- |
-| Ator principal | Usuário autenticado                                                        |
-| Interesses     | O usuário quer localizar suas classificações sem visualizar tags alheias.  |
-| Pré-condições  | Requisição autenticada.                                                    |
-| Gatilho        | O usuário solicita a lista, opcionalmente com nome, paginação e ordenação. |
-| Pós-condições  | O estado do sistema não muda.                                              |
-| Endpoint       | `GET /api/tag`                                                             |
+| Field          | Description                                                                        |
+| -------------- | ---------------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                                 |
+| Interests      | The user wants to find their classifications without seeing other users' tags.     |
+| Preconditions  | Authenticated request.                                                             |
+| Trigger        | The user requests the list, optionally specifying a name, pagination, and sorting. |
+| Postconditions | The system state does not change.                                                  |
+| Endpoint       | `GET /api/tag`                                                                     |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário informa os critérios opcionais.
-2. O sistema restringe a pesquisa às tags do usuário.
-3. O sistema aplica filtro, paginação e ordenação.
-4. O sistema apresenta itens e metadados de paginação.
+1. The user provides optional criteria.
+2. The system restricts the search to the user's tags.
+3. The system applies filtering, pagination, and sorting.
+4. The system returns items and pagination metadata.
 
-### Fluxos alternativos
+### Alternative flows
 
-- 3a. Nenhuma tag corresponde: o sistema apresenta uma página vazia.
-- 1a. Algum critério é inválido: a pesquisa é rejeitada.
+- 3a. No tags match: the system returns an empty page.
+- 1a. A criterion is invalid: the search is rejected.
 
-## UC-09 — Excluir tag
+## UC-09 — Delete tag
 
-| Campo          | Descrição                                                                                              |
-| -------------- | ------------------------------------------------------------------------------------------------------ |
-| Ator principal | Usuário autenticado                                                                                    |
-| Interesses     | O usuário quer remover uma classificação própria; registros classificados devem permanecer existentes. |
-| Pré-condições  | Requisição autenticada e tag pertencente ao usuário.                                                   |
-| Gatilho        | O usuário escolhe excluir a tag.                                                                       |
-| Pós-condições  | A tag e seus vínculos com registros são removidos; os registros permanecem.                            |
-| Endpoint       | `DELETE /api/tag/:id`                                                                                  |
+| Field          | Description                                                                        |
+| -------------- | ---------------------------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                                                 |
+| Interests      | The user wants to remove their own classification; classified entries must remain. |
+| Preconditions  | Authenticated request and a tag belonging to the user.                             |
+| Trigger        | The user chooses to delete the tag.                                                |
+| Postconditions | The tag and its entry associations are removed; the entries remain.                |
+| Endpoint       | `DELETE /api/tag/:id`                                                              |
 
-### Fluxo principal
+### Main flow
 
-1. O usuário indica a tag.
-2. O sistema confirma sua propriedade.
-3. O sistema exclui a tag e suas atribuições.
-4. O sistema confirma sem devolver conteúdo.
+1. The user specifies the tag.
+2. The system verifies ownership.
+3. The system deletes the tag and its assignments.
+4. The system confirms without returning content.
 
-### Fluxos alternativos
+### Alternative flows
 
-- 2a. A tag não existe ou pertence a outro usuário: o sistema responde como
-  tag não encontrada.
+- 2a. The tag does not exist or belongs to another user: the system responds with tag not found.

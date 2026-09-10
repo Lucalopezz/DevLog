@@ -14,7 +14,7 @@ function makeProps(
 
   return {
     projectId: PROJECT_ID,
-    label: 'Repository principal',
+    label: 'Main repository',
     url: 'https://github.com/example/devlog',
     type: ProjectResourceType.REPOSITORY,
     createdAt: date,
@@ -32,7 +32,7 @@ describe('ProjectResourceEntity', () => {
     const resource = new ProjectResourceEntity(makeProps());
 
     expect(resource.projectId).toBe(PROJECT_ID);
-    expect(resource.label).toBe('Repository principal');
+    expect(resource.label).toBe('Main repository');
     expect(resource.url).toBe('https://github.com/example/devlog');
     expect(resource.type).toBe(ProjectResourceType.REPOSITORY);
   });
@@ -41,7 +41,7 @@ describe('ProjectResourceEntity', () => {
     ['invalid projectId', { projectId: 'project-1' }],
     ['empty label', { label: '' }],
     ['label above the limit', { label: 'a'.repeat(121) }],
-    ['URL vazia', { url: '' }],
+    ['Empty URL', { url: '' }],
     ['Invalid URL', { url: 'not-a-url' }],
     ['invalid type', { type: 'UNKNOWN' as ProjectResourceType }],
   ])('rejects %s', (_, overrides) => {
@@ -69,13 +69,13 @@ describe('ProjectResourceEntity', () => {
     const resource = new ProjectResourceEntity(makeProps());
 
     resource.update({
-      label: 'Documentation da API',
+      label: 'API documentation',
       url: 'https://docs.example.com/devlog',
       type: ProjectResourceType.DOCUMENTATION,
     });
 
     expect(resource.projectId).toBe(PROJECT_ID);
-    expect(resource.label).toBe('Documentation da API');
+    expect(resource.label).toBe('API documentation');
     expect(resource.url).toBe('https://docs.example.com/devlog');
     expect(resource.type).toBe(ProjectResourceType.DOCUMENTATION);
     expect(resource.createdAt).toEqual(new Date('2026-08-01T00:00:00.000Z'));

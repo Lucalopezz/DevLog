@@ -69,7 +69,7 @@ describe('SolutionAttemptPrismaRepository', () => {
     expect(repository.sortableFields).toEqual(['createdAt', 'result']);
   });
 
-  it('executa CRUD convertendo modelos e entidades', async () => {
+  it('performs CRUD while mapping models and entities', async () => {
     const entity = makeEntity();
     findMany.mockResolvedValue([makeModel()]);
     findUnique.mockResolvedValue(makeModel());
@@ -113,7 +113,7 @@ describe('SolutionAttemptPrismaRepository', () => {
     await expect(repository.findById(ATTEMPT_ID)).resolves.toBeNull();
   });
 
-  it('lista somente as tentativas da entrada informada', async () => {
+  it('lists only attempts belonging to the supplied entry', async () => {
     findMany.mockResolvedValue([makeModel()]);
 
     await expect(repository.findByTechnicalEntryId(ENTRY_ID)).resolves.toEqual([

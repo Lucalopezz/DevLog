@@ -13,7 +13,7 @@ function makeProps(
 
   return {
     projectId: PROJECT_ID,
-    title: 'Subir ambiente local',
+    title: 'Start local environment',
     command: 'docker compose up -d',
     description: 'Start project services',
     executionOrder: 0,
@@ -30,7 +30,7 @@ describe('ProjectCommandEntity', () => {
     );
 
     expect(command.projectId).toBe(PROJECT_ID);
-    expect(command.title).toBe('Subir ambiente local');
+    expect(command.title).toBe('Start local environment');
     expect(command.command).toBe('docker compose up -d');
     expect(command.executionOrder).toBeUndefined();
   });
@@ -40,7 +40,7 @@ describe('ProjectCommandEntity', () => {
     ['empty title', { title: '' }],
     ['title above the limit', { title: 'a'.repeat(121) }],
     ['empty command', { command: '' }],
-    ['ordem negativa', { executionOrder: -1 }],
+    ['negative order', { executionOrder: -1 }],
     ['fractional order', { executionOrder: 1.5 }],
   ])('rejects %s', (_, overrides) => {
     expect(() => new ProjectCommandEntity(makeProps(overrides))).toThrow(
@@ -52,20 +52,20 @@ describe('ProjectCommandEntity', () => {
     const command = new ProjectCommandEntity(makeProps());
 
     expect(() => command.update({ title: '' })).toThrow(EntityValidationError);
-    expect(command.title).toBe('Subir ambiente local');
+    expect(command.title).toBe('Start local environment');
   });
 
   it('updates title, command, description, and order', () => {
     const command = new ProjectCommandEntity(makeProps());
 
     command.update({
-      title: 'Parar ambiente local',
+      title: 'Stop local environment',
       command: 'docker compose down',
       description: 'Stop project services',
       executionOrder: 1,
     });
 
-    expect(command.title).toBe('Parar ambiente local');
+    expect(command.title).toBe('Stop local environment');
     expect(command.command).toBe('docker compose down');
     expect(command.description).toBe('Stop project services');
     expect(command.executionOrder).toBe(1);

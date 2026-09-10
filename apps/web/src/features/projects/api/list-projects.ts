@@ -8,7 +8,7 @@ export async function listProjects(params: ListProjectsParams): Promise<ProjectC
 
 
 /**
- *Cria chaves como:
+ * Creates keys such as:
  *['projects', 'lists', 'list', { page: 1, name: 'api' }]
  *['projects', 'lists', 'list', { page: 2, name: 'api' }]
  *

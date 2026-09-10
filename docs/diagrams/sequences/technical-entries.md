@@ -14,7 +14,7 @@ sequenceDiagram
     participant ERepo as TechnicalEntryRepository
 
     UserActor->>C: POST /api/technical-entry
-    C->>UC: execute(dados, userId)
+    C->>UC: execute(data, userId)
     UC->>URepo: findById(userId)
     opt project supplied
         UC->>PRepo: findById(projectId)
@@ -44,20 +44,20 @@ sequenceDiagram
     participant ERepo as TechnicalEntryRepository
     participant LinkRepo as TechnicalEntryTagRepository
 
-    alt UC-31 pesquisar registros
+    alt UC-31 search entries
         UserActor->>C: GET /api/technical-entry?filters
-        C->>UC: search(userId, filtros)
+        C->>UC: search(userId, filters)
         alt LEARNING type with status
             UC-->>UserActor: 422 learning entries have no status
         else compatible filters
-            opt projectId informado
+            opt projectId supplied
                 UC->>PRepo: findById(projectId)
                 PRepo-->>UC: own project or 404
             end
             UC->>ERepo: search(filter includes userId and archivedAt defaulting to null)
             ERepo-->>UC: entry page
             UC->>LinkRepo: findTags(ids, userId)
-            LinkRepo-->>UC: tags agrupadas
+            LinkRepo-->>UC: grouped tags
             UC-->>UserActor: page with tags
         end
     else UC-32 get entry
@@ -150,7 +150,7 @@ sequenceDiagram
         UC-->>UserActor: archived entry
     else UC-37 delete
         UC->>ERepo: delete(id)
-        ERepo->>DB: DELETE registro
+        ERepo->>DB: DELETE entry
         DB->>DB: cascade deletion of attempts and assignments
         UC-->>UserActor: 204 No Content
     end
@@ -204,7 +204,7 @@ sequenceDiagram
     participant Attempt as SolutionAttemptEntity
 
     UserActor->>C: request to /solution-attempts
-    C->>UC: execute(entryId, userId, dados?)
+    C->>UC: execute(entryId, userId, data?)
     UC->>ERepo: findById(entryId)
     alt entry missing or belongs to another user
         UC-->>UserActor: 404 Not Found
@@ -213,28 +213,28 @@ sequenceDiagram
             UC-->>UserActor: 422 Unprocessable Entity
         else unarchived ISSUE
             UC->>Entry: addSolutionAttempt(description, result)
-            Entry-->>UC: nova tentativa
-            UC->>ARepo: insert(tentativa)
+            Entry-->>UC: new attempt
+            UC->>ARepo: insert(attempt)
             UC-->>UserActor: attempt created
         end
     else UC-41 list
-        UC->>ARepo: search(entryId, filtros)
+        UC->>ARepo: search(entryId, filters)
         ARepo-->>UC: attempt page
         UC-->>UserActor: page
     else UC-42 update description
         UC->>ARepo: findById(attemptId)
         alt attempt outside entry
             UC-->>UserActor: 404 Not Found
-        else tentativa vinculada
+        else linked attempt
             UC->>Attempt: updateDescription(description)
-            UC->>ARepo: update(tentativa)
+            UC->>ARepo: update(attempt)
             UC-->>UserActor: attempt updated
         end
     else UC-43 remove
         UC->>ARepo: findById(attemptId)
         alt attempt outside entry
             UC-->>UserActor: 404 Not Found
-        else tentativa vinculada
+        else linked attempt
             UC->>ARepo: delete(attemptId)
             UC-->>UserActor: 204 No Content
         end

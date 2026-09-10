@@ -45,7 +45,7 @@ describe('SolutionAttemptPrismaRepository (integration)', () => {
         {
           userId: USER_ID,
           title: 'API error',
-          context: 'Contexto do erro',
+          context: 'Error context',
           type: TechnicalEntryType.ISSUE,
         },
         ENTRY_ID,
@@ -61,7 +61,7 @@ describe('SolutionAttemptPrismaRepository (integration)', () => {
     const failed = new SolutionAttemptEntity(
       {
         technicalEntryId: ENTRY_ID,
-        description: 'Primeira tentativa',
+        description: 'First attempt',
         result: SolutionAttemptResult.FAILED,
       },
       FAILED_ATTEMPT_ID,
@@ -69,7 +69,7 @@ describe('SolutionAttemptPrismaRepository (integration)', () => {
     const successful = new SolutionAttemptEntity(
       {
         technicalEntryId: ENTRY_ID,
-        description: 'Segunda tentativa',
+        description: 'Second attempt',
         result: SolutionAttemptResult.SUCCESSFUL,
       },
       SUCCESS_ATTEMPT_ID,

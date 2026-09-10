@@ -24,7 +24,7 @@ function makeEntry(
     {
       userId: overrides.userId ?? USER_ID,
       title: 'API error',
-      context: 'Contexto do erro',
+      context: 'Error context',
       type: overrides.type ?? TechnicalEntryType.ISSUE,
       archivedAt: overrides.archivedAt,
     },
@@ -83,7 +83,7 @@ describe('AddSolutionAttemptUseCase', () => {
       useCase.execute({
         userId: USER_ID,
         technicalEntryId: ENTRY_ID,
-        description: 'Tentativa',
+        description: 'Attempt',
         result: SolutionAttemptResult.FAILED,
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
@@ -92,8 +92,8 @@ describe('AddSolutionAttemptUseCase', () => {
   });
 
   it.each([
-    ['entrada LEARNING', makeEntry({ type: TechnicalEntryType.LEARNING })],
-    ['entrada arquivada', makeEntry({ archivedAt: new Date() })],
+    ['LEARNING entry', makeEntry({ type: TechnicalEntryType.LEARNING })],
+    ['archived entry', makeEntry({ archivedAt: new Date() })],
   ])('rejects %s without persisting an attempt', async (_case, entry) => {
     const { useCase, solutionAttemptRepository } = makeUseCase(entry);
 
@@ -101,7 +101,7 @@ describe('AddSolutionAttemptUseCase', () => {
       useCase.execute({
         userId: USER_ID,
         technicalEntryId: ENTRY_ID,
-        description: 'Tentativa',
+        description: 'Attempt',
         result: SolutionAttemptResult.FAILED,
       }),
     ).rejects.toBeInstanceOf(UnprocessableEntityException);

@@ -62,13 +62,13 @@ describe('ProjectEntity', () => {
     const project = new ProjectEntity(makeProps());
 
     project.update({
-      name: 'DevLog atualizado',
+      name: 'Updated DevLog',
       description: 'New description',
       status: ProjectStatusEnum.FINISHED,
       localPath: '/workspace/devlog',
     });
 
-    expect(project.name).toBe('DevLog atualizado');
+    expect(project.name).toBe('Updated DevLog');
     expect(project.description).toBe('New description');
     expect(project.status).toBe(ProjectStatusEnum.FINISHED);
     expect(project.localPath).toBe('/workspace/devlog');
@@ -88,7 +88,7 @@ describe('ProjectEntity', () => {
     expect(() => project.addTechnology('NestJS')).toThrow(
       EntityValidationError,
     );
-    expect(() => project.addCommand('Subir API', 'pnpm dev')).toThrow(
+    expect(() => project.addCommand('Start API', 'pnpm dev')).toThrow(
       EntityValidationError,
     );
     expect(() =>
@@ -112,9 +112,9 @@ describe('ProjectEntity', () => {
 
     expect(project.description).toBeUndefined();
 
-    project.update({ description: 'Description restaurada' });
+    project.update({ description: 'Restored description' });
 
-    expect(project.description).toBe('Description restaurada');
+    expect(project.description).toBe('Restored description');
   });
 
   it('keeps archive and restore idempotent', () => {
@@ -154,7 +154,7 @@ describe('ProjectEntity', () => {
     const project = new ProjectEntity(makeProps());
 
     const command = project.addCommand(
-      'Subir ambiente local',
+      'Start local environment',
       'docker compose up -d',
       'Start services',
       1,
@@ -162,7 +162,7 @@ describe('ProjectEntity', () => {
 
     expect(command).toBeInstanceOf(ProjectCommandEntity);
     expect(command.projectId).toBe(project.id);
-    expect(command.title).toBe('Subir ambiente local');
+    expect(command.title).toBe('Start local environment');
     expect(command.command).toBe('docker compose up -d');
     expect(command.description).toBe('Start services');
     expect(command.executionOrder).toBe(1);
@@ -172,14 +172,14 @@ describe('ProjectEntity', () => {
     const project = new ProjectEntity(makeProps());
 
     const resource = project.addResource(
-      'Repository principal',
+      'Main repository',
       'https://github.com/example/devlog',
       ProjectResourceType.REPOSITORY,
     );
 
     expect(resource).toBeInstanceOf(ProjectResourceEntity);
     expect(resource.projectId).toBe(project.id);
-    expect(resource.label).toBe('Repository principal');
+    expect(resource.label).toBe('Main repository');
     expect(resource.url).toBe('https://github.com/example/devlog');
     expect(resource.type).toBe(ProjectResourceType.REPOSITORY);
   });

@@ -22,7 +22,7 @@ Use this table as your starting point. Most questions are addressed in the liste
 | How is the frontend organized? | [`guides/frontend_structure.md`](guides/frontend_structure.md) |
 | How is the monorepo structured? | [`guides/monorepo.md`](guides/monorepo.md) |
 | Which commands are used frequently? | [`guides/utils.md`](guides/utils.md) |
-| Where are the modeling study notes? | [`notes.md`](notes.md) |
+| Where is the step-by-step frontend projects tutorial? | [`notes.md`](notes.md) |
 
 For setup questions, first read the [root README](../README.md). It contains prerequisites, installation instructions, and the main commands.
 

@@ -51,9 +51,9 @@ function makeEntry(
     {
       userId,
       title: overrides.title ?? 'NestJS entry',
-      context: 'Contexto persistido',
+      context: 'Persisted context',
       type: overrides.type ?? TechnicalEntryType.ISSUE,
-      conclusion: overrides.resolvedAt ? 'Issue resolvido' : undefined,
+      conclusion: overrides.resolvedAt ? 'Resolved issue' : undefined,
       resolvedAt: overrides.resolvedAt,
       createdAt: timestamp,
       updatedAt: timestamp,

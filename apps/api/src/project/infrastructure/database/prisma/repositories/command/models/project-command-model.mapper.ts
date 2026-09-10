@@ -17,7 +17,7 @@ export class ProjectCommandModelMapper {
     try {
       return new ProjectCommandEntity(data, model.id);
     } catch {
-      throw new ValidationError('An entity not be loaded');
+      throw new ValidationError('An entity could not be loaded');
     }
   }
 

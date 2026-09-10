@@ -16,11 +16,11 @@ sequenceDiagram
     participant User as UserEntity
 
     Guest->>C: POST /api/users
-    C->>UC: execute(dados)
-    alt senhas diferentes
+    C->>UC: execute(data)
+    alt passwords differ
         UC-->>C: error 422
         C-->>Guest: passwords do not match
-    else senhas iguais
+    else passwords match
         UC->>URepo: findByEmail(email)
         alt email already registered
             URepo-->>UC: user
@@ -57,7 +57,7 @@ sequenceDiagram
     URepo-->>UC: user or null
     opt user found
         UC->>Hash: compareHash(password, passwordHash)
-        Hash-->>UC: corresponde?
+        Hash-->>UC: matches?
     end
     alt invalid credentials
         UC-->>Guest: generic 401 error
@@ -83,9 +83,9 @@ sequenceDiagram
     participant C as Protected controller
 
     UserActor->>Guard: request with cookies
-    alt cookie ausente
+    alt missing cookie
         Guard-->>UserActor: 401 Unauthorized
-    else cookie presente
+    else present cookie
         Guard->>Token: verify(access_token)
         alt invalid token or missing subject
             Token-->>Guard: failure
@@ -141,7 +141,7 @@ sequenceDiagram
         UC-->>UserActor: profile updated
     else UC-06 change password
         UserActor->>C: PATCH /api/users/me/password
-        C->>UC: updatePassword(dados)
+        C->>UC: updatePassword(data)
         UC->>URepo: findById(userId)
         alt confirmation differs
             UC-->>UserActor: error 422
@@ -151,7 +151,7 @@ sequenceDiagram
                 UC-->>UserActor: error 422
             else valid current password
                 UC->>Hash: generateHash(newPassword)
-                Hash-->>UC: novo hash
+                Hash-->>UC: new hash
                 UC->>User: updatePassword(hash)
                 UC->>URepo: update(user)
                 UC-->>UserActor: profile updated
@@ -179,17 +179,17 @@ sequenceDiagram
         UC->>URepo: findById(userId)
         UC->>Tag: create and normalize name
         UC->>TRepo: findByNormalizedName(name, userId)
-        alt duplicada
+        alt duplicate
             UC-->>UserActor: 409 Conflict
         else available
             UC->>TRepo: insert(tag)
             TRepo->>DB: INSERT
             UC-->>UserActor: tag created
         end
-    else UC-08 pesquisar tags
+    else UC-08 search tags
         UserActor->>C: GET /api/tag?filters
-        C->>UC: search(userId, filtros)
-        UC->>TRepo: search(filtro sempre inclui userId)
+        C->>UC: search(userId, filters)
+        UC->>TRepo: search(filter always includes userId)
         TRepo->>DB: paginated COUNT and SELECT
         DB-->>UserActor: tag page
     else UC-09 delete tag

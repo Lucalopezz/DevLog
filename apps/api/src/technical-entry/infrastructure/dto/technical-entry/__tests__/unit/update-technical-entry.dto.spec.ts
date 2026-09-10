@@ -6,7 +6,7 @@ import { UpdateTechnicalEntryDto } from '../../update-technical-entry.dto';
 const PROJECT_ID = '123e4567-e89b-42d3-a456-426614174010';
 
 describe('UpdateTechnicalEntryDto', () => {
-  it('aceita title no limite e projectId nulo ou UUID', async () => {
+  it('accepts title at the limit and a null or UUID projectId', async () => {
     const withProject = plainToInstance(UpdateTechnicalEntryDto, {
       title: 'a'.repeat(200),
       projectId: PROJECT_ID,

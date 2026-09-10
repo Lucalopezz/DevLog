@@ -37,7 +37,7 @@ describe('ProjectResourcePrismaRepository', () => {
     return new ProjectResourceEntity(
       {
         projectId: PROJECT_ID,
-        label: 'Documentation da API',
+        label: 'API documentation',
         url: 'https://docs.example.com/devlog',
         type: ProjectResourceType.DOCUMENTATION,
         createdAt,
@@ -53,7 +53,7 @@ describe('ProjectResourcePrismaRepository', () => {
     return {
       id: RESOURCE_ID,
       projectId: PROJECT_ID,
-      label: 'Documentation da API',
+      label: 'API documentation',
       url: 'https://docs.example.com/devlog',
       type: PrismaProjectResourceType.DOCUMENTATION,
       createdAt,
@@ -79,7 +79,7 @@ describe('ProjectResourcePrismaRepository', () => {
       data: {
         id: RESOURCE_ID,
         projectId: PROJECT_ID,
-        label: 'Documentation da API',
+        label: 'API documentation',
         url: 'https://docs.example.com/devlog',
         type: PrismaProjectResourceType.DOCUMENTATION,
         createdAt: entity.createdAt,
@@ -131,7 +131,7 @@ describe('ProjectResourcePrismaRepository', () => {
     expect(update).toHaveBeenCalledWith({
       where: { id: RESOURCE_ID },
       data: {
-        label: 'Documentation da API',
+        label: 'API documentation',
         url: 'https://docs.example.com/devlog',
         type: PrismaProjectResourceType.DOCUMENTATION,
         updatedAt: entity.updatedAt,

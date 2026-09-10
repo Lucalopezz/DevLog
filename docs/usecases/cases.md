@@ -1,36 +1,36 @@
-# DevLog — Casos de uso planejados (documento histórico)
+# DevLog — Planned use cases (historical document)
 
 > [!WARNING]
-> Este arquivo registra a visão originalmente planejada do MVP e pode conter
-> comportamentos ainda não expostos pela API. Para a documentação **as is**,
-> extraída do código atual, comece pelo [índice de casos de uso](README.md).
+> This file records the originally planned MVP vision and may contain
+> behavior not yet exposed by the API. For the **as-is** documentation,
+> extracted from the current code, start with the [use case index](README.md).
 
-Este documento representa os principais casos de uso do MVP do DevLog.
+This document describes the main use cases of the DevLog MVP.
 
-O objetivo é servir como referência para implementação do backend, principalmente para a camada `application`.
+The goal is to serve as a backend implementation reference, especially for the `application` layer.
 
 ---
 
-# 1. Visão geral
+# 1. Overview
 
-O DevLog possui duas funcionalidades principais:
+DevLog has two main features:
 
-1. **Diário técnico**
+1. **Technical journal**
 
-   - registrar problemas encontrados;
-   - registrar aprendizados;
-   - documentar tentativas de solução;
-   - registrar a solução/conclusão;
-   - classificar registros utilizando tags;
-   - relacionar um registro a um projeto.
+   - record issues encountered;
+   - record learnings;
+   - document solution attempts;
+   - record the solution/conclusion;
+   - classify entries using tags;
+   - associate an entry with a project.
 
-2. **Projetos**
+2. **Projects**
 
-   - registrar projetos;
-   - documentar tecnologias utilizadas;
-   - armazenar comandos importantes;
-   - armazenar links e recursos;
-   - visualizar registros técnicos relacionados ao projeto.
+   - record projects;
+   - document technologies used;
+   - store important commands;
+   - store links and resources;
+   - view technical entries associated with the project.
 
 ```mermaid
 flowchart TD
@@ -59,22 +59,22 @@ flowchart TD
 
 # 2. Actors
 
-No MVP existe apenas um ator:
+The MVP has only one actor:
 
 ```text
 User
 ```
 
-O sistema é pessoal, mas ainda terá autenticação para permitir o estudo de:
+The system is personal, but will still include authentication to support studying:
 
-- cookies HttpOnly;
-- autorização;
-- isolamento de dados;
-- JWT ou sessão;
+- HttpOnly cookies;
+- authorization;
+- data isolation;
+- JWT or sessions;
 - guards;
-- testes de autenticação.
+- authentication tests.
 
-Cada recurso pertence a um usuário.
+Each resource belongs to a user.
 
 ```mermaid
 flowchart LR
@@ -85,13 +85,13 @@ flowchart LR
     DevLog --> UserTags[User Tags]
 ```
 
-Um usuário nunca pode acessar recursos pertencentes a outro usuário.
+A user must never access resources belonging to another user.
 
 ---
 
 # 3. Authentication
 
-Casos de uso relacionados à conta e autenticação.
+Use cases related to accounts and authentication.
 
 ```mermaid
 flowchart TD
@@ -109,7 +109,7 @@ flowchart TD
 
 ## RegisterUser
 
-Cria uma nova conta.
+Creates a new account.
 
 ### Input
 
@@ -119,13 +119,13 @@ email
 password
 ```
 
-### Regras
+### Rules
 
-- email deve ser válido;
-- email não pode estar cadastrado;
-- senha deve respeitar os critérios mínimos;
-- senha nunca é armazenada diretamente;
-- senha deve ser convertida para hash.
+- email must be valid;
+- email must not already be registered;
+- password must meet the minimum requirements;
+- password is never stored directly;
+- password must be hashed.
 
 ### Output
 
@@ -137,7 +137,7 @@ User
 
 ## AuthenticateUser
 
-Autentica um usuário.
+Authenticates a user.
 
 ### Input
 
@@ -146,7 +146,7 @@ email
 password
 ```
 
-### Fluxo
+### Flow
 
 ```mermaid
 flowchart TD
@@ -172,9 +172,9 @@ flowchart TD
 
 ## GetCurrentUser
 
-Retorna os dados do usuário autenticado.
+Returns the authenticated user's data.
 
-Exemplo:
+Example:
 
 ```text
 GET /users/me
@@ -184,16 +184,16 @@ GET /users/me
 
 ## LogoutUser
 
-Encerra a autenticação atual.
+Ends the current authentication session.
 
-Dependendo da estratégia escolhida:
+Depending on the chosen strategy:
 
 ```text
-JWT simples:
+Simple JWT:
     remove cookie
 
 Refresh/session:
-    invalida sessão
+    invalidate session
     remove cookie
 ```
 
@@ -201,7 +201,7 @@ Refresh/session:
 
 # 4. Projects
 
-O projeto fornece contexto para os registros técnicos.
+The project provides context for technical entries.
 
 ```mermaid
 flowchart TD
@@ -221,7 +221,7 @@ flowchart TD
 
 ## CreateProject
 
-Cria um projeto.
+Creates a project.
 
 ### Input
 
@@ -233,43 +233,43 @@ localPath?
 status?
 ```
 
-### Regras
+### Rules
 
-- projeto pertence ao usuário autenticado;
-- nome é obrigatório;
-- repositoryUrl, se informado, deve ser uma URL válida.
+- project belongs to the authenticated user;
+- name is required;
+- repositoryUrl, if supplied, must be a valid URL.
 
 ---
 
 ## UpdateProject
 
-Atualiza informações gerais do projeto.
+Updates general project information.
 
-Exemplos:
+Examples:
 
 ```text
-nome
-descrição
-repositório
-caminho local
+name
+description
+repository
+local path
 status
 ```
 
-### Regra principal
+### Main rule
 
-Somente o proprietário pode alterar o projeto.
+Only the owner can modify the project.
 
-O update é parcial: propriedades ausentes permanecem inalteradas. Para os
-campos opcionais `description` e `localPath`, o valor `null` remove o conteúdo
-existente. Uma requisição sem nenhum campo editável é inválida.
+The update is partial: omitted properties remain unchanged. For the
+optional `description` and `localPath` fields, `null` removes the existing
+content. A request without any editable field is invalid.
 
 ---
 
 ## GetProject
 
-Retorna um projeto específico.
+Returns a specific project.
 
-O resultado futuramente pode agregar:
+The result may eventually include:
 
 ```text
 Project
@@ -284,9 +284,9 @@ Technical Entries
 
 ## ListProjects
 
-Lista projetos do usuário.
+Lists the user's projects.
 
-Filtros possíveis:
+Possible filters:
 
 ```text
 status
@@ -295,24 +295,24 @@ name
 technology
 ```
 
-No MVP não é necessário implementar todos.
+The MVP does not need to implement all of them.
 
-Inicialmente:
+Initially:
 
 ```text
 name
 status
 ```
 
-já são suficientes.
+are sufficient.
 
 ---
 
 ## ArchiveProject
 
-Arquiva um projeto.
+Archives a project.
 
-Não é necessário excluir fisicamente o registro.
+There is no need to physically delete the record.
 
 ```text
 ACTIVE
@@ -320,22 +320,22 @@ ACTIVE
 ARCHIVED
 ```
 
-Registros técnicos existentes continuam relacionados ao projeto.
+Existing technical entries remain associated with the project.
 
-O arquivamento e a restauração são comandos explícitos e idempotentes:
+Archiving and restoration are explicit, idempotent commands:
 
 ```text
-ArchiveProject -> preenche archivedAt
-RestoreProject -> remove archivedAt
+ArchiveProject -> set archivedAt
+RestoreProject -> clear archivedAt
 ```
 
 ---
 
 # 5. Project Technologies
 
-Representam tecnologias utilizadas em um projeto.
+Represent technologies used in a project.
 
-Exemplo:
+Example:
 
 ```text
 DevLog
@@ -366,35 +366,35 @@ name
 version?
 ```
 
-Exemplo:
+Example:
 
 ```text
 NestJS
 11
 ```
 
-### Regras
+### Rules
 
-- projeto precisa pertencer ao usuário;
-- não adicionar a mesma tecnologia duas vezes ao projeto.
+- the project must belong to the user;
+- do not add the same technology to a project twice.
 
 ---
 
 ## RemoveProjectTechnology
 
-Remove uma tecnologia do projeto.
+Removes a technology from the project.
 
-Isso não remove registros técnicos que utilizem uma tag com o mesmo nome.
+This does not remove technical entries using a tag with the same name.
 
-Tecnologia de projeto e tag são conceitos diferentes.
+Project technologies and tags are different concepts.
 
 ---
 
 # 6. Project Commands
 
-Permite documentar como trabalhar com determinado projeto.
+Documents how to work with a particular project.
 
-Exemplo:
+Example:
 
 ```text
 Start development
@@ -402,7 +402,7 @@ Start development
 pnpm dev
 ```
 
-Outro:
+Another:
 
 ```text
 Run migrations
@@ -430,7 +430,7 @@ command
 description?
 ```
 
-Exemplo:
+Example:
 
 ```text
 title:
@@ -444,9 +444,9 @@ pnpm --filter api dev
 
 # 7. Project Resources
 
-Links relacionados ao projeto.
+Links related to the project.
 
-Exemplos:
+Examples:
 
 ```text
 GitHub Repository
@@ -464,7 +464,7 @@ flowchart LR
     Project --> RemoveResource[Remove Resource]
 ```
 
-### Estrutura
+### Structure
 
 ```text
 label
@@ -476,9 +476,9 @@ type?
 
 # 8. Technical Entries
 
-Esta é a funcionalidade principal do DevLog.
+This is DevLog's main feature.
 
-Um registro representa algo aprendido ou um problema encontrado.
+An entry represents something learned or an issue encountered.
 
 ```mermaid
 flowchart TD
@@ -504,7 +504,7 @@ flowchart TD
 
 # 9. CreateTechnicalEntry
 
-Cria um registro no diário.
+Creates a journal entry.
 
 ### Input
 
@@ -517,7 +517,7 @@ projectId?
 tags?
 ```
 
-Inicialmente existem dois tipos:
+Initially, there are two types:
 
 ```text
 ISSUE
@@ -528,9 +528,9 @@ LEARNING
 
 ## ISSUE
 
-Representa um problema encontrado.
+Represents an issue encountered.
 
-Exemplo:
+Example:
 
 ```text
 Title:
@@ -543,13 +543,13 @@ Problem:
 Authentication cookie was not included in requests.
 ```
 
-Pode possuir:
+May have:
 
 ```text
 SolutionAttempts[]
 ```
 
-E eventualmente:
+And eventually:
 
 ```text
 resolution
@@ -560,9 +560,9 @@ resolvedAt
 
 ## LEARNING
 
-Representa algo aprendido que não necessariamente veio de um erro.
+Represents something learned that did not necessarily originate from an error.
 
-Exemplo:
+Example:
 
 ```text
 Title:
@@ -575,15 +575,15 @@ Conclusion:
 Run prisma generate explicitly.
 ```
 
-Não precisa possuir tentativas de solução.
+Does not need solution attempts.
 
 ---
 
 # 10. UpdateTechnicalEntry
 
-Permite alterar o conteúdo do registro.
+Allows changing entry content.
 
-Pode alterar:
+Can change:
 
 ```text
 title
@@ -593,38 +593,38 @@ project
 tags
 ```
 
-### Restrições
+### Restrictions
 
-O tipo do registro não deveria ser alterado livremente após ele começar a possuir comportamento específico.
+The entry type should not be changed freely once it starts exhibiting type-specific behavior.
 
-Exemplo:
+Example:
 
 ```text
-ISSUE com SolutionAttempts
+ISSUE with SolutionAttempts
 ```
 
-não deveria simplesmente virar:
+should not simply become:
 
 ```text
 LEARNING
 ```
 
-sem tratamento explícito.
+without explicit handling.
 
-Para o MVP, pode ser mais simples impedir a alteração do `type` após criação.
+For the MVP, it may be simpler to prevent changing `type` after creation.
 
-Uma entrada com `resolvedAt` preenchido deve sempre manter uma conclusão não
-vazia. Por isso, o update comum não pode remover a conclusão de uma entrada
-resolvida; a transição de estado continua pertencendo a `ResolveTechnicalIssue`
-e `ReopenTechnicalIssue`.
+An entry with `resolvedAt` set must always retain a nonempty
+conclusion. Therefore, a regular update cannot remove the conclusion of a resolved
+entry; the state transition remains the responsibility of `ResolveTechnicalIssue`
+and `ReopenTechnicalIssue`.
 
 ---
 
 # 11. GetTechnicalEntry
 
-Retorna o registro completo.
+Returns the complete entry.
 
-Exemplo:
+Example:
 
 ```text
 Technical Entry
@@ -645,7 +645,7 @@ if ISSUE:
 
 # 12. ListTechnicalEntries
 
-Essa será provavelmente a consulta mais utilizada da aplicação.
+This will likely be the application's most frequently used query.
 
 ```mermaid
 flowchart LR
@@ -658,7 +658,7 @@ flowchart LR
     Entries --> Status[Filter Status]
 ```
 
-Filtros possíveis:
+Possible filters:
 
 ```text
 title
@@ -668,9 +668,9 @@ type
 status
 ```
 
-O filtro `title` procura correspondências parciais sem diferenciar letras maiúsculas e minúsculas.
+The `title` filter searches for case-insensitive partial matches.
 
-Exemplo:
+Example:
 
 ```text
 title = cookie
@@ -684,7 +684,7 @@ status = RESOLVED
 
 # 13. Solution Attempts
 
-Existem apenas para registros do tipo `ISSUE`.
+These exist only for entries of type `ISSUE`.
 
 ```mermaid
 flowchart TD
@@ -705,7 +705,7 @@ flowchart TD
 
 ## AddSolutionAttempt
 
-Registra uma tentativa realizada para resolver um problema.
+Records an attempt to resolve an issue.
 
 ### Input
 
@@ -715,7 +715,7 @@ description
 result
 ```
 
-Resultado:
+Outcome:
 
 ```text
 FAILED
@@ -723,18 +723,18 @@ PARTIAL
 SUCCESSFUL
 ```
 
-### Regras
+### Rules
 
-- registro precisa pertencer ao usuário;
-- registro precisa ser `ISSUE`;
-- registros do tipo `LEARNING` não possuem tentativas;
-- problema arquivado não deveria receber novas tentativas.
+- the entry must belong to the user;
+- the entry must be an `ISSUE`;
+- entries of type `LEARNING` do not have attempts;
+- an archived issue should not receive new attempts.
 
 ---
 
 # 14. ResolveTechnicalIssue
 
-Marca um problema como resolvido.
+Marks an issue as resolved.
 
 ```text
 OPEN
@@ -749,9 +749,9 @@ entryId
 conclusion
 ```
 
-Pode existir uma tentativa bem-sucedida relacionada, mas isso não precisa ser obrigatório.
+There may be an associated successful attempt, but this does not need to be mandatory.
 
-Exemplo:
+Example:
 
 ```text
 Conclusion:
@@ -760,17 +760,17 @@ The API was correctly configured.
 The actual issue was that fetch did not use credentials: include.
 ```
 
-### Regras
+### Rules
 
-- apenas `ISSUE` pode ser resolvido;
-- conclusão é obrigatória;
-- registra `resolvedAt`.
+- only an `ISSUE` can be resolved;
+- a conclusion is required;
+- records `resolvedAt`.
 
 ---
 
 # 15. ReopenTechnicalIssue
 
-Permite reabrir um problema.
+Allows reopening an issue.
 
 ```text
 RESOLVED
@@ -778,17 +778,17 @@ RESOLVED
 OPEN
 ```
 
-O histórico de tentativas e a solução anterior continuam registrados.
+The attempt history and previous solution remain recorded.
 
-Isso é importante porque um problema pode parecer resolvido e posteriormente reaparecer.
+This matters because an issue may appear resolved and later recur.
 
 ---
 
 # 16. Tags
 
-Tags classificam conhecimento.
+Tags classify knowledge.
 
-Exemplos:
+Examples:
 
 ```text
 NestJS
@@ -813,7 +813,7 @@ flowchart LR
     Tag --> Entry3[Technical Entry]
 ```
 
-Uma entrada pode possuir várias tags:
+An entry can have multiple tags:
 
 ```text
 Cookie not being sent
@@ -835,34 +835,34 @@ Tags:
 name
 ```
 
-### Regras
+### Rules
 
-- pertence ao usuário;
-- não permitir duas tags com o mesmo nome para o mesmo usuário.
+- belongs to the user;
+- do not allow two tags with the same name for the same user.
 
 ---
 
 ## AddTagToTechnicalEntry
 
-Relaciona uma tag existente a um registro.
+Associates an existing tag with an entry.
 
-### Regra
+### Rule
 
-Tanto a tag quanto o registro precisam pertencer ao usuário autenticado.
+Both the tag and entry must belong to the authenticated user.
 
 ---
 
 ## RemoveTagFromTechnicalEntry
 
-Remove apenas a relação.
+Removes only the association.
 
-Não remove a tag.
+Does not remove the tag.
 
 ---
 
-# 17. Relação Project × Technical Entry
+# 17. Project × Technical Entry relationship
 
-Essa relação é importante para o conceito do DevLog.
+This relationship is important to DevLog's concept.
 
 ```mermaid
 flowchart TD
@@ -877,19 +877,19 @@ flowchart TD
     Entry3 --> DDD[DDD Tag]
 ```
 
-Projeto representa:
+A project represents:
 
 ```text
-Onde isso aconteceu?
+Where did this happen?
 ```
 
-Tag representa:
+A tag represents:
 
 ```text
-Sobre o que isso é?
+What is this about?
 ```
 
-Exemplo:
+Example:
 
 ```text
 Technical Entry:
@@ -907,9 +907,9 @@ Authentication
 
 ---
 
-# 18. Fluxo principal do usuário
+# 18. Main user flow
 
-Um fluxo esperado de uso seria:
+An expected usage flow would be:
 
 ```mermaid
 flowchart TD
@@ -944,7 +944,7 @@ flowchart TD
 
 ---
 
-# 19. Casos de uso do MVP
+# 19. MVP use cases
 
 ## Authentication
 
@@ -1017,9 +1017,9 @@ RemoveTagFromTechnicalEntry
 
 ---
 
-# 20. Representação da camada Application
+# 20. Application layer representation
 
-Isso pode se refletir diretamente na estrutura do NestJS.
+This can map directly to the NestJS structure.
 
 ```text
 src/
@@ -1071,11 +1071,11 @@ src/
 
 ---
 
-# 21. Ordem sugerida de implementação
+# 21. Suggested implementation order
 
-Não é necessário implementar todos os casos de uso de uma vez.
+There is no need to implement every use case at once.
 
-Uma ordem que permite estudar as camadas gradualmente é:
+An order that allows studying the layers gradually is:
 
 ```text
 1. Shared/domain base
@@ -1097,7 +1097,7 @@ Uma ordem que permite estudar as camadas gradualmente é:
 5. Tags
    ├── CreateTag
    ├── ListTags
-   └── relacionar tags com entries
+   └── associate tags with entries
 
 6. Projects
    ├── CreateProject
@@ -1105,7 +1105,7 @@ Uma ordem que permite estudar as camadas gradualmente é:
    ├── ListProjects
    └── UpdateProject
 
-7. Relacionar
+7. Associate
    TechnicalEntry -> Project
 
 8. Issues
@@ -1125,11 +1125,11 @@ Uma ordem que permite estudar as camadas gradualmente é:
 
 ---
 
-# 22. MVP essencial vs completo
+# 22. Essential versus complete MVP
 
-Nem todos os casos de uso precisam existir para começar a utilizar o DevLog.
+Not every use case needs to exist before starting to use DevLog.
 
-## Primeiro MVP utilizável
+## First usable MVP
 
 ```text
 RegisterUser
@@ -1148,21 +1148,21 @@ GetProject
 ListProjects
 ```
 
-Com isso já é possível:
+This already makes it possible to:
 
 ```text
-Criar projeto
+Create project
     ↓
-Criar registro técnico
+Create technical entry
     ↓
-Relacionar registro ao projeto
+Associate entry with project
     ↓
-Adicionar tags
+Add tags
     ↓
-Pesquisar posteriormente
+Search later
 ```
 
-Depois:
+Later:
 
 ```text
 Solution Attempts
@@ -1172,30 +1172,30 @@ Resources
 Archive
 ```
 
-podem ser adicionados incrementalmente.
+can be added incrementally.
 
 ---
 
-# 23. Regra conceitual principal
+# 23. Main conceptual rule
 
-O DevLog deve responder principalmente três perguntas:
+DevLog should primarily answer three questions:
 
 ```text
-O que eu aprendi?
+What did I learn?
     → TechnicalEntry
 
-Onde eu aprendi/encontrei isso?
+Where did I learn/encounter this?
     → Project
 
-Sobre qual assunto?
+About which topic?
     → Tag
 ```
 
-Para problemas existe uma quarta pergunta:
+For issues, there is a fourth question:
 
 ```text
-Como eu resolvi?
+How did I resolve it?
     → SolutionAttempt + Resolution
 ```
 
-Essa é a base funcional do MVP.
+This is the functional foundation of the MVP.

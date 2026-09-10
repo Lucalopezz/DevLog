@@ -27,7 +27,7 @@ function makeEntry(
     {
       userId: overrides.userId ?? USER_ID,
       title: 'API error',
-      context: 'Investigando o erro da API',
+      context: 'Investigating the API error',
       type: overrides.type ?? TechnicalEntryType.ISSUE,
       conclusion: overrides.conclusion,
       resolvedAt: overrides.resolvedAt,
@@ -63,13 +63,13 @@ describe('ResolveTechnicalIssueUseCase', () => {
     const output = await useCase.execute({
       id: ENTRY_ID,
       userId: USER_ID,
-      conclusion: 'A porta foi liberada',
+      conclusion: 'The port was released',
     });
 
     expect(repository.update.mock.calls).toEqual([[entry]]);
     expect(output).toMatchObject({
       id: ENTRY_ID,
-      conclusion: 'A porta foi liberada',
+      conclusion: 'The port was released',
       status: TechnicalEntryStatus.RESOLVED,
       resolvedAt,
     });
@@ -84,7 +84,7 @@ describe('ResolveTechnicalIssueUseCase', () => {
       useCase.execute({
         id: ENTRY_ID,
         userId: USER_ID,
-        conclusion: 'Resolved diretamente',
+        conclusion: 'Resolved directly',
       }),
     ).resolves.toMatchObject({ status: TechnicalEntryStatus.RESOLVED });
   });
@@ -115,7 +115,7 @@ describe('ResolveTechnicalIssueUseCase', () => {
       useCase.execute({
         id: ENTRY_ID,
         userId: USER_ID,
-        conclusion: 'Resumo do aprendizado',
+        conclusion: 'Learning summary',
       }),
     ).rejects.toBeInstanceOf(UnprocessableEntityException);
 
@@ -150,7 +150,7 @@ describe('ResolveTechnicalIssueUseCase', () => {
       useCase.execute({
         id: ENTRY_ID,
         userId: USER_ID,
-        conclusion: 'Tentativa indevida',
+        conclusion: 'Unauthorized attempt',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
 

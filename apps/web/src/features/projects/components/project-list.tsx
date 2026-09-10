@@ -13,7 +13,7 @@ export function ProjectList({ projects }: ProjectListProps) {
     <section aria-labelledby="projects-list-title" className="space-y-4">
       <div>
         <h2 className="text-xl font-semibold" id="projects-list-title">
-          Seus projetos
+          Your projects
         </h2>
         <p className="text-sm text-muted-foreground">
           Unarchived projects ordered from newest to oldest.
