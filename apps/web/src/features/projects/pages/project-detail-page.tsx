@@ -17,14 +17,21 @@ import {
   ResourcesSection,
   TechnicalEntriesSection,
 } from "../components/project-detail-sections";
+import { ProjectSettingsPane } from "../components/project-settings-pane";
 
-type ProjectDetailTab = "overview" | "entries" | "commands" | "resources";
+type ProjectDetailTab =
+  | "overview"
+  | "entries"
+  | "commands"
+  | "resources"
+  | "settings";
 
 const tabs: { id: ProjectDetailTab; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "entries", label: "Technical entries" },
   { id: "commands", label: "Commands" },
   { id: "resources", label: "Resources" },
+  { id: "settings", label: "Settings" },
 ];
 
 export default function ProjectDetailPage() {
@@ -188,6 +195,12 @@ export default function ProjectDetailPage() {
               resources={resourcesQuery.data?.data}
             />
           </SectionFrame>
+        ) : null}
+        {activeTab === "settings" ? (
+          <ProjectSettingsPane
+            project={project}
+            onEdit={() => setIsEditProjectDialogOpen(true)}
+          />
         ) : null}
       </section>
 
