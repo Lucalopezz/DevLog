@@ -126,6 +126,6 @@ project with the same name.
 
 ## Next areas to develop
 
-Continue technical entry creation and editing, then connect tag and solution attempt workflows and editing of project subresources.
+Continue technical entry creation and editing, then connect tag and solution attempt workflows and editing of project subresources. The frontend roadmap, including the proposed Quick Capture flow, is tracked in [`../../docs/backlog/frontend.md`](../../docs/backlog/frontend.md).
 
 The web app does not yet have a test runner. Until one is added, the minimum checks for frontend changes are `lint` and `build`.

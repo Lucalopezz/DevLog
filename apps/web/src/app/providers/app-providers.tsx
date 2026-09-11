@@ -1,6 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense, type ReactNode } from "react";
 import { Toaster } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "@/lib/query-client";
 
 // In DEV, asynchronously imports ReactQueryDevtools; otherwise, sets it to null
@@ -18,14 +19,16 @@ interface AppProvidersProps {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <Toaster closeButton position="top-right" richColors theme="dark" />
-      {ReactQueryDevtools ? (
-        <Suspense fallback={null}>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </Suspense>
-      ) : null}
-    </QueryClientProvider>
+    <TooltipProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster closeButton position="top-right" richColors theme="dark" />
+        {ReactQueryDevtools ? (
+          <Suspense fallback={null}>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
+        ) : null}
+      </QueryClientProvider>
+    </TooltipProvider>
   );
 }

@@ -1,9 +1,27 @@
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import {
+  Activity,
+  Archive,
+  BarChart3,
+  BookOpen,
+  Boxes,
   CircleUserRound,
+  CircleAlert,
+  CircleCheck,
+  CircleHelp,
+  Cpu,
   FolderKanban,
+  LayoutDashboard,
+  Lightbulb,
+  Link2,
   LogIn,
   LogOut,
+  Plus,
+  Search,
+  Server,
+  Settings2,
+  Tags,
+  Terminal,
   UserPlus,
 } from 'lucide-react'
 import { NavLink } from 'react-router'
@@ -19,14 +37,110 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
 /**
- * 
- * Sidebar navigation link. Uses React Router NavLink to apply active styles
+ * A sidebar item can be a real route or a visual placeholder for a planned
+ * feature. Keeping both variants in the same model makes the product map easy
+ * to scan and avoids adding broken links before their routes exist.
  */
+type SidebarItem = {
+  label: string
+  icon: ComponentType<{ className?: string }>
+  to?: string
+  end?: boolean
+  planned?: boolean
+}
+
+type SidebarSection = {
+  label: string
+  items: SidebarItem[]
+}
+
+const sidebarSections: SidebarSection[] = [
+  {
+    label: 'Workspace',
+    items: [
+      { label: 'Overview', icon: LayoutDashboard, to: '/', end: true },
+      { label: 'Technical Journal', icon: BookOpen, planned: true },
+      { label: 'Projects', icon: FolderKanban, to: '/projects', end: true },
+      { label: 'Quick Capture', icon: Plus, planned: true },
+    ],
+  },
+  {
+    label: 'Journal',
+    items: [
+      { label: 'All Entries', icon: BookOpen, planned: true },
+      { label: 'Open Issues', icon: CircleAlert, planned: true },
+      { label: 'Learnings', icon: Lightbulb, planned: true },
+      { label: 'Resolved Issues', icon: CircleCheck, planned: true },
+      { label: 'Archived Entries', icon: Archive, planned: true },
+      { label: 'Search & Filters', icon: Search, planned: true },
+    ],
+  },
+  {
+    label: 'Project Knowledge',
+    items: [
+      { label: 'Tags', icon: Tags, planned: true },
+      { label: 'Technologies', icon: Cpu, planned: true },
+      { label: 'Commands', icon: Terminal, planned: true },
+      { label: 'Links & Resources', icon: Link2, planned: true },
+      { label: 'Environments', icon: Boxes, planned: true },
+      { label: 'Services', icon: Server, planned: true },
+    ],
+  },
+  {
+    label: 'Insights',
+    items: [
+      { label: 'Activity Timeline', icon: Activity, planned: true },
+      { label: 'Knowledge Overview', icon: BarChart3, planned: true },
+    ],
+  },
+]
+
+function SidebarItemLink({ item }: { item: SidebarItem }) {
+  const Icon = item.icon
+
+  if (item.planned || !item.to) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          aria-disabled="true"
+          disabled
+          tooltip={`${item.label} — coming soon`}
+        >
+          <Icon />
+          <span>{item.label}</span>
+        </SidebarMenuButton>
+        <SidebarMenuBadge>Soon</SidebarMenuBadge>
+      </SidebarMenuItem>
+    )
+  }
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild>
+        <NavLink
+          end={item.end}
+          to={item.to}
+          className={({ isActive }) =>
+            cn(
+              'w-full',
+              isActive && 'bg-sidebar-accent text-sidebar-accent-foreground',
+            )
+          }
+        >
+          <Icon />
+          <span>{item.label}</span>
+        </NavLink>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
+
 function SidebarLink({
   to,
   children,
@@ -79,22 +193,18 @@ export function AppSidebar() {
 
       <SidebarContent>
         {isAuthenticated ? (
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarLink end to="/">
-                  <CircleUserRound />
-                  <span>Home</span>
-                </SidebarLink>
-              </SidebarMenu>
-              <SidebarMenu>
-                <SidebarLink end to="/projects">
-                  <FolderKanban />
-                  <span>Projects</span>
-                </SidebarLink>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          sidebarSections.map((section) => (
+            <SidebarGroup key={section.label}>
+              <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {section.items.map((item) => (
+                    <SidebarItemLink item={item} key={item.label} />
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))
         ) : (
           <SidebarGroup>
             <SidebarGroupLabel>Access</SidebarGroupLabel>
@@ -133,6 +243,22 @@ export function AppSidebar() {
               <CircleUserRound />
               <span className="truncate">{user.name}</span>
             </SidebarLink>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton disabled tooltip="Settings — coming soon">
+                <Settings2 />
+                <span>Settings</span>
+              </SidebarMenuButton>
+              <SidebarMenuBadge>Soon</SidebarMenuBadge>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton disabled tooltip="Help & feedback — coming soon">
+                <CircleHelp />
+                <span>Help & feedback</span>
+              </SidebarMenuButton>
+              <SidebarMenuBadge>Soon</SidebarMenuBadge>
+            </SidebarMenuItem>
 
             <SidebarMenuItem>
               <SidebarMenuButton

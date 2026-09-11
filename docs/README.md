@@ -15,6 +15,7 @@ Use this table as your starting point. Most questions are addressed in the liste
 | Where is the historical/planned MVP specification? | [`usecases/cases.md`](usecases/cases.md) |
 | Where are the UML diagrams? | [`diagrams/README.md`](diagrams/README.md) |
 | What remains to be implemented in the backend? | [`backlog/backend.md`](backlog/backend.md) |
+| What remains to be implemented in the frontend? | [`backlog/frontend.md`](backlog/frontend.md) |
 | How do I configure the environment and connect the API to PostgreSQL? | [`guides/configs_workflow.md`](guides/configs_workflow.md) |
 | How does authentication work, and how is it implemented? | [`guides/authentication_workflow.md`](guides/authentication_workflow.md) |
 | How does entity validation work? | [`guides/entity_validation_workflow.md`](guides/entity_validation_workflow.md) |
