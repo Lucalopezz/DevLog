@@ -3,6 +3,18 @@ import type { Pagination } from "@/api/types";
 export type TechnicalEntryType = "ISSUE" | "LEARNING";
 export type TechnicalEntryStatus = "OPEN" | "RESOLVED";
 
+export function isTechnicalEntryType(
+  value: string | null | undefined,
+): value is TechnicalEntryType {
+  return value === "ISSUE" || value === "LEARNING";
+}
+
+export function isTechnicalEntryStatus(
+  value: string | null | undefined,
+): value is TechnicalEntryStatus {
+  return value === "OPEN" || value === "RESOLVED";
+}
+
 /**
  * Query parameters accepted by GET /technical-entry.
  *
@@ -26,6 +38,13 @@ export type ListTechnicalEntriesParams = {
   status?: TechnicalEntryStatus;
   projectId?: string;
   title?: string;
+};
+
+/** Values edited in the list filters before conversion to query parameters. */
+export type TechnicalEntrySearchFormValues = {
+  title: string;
+  type: TechnicalEntryType | "";
+  status: TechnicalEntryStatus | "";
 };
 
 export type TechnicalEntryTag = {

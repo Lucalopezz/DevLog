@@ -65,7 +65,7 @@ const sidebarSections: SidebarSection[] = [
     label: 'Workspace',
     items: [
       { label: 'Overview', icon: LayoutDashboard, to: '/', end: true },
-      { label: 'Technical Journal', icon: BookOpen, planned: true },
+      { label: 'Technical Journal', icon: BookOpen, to: '/technical-entries', end: true },
       { label: 'Projects', icon: FolderKanban, to: '/projects', end: true },
       { label: 'Quick Capture', icon: Plus, planned: true },
     ],

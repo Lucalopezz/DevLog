@@ -7,6 +7,8 @@ import { RootLayout } from './root-layout'
 import { redirectAuthenticatedUser, requireUser } from './require-user'
 import ProjectsPage from '@/features/projects/pages/projects-page'
 import ProjectDetailPage from '@/features/projects/pages/project-detail-page'
+import TechnicalEntriesPage from '@/features/technical-entry/pages/technical-entries-page'
+import TechnicalEntryDetailPage from '@/features/technical-entry/pages/technical-entry-detail-page'
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +44,14 @@ export const router = createBrowserRouter([
           {
             path: 'projects/:projectId',
             Component: ProjectDetailPage,
+          },
+          {
+            path: 'technical-entries',
+            Component: TechnicalEntriesPage,
+          },
+          {
+            path: 'technical-entries/:technicalEntryId',
+            Component: TechnicalEntryDetailPage,
           },
         ],
       },
