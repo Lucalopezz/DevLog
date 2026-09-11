@@ -1,23 +1,11 @@
-import {
-  ArrowLeft,
-  CalendarDays,
-  FolderKanban,
-  MapPin,
-  Pencil,
-} from "lucide-react";
+import { ArrowLeft, CalendarDays, FolderKanban, MapPin } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/date";
 import { presentProjectStatus } from "../presentation";
 import type { Project } from "../types/project";
 
-export function ProjectDetailHeader({
-  onEdit,
-  project,
-}: {
-  onEdit: () => void;
-  project: Project;
-}) {
+export function ProjectDetailHeader({ project }: { project: Project }) {
   const status = presentProjectStatus(project.status);
 
   return (
@@ -62,23 +50,12 @@ export function ProjectDetailHeader({
         </div>
 
         <div className="grid shrink-0 gap-3 sm:min-w-48">
-          <Button
-            disabled={Boolean(project.archivedAt)}
-            onClick={onEdit}
-            size="sm"
-            type="button"
-            variant="outline"
-          >
-            <Pencil data-icon="inline-start" />
-            Edit project
-          </Button>
-
           <dl className="grid gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <CalendarDays className="size-4" />
               <dt className="sr-only">Created on</dt>
               <dd>
-                Created on{' '}
+                Created on{" "}
                 <time dateTime={project.createdAt}>
                   {formatDate(project.createdAt)}
                 </time>

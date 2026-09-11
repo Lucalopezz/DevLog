@@ -20,11 +20,7 @@ import {
 import { ProjectSettingsPane } from "../components/project-settings-pane";
 
 type ProjectDetailTab =
-  | "overview"
-  | "entries"
-  | "commands"
-  | "resources"
-  | "settings";
+  "overview" | "entries" | "commands" | "resources" | "settings";
 
 const tabs: { id: ProjectDetailTab; label: string }[] = [
   { id: "overview", label: "Overview" },
@@ -49,7 +45,10 @@ export default function ProjectDetailPage() {
   // Each hook represents an independent API collection. Pages are also
   // independent: advancing commands does not change the resource page.
   const projectQuery = useGetProject(projectId);
-  const technicalEntriesQuery = useProjectTechnicalEntries(projectId, entriesPage);
+  const technicalEntriesQuery = useProjectTechnicalEntries(
+    projectId,
+    entriesPage,
+  );
   const commandsQuery = useProjectCommands(projectId, commandsPage);
   const resourcesQuery = useProjectResources(projectId, resourcesPage);
 
@@ -69,11 +68,15 @@ export default function ProjectDetailPage() {
             <FolderKanban className="size-6" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-semibold" id="project-detail-error-title">
+            <h1
+              className="text-xl font-semibold"
+              id="project-detail-error-title"
+            >
               Project not found
             </h1>
             <p className="text-sm leading-6 text-muted-foreground">
-              The project may have been removed or may not belong to your account.
+              The project may have been removed or may not belong to your
+              account.
             </p>
           </div>
           <Button asChild variant="outline">
@@ -88,10 +91,7 @@ export default function ProjectDetailPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8">
-      <ProjectDetailHeader
-        onEdit={() => setIsEditProjectDialogOpen(true)}
-        project={project}
-      />
+      <ProjectDetailHeader project={project} />
       <ProjectEditForm
         key={`${project.id}:${project.updatedAt}`}
         open={isEditProjectDialogOpen}
@@ -101,7 +101,10 @@ export default function ProjectDetailPage() {
 
       {/* ARIA roles make navigation understandable to screen readers;
           visible focus provides equivalent cues for keyboard and mouse users. */}
-      <nav aria-label="Project sections" className="overflow-x-auto border-b border-border/60">
+      <nav
+        aria-label="Project sections"
+        className="overflow-x-auto border-b border-border/60"
+      >
         <div className="flex min-w-max gap-1" role="tablist">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -205,7 +208,10 @@ export default function ProjectDetailPage() {
       </section>
 
       {projectQuery.isFetching ? (
-        <p aria-live="polite" className="flex items-center gap-2 text-sm text-muted-foreground">
+        <p
+          aria-live="polite"
+          className="flex items-center gap-2 text-sm text-muted-foreground"
+        >
           <RefreshCw className="size-4 animate-spin" />
           Updating project...
         </p>
