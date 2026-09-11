@@ -2,11 +2,11 @@ import { CalendarDays, Hash, Tags } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Markdown } from "@/components/markdown";
 import { formatDate, formatRelativeDate } from "@/lib/date";
 import { useGetTechnicalEntry } from "../hooks/use-get-technical-entry";
 import { TechnicalEntryDetailHeader } from "../components/technical-entry-detail-header";
 import { TechnicalEntryEditForm } from "../components/technical-entry-edit-form";
+import { TechnicalEntryInlineContent } from "../components/technical-entry-inline-content";
 import { TechnicalEntryDetailSkeleton } from "../components/technical-entry-detail-skeleton";
 import { DeleteTechnicalEntryButton } from "../components/technical-entry-delete-btn";
 import {
@@ -87,9 +87,13 @@ export default function TechnicalEntryDetailPage() {
                 </p>
               </div>
             </div>
-            <Markdown className="max-w-3xl text-card-foreground/80">
-              {entry.context}
-            </Markdown>
+            <TechnicalEntryInlineContent
+              emptyMessage="Context is required."
+              entry={entry}
+              field="context"
+              label="Context"
+              placeholder="Describe what happened, where it happened, and what you tried."
+            />
           </section>
 
           <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm sm:p-8">
@@ -104,15 +108,13 @@ export default function TechnicalEntryDetailPage() {
                 </p>
               </div>
             </div>
-            {entry.conclusion ? (
-              <Markdown className="max-w-3xl text-card-foreground/80">
-                {entry.conclusion}
-              </Markdown>
-            ) : (
-              <p className="text-sm italic leading-6 text-muted-foreground">
-                No conclusion has been recorded yet.
-              </p>
-            )}
+            <TechnicalEntryInlineContent
+              emptyMessage="No conclusion has been recorded yet."
+              entry={entry}
+              field="conclusion"
+              label="Conclusion"
+              placeholder="What did you learn or how did you solve it?"
+            />
           </section>
         </div>
 

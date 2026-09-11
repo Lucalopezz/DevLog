@@ -1,6 +1,7 @@
 import type { SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { FormInput } from "@/components/ui/form-input";
 import {
   Dialog,
   DialogContent,
@@ -9,11 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useTechnicalEntryEditForm } from "../hooks/use-technical-entry-form";
+import { useTechnicalEntryTitleForm } from "../hooks/use-technical-entry-form";
 import { useUpdateTechnicalEntry } from "../hooks/use-update-technical-entry";
-import type { UpdateTechnicalEntryFormValues } from "../schemas/technical-entry.schema";
+import type { UpdateTechnicalEntryTitleFormValues } from "../schemas/technical-entry.schema";
 import type { TechnicalEntry } from "../types/technical-entry";
-import { TechnicalEntryFormFields } from "./technical-entry-form-fields";
 
 type Props = {
   entry: TechnicalEntry;
@@ -21,27 +21,22 @@ type Props = {
   onOpenChange: (open: boolean) => void;
 };
 
-function nullableText(value: string) {
-  const normalized = value.trim();
-  return normalized || null;
-}
-
 /**
- * Edit wrapper for the shared technical-entry fields.
+ * Dialog wrapper for the technical entry title.
  *
- * The type is intentionally not rendered here: the PATCH contract does not
- * allow changing ISSUE into LEARNING or vice versa. Status is also controlled
- * by the resolve/reopen actions, not by this general-details form.
+ * Long-form content has its own inline editor on the detail page. Separating
+ * the title form from the content editor makes each interaction smaller and
+ * avoids making the user search through a modal to edit a paragraph.
  */
 export function TechnicalEntryEditForm({
   entry,
   open,
   onOpenChange,
 }: Props) {
-  const form = useTechnicalEntryEditForm(entry);
+  const form = useTechnicalEntryTitleForm(entry);
   const updateMutation = useUpdateTechnicalEntry();
 
-  const onSubmit: SubmitHandler<UpdateTechnicalEntryFormValues> = async (
+  const onSubmit: SubmitHandler<UpdateTechnicalEntryTitleFormValues> = async (
     data,
   ) => {
     try {
@@ -49,8 +44,6 @@ export function TechnicalEntryEditForm({
         technicalEntryId: entry.id,
         input: {
           title: data.title,
-          context: data.context,
-          conclusion: nullableText(data.conclusion),
         },
       });
       onOpenChange(false);
@@ -70,7 +63,7 @@ export function TechnicalEntryEditForm({
             Edit technical entry
           </DialogTitle>
           <DialogDescription className="leading-6">
-            Update the title, context, or conclusion of this entry.
+            Update the title of this entry.
           </DialogDescription>
         </DialogHeader>
 
@@ -80,9 +73,13 @@ export function TechnicalEntryEditForm({
             noValidate
             onSubmit={form.handleSubmit(onSubmit)}
           >
-            <TechnicalEntryFormFields<UpdateTechnicalEntryFormValues>
+            <FormInput
+              autoComplete="off"
               control={form.control}
               disabled={isLoading}
+              label="Title"
+              name="title"
+              placeholder="Unable to connect to the database"
             />
 
             <DialogFooter className="mx-0 mt-1 mb-0 border-t-0 bg-transparent p-0">

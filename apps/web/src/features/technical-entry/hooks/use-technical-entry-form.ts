@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createTechnicalEntrySchema,
   type CreateTechnicalEntryFormValues,
-  updateTechnicalEntrySchema,
-  type UpdateTechnicalEntryFormValues,
+  type UpdateTechnicalEntryTitleFormValues,
+  updateTechnicalEntryTitleSchema,
 } from "../schemas/technical-entry.schema";
 
 export function useTechnicalEntryForm() {
@@ -20,14 +20,11 @@ export function useTechnicalEntryForm() {
   });
 }
 
-export function useTechnicalEntryEditForm(entry: TechnicalEntry) {
-  return useForm<UpdateTechnicalEntryFormValues>({
-    resolver: zodResolver(updateTechnicalEntrySchema),
+export function useTechnicalEntryTitleForm(entry: TechnicalEntry) {
+  return useForm<UpdateTechnicalEntryTitleFormValues>({
+    resolver: zodResolver(updateTechnicalEntryTitleSchema),
     defaultValues: {
       title: entry.title,
-      context: entry.context,
-      conclusion: entry.conclusion ?? "",
-      projectId: entry.projectId ?? "",
     },
   });
 }
