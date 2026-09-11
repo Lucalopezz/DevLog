@@ -27,4 +27,8 @@ export interface ProjectRepository extends SearchableRepositoryInterface<
   ProjectSearchResult
 > {
   findByOwnerId(userId: string): Promise<ProjectEntity[]>;
+  findByNameAndOwnerId(
+    name: string,
+    userId: string,
+  ): Promise<ProjectEntity | null>;
 }

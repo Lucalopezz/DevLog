@@ -218,7 +218,7 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 - [x] Associate the project with the authenticated user.
 - [x] Default initial project status to `ACTIVE` when omitted.
 - [x] Create the creation endpoint.
-- [x] Test valid creation, missing description, and association with the correct user.
+- [x] Test valid creation, missing description, association with the correct user, and duplicate names per user.
 - [ ] Test DTO input validation, including a missing name.
 
 ### GetProject and ListProjects

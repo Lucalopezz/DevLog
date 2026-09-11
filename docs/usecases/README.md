@@ -36,6 +36,7 @@ The current code has no external secondary actor. The database, controllers, use
 4. Lists are paginated and have their own sorting and filters.
 5. Successful deletions return no content.
 6. `null` clears associations or optional values only where the contract allows it; omission preserves the current value.
+7. Project names are unique per authenticated user; attempting to create a duplicate returns `409 Conflict`.
 
 ## Domain vocabulary
 

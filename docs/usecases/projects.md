@@ -20,13 +20,18 @@ is repeated in alternative flows only when it changes the meaning of the use cas
 
 1. The user provides the project details.
 2. The system validates the data and confirms that the user exists.
-3. The system creates the project with status `ACTIVE`.
-4. The system returns the created project.
+3. The system checks whether the authenticated user already has a project with
+   the same name.
+4. The system creates the project with status `ACTIVE`.
+5. The system returns the created project.
 
 ### Alternative flows
 
-- An invalid name, a name already used by the same user, or a missing account prevents
-  creation.
+- An invalid name or a missing account prevents creation with `422 Unprocessable
+  Entity`.
+- A name already used by the same user prevents creation with `409 Conflict`.
+- The database also enforces the `(user_id, name)` uniqueness constraint so that
+  concurrent requests cannot persist duplicate projects.
 
 ## UC-11 — Search projects
 

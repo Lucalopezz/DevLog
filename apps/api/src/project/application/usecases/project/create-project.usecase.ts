@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
 import {
   ProjectOutput,
@@ -24,7 +24,7 @@ export class CreateProjectUseCase implements UseCaseContract<
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly userRepository: UserRepository,
-  ) {}
+  ) { }
 
   async execute(
     input: CreateProjectUseCaseInput,
@@ -42,6 +42,19 @@ export class CreateProjectUseCase implements UseCaseContract<
       description,
       status: ProjectStatusEnum.ACTIVE,
     });
+
+    // The application check gives the user a meaningful 409 response. The
+    // database unique constraint remains necessary for concurrent requests.
+    const projectExists = await this.projectRepository.findByNameAndOwnerId(
+      entity.name,
+      entity.userId,
+    );
+
+    if (projectExists) {
+      throw new ConflictException(
+        'Project with this name already exists for this user',
+      );
+    }
 
     await this.projectRepository.insert(entity);
 

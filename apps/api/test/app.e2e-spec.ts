@@ -147,4 +147,18 @@ describe('Project archive relationships (e2e)', () => {
       }),
     ]);
   });
+
+  it('rejects a duplicate project name for the same authenticated user', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/project')
+      .set('Cookie', AUTH_COOKIE)
+      .send({ name: 'DevLog E2E' })
+      .expect(409);
+
+    expect(response.body).toMatchObject({
+      statusCode: 409,
+      message: 'Project with this name already exists for this user',
+      error: 'Conflict',
+    });
+  });
 });

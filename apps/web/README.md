@@ -120,7 +120,9 @@ from feature-local components and mutations:
 
 Archived projects are displayed as read-only. Deletion requires typing the
 project name and redirects to `/projects` after success. The backend also
-requires an archived project to be restored before it can be deleted.
+requires an archived project to be restored before it can be deleted. Project
+creation also reports a conflict when the authenticated user already has a
+project with the same name.
 
 ## Next areas to develop
 

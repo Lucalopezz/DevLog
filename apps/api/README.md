@@ -49,7 +49,8 @@ Within features, the main layers are:
 Use cases receive `userId` from `AuthGuard`, never from the client request body.
 Queries and mutations validate resource ownership to prevent access to another
 user's data. The project aggregate also enforces that archived projects are
-read-only and that deletion is allowed only after restoration. See the
+read-only, project names are unique per user during creation, and deletion is
+allowed only after restoration. See the
 [project use cases](../docs/usecases/projects.md) and [database decisions](../docs/decisions/database.md)
 for the reasoning.
 

@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ProjectEntity } from '@/project/domain/entities/project/project.entity';
 import { ProjectRepository } from '@/project/domain/repositories/project/project.repository';
 import { UserRepository } from '@/user/domain/repositories/user.repository';
@@ -11,8 +11,10 @@ describe('CreateProjectUseCase', () => {
     const insert = jest
       .fn<(entity: ProjectEntity) => Promise<void>>()
       .mockResolvedValue(undefined);
+    const findByNameAndOwnerId = jest.fn().mockResolvedValue(null);
     const projectRepository = {
       insert,
+      findByNameAndOwnerId,
     } as unknown as jest.Mocked<ProjectRepository>;
     const findById = jest.fn().mockResolvedValue({ id: USER_ID });
     const userRepository = {
@@ -21,9 +23,9 @@ describe('CreateProjectUseCase', () => {
 
     return {
       useCase: new CreateProjectUseCase(projectRepository, userRepository),
-      projectRepository,
       insert,
       findById,
+      findByNameAndOwnerId,
     };
   }
 
@@ -71,5 +73,26 @@ describe('CreateProjectUseCase', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
 
     expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('rejects a project name already used by the same user', async () => {
+    const { useCase, insert, findByNameAndOwnerId } = makeUseCase();
+    findByNameAndOwnerId.mockResolvedValue(
+      new ProjectEntity({
+        userId: USER_ID,
+        name: 'DevLog',
+        status: 'ACTIVE',
+      }),
+    );
+    const execution = useCase.execute({ userId: USER_ID, name: 'DevLog' });
+
+    await expect(execution).rejects.toBeInstanceOf(ConflictException);
+    await expect(execution).rejects.toThrow(
+      'Project with this name already exists for this user',
+    );
+
+    expect(findByNameAndOwnerId).toHaveBeenCalledWith('DevLog', USER_ID);
+    expect(insert).not.toHaveBeenCalled();
+    expect(findByNameAndOwnerId).toHaveBeenCalledTimes(1);
   });
 });

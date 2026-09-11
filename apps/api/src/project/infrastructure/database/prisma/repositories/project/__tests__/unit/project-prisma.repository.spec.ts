@@ -126,6 +126,23 @@ describe('ProjectPrismaRepository', () => {
     await expect(repository.findById('missing-id')).resolves.toBeNull();
   });
 
+  it('finds a project by the owner and unique name', async () => {
+    findUnique.mockResolvedValue(makeModel());
+
+    await expect(
+      repository.findByNameAndOwnerId('DevLog', USER_ID),
+    ).resolves.toMatchObject({
+      id: PROJECT_ID,
+      name: 'DevLog',
+    });
+
+    expect(findUnique).toHaveBeenCalledWith({
+      where: {
+        userId_name: { userId: USER_ID, name: 'DevLog' },
+      },
+    });
+  });
+
   it('updates mutable fields and deletes by ID', async () => {
     const entity = makeEntity();
 

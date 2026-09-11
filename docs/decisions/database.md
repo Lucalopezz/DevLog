@@ -112,6 +112,11 @@ UNIQUE (user_id, name)
 
 A user cannot have two projects with the same name, but different users may use the same project names.
 
+The create-project use case checks this pair before inserting so the normal
+duplicate request returns `409 Conflict` instead of exposing a persistence
+error. The database constraint remains mandatory because a pre-check alone
+cannot prevent duplicates when concurrent requests arrive at the same time.
+
 ### About `repository_url`
 
 The initial document placed `repositoryUrl` directly in `Project`, but also defined `ProjectResource` with the `REPOSITORY` type.

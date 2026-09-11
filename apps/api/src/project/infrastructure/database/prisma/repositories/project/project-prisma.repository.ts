@@ -12,7 +12,7 @@ import { ProjectModelMapper } from './models/project-model.mapper';
 export class ProjectPrismaRepository implements ProjectRepository {
   sortableFields: string[] = ['createdAt', 'updatedAt', 'name'];
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   async insert(entity: ProjectEntity): Promise<void> {
     await this.prismaService.project.create({
@@ -50,6 +50,19 @@ export class ProjectPrismaRepository implements ProjectRepository {
     const model = await this.prismaService.project.findUnique({
       where: { id },
     });
+    return model ? ProjectModelMapper.toEntity(model) : null;
+  }
+
+  async findByNameAndOwnerId(
+    name: string,
+    userId: string,
+  ): Promise<ProjectEntity | null> {
+    const model = await this.prismaService.project.findUnique({
+      where: {
+        userId_name: { userId, name },
+      },
+    });
+
     return model ? ProjectModelMapper.toEntity(model) : null;
   }
 

@@ -20,8 +20,14 @@ sequenceDiagram
     else existing user
         UC->>Project: create(status ACTIVE)
         Project-->>UC: valid project or error 422
-        UC->>PRepo: insert(project)
-        UC-->>UserActor: project created
+        UC->>PRepo: findByNameAndOwnerId(name, userId)
+        alt duplicate name for the same user
+            UC-->>UserActor: 409 Conflict
+        else name available
+            UC->>PRepo: insert(project)
+            Note over PRepo: Database unique constraint remains the final guard
+            UC-->>UserActor: project created
+        end
     end
 ```
 
