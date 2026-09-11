@@ -1,4 +1,4 @@
-import { FolderKanban, RefreshCw } from "lucide-react";
+import { FolderKanban, Plus, RefreshCw } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import {
   TechnicalEntriesSection,
 } from "../components/project-detail-sections";
 import { ProjectSettingsPane } from "../components/project-settings-pane";
+import { TechnicalEntryForm } from "@/features/technical-entry/components/technical-entry-form";
 
 type ProjectDetailTab =
   "overview" | "entries" | "commands" | "resources" | "settings";
@@ -41,6 +42,8 @@ export default function ProjectDetailPage() {
   const [commandsPage, setCommandsPage] = useState(1);
   const [resourcesPage, setResourcesPage] = useState(1);
   const [isEditProjectDialogOpen, setIsEditProjectDialogOpen] = useState(false);
+  const [isCreateEntryDialogOpen, setIsCreateEntryDialogOpen] =
+    useState(false);
 
   // Each hook represents an independent API collection. Pages are also
   // independent: advancing commands does not change the resource page.
@@ -98,6 +101,11 @@ export default function ProjectDetailPage() {
         onOpenChange={setIsEditProjectDialogOpen}
         project={project}
       />
+      <TechnicalEntryForm
+        open={isCreateEntryDialogOpen}
+        onOpenChange={setIsCreateEntryDialogOpen}
+        projectId={project.id}
+      />
 
       {/* ARIA roles make navigation understandable to screen readers;
           visible focus provides equivalent cues for keyboard and mouse users. */}
@@ -151,6 +159,16 @@ export default function ProjectDetailPage() {
 
         {activeTab === "entries" ? (
           <SectionFrame
+            action={
+              <Button
+                disabled={Boolean(project.archivedAt)}
+                onClick={() => setIsCreateEntryDialogOpen(true)}
+                type="button"
+              >
+                <Plus data-icon="inline-start" />
+                New entry
+              </Button>
+            }
             description="Issues and lessons learned in the context of this project."
             title="Technical entries"
           >
@@ -221,19 +239,24 @@ export default function ProjectDetailPage() {
 }
 
 function SectionFrame({
+  action,
   children,
   description,
   title,
 }: {
+  action?: ReactNode;
   children: ReactNode;
   description: string;
   title: string;
 }) {
   return (
     <div className="space-y-5">
-      <header className="space-y-1">
-        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-        <p className="text-sm text-muted-foreground">{description}</p>
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1">
+          <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+        {action}
       </header>
       {children}
     </div>

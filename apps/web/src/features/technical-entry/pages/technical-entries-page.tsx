@@ -1,11 +1,13 @@
-import { BookOpen, RefreshCw } from "lucide-react";
+import { BookOpen, Plus, RefreshCw } from "lucide-react";
 import { useSearchParams } from "react-router";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTechnicalEntries } from "../hooks/use-technical-entries";
 import { TechnicalEntryFilters } from "../components/technical-entry-filter";
 import { TechnicalEntryList } from "../components/technical-entry-list";
 import { TechnicalEntryListSkeleton } from "../components/technical-entry-list-skeleton";
 import { TechnicalEntryPagination } from "../components/technical-entry-pagination";
+import { TechnicalEntryForm } from "../components/technical-entry-form";
 import {
   isTechnicalEntryStatus,
   isTechnicalEntryType,
@@ -29,6 +31,8 @@ function parsePage(value: string | null) {
 
 export default function TechnicalEntriesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isCreateEntryDialogOpen, setIsCreateEntryDialogOpen] =
+    useState(false);
 
   const page = parsePage(searchParams.get("page"));
   const title = searchParams.get("title")?.trim() || undefined;
@@ -96,16 +100,31 @@ export default function TechnicalEntriesPage() {
           </p>
         </div>
 
-        {isFetching && !isPending ? (
-          <p
-            aria-live="polite"
-            className="flex items-center gap-2 text-sm text-muted-foreground"
+        <div className="flex flex-col gap-3 sm:items-end">
+          <Button
+            onClick={() => setIsCreateEntryDialogOpen(true)}
+            type="button"
           >
-            <RefreshCw className="size-4 animate-spin" />
-            Updating...
-          </p>
-        ) : null}
+            <Plus data-icon="inline-start" />
+            New entry
+          </Button>
+
+          {isFetching && !isPending ? (
+            <p
+              aria-live="polite"
+              className="flex items-center gap-2 text-sm text-muted-foreground"
+            >
+              <RefreshCw className="size-4 animate-spin" />
+              Updating...
+            </p>
+          ) : null}
+        </div>
       </header>
+
+      <TechnicalEntryForm
+        open={isCreateEntryDialogOpen}
+        onOpenChange={setIsCreateEntryDialogOpen}
+      />
 
       <TechnicalEntryFilters
         key={`${title ?? ""}:${type ?? ""}:${status ?? ""}`}

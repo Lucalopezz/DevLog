@@ -48,8 +48,11 @@ const defaultParams = {
 export const projectDetailKeys = {
   all: (projectId: string) => ["project", projectId, "details"] as const,
 
+  technicalEntriesRoot: (projectId: string) =>
+    [...projectDetailKeys.all(projectId), "technical-entries"] as const,
+
   technicalEntries: (projectId: string, params: ProjectDetailListParams) =>
-    [...projectDetailKeys.all(projectId), "technical-entries", params] as const,
+    [...projectDetailKeys.technicalEntriesRoot(projectId), params] as const,
 
   commands: (projectId: string, params: ProjectDetailListParams) =>
     [...projectDetailKeys.all(projectId), "commands", params] as const,

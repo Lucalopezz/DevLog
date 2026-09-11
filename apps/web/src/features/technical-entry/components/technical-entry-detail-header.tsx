@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, FolderKanban } from "lucide-react";
+import { ArrowLeft, CalendarDays, FolderKanban, Pencil } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/date";
@@ -10,8 +10,10 @@ import type { TechnicalEntry } from "../types/technical-entry";
 
 export function TechnicalEntryDetailHeader({
   entry,
+  onEdit,
 }: {
   entry: TechnicalEntry;
+  onEdit: () => void;
 }) {
   const type = presentTechnicalEntryType(entry.type);
   const status = entry.status
@@ -21,12 +23,18 @@ export function TechnicalEntryDetailHeader({
 
   return (
     <header className="space-y-6">
-      <Button asChild className="-ml-2" size="sm" variant="ghost">
-        <Link to="/technical-entries">
-          <ArrowLeft data-icon="inline-start" />
-          Back to technical entries
-        </Link>
-      </Button>
+      <div className="flex items-center justify-between gap-3">
+        <Button asChild className="-ml-2" size="sm" variant="ghost">
+          <Link to="/technical-entries">
+            <ArrowLeft data-icon="inline-start" />
+            Back to technical entries
+          </Link>
+        </Button>
+        <Button onClick={onEdit} size="sm" type="button" variant="outline">
+          <Pencil data-icon="inline-start" />
+          Edit entry
+        </Button>
+      </div>
 
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-start gap-4">

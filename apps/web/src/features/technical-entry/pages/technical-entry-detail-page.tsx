@@ -1,10 +1,12 @@
 import { CalendarDays, Hash, Tags } from "lucide-react";
 import { Link, useParams } from "react-router";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/markdown";
 import { formatDate, formatRelativeDate } from "@/lib/date";
 import { useGetTechnicalEntry } from "../hooks/use-get-technical-entry";
 import { TechnicalEntryDetailHeader } from "../components/technical-entry-detail-header";
+import { TechnicalEntryEditForm } from "../components/technical-entry-edit-form";
 import { TechnicalEntryDetailSkeleton } from "../components/technical-entry-detail-skeleton";
 import { DeleteTechnicalEntryButton } from "../components/technical-entry-delete-btn";
 import {
@@ -16,6 +18,7 @@ export default function TechnicalEntryDetailPage() {
   const { technicalEntryId = "" } = useParams<{
     technicalEntryId: string;
   }>();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const entryQuery = useGetTechnicalEntry(technicalEntryId);
 
   if (entryQuery.isPending) return <TechnicalEntryDetailSkeleton />;
@@ -59,7 +62,16 @@ export default function TechnicalEntryDetailPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8">
-      <TechnicalEntryDetailHeader entry={entry} />
+      <TechnicalEntryDetailHeader
+        entry={entry}
+        onEdit={() => setIsEditDialogOpen(true)}
+      />
+      <TechnicalEntryEditForm
+        key={`${entry.id}:${entry.updatedAt}`}
+        entry={entry}
+        onOpenChange={setIsEditDialogOpen}
+        open={isEditDialogOpen}
+      />
 
       <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
         <div className="space-y-5">
