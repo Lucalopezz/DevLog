@@ -22,7 +22,7 @@ export async function listTechnicalEntries(
  * */
 
 export const technicalEntriesKeys = {
-  all: ["projects"] as const,
+  all: ["technical-entries"] as const,
   lists: () => [...technicalEntriesKeys.all, "lists"] as const,
   list: (params: ListTechnicalEntriesParams) =>
     [...technicalEntriesKeys.lists(), "list", params] as const,
