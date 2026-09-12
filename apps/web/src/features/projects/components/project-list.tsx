@@ -1,3 +1,4 @@
+import { Markdown } from "@/components/markdown";
 import { presentProjectStatus } from "../presentation";
 import type { Project } from "../types/project";
 import { formatDate } from "@/lib/date";
@@ -44,9 +45,9 @@ export function ProjectList({ projects }: ProjectListProps) {
                   </header>
 
                   {project.description ? (
-                    <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
+                    <Markdown className="max-h-18 overflow-hidden text-sm leading-6 text-muted-foreground">
                       {project.description}
-                    </p>
+                    </Markdown>
                   ) : (
                     <p className="text-sm italic text-muted-foreground">
                       No description.

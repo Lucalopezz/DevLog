@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router";
 import { formatRelativeDate } from "@/lib/date";
+import { Markdown } from "@/components/markdown";
 import {
   presentTechnicalEntryStatus,
   presentTechnicalEntryType,
@@ -65,9 +66,9 @@ export function TechnicalEntryList({
                     ) : null}
                   </header>
 
-                  <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
+                  <Markdown className="max-h-24 overflow-hidden text-sm leading-6 text-muted-foreground">
                     {entry.context}
-                  </p>
+                  </Markdown>
 
                   {entry.tags?.length ? (
                     <ul className="flex flex-wrap gap-1.5">
