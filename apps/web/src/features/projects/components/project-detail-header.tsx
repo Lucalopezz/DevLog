@@ -41,10 +41,6 @@ export function ProjectDetailHeader({ project }: { project: Project }) {
               <h1 className="break-words text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
                 {project.name}
               </h1>
-              <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                {project.description ||
-                  "A space to organize decisions, references, and lessons learned in this project."}
-              </p>
             </div>
           </div>
         </div>

@@ -1,7 +1,14 @@
-import { BookOpenText, Boxes, CircleDot, Code2, ExternalLink } from "lucide-react";
+import {
+  BookOpenText,
+  Boxes,
+  CircleDot,
+  Code2,
+  ExternalLink,
+} from "lucide-react";
 import { formatRelativeDate } from "@/lib/date";
 import { presentProjectStatus } from "../presentation";
 import type { Project } from "../types/project";
+import { ProjectInlineContent } from "./project-inline-content";
 
 type ProjectDetailOverviewProps = {
   project: Project;
@@ -38,6 +45,18 @@ export function ProjectDetailOverview({
 
   return (
     <div className="space-y-5">
+      <section className="grid gap-3 sm:grid-cols-3">
+        {/* Totals come from meta.total, not the current page size. This keeps
+            the summary accurate even when the collection is paginated. */}
+        <Metric
+          icon={Boxes}
+          label="Technical entries"
+          value={technicalEntriesTotal}
+        />
+        <Metric icon={Code2} label="Commands" value={commandsTotal} />
+        <Metric icon={ExternalLink} label="Resources" value={resourcesTotal} />
+      </section>
+
       <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
         <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm sm:p-8">
           <div className="mb-6 flex items-center gap-3">
@@ -46,26 +65,30 @@ export function ProjectDetailOverview({
             </span>
             <div>
               <h2 className="font-semibold">About the project</h2>
-              <p className="text-sm text-muted-foreground">Context to get back to work</p>
+              <p className="text-sm text-muted-foreground">
+                Context to get back to work
+              </p>
             </div>
           </div>
 
-          <p className="max-w-2xl whitespace-pre-wrap text-sm leading-7 text-card-foreground/80">
-            {project.description || "This project does not have a description yet."}
-          </p>
+          <ProjectInlineContent project={project} />
 
           <dl className="mt-8 grid gap-4 border-t border-border/60 pt-5 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-muted-foreground">Current status</dt>
               <dd className="mt-1 flex items-center gap-2 font-medium">
                 <CircleDot className="size-4 text-primary" />
-                <span className={status.className.split(" ")[1]}>{status.label}</span>
+                <span className={status.className.split(" ")[1]}>
+                  {status.label}
+                </span>
               </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Last updated</dt>
               <dd className="mt-1 font-medium">
-                <time dateTime={project.updatedAt}>{formatRelativeDate(project.updatedAt)}</time>
+                <time dateTime={project.updatedAt}>
+                  {formatRelativeDate(project.updatedAt)}
+                </time>
               </dd>
             </div>
           </dl>
@@ -91,7 +114,9 @@ export function ProjectDetailOverview({
                 >
                   <span className="font-medium">{technology.name}</span>
                   {technology.version ? (
-                    <span className="ml-1.5 text-muted-foreground">{technology.version}</span>
+                    <span className="ml-1.5 text-muted-foreground">
+                      {technology.version}
+                    </span>
                   ) : null}
                 </li>
               ))}
@@ -103,14 +128,6 @@ export function ProjectDetailOverview({
           )}
         </section>
       </div>
-
-      <section className="grid gap-3 sm:grid-cols-3">
-        {/* Totals come from meta.total, not the current page size. This keeps
-            the summary accurate even when the collection is paginated. */}
-        <Metric icon={Boxes} label="Technical entries" value={technicalEntriesTotal} />
-        <Metric icon={Code2} label="Commands" value={commandsTotal} />
-        <Metric icon={ExternalLink} label="Resources" value={resourcesTotal} />
-      </section>
     </div>
   );
 }
