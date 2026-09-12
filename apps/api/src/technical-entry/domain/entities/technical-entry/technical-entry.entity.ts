@@ -171,6 +171,8 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
   }
 
   archive(): void {
+    // Explicit lifecycle commands are idempotent: retrying an archive request
+    // must not change the original archive timestamp.
     if (this.archivedAt !== undefined) {
       return;
     }
@@ -185,6 +187,26 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     TechnicalEntryEntity.validate(updatedProps);
 
     this.archivedAt = now;
+    this.updatedAt = now;
+  }
+
+  restore(): void {
+    // Restoring an active entry is also a safe no-op, which makes retries
+    // predictable for both the API and clients using mutation retries.
+    if (this.archivedAt === undefined) {
+      return;
+    }
+
+    const now = new Date();
+    const updatedProps = {
+      ...this.props,
+      archivedAt: undefined,
+      updatedAt: now,
+    };
+
+    TechnicalEntryEntity.validate(updatedProps);
+
+    this.archivedAt = undefined;
     this.updatedAt = now;
   }
   get status(): TechnicalEntryStatus | undefined {
@@ -257,7 +279,7 @@ export class TechnicalEntryEntity extends Entity<TechnicalEntryProps> {
     this.props.resolvedAt = resolvedAt;
   }
 
-  private set archivedAt(archivedAt: Date) {
+  private set archivedAt(archivedAt: Date | undefined) {
     this.props.archivedAt = archivedAt;
   }
 

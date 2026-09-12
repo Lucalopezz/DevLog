@@ -27,6 +27,7 @@ import { ReopenTechnicalIssueUseCase } from '../application/usecases/technical-e
 import { UpdateSolutionAttemptUseCase } from '../application/usecases/solution-attempt/update-solution-attempt.usecase';
 import { RemoveSolutionAttemptUseCase } from '../application/usecases/solution-attempt/remove-solution-attempt.usecase';
 import { ArchiveTechnicalEntryUseCase } from '../application/usecases/technical-entry/archive-technical-entry.usecase';
+import { RestoreTechnicalEntryUseCase } from '../application/usecases/technical-entry/restore-technical-entry.usecase';
 
 @Module({
   controllers: [TechnicalEntryController],
@@ -139,6 +140,13 @@ import { ArchiveTechnicalEntryUseCase } from '../application/usecases/technical-
       provide: ArchiveTechnicalEntryUseCase,
       useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
         return new ArchiveTechnicalEntryUseCase(technicalEntryRepository);
+      },
+      inject: ['TechnicalEntryRepository'],
+    },
+    {
+      provide: RestoreTechnicalEntryUseCase,
+      useFactory: (technicalEntryRepository: TechnicalEntryRepository) => {
+        return new RestoreTechnicalEntryUseCase(technicalEntryRepository);
       },
       inject: ['TechnicalEntryRepository'],
     },

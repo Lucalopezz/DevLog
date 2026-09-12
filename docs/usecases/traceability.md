@@ -41,6 +41,7 @@ represented in the behavioral documentation.
 | `PATCH /api/technical-entry/:id/resolve`                            | [UC-34 — Resolve technical issue](technical-entries.md#uc-34--resolve-technical-issue)   |    Yes    |
 | `PATCH /api/technical-entry/:id/reopen`                             | [UC-35 — Reopen technical issue](technical-entries.md#uc-35--reopen-technical-issue)     |    Yes    |
 | `PATCH /api/technical-entry/:id/archive`                            | [UC-36 — Archive technical entry](technical-entries.md#uc-36--archive-technical-entry)   |    Yes    |
+| `PATCH /api/technical-entry/:id/restore`                            | [UC-36a — Restore technical entry](technical-entries.md#uc-36a--restore-technical-entry) |    Yes    |
 | `DELETE /api/technical-entry/:id`                                   | [UC-37 — Delete technical entry](technical-entries.md#uc-37--delete-technical-entry)     |    Yes    |
 | `POST /api/technical-entry/:entryId/tags`                           | [UC-38 — Assign tag to entry](technical-entries.md#uc-38--assign-tag-to-entry)           |    Yes    |
 | `DELETE /api/technical-entry/:entryId/tags/:tagId`                  | [UC-39 — Remove tag from entry](technical-entries.md#uc-39--remove-tag-from-entry)       |    Yes    |

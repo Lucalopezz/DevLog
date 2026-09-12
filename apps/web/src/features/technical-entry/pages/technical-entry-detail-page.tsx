@@ -9,6 +9,8 @@ import { TechnicalEntryEditForm } from "../components/technical-entry-edit-form"
 import { TechnicalEntryInlineContent } from "../components/technical-entry-inline-content";
 import { TechnicalEntryDetailSkeleton } from "../components/technical-entry-detail-skeleton";
 import { DeleteTechnicalEntryButton } from "../components/technical-entry-delete-btn";
+import { ArchiveTechnicalEntryButton } from "../components/technical-entry-archive-btn";
+import { RestoreTechnicalEntryButton } from "../components/technical-entry-restore-btn";
 import {
   presentTechnicalEntryStatus,
   presentTechnicalEntryType,
@@ -173,6 +175,22 @@ export default function TechnicalEntryDetailPage() {
               </ul>
             </section>
           ) : null}
+
+          <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
+            <h2 className="font-semibold">Entry lifecycle</h2>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              {entry.archivedAt
+                ? "Restore this entry to include it in your default journal lists."
+                : "Archive this entry to keep its history without showing it in default lists."}
+            </p>
+            <div className="mt-5 border-t border-border/60 pt-5">
+              {entry.archivedAt ? (
+                <RestoreTechnicalEntryButton technicalEntryId={entry.id} />
+              ) : (
+                <ArchiveTechnicalEntryButton technicalEntryId={entry.id} />
+              )}
+            </div>
+          </section>
 
           <section className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
             <h2 className="font-semibold text-destructive">Danger zone</h2>

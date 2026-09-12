@@ -67,7 +67,9 @@ These items were not changed in the models; they are documented to keep the diag
 
 - The domain calls the intermediate project state `INACTIVE`, while the database stores `PAUSED`. A mapper explicitly translates these values.
 - Archived projects are read-only for their details, technologies, commands, and resources. Archived technical entries can still be updated, resolved, reopened, classified, have existing attempts changed/removed, and be deleted. Only adding a new attempt explicitly blocks archived entries.
-- There is no operation to restore an archived technical entry.
+- Archived technical entries can be restored explicitly through
+  `PATCH /api/technical-entry/:id/restore`; archiving and restoration are
+  separate idempotent operations rather than a toggle.
 - Logout removes the local cookie, but the server does not revoke the token.
 - The API accepts `conclusion` when creating/editing a `LEARNING`; the domain only prohibits `resolvedAt` for this type. Conclusion and resolution are not synonyms in the implementation.
 - An attempt result can be set on creation, but the public update only changes its description.

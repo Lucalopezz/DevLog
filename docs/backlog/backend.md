@@ -376,15 +376,19 @@ explicit restoration.
 ### ArchiveTechnicalEntry
 
 - [x] Create the `ArchiveTechnicalEntry` use case.
+- [x] Create the `RestoreTechnicalEntry` use case.
 - [x] Implement logical entry archiving without hard deletion.
+- [x] Implement explicit restoration without changing entry history.
 - [x] Define archived entry behavior in lists and detail queries.
 - [x] Prevent new solution attempts on archived entries.
-- [x] Create the archiving endpoint.
-- [x] Test archiving, history preservation, and user isolation.
+- [x] Create authenticated archive and restore endpoints.
+- [x] Test archiving, restoration, history preservation, and user isolation.
 
 Listing omits archived entries by default (`archivedAt = null`), while
 detail queries still return the entry and its history. The endpoint
 `PATCH /api/technical-entry/:id/archive` is authenticated and idempotent.
+Restoration is available through the separate idempotent endpoint
+`PATCH /api/technical-entry/:id/restore`.
 
 ## 10. Suggested incremental delivery
 

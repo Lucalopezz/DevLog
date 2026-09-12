@@ -56,6 +56,7 @@ import { UpdateSolutionAttemptUseCase } from '../application/usecases/solution-a
 import { UpdateSolutionAttemptDto } from './dto/solution-attempt/update-solution-attempt.dto';
 import { RemoveSolutionAttemptUseCase } from '../application/usecases/solution-attempt/remove-solution-attempt.usecase';
 import { ArchiveTechnicalEntryUseCase } from '../application/usecases/technical-entry/archive-technical-entry.usecase';
+import { RestoreTechnicalEntryUseCase } from '../application/usecases/technical-entry/restore-technical-entry.usecase';
 
 @Controller('technical-entry')
 export class TechnicalEntryController {
@@ -100,6 +101,9 @@ export class TechnicalEntryController {
 
   @Inject(ArchiveTechnicalEntryUseCase)
   private archiveTechnicalEntryUseCase: ArchiveTechnicalEntryUseCase;
+
+  @Inject(RestoreTechnicalEntryUseCase)
+  private restoreTechnicalEntryUseCase: RestoreTechnicalEntryUseCase;
 
   static technicalEntryToResponse(output: TechnicalEntryOutput) {
     return new TechnicalEntryPresenter(output);
@@ -202,6 +206,20 @@ export class TechnicalEntryController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     const output = await this.archiveTechnicalEntryUseCase.execute({
+      id,
+      userId: user.id,
+    });
+
+    return TechnicalEntryController.technicalEntryToResponse(output);
+  }
+
+  @Patch(':id/restore')
+  @UseGuards(AuthGuard)
+  async restore(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.restoreTechnicalEntryUseCase.execute({
       id,
       userId: user.id,
     });

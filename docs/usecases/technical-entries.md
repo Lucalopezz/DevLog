@@ -167,7 +167,27 @@ found, avoiding disclosure of another account's data.
 ### Alternative flows
 
 - If already archived, the operation is idempotent.
-- There is no restoration use case or endpoint in the current code.
+
+## UC-36a — Restore technical entry
+
+| Field          | Description                                                |
+| -------------- | ---------------------------------------------------------- |
+| Primary actor  | Authenticated user                                         |
+| Interests      | Return an archived entry to default searches.              |
+| Preconditions  | An entry belonging to the user.                            |
+| Trigger        | The user requests restoration.                             |
+| Postconditions | The entry no longer has an archive timestamp.              |
+| Endpoint       | `PATCH /api/technical-entry/:id/restore`                   |
+
+### Main flow
+
+1. The system verifies entry ownership.
+2. The system removes the archive timestamp.
+3. The system returns the resulting state.
+
+### Alternative flows
+
+- If already active, the operation is idempotent.
 
 ## UC-37 — Delete technical entry
 

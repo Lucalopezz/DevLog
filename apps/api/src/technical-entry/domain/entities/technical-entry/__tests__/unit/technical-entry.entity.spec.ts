@@ -185,4 +185,28 @@ describe('TechnicalEntryEntity', () => {
       ),
     ).toThrow(EntityValidationError);
   });
+
+  it('restores idempotently without changing resolution or project', () => {
+    jest.useFakeTimers();
+    const archivedAt = new Date('2026-08-02T12:00:00.000Z');
+    const restoredAt = new Date('2026-08-03T12:00:00.000Z');
+    const entry = new TechnicalEntryEntity(
+      makeProps({
+        projectId: PROJECT_ID,
+        conclusion: 'The port was released',
+        resolvedAt: new Date('2026-08-02T10:00:00.000Z'),
+        archivedAt,
+      }),
+    );
+
+    jest.setSystemTime(restoredAt);
+    entry.restore();
+    jest.setSystemTime(new Date('2026-08-04T12:00:00.000Z'));
+    entry.restore();
+
+    expect(entry.archivedAt).toBeUndefined();
+    expect(entry.updatedAt).toEqual(restoredAt);
+    expect(entry.projectId).toBe(PROJECT_ID);
+    expect(entry.status).toBe('RESOLVED');
+  });
 });
