@@ -10,17 +10,21 @@ import type { TechnicalEntry } from "../types/technical-entry";
 
 export function TechnicalEntryList({
   entries,
+  title = "Your technical entries",
+  description = "Issues and learnings from your technical journal.",
 }: {
   entries: TechnicalEntry[];
+  title?: string;
+  description?: string;
 }) {
   return (
     <section aria-labelledby="technical-entries-list-title" className="space-y-4">
       <div>
         <h2 className="text-xl font-semibold" id="technical-entries-list-title">
-          Your technical entries
+          {title}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Issues and learnings from your technical journal.
+          {description}
         </p>
       </div>
 

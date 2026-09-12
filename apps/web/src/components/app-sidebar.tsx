@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { ComponentType, ReactNode } from "react";
 import {
   Activity,
   Archive,
@@ -23,11 +23,11 @@ import {
   Tags,
   Terminal,
   UserPlus,
-} from 'lucide-react'
-import { NavLink } from 'react-router'
-import { useGetUser } from '@/features/auth/hooks/use-get-user'
-import { useLogout } from '@/features/auth/hooks/use-logout'
-import { cn } from '@/lib/utils'
+} from "lucide-react";
+import { NavLink } from "react-router";
+import { useGetUser } from "@/features/auth/hooks/use-get-user";
+import { useLogout } from "@/features/auth/hooks/use-logout";
+import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -40,7 +40,7 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar'
+} from "@/components/ui/sidebar";
 
 /**
  * A sidebar item can be a real route or a visual placeholder for a planned
@@ -48,61 +48,71 @@ import {
  * to scan and avoids adding broken links before their routes exist.
  */
 type SidebarItem = {
-  label: string
-  icon: ComponentType<{ className?: string }>
-  to?: string
-  end?: boolean
-  planned?: boolean
-}
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  to?: string;
+  end?: boolean;
+  planned?: boolean;
+};
 
 type SidebarSection = {
-  label: string
-  items: SidebarItem[]
-}
+  label: string;
+  items: SidebarItem[];
+};
 
 const sidebarSections: SidebarSection[] = [
   {
-    label: 'Workspace',
+    label: "Workspace",
     items: [
-      { label: 'Overview', icon: LayoutDashboard, to: '/', end: true },
-      { label: 'Technical Journal', icon: BookOpen, to: '/technical-entries', end: true },
-      { label: 'Projects', icon: FolderKanban, to: '/projects', end: true },
-      { label: 'Quick Capture', icon: Plus, planned: true },
+      { label: "Overview", icon: LayoutDashboard, to: "/", end: true },
+      {
+        label: "Technical Journal",
+        icon: BookOpen,
+        to: "/technical-entries",
+        end: true,
+      },
+      { label: "Projects", icon: FolderKanban, to: "/projects", end: true },
+      { label: "Quick Capture", icon: Plus, planned: true },
     ],
   },
   {
-    label: 'Journal',
+    label: "Journal",
     items: [
-      { label: 'All Entries', icon: BookOpen, planned: true },
-      { label: 'Open Issues', icon: CircleAlert, planned: true },
-      { label: 'Learnings', icon: Lightbulb, planned: true },
-      { label: 'Resolved Issues', icon: CircleCheck, planned: true },
-      { label: 'Archived Entries', icon: Archive, planned: true },
-      { label: 'Search & Filters', icon: Search, planned: true },
+      { label: "All Entries", icon: BookOpen, planned: true },
+      { label: "Open Issues", icon: CircleAlert, planned: true },
+      { label: "Learnings", icon: Lightbulb, planned: true },
+      { label: "Resolved Issues", icon: CircleCheck, planned: true },
+      {
+        label: "Archived Entries",
+        icon: Archive,
+        to: "/technical-entries/archived",
+        end: true,
+      },
+      { label: "Search & Filters", icon: Search, planned: true },
     ],
   },
   {
-    label: 'Project Knowledge',
+    label: "Project Knowledge",
     items: [
-      { label: 'Tags', icon: Tags, planned: true },
-      { label: 'Technologies', icon: Cpu, planned: true },
-      { label: 'Commands', icon: Terminal, planned: true },
-      { label: 'Links & Resources', icon: Link2, planned: true },
-      { label: 'Environments', icon: Boxes, planned: true },
-      { label: 'Services', icon: Server, planned: true },
+      { label: "Tags", icon: Tags, planned: true },
+      { label: "Technologies", icon: Cpu, planned: true },
+      { label: "Commands", icon: Terminal, planned: true },
+      { label: "Links & Resources", icon: Link2, planned: true },
+      { label: "Environments", icon: Boxes, planned: true },
+      { label: "Services", icon: Server, planned: true },
     ],
   },
   {
-    label: 'Insights',
+    label: "Insights",
     items: [
-      { label: 'Activity Timeline', icon: Activity, planned: true },
-      { label: 'Knowledge Overview', icon: BarChart3, planned: true },
+      { label: "Activity Timeline", icon: Activity, planned: true },
+      { label: "Knowledge Overview", icon: BarChart3, planned: true },
     ],
   },
-]
+];
 
 function SidebarItemLink({ item }: { item: SidebarItem }) {
-  const Icon = item.icon
+  const Icon = item.icon;
 
   if (item.planned || !item.to) {
     return (
@@ -117,7 +127,7 @@ function SidebarItemLink({ item }: { item: SidebarItem }) {
         </SidebarMenuButton>
         <SidebarMenuBadge>Soon</SidebarMenuBadge>
       </SidebarMenuItem>
-    )
+    );
   }
 
   return (
@@ -128,8 +138,8 @@ function SidebarItemLink({ item }: { item: SidebarItem }) {
           to={item.to}
           className={({ isActive }) =>
             cn(
-              'w-full',
-              isActive && 'bg-sidebar-accent text-sidebar-accent-foreground',
+              "w-full",
+              isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
             )
           }
         >
@@ -138,7 +148,7 @@ function SidebarItemLink({ item }: { item: SidebarItem }) {
         </NavLink>
       </SidebarMenuButton>
     </SidebarMenuItem>
-  )
+  );
 }
 
 function SidebarLink({
@@ -146,9 +156,9 @@ function SidebarLink({
   children,
   end = false,
 }: {
-  to: string
-  children: ReactNode
-  end?: boolean
+  to: string;
+  children: ReactNode;
+  end?: boolean;
 }) {
   return (
     <SidebarMenuItem>
@@ -158,8 +168,8 @@ function SidebarLink({
           to={to}
           className={({ isActive }) =>
             cn(
-              'w-full',
-              isActive && 'bg-sidebar-accent text-sidebar-accent-foreground',
+              "w-full",
+              isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
             )
           }
         >
@@ -167,16 +177,16 @@ function SidebarLink({
         </NavLink>
       </SidebarMenuButton>
     </SidebarMenuItem>
-  )
+  );
 }
 
 export function AppSidebar() {
-  const { data: user, isPending } = useGetUser()
-  const { mutate: logout, isPending: isLoggingOut } = useLogout()
+  const { data: user, isPending } = useGetUser();
+  const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
-  // Determines whether the user is signed in from the useGetUser response. 
+  // Determines whether the user is signed in from the useGetUser response.
   // The private route loader remains responsible for access control.
-  const isAuthenticated = Boolean(user)
+  const isAuthenticated = Boolean(user);
 
   return (
     <Sidebar>
@@ -253,7 +263,10 @@ export function AppSidebar() {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton disabled tooltip="Help & feedback — coming soon">
+              <SidebarMenuButton
+                disabled
+                tooltip="Help & feedback — coming soon"
+              >
                 <CircleHelp />
                 <span>Help & feedback</span>
               </SidebarMenuButton>
@@ -267,12 +280,12 @@ export function AppSidebar() {
                 type="button"
               >
                 <LogOut />
-                <span>{isLoggingOut ? 'Signing out...' : 'Sign out'}</span>
+                <span>{isLoggingOut ? "Signing out..." : "Sign out"}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         ) : null}
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
