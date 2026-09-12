@@ -49,6 +49,19 @@ describe('TechnicalEntryPrismaRepository', () => {
     );
   });
 
+  it('maps the archive sentinel to a non-null archive date filter', async () => {
+    await repository.search(
+      new TechnicalEntrySearchParams({
+        filter: { archivedAt: 'not-null' },
+      }),
+    );
+
+    expect(count).toHaveBeenCalledWith({ where: { archivedAt: { not: null } } });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { archivedAt: { not: null } } }),
+    );
+  });
+
   it('preserves the intersection when type and status are incompatible', async () => {
     await repository.search(
       new TechnicalEntrySearchParams({

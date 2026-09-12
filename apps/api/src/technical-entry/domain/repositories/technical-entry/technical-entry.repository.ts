@@ -7,12 +7,18 @@ import {
 } from '@/shared/domain/repositories/searchable.repository';
 import { TechnicalEntryStatus } from '../../entities/technical-entry/technical-entry-status.enum';
 
+/**
+ * Search supports an exact date, no archive date, or any archive date.
+ * `not-null` is a query-level sentinel for the last option.
+ */
+export type TechnicalEntryArchivedAtFilter = Date | null | 'not-null';
+
 export type TechnicalEntryFilter = {
   userId?: string;
   projectId?: string;
   title?: string;
   type?: TechnicalEntryType;
-  archivedAt?: Date | null;
+  archivedAt?: TechnicalEntryArchivedAtFilter;
   status?: TechnicalEntryStatus;
 };
 

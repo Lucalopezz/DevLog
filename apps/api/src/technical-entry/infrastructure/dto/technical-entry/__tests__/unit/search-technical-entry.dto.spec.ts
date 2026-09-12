@@ -27,6 +27,17 @@ describe('SearchTechnicalEntryDto', () => {
     expect(dto.archivedAt).toBeNull();
   });
 
+  it('accepts the sentinel for all archived entries', async () => {
+    const dto = plainToInstance(SearchTechnicalEntryDto, {
+      archivedAt: 'not-null',
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors).toHaveLength(0);
+    expect(dto.archivedAt).toBe('not-null');
+  });
+
   it('rejects invalid parameters', async () => {
     const dto = plainToInstance(SearchTechnicalEntryDto, {
       page: '0',

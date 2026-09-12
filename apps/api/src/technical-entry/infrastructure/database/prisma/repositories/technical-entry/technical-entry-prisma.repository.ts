@@ -124,8 +124,13 @@ export class TechnicalEntryPrismaRepository implements TechnicalEntryRepository 
     if (filter.type !== undefined) {
       where.type = TechnicalEntryModelMapper.toPrismaType(filter.type);
     }
+    // If the filter.archivedAt is explicitly set to 'not-null', we want to find
+    // all entries that have an archivedAt value (i.e., they are archived).
+    // If it's set to null, we want to find all entries that are not archived.
+    // If it's undefined, we don't filter by archivedAt at all.
     if (filter.archivedAt !== undefined) {
-      where.archivedAt = filter.archivedAt;
+      where.archivedAt =
+        filter.archivedAt === 'not-null' ? { not: null } : filter.archivedAt;
     }
     if (filter.status !== undefined) {
       where.AND = [

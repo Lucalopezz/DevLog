@@ -11,6 +11,7 @@ import {
   IsString,
   IsUUID,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class SearchTechnicalEntryDto implements Omit<
@@ -43,10 +44,17 @@ export class SearchTechnicalEntryDto implements Omit<
       return null;
     }
 
+    // This sentinel represents `archivedAt IS NOT NULL`, which cannot be
+    // represented by a single archive date.
+    if (value === 'not-null') {
+      return 'not-null';
+    }
+
     return typeof value === 'string' ? new Date(value) : (value as unknown);
   })
+  @ValidateIf(({ archivedAt }) => archivedAt !== 'not-null') // Executes @isDate only if archivedAt is not 'not-null'
   @IsDate({ message: 'Invalid parameter' })
-  archivedAt?: Date | null | undefined;
+  archivedAt?: Date | null | 'not-null' | undefined;
 
   @IsOptional()
   @IsEnum(TechnicalEntryType, { message: 'Invalid parameter' })

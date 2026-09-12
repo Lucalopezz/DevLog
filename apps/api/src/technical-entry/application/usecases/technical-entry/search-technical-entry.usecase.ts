@@ -5,6 +5,7 @@ import {
 import { UseCaseContract } from '@/shared/application/usecases/use-case-contract';
 import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry/technical-entry-type.enum';
 import {
+  TechnicalEntryArchivedAtFilter,
   TechnicalEntryFilter,
   TechnicalEntryRepository,
   TechnicalEntrySearchParams,
@@ -33,7 +34,7 @@ export type SearchTechnicalEntryUseCaseInput = {
   projectId?: string;
   title?: string;
   type?: TechnicalEntryType;
-  archivedAt?: Date | null;
+  archivedAt?: TechnicalEntryArchivedAtFilter;
   status?: TechnicalEntryStatus;
 };
 
@@ -79,7 +80,8 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
     if (input.type) filter.type = input.type;
     if (input.status) filter.status = input.status;
 
-    // Add the supplied archive date to the filter; otherwise, use null to find only unarchived entries
+    // The default remains unarchived entries. The explicit `not-null` value
+    // is used by the archived-entries page to request every archived entry.
     filter.archivedAt = input.archivedAt ?? null;
 
     const params = new TechnicalEntrySearchParams({
