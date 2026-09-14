@@ -14,8 +14,7 @@ export async function listTechnicalEntries(
 }
 
 /**
- * Creates keys such as:
- *
+ * Creates keys.
  * The first represents page 1. The second represents page 2.
  * React Query therefore caches each result separately.
  *
