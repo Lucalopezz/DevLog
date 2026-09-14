@@ -12,13 +12,19 @@ It combines a technical journal with a project dashboard. Use it to document iss
 - Project settings with metadata, local path, lifecycle actions, and a protected
   delete flow;
 - Technical entries for issues (`ISSUE`) and lessons learned (`LEARNING`);
+- Technical journal listing with pagination, title/type/status filters, Markdown
+  rendering, creation, inline content editing, title editing, and entry detail
+  pages;
+- Technical entry archiving, restoration, and confirmed deletion in the web
+  application;
 - Solution attempts, resolution status, entry archiving, and tags in the API;
 - Technologies, commands, and resources linked to projects in the API;
 - Ownership checks that restrict authenticated users to their own data.
 
-The frontend currently prioritizes the authentication and Projects experience.
-Technical entry creation and editing are part of the API but their complete
-frontend workflow is still being developed.
+The frontend currently provides authentication, account details, the Projects
+experience, and the first complete technical-journal slice. Tags, solution
+attempts, issue actions, and project subresource editing still need frontend
+work.
 
 ## Technologies
 
@@ -47,6 +53,9 @@ The authenticated web application currently exposes:
 | `/account` | Authenticated account details |
 | `/projects` | Paginated project list with search, filters, and creation |
 | `/projects/:projectId` | Project overview, entries, commands, resources, and settings |
+| `/technical-entries` | Paginated active technical journal with search and filters |
+| `/technical-entries/:technicalEntryId` | Technical entry details, content editing, and lifecycle actions |
+| `/technical-entries/archived` | Paginated archived technical entries |
 
 The project settings area supports editing, archiving, restoring, copying
 metadata, and permanently deleting an unarchived project after confirmation.
@@ -115,7 +124,11 @@ English is the standard language for the application, documentation, API message
 
 ## Next areas to develop
 
-- Complete technical entry creation and editing in the frontend;
-- Add frontend workflows for tags and solution attempts;
-- Add create, edit, and delete flows for project technologies, commands, and resources;
-- Add a frontend test runner and broader HTTP end-to-end coverage.
+- Complete technical-entry filters for projects and tags;
+- Add frontend workflows for tag assignment/removal, solution attempts, and
+  resolve/reopen actions;
+- Add create, edit, and delete flows for project technologies, commands, and
+  resources;
+- Add a frontend test runner and broader API HTTP end-to-end coverage;
+- Decide and implement Quick Capture after the core journal workflows are
+  complete.

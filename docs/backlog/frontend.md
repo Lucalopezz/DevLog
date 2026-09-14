@@ -6,16 +6,27 @@ integration, loading states, and frontend user experience.
 This backlog complements [`backlog/backend.md`](backend.md). A frontend task
 may consume an existing API capability without requiring a backend change.
 
+> [!NOTE]
+> Review on 2026-09-14: authentication, account details, project management,
+> and the first technical-journal slice are implemented. Checked items below
+> describe behavior verified in the current web source; unchecked items are
+> the remaining work or intentionally planned product work.
+
 ## 1. Technical journal
 
-- [ ] Create the `/entries` page with pagination and entry cards.
-- [ ] Add filters for title, project, type, tag, and issue status.
-- [ ] Create the `/entries/:entryId` detail page.
-- [ ] Add technical entry creation and editing forms.
+- [x] Create the `/technical-entries` page with pagination and entry cards.
+- [x] Add filters for title, type, and issue status.
+- [ ] Add project and tag filters.
+- [x] Create the `/technical-entries/:technicalEntryId` detail page.
+- [x] Add technical entry creation and editing forms for title, context, and
+  conclusion.
+- [x] Add Markdown rendering for entry content.
+- [x] Add active and archived entry lists with pagination and empty/loading/error
+  states.
 - [ ] Add tags to the entry form and tag relationship actions.
 - [ ] Add solution attempt creation, editing, and removal for `ISSUE` entries.
 - [ ] Add resolve and reopen actions for technical issues.
-- [ ] Add archive and delete actions with confirmation flows.
+- [x] Add archive, restore, and delete actions with confirmation flows.
 
 ## 2. Quick Capture
 
@@ -89,9 +100,10 @@ version.
 
 ## 3. Project knowledge
 
-- [ ] Connect project technical entries to the journal experience.
-- [ ] Connect technologies, commands, links, and resources to project detail
-  views.
+- [x] Connect project technical entries to the journal experience through the
+  project detail page.
+- [x] Connect technologies, commands, links, and resources to project detail
+  views as paginated read-only sections.
 - [ ] Add tag management surfaces when the product needs a dedicated tag
   workflow.
 - [ ] Design documentation-only environment and service views.
@@ -104,4 +116,3 @@ version.
   feature pages.
 - [ ] Add a frontend test runner and behavior tests for forms and navigation.
 - [ ] Add the planned Settings and Help & feedback surfaces.
-

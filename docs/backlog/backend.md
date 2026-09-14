@@ -10,7 +10,10 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 > Mark a task complete only when a verifiable backend implementation exists. A Prisma table alone, for example, does not mean its use case and endpoints are ready.
 
 > [!NOTE]
-> Review on 2026-09-01: the main MVP functional scope is implemented and validated by the API build and unit tests (69 suites, 335 tests). Remaining work covers explicit functional gaps (such as tag filtering and complete project aggregation), post-MVP decisions, and additional HTTP coverage.
+> Review on 2026-09-14: the main MVP functional scope is implemented and
+> validated by the API build and unit tests (70 suites, 343 tests). Remaining
+> work covers explicit functional gaps (such as tag filtering and complete
+> project aggregation), post-MVP decisions, and additional HTTP coverage.
 
 ## Cross-cutting rules
 
@@ -96,7 +99,13 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 
 ## 3. Technical entries — initial MVP
 
-> The domain layer has an entity, enum, validation, repository contract, mapper, and Prisma repository. Creation, paginated listing, retrieval, updates, hard deletion, solution attempts, and resolution have use cases, presenters, and AuthGuard-protected endpoints. Project/tag relationships include validation and tag aggregation in responses. At this review stage, tags in creation/updates, archiving, and complete HTTP tests remained pending.
+> The domain layer has an entity, enum, validation, repository contract, mapper,
+> and Prisma repository. Creation, paginated listing, retrieval, updates, hard
+> deletion, logical archiving/restoration, solution attempts, and resolution
+> have use cases, presenters, and AuthGuard-protected endpoints. Project/tag
+> relationships include validation and tag aggregation in responses. At this
+> review stage, tags in creation/updates, tag filtering, complete project
+> aggregation, and complete HTTP tests remain pending.
 
 ### CreateTechnicalEntry
 

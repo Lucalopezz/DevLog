@@ -24,7 +24,6 @@ Use this table as your starting point. Most questions are addressed in the liste
 | How is the frontend organized? | [`guides/frontend_structure.md`](guides/frontend_structure.md) |
 | How is the monorepo structured? | [`guides/monorepo.md`](guides/monorepo.md) |
 | Which commands are used frequently? | [`guides/utils.md`](guides/utils.md) |
-| Where is the step-by-step frontend projects tutorial? | [`notes.md`](notes.md) |
 
 For setup questions, first read the [root README](../README.md). It contains prerequisites, installation instructions, and the main commands.
 
@@ -66,3 +65,20 @@ The current frontend Projects surface includes project details and a Settings
 tab for editing, archiving, restoring, metadata inspection, and confirmed
 deletion. The API behavior behind those actions is documented in
 [`usecases/projects.md`](usecases/projects.md).
+
+## Current implementation status
+
+As of 2026-09-14, the API MVP functional scope is implemented and has 70 unit
+test suites with 343 passing tests. The web application has authentication,
+account details, project management, and the first technical-journal slice:
+paginated active and archived lists, filters for title/type/status, creation,
+detail views, Markdown rendering, content/title editing, and entry lifecycle
+actions.
+
+The next implementation focus is the remaining user-facing journal behavior:
+project/tag filters, tag assignment, solution attempts, and resolve/reopen
+actions. After that, implement editing of project technologies, commands, and
+resources, then add frontend behavior tests and the missing API HTTP coverage.
+
+The authoritative task breakdown is kept in [`backlog/backend.md`](backlog/backend.md)
+and [`backlog/frontend.md`](backlog/frontend.md).

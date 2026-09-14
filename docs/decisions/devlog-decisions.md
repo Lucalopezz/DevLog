@@ -487,42 +487,44 @@ The entry/project association can be set while creating or updating an entry, wi
 
 - User registration.
 
-### `/entries`
+### `/technical-entries`
 
 Main technical journal list.
 
 Filters:
 
 ```text
-Search
-Project
+Title search
 Type
-Tag
 Status
 ```
 
-### `/entries/[id]`
+Project and tag filters remain planned frontend work.
 
-Displays:
+### `/technical-entries/:technicalEntryId`
+
+Currently displays:
 
 ```text
 Title
 Type
 Context
-Attempts
 Conclusion
 Related project
 Tags
 Status
+Archive/restore/delete actions
 ```
+
+Solution attempts and resolve/reopen actions remain planned frontend work.
 
 ### `/projects`
 
 List of registered projects.
 
-### `/projects/[id]`
+### `/projects/:projectId`
 
-Displays:
+Currently displays:
 
 ```text
 General information
@@ -530,9 +532,11 @@ Technologies
 Commands
 Links and resources
 Related technical entries
+Settings and lifecycle actions
 ```
 
-There will initially be no dedicated tag screen. Tags can be created and used while editing entries.
+There is currently no dedicated tag screen in the web application. Tag
+assignment and removal in the entry UI remain planned frontend work.
 
 ---
 
@@ -570,37 +574,38 @@ infrastructure/
 
 ### Frontend
 
-- Next.js.
-- Server Components by default.
-- Client Components only where interaction is needed.
+- React, Vite, and TypeScript.
+- React Router for browser navigation.
 - React Hook Form.
 - Zod.
-- TanStack Query when needed.
-- Shadcn UI, if adopted in the project.
+- TanStack Query for remote data and cache synchronization.
+- Tailwind CSS, shadcn/ui, Radix UI, and Lucide for the interface.
 
 ### Local deployment
 
-- Docker Compose.
-- Next.js.
-- NestJS.
-- PostgreSQL.
-- Nginx or Caddy as a reverse proxy.
+- Docker Compose for PostgreSQL.
+- Vite frontend development server.
+- NestJS API.
+- Nginx or Caddy as a future reverse proxy.
 
-Planned topology:
+Current local development topology:
 
 ```text
 Browser
-   |
-Reverse Proxy
-   |-- /       -> Next.js
-   |-- /api    -> NestJS
-                   |
-                PostgreSQL
+  |-- http://localhost:5173 -> Vite/React
+  |-- http://localhost:3000/api -> NestJS
+                                      |
+                                   PostgreSQL
 ```
 
 ---
 
-## 10. Implementation order
+## 10. Initial implementation order
+
+> This order is the original product plan. The current delivery status is
+> tracked in [`../backlog/backend.md`](../backlog/backend.md) and
+> [`../backlog/frontend.md`](../backlog/frontend.md); the frontend is now
+> implemented with React/Vite rather than the original Next.js proposal.
 
 ```text
 1. Basic authentication

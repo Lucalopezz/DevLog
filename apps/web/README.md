@@ -11,9 +11,16 @@ filter, create, edit, and inspect projects. A project detail page contains
 The Settings tab supports project metadata, lifecycle actions, safe deletion,
 and read-only behavior for archived projects.
 
-The `/` route remains an initial infrastructure demonstration. Technical entry
-creation/editing and project subresource management continue to evolve in the
-frontend, while their API support is already available.
+The technical journal is also available through `/technical-entries`. It
+supports paginated active and archived lists, title/type/status filters,
+Markdown rendering, creation, inline editing of context and conclusion, title
+editing, detail views, archiving, restoration, and confirmed deletion. The
+project detail page can create and list entries for a project.
+
+The `/` route remains an initial infrastructure demonstration. Tag assignment,
+solution attempts, issue resolve/reopen actions, and project subresource
+editing continue to evolve in the frontend, while their API support is already
+available.
 
 The foundation includes:
 
@@ -48,6 +55,7 @@ src/
     auth/              # Authentication schemas, types, hooks, and screens
     home/              # Current home page
     projects/          # Project APIs, forms, lifecycle, settings, and screens
+    technical-entry/   # Journal lists, details, forms, and lifecycle actions
   lib/                 # Query client, dates, and utilities
   routes/              # Browser route definitions
   main.tsx             # React entry point
@@ -126,6 +134,9 @@ project with the same name.
 
 ## Next areas to develop
 
-Continue technical entry creation and editing, then connect tag and solution attempt workflows and editing of project subresources. The frontend roadmap, including the proposed Quick Capture flow, is tracked in [`../../docs/backlog/frontend.md`](../../docs/backlog/frontend.md).
+Continue with project/tag filters, tag and solution-attempt workflows, issue
+resolve/reopen actions, and editing of project subresources. The frontend
+roadmap, including the proposed Quick Capture flow, is tracked in
+[`../../docs/backlog/frontend.md`](../../docs/backlog/frontend.md).
 
 The web app does not yet have a test runner. Until one is added, the minimum checks for frontend changes are `lint` and `build`.
