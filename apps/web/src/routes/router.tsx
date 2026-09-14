@@ -10,6 +10,7 @@ import ProjectDetailPage from "@/features/projects/pages/project-detail-page";
 import TechnicalEntriesPage from "@/features/technical-entry/pages/technical-entries-page";
 import TechnicalEntryDetailPage from "@/features/technical-entry/pages/technical-entry-detail-page";
 import ArchivedTechnicalEntriesPage from "@/features/technical-entry/pages/technical-entry-archived-page";
+import TagsPage from "@/features/tags/pages/tags-page";
 
 export const router = createBrowserRouter([
   {
@@ -57,6 +58,10 @@ export const router = createBrowserRouter([
           {
             path: "technical-entries/archived",
             Component: ArchivedTechnicalEntriesPage,
+          },
+          {
+            path: "tags",
+            Component: TagsPage,
           },
         ],
       },

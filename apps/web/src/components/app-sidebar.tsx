@@ -94,7 +94,7 @@ const sidebarSections: SidebarSection[] = [
   {
     label: "Project Knowledge",
     items: [
-      { label: "Tags", icon: Tags, planned: true },
+      { label: "Tags", icon: Tags, to: "/tags", end: true },
       { label: "Technologies", icon: Cpu, planned: true },
       { label: "Commands", icon: Terminal, planned: true },
       { label: "Links & Resources", icon: Link2, planned: true },

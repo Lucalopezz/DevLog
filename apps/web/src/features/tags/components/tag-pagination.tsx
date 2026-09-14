@@ -1,0 +1,53 @@
+import type { Meta } from "@/api/types";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+type TagPaginationProps = {
+  isFetching: boolean;
+  meta: Meta;
+  onPageChange: (page: number) => void;
+};
+
+export function TagPagination({
+  isFetching,
+  meta,
+  onPageChange,
+}: TagPaginationProps) {
+  const isFirstPage = meta.currentPage <= 1;
+  const isLastPage = meta.currentPage >= meta.lastPage;
+
+  return (
+    <nav
+      aria-label="Tag pagination"
+      className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p aria-live="polite" className="text-sm text-muted-foreground">
+        Page {meta.currentPage} of {meta.lastPage} ·{" "}
+        {meta.total.toLocaleString("en-US")} tag(s)
+      </p>
+
+      <div className="flex items-center gap-2">
+        <Button
+          aria-label="Go to the previous page"
+          disabled={isFirstPage || isFetching}
+          onClick={() => onPageChange(meta.currentPage - 1)}
+          type="button"
+          variant="outline"
+        >
+          <ChevronLeft data-icon="inline-start" />
+          Previous
+        </Button>
+        <Button
+          aria-label="Go to the next page"
+          disabled={isLastPage || isFetching}
+          onClick={() => onPageChange(meta.currentPage + 1)}
+          type="button"
+          variant="outline"
+        >
+          Next
+          <ChevronRight data-icon="inline-end" />
+        </Button>
+      </div>
+    </nav>
+  );
+}
