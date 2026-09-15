@@ -1,6 +1,6 @@
 # Frontend testing implementation plan
 
-Status: **Parts 0–2 implemented; Parts 3–9 remain proposed**. Source baseline:
+Status: **Parts 0–4 implemented; Parts 5–9 remain proposed**. Source baseline:
 commit `e608071`, inspected on 2026-09-14; completion review against `15df521`
 on 2026-09-15 (the intervening commit adds the draft testing documents).
 Recheck the named source files before implementing each part if the app changes.
@@ -548,6 +548,8 @@ suites first, then the frontend suite, lint, and build.
 
 ## Part 3 — Authentication and routing
 
+Implementation status: **complete**.
+
 **Goal:** prove that a user can sign in, create an account, view their session,
 and move between public/protected routes. This is the first complete vertical
 slice: DOM → validation → HTTP → query cache → router.
@@ -740,7 +742,14 @@ session transition:
 client, and data does not cross sessions. Focused suites, full frontend tests,
 lint, and build pass.
 
+The existing feedback gaps remain explicit: `AccountPage` relies on route-level
+error propagation instead of rendering its own error banner, and a failed
+logout keeps the session usable but does not yet display an error toast. These
+behaviors were characterized rather than expanded beyond this part's scope.
+
 ## Part 4 — Project lists and creation
+
+Implementation status: **complete**.
 
 **Goal:** cover URL-driven state and the relationship between a form mutation
 and the visible list. Implement list rendering first, filters/pagination second,
