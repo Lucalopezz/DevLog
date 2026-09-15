@@ -14,13 +14,15 @@ import {
 } from "@/components/ui/dialog";
 import { useCreateTag } from "../hooks/use-create-tag";
 import { tagSchema, type TagFormValues } from "../schemas/tag.schema";
+import type { Tag } from "../types/tag";
 
 type TagFormProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreated?: (tag: Tag) => void;
 };
 
-export function TagForm({ open, onOpenChange }: TagFormProps) {
+export function TagForm({ onCreated, open, onOpenChange }: TagFormProps) {
   // The form owns field state and client validation; the mutation owns the
   // request, toast feedback, and cache invalidation.
   const form = useForm<TagFormValues>({
@@ -31,7 +33,11 @@ export function TagForm({ open, onOpenChange }: TagFormProps) {
 
   const onSubmit: SubmitHandler<TagFormValues> = async (data) => {
     try {
-      await createMutation.mutateAsync(data);
+      const tag = await createMutation.mutateAsync(data);
+
+      // Consumers such as TagSelector need the new ID immediately, before the
+      // invalidated tag query finishes refetching in the background.
+      onCreated?.(tag);
       form.reset();
       onOpenChange(false);
     } catch {
