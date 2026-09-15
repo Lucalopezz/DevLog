@@ -1,9 +1,8 @@
 # Frontend testing implementation plan
 
-Status: **proposed; no test infrastructure or tests have been implemented by
-this document**. Source baseline: commit `e608071`, inspected on 2026-09-14;
-completion review against `15df521` on 2026-09-15 (the intervening commit adds
-the draft testing documents).
+Status: **Parts 0–2 implemented; Parts 3–9 remain proposed**. Source baseline:
+commit `e608071`, inspected on 2026-09-14; completion review against `15df521`
+on 2026-09-15 (the intervening commit adds the draft testing documents).
 Recheck the named source files before implementing each part if the app changes.
 
 Read [Frontend testing: a guide for backend developers](frontend-testing.md)
@@ -115,20 +114,20 @@ CI until every feature has tests.
 
 ### Work items
 
-- [ ] Run `pnpm --filter web lint` and `pnpm --filter web build`; record failures
+- [x] Run `pnpm --filter web lint` and `pnpm --filter web build`; record failures
   that predate the testing work.
-- [ ] Confirm Node and package versions before selecting test dependencies.
+- [x] Confirm Node and package versions before selecting test dependencies.
   `AGENTS.md` requests pnpm 11.18.0, while root `package.json` currently declares
   11.21.0. Reconcile this explicitly before installation/CI; do not silently
   change the lockfile with a different package manager.
-- [ ] Inspect the current runtime/package compatibility requirements in the
+- [x] Inspect the current runtime/package compatibility requirements in the
   official [Vitest installation guide](https://vitest.dev/guide/). Commit
   resolved compatible versions; keep Vitest and `@vitest/coverage-v8` aligned.
-- [ ] Record which current behaviors are deliberate and which findings above
+- [x] Record which current behaviors are deliberate and which findings above
   require a regression fix.
-- [ ] Adopt `*.spec.ts` for pure tests, `*.spec.tsx` for React tests, and
+- [x] Adopt `*.spec.ts` for pure tests, `*.spec.tsx` for React tests, and
   `e2e/**/*.spec.ts` for Playwright. Keep feature tests beside their source.
-- [ ] Reserve `src/test/` for shared infrastructure, factories, and HTTP handlers.
+- [x] Reserve `src/test/` for shared infrastructure, factories, and HTTP handlers.
 
 ### Planned structure
 
@@ -167,7 +166,12 @@ apps/web/
 planned suite has a clear owner/layer. No dependency or test file is needed to
 complete this documentation-only part.
 
+The completed baseline and convention decisions are recorded in
+[Frontend testing baseline](frontend-testing-baseline.md).
+
 ## Part 1 — Runner and reusable test infrastructure
+
+Implementation status: **complete**.
 
 ### 1A. Install the initial stack
 
@@ -415,16 +419,18 @@ it('uses the fallback when the failure is not an Axios error', () => {
 
 ### Acceptance and validation
 
-- [ ] A pure test and the empty-login example in the learning guide pass.
-- [ ] A missing HTTP handler fails visibly instead of contacting the real API.
-- [ ] Two tests with different responses do not share cache or DOM state.
-- [ ] Tests are type-checked; lint accepts test helpers without disabling hooks rules.
-- [ ] `pnpm --filter web test`, `pnpm --filter web test:cov`,
+- [x] A pure test and the empty-login example in the learning guide pass.
+- [x] A missing HTTP handler fails visibly instead of contacting the real API.
+- [x] Two tests with different responses do not share cache or DOM state.
+- [x] Tests are type-checked; lint accepts test helpers without disabling hooks rules.
+- [x] `pnpm --filter web test`, `pnpm --filter web test:cov`,
   `pnpm --filter web lint`, and `pnpm --filter web build` pass.
-- [ ] `pnpm test` discovers the web task and exits. It may also run API tests;
+- [x] `pnpm test` discovers the web task and exits. It may also run API tests;
   distinguish unrelated baseline failures from web failures.
 
 ## Part 2 — Schemas, utilities, and request contracts
+
+Implementation status: **complete**.
 
 **Goal:** learn familiar input/output testing before adding more UI complexity.
 Split into pure validation tests, shared utilities, and request contracts.
