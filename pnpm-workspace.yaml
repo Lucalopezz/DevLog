@@ -4,5 +4,7 @@ packages:
 allowBuilds:
   '@prisma/engines': true
   '@scarf/scarf': false
+  # MSW's postinstall only prints a funding message; tests do not need it.
+  msw: false
   prisma: true
   unrs-resolver: true
