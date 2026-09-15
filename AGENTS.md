@@ -53,7 +53,7 @@ instead of replacing it.
 
 ## Build, Test, and Development Commands
 
-Run commands from the repository root using pnpm 11.18.0.
+Run commands from the repository root using pnpm 11.21.0.
 
 - `pnpm dev` starts all available development tasks through Turborepo.
 - `pnpm build`, `pnpm lint`, and `pnpm test` build, lint, or test workspace packages that implement those tasks.
