@@ -285,3 +285,82 @@ that defect in a focused change with its regression test. Do not redefine the
 expected result just to make a failing test green.
 
 Continue with the [detailed implementation plan](frontend-testing-plan.md).
+
+## 10. Understand cache synchronization before testing mutations
+
+A query cache is a collection of saved server responses, identified by keys.
+The same entry can appear in several responses: its detail, a global search
+page, and a project's entry list. Updating one response does not automatically
+update the others.
+
+For example, changing a linked entry's title should update both its detail
+heading and its card inside the project. A test that checks only the success
+toast misses the stale project card. The plan's
+[cache synchronization matrix](frontend-testing-plan.md#cache-synchronization-matrix)
+identifies the representations each mutation affects.
+
+Keep three kinds of state separate:
+
+| State | Example | Test responsibility |
+| --- | --- | --- |
+| Form/UI state | Unsaved conclusion, open dialog, selected tag IDs | Typing, cancel, validation, retry and controlled-parent updates |
+| URL state | Search term, status filter, page number | Search commits the draft; navigation restores filters; HTTP parameters agree |
+| Server state | Saved entry and collection totals in TanStack Query | Successful mutations refresh affected views; failures preserve useful data |
+
+This separation explains why saving is more than sending a PATCH. The form
+submits validated data, the API persists it, the mutation refreshes affected
+queries, and the component renders the returned server state. A failure can
+happen during submission or during the later refresh; those are different
+outcomes and should not encourage duplicate submissions.
+
+An especially subtle testing mistake is navigating away and back after every
+mutation. If the query was already stale, mounting it may fetch fresh data
+regardless of whether the mutation invalidated it correctly. Keep an affected
+view mounted for one regression, and use a deliberately fresh inactive cache
+for another. The plan explains how to arrange both cases.
+
+## 11. From local feedback to CI
+
+**Continuous integration (CI)** runs the agreed checks against each change in
+a repeatable environment. Introduce the fast frontend checks after Part 1,
+then add browser checks as those suites become available.
+
+| Question | Check | Infrastructure |
+| --- | --- | --- |
+| Does validation, UI collaboration and cache behavior work? | Vitest with Testing Library and MSW | Node and simulated DOM |
+| Does the code satisfy static rules and compile? | ESLint and TypeScript/Vite build | Node; no running API |
+| Do browser navigation, focus and layout behave correctly? | Playwright with intercepted API | Built frontend and Chromium |
+| Do sessions and persisted journeys work across the real stack? | Playwright with real API | Built frontend, Nest and isolated PostgreSQL |
+
+A full-stack pass should include a reload: an in-memory cache can make a save
+appear successful even if the expected data was never persisted. A session
+journey must also sign in through the browser; setting a test cookie manually
+bypasses the integration that the test is meant to establish.
+
+Keep full-stack tests few and independent. They provide confidence at service
+boundaries but take longer to prepare and diagnose than a focused component
+test. The plan's [Part 9](frontend-testing-plan.md#part-9--full-stack-journeys-ci-and-completion)
+specifies the database lifecycle, environment pitfalls, journeys, CI jobs and
+completion checklist. This remains a plan; none of those checks are installed
+by editing these documents.
+
+## 12. How to judge whether a test is useful
+
+Before considering a test finished, answer these questions:
+
+- What observable defect would make this test fail?
+- Does it assert the result, or only that a mocked function was called?
+- Could it pass because a fallback response, automatic refetch or shared cache
+  accidentally supplied the expected data?
+- Can it run alone and after another test with different data?
+- Does a failure identify the relevant behavior without depending on private
+  component state, generated IDs or CSS classes?
+
+Coverage is useful for finding places to investigate. It cannot tell whether
+an assertion distinguishes a correct result from a broken one. A small suite
+that catches lost drafts, stale lists and session leaks is a better starting
+point than large snapshots with no clear failure scenario.
+
+Follow the [debugging and maintenance section](frontend-testing-plan.md#debugging-and-maintenance)
+when a test fails. Work through the implementation plan one part at a time and
+record validation evidence before marking that part complete.

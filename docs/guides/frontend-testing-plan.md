@@ -1,7 +1,9 @@
 # Frontend testing implementation plan
 
 Status: **proposed; no test infrastructure or tests have been implemented by
-this document**. Source baseline: commit `e608071`, inspected on 2026-09-14.
+this document**. Source baseline: commit `e608071`, inspected on 2026-09-14;
+completion review against `15df521` on 2026-09-15 (the intervening commit adds
+the draft testing documents).
 Recheck the named source files before implementing each part if the app changes.
 
 Read [Frontend testing: a guide for backend developers](frontend-testing.md)
@@ -76,6 +78,7 @@ part:
 | Archived entry edit affordances | Entry title and inline editors do not gate editing on `archivedAt` | Part 6: compare the documented API lifecycle rules, then test/fix the intended behavior |
 | Some entry mutations omit the project list branch | Create/archive/restore invalidate linked project entries; update/delete currently do not | Part 6: demonstrate stale project cards and totals, then add missing invalidation |
 | Tag deletion omits project detail collections | Tag lists, global entry lists, and entry details refresh, but project entry cards can retain old badges | Part 7: cover and repair cross-feature synchronization |
+| Project deletion leaves cached entry associations | Prisma preserves linked entries with `projectId` set to null; the web mutation only removes the project branch and refreshes project lists | Parts 5–6: verify preserved entries lose the old project association in cached lists/details |
 | Logout removes only the current-user query | Project/tag/entry data can remain in the cache during account switching | Part 3: test two users on identical query keys; define cancellation and clearing of user-scoped data |
 | Project tabs use custom buttons | Click behavior exists; arrow-key tab navigation is not implemented | Part 8: test keyboard expectations and implement the chosen accessible tab pattern |
 | Detail error screens conflate failures | Project/entry detail pages render “not found” content for any query error | Parts 5–6: characterize 404; track a separate improvement for network/500 messaging |
@@ -133,6 +136,7 @@ CI until every feature has tests.
 apps/web/
   vitest.config.ts
   playwright.config.ts                 # Part 8
+  playwright.full-stack.config.ts      # Part 9
   tsconfig.e2e.json                     # Part 8
   src/test/
     setup.ts
@@ -195,7 +199,7 @@ Proposed `apps/web/vitest.config.ts`:
 
 ```ts
 import { defineConfig, mergeConfig } from 'vitest/config'
-import viteConfig from './vite.config'
+import viteConfig from './vite.config.ts'
 
 export default mergeConfig(viteConfig, defineConfig({
   test: {
@@ -342,6 +346,10 @@ spy outside a test body, move it into the test: automatic restoration and
 module-level spies do not mix well.
 
 With `onUnhandledRequest: 'error'`, an undeclared request is a setup failure.
+Verify that the suite actually fails: Axios/Query may catch the interception
+error and render an expected error screen. If that hides the failure, collect
+unexpected requests in the handler policy and assert the collection is empty
+in teardown, while retaining MSW's error behavior. Do not rely only on stderr.
 Do not change this to blanket bypass when a page mounts more queries than
 expected. For example, ProjectDetailPage starts all its collection queries
 before a tab is clicked, so its tests need all four GET handlers.
@@ -904,6 +912,9 @@ times; test the actual field values.
 `technologies`. Its hook refetches the complete GET result. Seed a detail with
 technologies, return a PATCH without them, and verify that the refreshed detail
 still displays them. A naive `setQueryData` replacement should fail this test.
+The current detail key is also a prefix of collection keys, so invalidating
+it without `exact: true` refreshes those collections too. Account for this in
+handlers; see the cache matrix before narrowing the behavior.
 
 ### 5C. Lifecycle
 
@@ -913,6 +924,11 @@ still displays them. A naive `setQueryData` replacement should fail this test.
 | Restore | Restore confirmation and cancellation; successful response re-enables edits; collection/list state refreshed; failure remains retryable |
 | Delete | Wrong name disables confirmation; `confirmation.trim() === projectName` enables it; matching is case-sensitive; submit once; success removes detail and navigates to `/projects`; failure retains dialog and confirmation |
 | Archived project | Settings edit/delete and project-linked New entry disabled; restore available; inline description editing also respects the intended read-only rule after its regression fix |
+
+After deleting an active project with linked entries, verify that those entries
+remain accessible and their cached project association is refreshed to match
+the API. The Prisma relation uses `onDelete: SetNull`; project deletion does not
+delete the journal entries. Cover this with the Part 6 cross-feature cases.
 
 Use `screen.findByRole('alertdialog')` and `within(dialog)` to distinguish a
 trigger button from the similarly named confirmation action. Test keyboard
@@ -1332,3 +1348,399 @@ complete accessibility coverage.
 manual keyboard/narrow-layout observations are recorded. Any standalone picker
 browser limitation is explicit. Add Firefox/WebKit or screenshot baselines
 only after the initial Chromium suite is reliable and the benefit is clear.
+
+## Part 9 — Full-stack journeys, CI, and completion
+
+**Goal:** establish that the built frontend, real authentication, API contracts,
+and database work together, then make the checks repeatable. Keep exhaustive
+validation and failure cases in the faster suites from Parts 2–7.
+
+### 9A. Prepare an isolated real stack
+
+The existing API e2e suite overrides `TokenProvider` and supplies its own cookie.
+It covers backend behavior, but cannot substitute for a browser signing in with
+real credentials. The browser suite must start the normal Nest application
+without provider overrides or intercepted API responses.
+
+Prerequisites and work items:
+
+- [ ] Resolve the pnpm version discrepancy from Part 0 and record a compatible
+  Node version for local runs and CI. Use a frozen lockfile in CI.
+- [ ] Prepare an ignored `apps/api/.env.test` from its example, with a dedicated
+  test database. Make its credentials match `database-test` in
+  `docker/compose.yaml`; use disposable credentials in CI.
+- [ ] Set `NODE_ENV=test`, `PORT=3001`, and
+  `CORS_ALLOWED_ORIGINS=http://localhost:4173` for the API. The current example's
+  `CORS_ALLOWED_ORIGINS=*` is rejected outside development. Correct the example
+  during implementation, as well as using an explicit browser origin.
+- [ ] Use `JWT_EXPIRES_IN_SECONDS=3600`, the key the service actually reads;
+  replace the outdated `JWT_EXPIRES_IN` in the example. Supply a test-only
+  `JWT_SECRET`. No JWT or database setting belongs in a `VITE_*` variable.
+- [ ] Make `DATABASE_URL` identical for migration, fixture cleanup, and the
+  running API. `apps/api/prisma.config.ts` loads `.env.test` with
+  `override: true`: exporting a different URL in CI is insufficient if that
+  file contains a stale value. Generate the ignored file from the job's test
+  configuration and validate the resolved target before migrating or cleaning.
+- [ ] Start `database-test` and wait for its health check; generate Prisma's
+  client, apply committed migrations, and build the API before Playwright.
+  The existing `db:test:up` script starts the database and applies migrations;
+  it does not explicitly generate the client or build Nest.
+- [ ] Keep database preparation outside Playwright's server startup. A database
+  or migration failure should stop the job before any browser launches.
+
+After preparing the environment files, the local preparation sequence is:
+
+```bash
+NODE_ENV=test pnpm --filter api exec prisma generate
+pnpm --filter api db:test:up
+pnpm --filter api build
+```
+
+Use one hostname consistently. The proposed browser origin is
+`http://localhost:4173` and API origin is `http://localhost:3001`. Mixing
+`localhost` with `127.0.0.1` changes cookie/origin behavior. This local HTTP suite
+checks the test-environment cookie policy; production HTTPS and Secure-cookie
+behavior require a deployment smoke check with the actual origin arrangement.
+
+### 9B. Separate browser configurations and test data
+
+Keep Part 8's intercepted suite as `test:e2e`. Add a separate script so a normal
+browser run does not unexpectedly require a database:
+
+```json
+{
+  "test:e2e:full-stack": "playwright test --config playwright.full-stack.config.ts"
+}
+```
+
+Proposed `apps/web/playwright.full-stack.config.ts`:
+
+```ts
+import { defineConfig, devices } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './e2e/full-stack',
+  fullyParallel: false,
+  workers: 1,
+  forbidOnly: Boolean(process.env.CI),
+  retries: 0,
+  outputDir: './test-results/full-stack',
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-report/full-stack', open: 'never' }],
+  ],
+  use: {
+    baseURL: 'http://localhost:4173',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+  ],
+  webServer: [
+    {
+      command: 'pnpm --filter api start:prod',
+      // An unauthenticated 401 establishes HTTP readiness, not database health.
+      url: 'http://localhost:3001/api/users/me',
+      reuseExistingServer: false,
+      timeout: 120_000,
+      env: {
+        NODE_ENV: 'test',
+        PORT: '3001',
+        CORS_ALLOWED_ORIGINS: 'http://localhost:4173',
+      },
+    },
+    {
+      command: 'pnpm build && pnpm preview --host localhost --port 4173 --strictPort',
+      url: 'http://localhost:4173',
+      reuseExistingServer: false,
+      timeout: 120_000,
+      env: { VITE_API_URL: 'http://localhost:3001/api' },
+    },
+  ],
+}))
+```
+
+Playwright supports a server array and accepts a 401 readiness response. The
+API script runs in the API package through pnpm filtering; the preview command
+runs in `apps/web`. The frontend environment is supplied before its build.
+See [Playwright server orchestration](https://playwright.dev/docs/test-webserver).
+
+Add this config to `tsconfig.e2e.json` and its Node ESLint override. Keep browser
+fixtures under `e2e/fixtures/`; never import `src/test/setup.ts`, MSW's server,
+or Vitest helpers into Playwright. Run mocked and full-stack suites sequentially
+locally because both use port 4173 and rebuild `apps/web/dist`. CI can use
+separate jobs with separate checkouts. Keep their report/output directories
+separate when collecting both in one checkout.
+
+Data isolation design:
+
+1. Give every test a fresh browser context and an account unique to that test
+   attempt. Generate emails with a run identifier plus test/retry identity;
+   fixed shared emails cause conflicts on rerun. Keep displayed fixture text
+   predictable and in English.
+2. Register through the real UI in the authentication journey. Other journeys
+   may create accounts and prerequisite records through the real HTTP API to
+   reduce setup time, then sign in through the browser.
+3. Use authenticated HTTP setup only for prerequisites, not to perform the
+   action the journey claims to test. A tag relationship can be seeded through
+   the backend because the frontend does not yet offer assignment.
+4. Track created user IDs in the test fixtures. Add an API-owned, Node-only
+   cleanup command using the existing Prisma setup; accept only the tracked
+   IDs, validate the test database target and `NODE_ENV=test`, and delete only
+   those test users. Their owned data cascades in the current schema. Do not
+   add a public cleanup endpoint or import Prisma into the frontend bundle.
+5. Run fixture cleanup even after a failed assertion, and close its database
+   client. On an ephemeral CI database, job teardown also disposes the database.
+   On a local persistent test database, retain a run manifest for narrowly
+   scoped cleanup if the process was interrupted.
+6. Start with one worker and no full-stack retries. Parallelism can come later
+   with independent data and cleanup per worker. Never run a global truncate
+   while another API or browser suite is using the same database.
+
+Do not copy `.env` values, cookie values, or saved authentication state into
+reports. Prefer per-test login over a shared `storageState` for this small suite.
+Do not use `pnpm db:reset` or `db:test:reset` as routine suite preparation.
+
+### 9C. Small full-stack journey inventory
+
+Each row is an independent test with its own setup, rather than one ordered
+chain whose first failure invalidates the rest.
+
+| Proposed suite | Actions through the browser | Required outcome |
+| --- | --- | --- |
+| `session.spec.ts` | Register, sign in, open Account, reload a protected deep link, sign out, revisit the protected link | Registration leaves the user signed out; login creates a usable session; reload retains identity; logout returns the user to login and the next protected request is unauthorized |
+| `project-journal.spec.ts` | Create a project, add a linked entry from its Entries tab, edit its title/conclusion, revisit project and reload | Server persists the submitted fields; project card and Overview total reflect the entry; reload proves the result was not only local cache state |
+| `entry-lifecycle.spec.ts` | Archive an entry, open the archive route, restore it, then confirm deletion | Active/archive membership and linked project total agree with the server; deleting removes the entry and revisiting its URL shows the existing not-found state |
+| `tags.spec.ts` | Create a tag, search for it, confirm deletion; use a seeded relationship for the deletion case | Library updates persist after reload; entry badges disappear without deleting the entry |
+| `session-isolation.spec.ts` | Load user A's projects, sign out, sign in as B in the same page/context, revisit the list | A's private data never appears under B's identity; B's request succeeds using B's session |
+
+For the session journey, inspect cookie metadata via the browser context to
+check the current `devlog_access_token` cookie's `httpOnly`, `sameSite: 'Lax'`, and
+path `/` attributes; confirm its name against the API constant during
+implementation. Assert cookie presence/removal without logging its value.
+A successful browser-origin `/users/me` request after reload establishes that
+CORS, credentialed Axios requests, cookie storage, and Nest verification
+cooperate. An APIRequestContext login alone does not establish browser CORS.
+
+Keep the delayed user-A request race in the controlled MSW suite from Part 3;
+do not introduce response interception into the full-stack test to reproduce
+it. These two tests protect different failure modes.
+
+**Acceptance:** all journeys pass from a prepared empty test database and on a
+second run without collisions. Cookie authentication is real, cleanup runs on
+failure, no API response is mocked, and missing services produce an actionable
+setup failure. Record any lifecycle/cache defect as a regression fix in its
+owning part before accepting the corresponding journey.
+
+### 9D. Continuous integration
+
+There is no `.github/workflows` directory in the inspected baseline. If GitHub
+Actions is the repository's CI host, create
+`.github/workflows/frontend-tests.yml` during this phase. Use equivalent jobs
+if another host is selected; the required checks are the same.
+
+| Job | Preparation and commands | Dependency and artifacts |
+| --- | --- | --- |
+| Frontend quality | Install the reconciled pnpm/Node versions; `pnpm install --frozen-lockfile`; web lint, `test:cov`, build | Starts in Part 1; save `apps/web/coverage` when generated |
+| Browser with intercepted API | Frozen install; install Chromium and OS dependencies; `typecheck:e2e`; `test:e2e` | Starts in Part 8; save Playwright report, trace and failure screenshots |
+| Browser with real API | Frozen install; isolated PostgreSQL; generated `.env.test`; Prisma generate/migrate; API build; `typecheck:e2e`; `test:e2e:full-stack` | Starts in Part 9; save separate browser reports and API startup diagnostics |
+
+Use `pnpm --filter web exec playwright install --with-deps chromium` on a
+supported Linux CI runner. Pin compatible runtime/tooling versions, give jobs
+a finite timeout, and upload failure artifacts even when tests fail. See
+[Playwright's CI guide](https://playwright.dev/docs/ci). Keep artifact retention
+short and access restricted because traces can include session/network data.
+
+For database preparation in CI, choose one owner: a job PostgreSQL service with
+explicit migration commands, or the existing Compose `database-test` service.
+Do not start both. With a CI service, run
+`NODE_ENV=test pnpm --filter api exec prisma migrate deploy` after generating
+the aligned environment file; do not invoke `db:test:up`, which starts Docker.
+
+Trigger checks for changes to `apps/web/**`, relevant API contracts, Prisma
+schema/migrations, shared packages, the root lockfile/workspace configuration,
+and test workflow files. Initially, running on every pull request is simpler
+than maintaining path filters that can miss cross-package changes. Keep API
+unit/integration checks alongside these jobs; a web pass does not replace them.
+
+Turborepo follow-through:
+
+- Keep `test` finite and `test:watch` separate. If watch is exposed through
+  Turbo, mark that task persistent and uncached.
+- Add `test:cov` with `coverage/**` outputs if CI invokes it through Turbo.
+  The current `test` task lists coverage outputs, but plain `vitest run` does
+  not produce a coverage report. Cache behavior must follow actual scripts.
+- If adding Turbo tasks for either browser mode, set `cache: false`: the
+  real-stack result depends on running services and database state, while the
+  initial mocked suite also owns server startup and diagnostic artifacts.
+- Verify build cache inputs include `VITE_API_URL` and relevant env files.
+  Vite framework inference includes `VITE_*` variables, but env-file handling
+  still needs review. Filtered pnpm scripts in this plan bypass Turbo, so
+  their fresh preview builds do not depend on this cache configuration.
+  See [Turborepo environment inputs](https://turborepo.dev/docs/crafting-your-repository/using-environment-variables).
+
+Do not make quality checks silently optional with `continue-on-error`,
+`passWithNoTests`, or permanent skips. Inspect any mocked-browser retry that
+passes only on a later attempt; retries are diagnostic evidence of flakiness,
+not a repair. Require stable job names in branch protection once the rollout
+is working, and ensure all introduced checks actually discover tests.
+
+### 9E. Coverage review and definition of done
+
+Collect the first coverage baseline after meaningful feature suites exist.
+Review uncovered branches in authentication, payload normalization, filters,
+and mutation synchronization before choosing any percentage threshold. If a
+threshold is added, record its rationale and increase it as coverage grows;
+do not exclude difficult feature code merely to meet the number.
+
+Completion checklist for the **implementation**, not this proposed document:
+
+- [ ] Parts 0–9 meet their exit criteria, with links to implementing commits/PRs
+  and the validation results for each part.
+- [ ] Every current surface in the scope inventory has a responsible suite or
+  an explicit indirect/manual coverage rationale.
+- [ ] Required success, empty, pending, failure, retry, cancellation and URL
+  cases are covered where applicable; request shapes match the real API.
+- [ ] Cross-feature cases in the cache matrix pass, including active views,
+  cached inactive views, project deletion, and account switching.
+- [ ] Archived-edit and accessibility findings are resolved or explicitly
+  recorded as incomplete acceptance items. Optional enhancements and future
+  product features remain separate from required coverage.
+- [ ] Vitest, coverage generation, browser typechecking, both browser suites,
+  lint and build pass in CI with no focused tests or unexplained skips.
+- [ ] Real-stack data setup/cleanup works repeatedly; reports can diagnose
+  failures without exposing credentials or depending on a developer's server.
+- [ ] Keyboard and narrow-layout observations are recorded. The standalone
+  TagSelector's browser coverage is either completed with a fixture harness
+  or explicitly recorded as a remaining limitation.
+- [ ] Update this plan's status, the learning guide's status, and the repository
+  instructions that currently say the frontend has no test runner. Link the
+  guides from `docs/README.md` when implementation is introduced.
+
+Record progress per part with: status, implementing commit/PR, commands and
+results, covered scenario groups, remaining findings, and the next step.
+A checked-off plan must not imply that future tag assignment, solution attempts,
+or other excluded product features were delivered.
+
+## Cache synchronization matrix
+
+A mutation can affect several separately cached representations. Use this
+matrix to design behavior tests; do not make a spy on `invalidateQueries` the
+only assertion. The current key factories live beside their API functions.
+
+| Mutation | Required synchronization | Current behavior / planned work |
+| --- | --- | --- |
+| Login | Store `currentUserQueryKey`; subsequent protected loaders see the same user | Implemented; test with the injected client in Part 3 |
+| Logout/account switch | Cancel old user queries, remove private cached state, prevent late responses/callbacks restoring it | Only current user is removed today; Part 3 regression/fix |
+| Register | Navigate to login without populating an authenticated session | Implemented; Part 3 |
+| Create project | Invalidate `projectsKeys.lists()` across filters/pages | Implemented; Part 4 |
+| Update project | Refresh complete project detail and project lists; preserve technologies omitted by PATCH | Current prefix invalidation also matches project collections; Part 5 |
+| Archive/restore project | Refresh project detail, its collection branch and project lists; preserve journal relationships | Implemented with overlapping prefixes; verify behavior in Part 5 |
+| Delete project | Remove the project's detail/collection branch; refresh project lists and entry lists/details whose project association becomes null | Project removal already matches child keys; entry synchronization needs a Part 5–6 regression/fix |
+| Create entry | Refresh `technicalEntriesKeys.lists()` and, when linked, `projectDetailKeys.technicalEntriesRoot(projectId)` | Implemented; Part 6 |
+| Update entry | Refresh `getTechnicalEntryQueryKey(id)`, global entry lists, and linked project entries | Linked project branch missing today; Part 6 regression/fix |
+| Archive/restore entry | Refresh entry detail, active/archive global lists, linked project entries and their totals | Implemented when response supplies projectId; Part 6 |
+| Delete entry | Remove entry detail; refresh global lists and linked project entries/totals | Linked branch missing; capture projectId before deleting; Part 6 |
+| Create tag | Refresh `tagKeys.lists()` including picker searches; controlled parent receives created ID | Implemented; Part 7 |
+| Delete tag | Refresh tag lists, global entry lists, entry details, and project entry collections displaying the tag | Project collections missing; Part 7 regression/fix |
+
+### Prefixes, active queries, and hidden false positives
+
+`getProjectQueryKey(id)` is `['project', id]`; collection keys begin with
+`['project', id, 'details']`. Query filters match prefixes unless `exact: true`
+is supplied. Therefore project removal already removes its cached collections,
+and invalidating its detail currently also reaches commands/resources/entries.
+Do not claim that those child keys are untouched just because they were not
+named separately in the hook.
+
+Invalidation marks matching data stale and normally refetches active queries;
+removal discards matching cached entries. Inactive views usually refetch on
+mount under the current policy. A direct detail-only change would need
+`exact: true` plus deliberate collection invalidations where required. See the
+[TanStack Query client reference](https://tanstack.com/query/latest/docs/framework/react/reference/classes/QueryClient).
+
+For an inactive-cache regression, seed realistic data with a nonzero
+`staleTime` in that particular test (or set query defaults for the relevant
+keys). Part 1's default `staleTime: 0` can otherwise cause a refetch on every
+mount and hide missing invalidation. Verify invalidated state before navigating,
+then the new visible data afterward. For active views, keep their real queries
+mounted and hold the refetch response to observe the transition.
+
+Tag deletion does not currently return affected project IDs. A targeted
+predicate matching project technical-entry collection keys can refresh that
+branch across projects without refetching commands/resources. Centralize the
+matching rule and test it against the actual key factories. This is preferable
+to refreshing every query in the app, but it introduces a dependency on the
+key structure that must stay documented.
+
+Additional synchronization assertions:
+
+- Use two different pages/filter keys so one successful refresh cannot hide a
+  stale sibling cache entry. Assert totals as well as item names.
+- An entry mutation must not refresh an unrelated project's commands/resources.
+- Test failed mutations: drafts remain and caches are not updated as though
+  the server accepted the change.
+- Distinguish a rejected mutation from a successful mutation followed by a
+  failed refetch. The server may have saved the record even though the list
+  could not refresh; inspect current behavior and avoid resubmitting a create
+  merely to retry a GET.
+- Remove/cancel deleted data deliberately and verify late queries cannot
+  restore it. Query cancellation/clearing does not undo server mutations;
+  session-transition tests should also consider late mutation callbacks.
+
+## Debugging and maintenance
+
+### Diagnose the failing boundary
+
+| Symptom | First investigation | Avoid |
+| --- | --- | --- |
+| Missing provider/router error | Match the helper to the component; use real app routes for loaders | Mocking every hook until rendering succeeds |
+| Undeclared MSW request | Check API origin, verb, path and eagerly mounted collection queries | Global bypass or a success response for every URL |
+| Expected error test passes despite an unexpected request | Enforce the unhandled-request teardown assertion from Part 1 | Treating all network failures as the intended server response |
+| Element query is ambiguous | Inspect accessible names and scope with `within(dialog)` or a named region | Picking an index from `getAllByRole` |
+| `act` warning or late state update | Await user actions and final UI; release deferred requests; wrap manual timer advancement | Silencing console warnings |
+| List updates only after navigation/reload | Inspect query keys, active observers and mutation invalidation | Reloading the page inside the assertion to hide stale UI |
+| Test passes alone but fails in the suite | Check singleton clients, handlers, router disposal, timers, cookies and mutable fixtures | Making the suite permanently serial without identifying leaked state |
+| CI date/text mismatch | Fix timezone, clock and locale inputs; inspect installed runtime versions | Deriving expected values from the current clock |
+| API starts locally but fails in browser tests | Check `.env.test`, CORS allowlist, port, migrations and generated Prisma client | Mocking session responses in the full-stack suite |
+| Browser login fails after a successful POST | Inspect cookie metadata, browser-origin requests and credential/CORS settings | Copying a token into localStorage |
+| Real-stack tests conflict on rerun | Check unique account identity and scoped cleanup | Resetting the development database |
+| Playwright can run but code does not typecheck | Run `typecheck:e2e` and inspect config/helper inclusion | Assuming transpilation validates TypeScript |
+
+Use `screen.debug()` for a relevant DOM fragment and the Testing Library query
+error for available roles. For browser failures, inspect the retained trace's
+action, DOM snapshot, console and network views before increasing timeouts.
+Remove temporary debug output from passing tests.
+
+### Everyday commands after their rollout phases
+
+```bash
+# Part 1: fast feedback and an individual file.
+pnpm --filter web test:watch
+pnpm --filter web test src/features/auth/components/login-form.spec.tsx
+pnpm --filter web test:cov
+pnpm --filter web lint
+pnpm --filter web build
+
+# Part 8: intercepted browser suite and interactive debugging.
+pnpm --filter web typecheck:e2e
+pnpm --filter web test:e2e
+pnpm --filter web test:e2e:ui
+
+# Part 9: requires the isolated database, migrations and API build above.
+pnpm --filter web test:e2e:full-stack
+```
+
+These commands become available only when their scripts are implemented.
+Run the focused regression first, then the affected feature/cross-feature
+suites and required checks. Do not start the database for ordinary Vitest or
+intercepted-browser tests.
+
+When a feature changes, update the behavior inventory, fixtures and contract
+assertions together. Keep factories faithful to DTOs/presenters; database
+representations can differ from public values (for example, Prisma's project
+`PAUSED` maps to the API/frontend `INACTIVE`). Revisit skipped coverage decisions
+when a placeholder becomes an interactive feature. Prefer one meaningful
+regression at the cheapest suitable layer over duplicating the same assertion
+in every layer.
