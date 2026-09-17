@@ -117,18 +117,21 @@ export function ProjectInlineContent({ project }: { project: Project }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button
-          aria-label="Edit project description"
-          onClick={handleStartEditing}
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
-          <Pencil data-icon="inline-start" />
-          Edit
-        </Button>
-      </div>
+      {!project.archivedAt ? (
+        <div className="flex justify-end">
+          {/* Archived projects are read-only in every section, not only Settings. */}
+          <Button
+            aria-label="Edit project description"
+            onClick={handleStartEditing}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            <Pencil data-icon="inline-start" />
+            Edit
+          </Button>
+        </div>
+      ) : null}
 
       {description.trim() ? (
         <div className={`${contentViewportClassName} pr-2`}>

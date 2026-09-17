@@ -7,6 +7,8 @@ import { projectDetailKeys } from "../api/list-project-details";
 import { archiveProject } from "../api/archive-project";
 import { restoreProject } from "../api/restore-project";
 import { deleteProject } from "../api/delete-project";
+import { technicalEntriesKeys } from "@/features/technical-entry/api/list-technical-entries";
+import type { TechnicalEntry } from "@/features/technical-entry/types/technical-entry";
 
 export function useArchiveProject() {
   const queryClient = useQueryClient();
@@ -70,13 +72,21 @@ export function useDeleteProject() {
   return useMutation({
     mutationFn: deleteProject,
     onSuccess: async (_, projectId) => {
+      // The API keeps journal entries but clears their projectId. Their
+      // separately cached global lists and details must be refreshed too.
       queryClient.removeQueries({
         queryKey: getProjectQueryKey(projectId),
       });
 
-      await queryClient.invalidateQueries({
-        queryKey: projectsKeys.lists(),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: projectsKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: technicalEntriesKeys.lists() }),
+        queryClient.invalidateQueries({
+          queryKey: ["technical-entry"],
+          predicate: (query) =>
+            (query.state.data as TechnicalEntry | undefined)?.projectId === projectId,
+        }),
+      ]);
 
       toast.success("Project deleted successfully.");
     },

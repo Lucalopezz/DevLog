@@ -8,6 +8,7 @@ import {
 import type { Meta } from "@/api/types";
 import { Button } from "@/components/ui/button";
 import { formatRelativeDate } from "@/lib/date";
+import { Link } from "react-router";
 import type { ProjectCommand, ProjectResource } from "../types/project-detail";
 import type { TechnicalEntry } from "@/features/technical-entry/types/technical-entry";
 import { resourcePresentation } from "../presentation";
@@ -86,6 +87,16 @@ const technicalEntryTypePresentation = {
   LEARNING: { label: "Learning", icon: Lightbulb },
 } as const;
 
+function isSafeResourceUrl(value: string) {
+  try {
+    // An API response is still untrusted input for an href. Only HTTP(S)
+    // resources should become links; other schemes remain readable text.
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
 export function TechnicalEntriesSection({
   entries,
   isError,
@@ -137,7 +148,9 @@ export function TechnicalEntriesSection({
                       {type.label}
                     </p>
                     <h3 className="mt-1 break-words font-semibold">
-                      {entry.title}
+                      <Link className="hover:underline" to={`/technical-entries/${entry.id}`}>
+                        {entry.title}
+                      </Link>
                     </h3>
                   </div>
                 </div>
@@ -151,6 +164,12 @@ export function TechnicalEntriesSection({
               <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
                 {entry.context}
               </p>
+
+              {entry.conclusion ? (
+                <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+                  {entry.conclusion}
+                </p>
+              ) : null}
 
               {entry.tags?.length ? (
                 <ul className="flex flex-wrap gap-1.5">
@@ -289,12 +308,12 @@ export function ResourcesSection({
         {resources.map((resource) => {
           const presentation = resourcePresentation[resource.type];
           const ResourceIcon = presentation.icon;
-          const isExternal = /^https?:\/\//.test(resource.url);
+          const isExternal = isSafeResourceUrl(resource.url);
 
           return (
             <a
               className="group flex min-w-0 items-start gap-3 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm transition-colors hover:border-primary/40 hover:bg-card"
-              href={resource.url}
+              href={isExternal ? resource.url : undefined}
               key={resource.id}
               rel={isExternal ? "noreferrer" : undefined}
               target={isExternal ? "_blank" : undefined}
