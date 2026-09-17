@@ -4,6 +4,8 @@ import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { getTechnicalEntryQueryKey } from "../api/get-technical-entry";
 import { technicalEntriesKeys } from "../api/list-technical-entries";
 import { updateTechnicalEntry } from "../api/update-technical-entry";
+import { projectDetailKeys } from "@/features/projects/api/list-project-details";
+import type { TechnicalEntry } from "../types/technical-entry";
 import type { UpdateTechnicalEntryInput } from "../types/technical-entry";
 
 export type UpdateTechnicalEntryMutationInput = {
@@ -18,11 +20,19 @@ export function useUpdateTechnicalEntry() {
     mutationFn: ({ technicalEntryId, input }: UpdateTechnicalEntryMutationInput) =>
       updateTechnicalEntry(technicalEntryId, input),
 
-    onSuccess: async (_technicalEntry, { technicalEntryId }) => {
+    onSuccess: async (technicalEntry, { technicalEntryId }) => {
       toast.success("Technical entry updated successfully.");
 
       // Refresh both the detail cache and every filtered list containing this
-      // entry. The server remains the source of truth after the PATCH.
+      // entry. A project reassignment can affect both the old and new lists.
+      const previousProjectId = queryClient.getQueryData<TechnicalEntry>(
+        getTechnicalEntryQueryKey(technicalEntryId),
+      )?.projectId;
+      const projectIds = new Set(
+        [previousProjectId, technicalEntry.projectId].filter(
+          (id): id is string => Boolean(id),
+        ),
+      );
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: getTechnicalEntryQueryKey(technicalEntryId),
@@ -30,6 +40,11 @@ export function useUpdateTechnicalEntry() {
         queryClient.invalidateQueries({
           queryKey: technicalEntriesKeys.lists(),
         }),
+        ...[...projectIds].map((projectId) =>
+          queryClient.invalidateQueries({
+            queryKey: projectDetailKeys.technicalEntriesRoot(projectId),
+          }),
+        ),
       ]);
     },
 

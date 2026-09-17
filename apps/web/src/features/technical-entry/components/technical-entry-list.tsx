@@ -74,6 +74,15 @@ export function TechnicalEntryList({
                     {entry.context}
                   </Markdown>
 
+                  {entry.conclusion?.trim() ? (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground">Conclusion</p>
+                      <Markdown className="max-h-16 overflow-hidden text-sm leading-6 text-muted-foreground">
+                        {entry.conclusion}
+                      </Markdown>
+                    </div>
+                  ) : null}
+
                   {entry.tags?.length ? (
                     <ul className="flex flex-wrap gap-1.5">
                       {entry.tags.map((tag) => (
