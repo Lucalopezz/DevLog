@@ -6,7 +6,7 @@ import { projectDetailKeys } from "@/features/projects/api/list-project-details"
 export async function invalidateTechnicalEntryQueries(
   queryClient: QueryClient,
   technicalEntryId: string,
-  projectId: string,
+  projectId?: string,
 ) {
   const invalidations = [
     // Invalidate the specific technical entry query
