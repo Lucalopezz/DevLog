@@ -1,6 +1,6 @@
 import { FolderKanban, RefreshCw } from "lucide-react";
 import { useSearchParams } from "react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useProjects } from "../hooks/use-projects";
 import { ProjectList } from "../components/project-list";
@@ -50,6 +50,7 @@ export default function ProjectsPage() {
 
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] =
     useState(false);
+  const createProjectTriggerRef = useRef<HTMLButtonElement>(null);
 
   function handleSearch(filters: ProjectSearchFormValues) {
     const nextParams = new URLSearchParams(searchParams);
@@ -108,6 +109,7 @@ export default function ProjectsPage() {
 
         <Button
           type="button"
+          ref={createProjectTriggerRef}
           onClick={() => setIsCreateProjectDialogOpen(true)}
         >
           New project
@@ -138,6 +140,7 @@ export default function ProjectsPage() {
       <ProjectForm
         open={isCreateProjectDialogOpen}
         onOpenChange={setIsCreateProjectDialogOpen}
+        triggerRef={createProjectTriggerRef}
       />
 
       {isPending ? <ProjectListSkeleton /> : null}

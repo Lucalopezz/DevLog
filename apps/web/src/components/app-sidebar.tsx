@@ -25,6 +25,8 @@ import {
   UserPlus,
 } from "lucide-react";
 import { NavLink } from "react-router";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { SheetClose } from "@/components/ui/sheet";
 import { useGetUser } from "@/features/auth/hooks/use-get-user";
 import { useLogout } from "@/features/auth/hooks/use-logout";
 import { cn } from "@/lib/utils";
@@ -113,6 +115,7 @@ const sidebarSections: SidebarSection[] = [
 
 function SidebarItemLink({ item }: { item: SidebarItem }) {
   const Icon = item.icon;
+  const isMobile = useIsMobile();
 
   if (item.planned || !item.to) {
     return (
@@ -130,22 +133,28 @@ function SidebarItemLink({ item }: { item: SidebarItem }) {
     );
   }
 
+  const link = (
+    <NavLink
+      end={item.end}
+      to={item.to}
+      className={({ isActive }) =>
+        cn(
+          "w-full",
+          isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+        )
+      }
+    >
+      <Icon />
+      <span>{item.label}</span>
+    </NavLink>
+  );
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild>
-        <NavLink
-          end={item.end}
-          to={item.to}
-          className={({ isActive }) =>
-            cn(
-              "w-full",
-              isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
-            )
-          }
-        >
-          <Icon />
-          <span>{item.label}</span>
-        </NavLink>
+        {/* SheetClose participates in the mobile drawer only; desktop links
+            retain ordinary navigation without a modal context. */}
+        {isMobile ? <SheetClose asChild>{link}</SheetClose> : link}
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -160,21 +169,25 @@ function SidebarLink({
   children: ReactNode;
   end?: boolean;
 }) {
+  const isMobile = useIsMobile();
+  const link = (
+    <NavLink
+      end={end}
+      to={to}
+      className={({ isActive }) =>
+        cn(
+          "w-full",
+          isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+        )
+      }
+    >
+      {children}
+    </NavLink>
+  );
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild>
-        <NavLink
-          end={end}
-          to={to}
-          className={({ isActive }) =>
-            cn(
-              "w-full",
-              isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
-            )
-          }
-        >
-          {children}
-        </NavLink>
+        {isMobile ? <SheetClose asChild>{link}</SheetClose> : link}
       </SidebarMenuButton>
     </SidebarMenuItem>
   );

@@ -1,4 +1,5 @@
 import type { SubmitHandler } from "react-hook-form";
+import type { RefObject } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -18,6 +19,7 @@ import type { CreateProjectInput } from "../types/project";
 export type ProjectFormProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  triggerRef?: RefObject<HTMLButtonElement | null>;
 };
 
 /**
@@ -27,7 +29,7 @@ export type ProjectFormProps = {
  * the HTTP call and global effects, such as toasts and cache invalidation.
  * This component therefore only connects fields to the submission flow.
  */
-export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
+export function ProjectForm({ open, onOpenChange, triggerRef }: ProjectFormProps) {
   const form = useProjectForm();
   const createProjectMutation = useCreateProject();
 
@@ -50,7 +52,17 @@ export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="gap-6 border-border/60 bg-card p-7 shadow-2xl ring-0 sm:max-w-xl">
+      <DialogContent
+        className="gap-6 border-border/60 bg-card p-7 shadow-2xl ring-0 sm:max-w-xl"
+        onCloseAutoFocus={(event) => {
+          // This controlled dialog has no DialogTrigger for Radix to refocus.
+          // Restore the keyboard user's position in the project list instead.
+          if (triggerRef?.current) {
+            event.preventDefault();
+            triggerRef.current.focus();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight">
             New project

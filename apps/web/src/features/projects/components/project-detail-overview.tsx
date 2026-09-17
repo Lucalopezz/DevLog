@@ -58,7 +58,7 @@ export function ProjectDetailOverview({
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-        <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm sm:p-8">
+        <section className="min-w-0 rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm sm:p-8">
           <div className="mb-6 flex items-center gap-3">
             <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
               <BookOpenText className="size-5 text-primary" />
