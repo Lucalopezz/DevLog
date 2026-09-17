@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 coverage
+.playwright-browsers/
+playwright-report/
+test-results/
+playwright/.auth/
 .vitest
 *.local
 

@@ -1,6 +1,6 @@
 import { FolderKanban, Plus, RefreshCw } from "lucide-react";
 import { Link, useParams } from "react-router";
-import { useState, type ReactNode } from "react";
+import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { useGetProject } from "../hooks/use-get-project";
 import {
@@ -54,6 +54,35 @@ export default function ProjectDetailPage() {
   );
   const commandsQuery = useProjectCommands(projectId, commandsPage);
   const resourcesQuery = useProjectResources(projectId, resourcesPage);
+
+  function handleTabKeyDown(
+    event: KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) {
+    // Automatic activation fits these tabs: all collections already query in
+    // parallel, so moving focus does not start a new request or wait for data.
+    let nextIndex: number;
+    switch (event.key) {
+      case "ArrowRight":
+        nextIndex = (index + 1) % tabs.length;
+        break;
+      case "ArrowLeft":
+        nextIndex = (index - 1 + tabs.length) % tabs.length;
+        break;
+      case "Home":
+        nextIndex = 0;
+        break;
+      case "End":
+        nextIndex = tabs.length - 1;
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    setActiveTab(tabs[nextIndex].id);
+    const tabButtons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    tabButtons?.[nextIndex]?.focus();
+  }
 
   // The project is the parent resource. Show its skeleton first and only
   // render the sections once a project is available to provide context.
@@ -114,7 +143,7 @@ export default function ProjectDetailPage() {
         className="overflow-x-auto border-b border-border/60"
       >
         <div className="flex min-w-max gap-1" role="tablist">
-          {tabs.map((tab) => {
+          {tabs.map((tab, index) => {
             const isActive = activeTab === tab.id;
 
             return (
@@ -126,9 +155,12 @@ export default function ProjectDetailPage() {
                     ? "text-foreground after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary"
                     : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                 }`}
+                id={`project-tab-${tab.id}`}
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
+                onKeyDown={(event) => handleTabKeyDown(event, index)}
                 role="tab"
+                tabIndex={isActive ? 0 : -1}
                 type="button"
               >
                 {tab.label}
@@ -138,17 +170,16 @@ export default function ProjectDetailPage() {
         </div>
       </nav>
 
-      <section
-        aria-labelledby={`project-tab-${activeTab}`}
-        id={`project-panel-${activeTab}`}
-        role="tabpanel"
-        tabIndex={0}
-      >
-        <h2 className="sr-only" id={`project-tab-${activeTab}`}>
-          {tabs.find((tab) => tab.id === activeTab)?.label}
-        </h2>
-
-        {activeTab === "overview" ? (
+      {tabs.map((tab) => (
+        <section
+          aria-labelledby={`project-tab-${tab.id}`}
+          hidden={activeTab !== tab.id}
+          id={`project-panel-${tab.id}`}
+          key={tab.id}
+          role="tabpanel"
+          tabIndex={0}
+        >
+        {activeTab === tab.id && tab.id === "overview" ? (
           <ProjectDetailOverview
             commandsTotal={commandsQuery.data?.meta.total}
             project={project}
@@ -157,7 +188,7 @@ export default function ProjectDetailPage() {
           />
         ) : null}
 
-        {activeTab === "entries" ? (
+        {activeTab === tab.id && tab.id === "entries" ? (
           <SectionFrame
             action={
               <Button
@@ -184,7 +215,7 @@ export default function ProjectDetailPage() {
           </SectionFrame>
         ) : null}
 
-        {activeTab === "commands" ? (
+        {activeTab === tab.id && tab.id === "commands" ? (
           <SectionFrame
             description="Recurring commands to set up, run, and maintain the project."
             title="Commands"
@@ -201,7 +232,7 @@ export default function ProjectDetailPage() {
           </SectionFrame>
         ) : null}
 
-        {activeTab === "resources" ? (
+        {activeTab === tab.id && tab.id === "resources" ? (
           <SectionFrame
             description="Useful links and references to continue your work."
             title="Resources"
@@ -217,13 +248,14 @@ export default function ProjectDetailPage() {
             />
           </SectionFrame>
         ) : null}
-        {activeTab === "settings" ? (
+        {activeTab === tab.id && tab.id === "settings" ? (
           <ProjectSettingsPane
             project={project}
             onEdit={() => setIsEditProjectDialogOpen(true)}
           />
         ) : null}
-      </section>
+        </section>
+      ))}
 
       {projectQuery.isFetching ? (
         <p

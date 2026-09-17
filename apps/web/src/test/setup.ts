@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { afterAll, afterEach, beforeAll, beforeEach, vi } from 'vitest'
 
 import { server } from './mocks/server'
+import { createMatchMediaController } from './match-media'
 import { disposeTestQueryClients } from './query-client'
 import { disposeTestRouters } from './router-registry'
 
@@ -22,42 +23,8 @@ beforeAll(() => {
 beforeEach(() => {
   unexpectedRequests.length = 0
 
-  // RootLayout needs matchMedia through useIsMobile. This desktop double owns
-  // listeners per query so later browser-oriented tests can dispatch changes
-  // without replacing the application hook.
-  const listenersByMedia = new Map<
-    string,
-    Set<EventListenerOrEventListenerObject>
-  >()
-  vi.stubGlobal('matchMedia', (media: string) => {
-    const listeners = listenersByMedia.get(media) ?? new Set()
-    listenersByMedia.set(media, listeners)
-
-    return {
-      matches: false,
-      media,
-      onchange: null,
-      addListener: (listener: EventListenerOrEventListenerObject) =>
-        listeners.add(listener),
-      removeListener: (listener: EventListenerOrEventListenerObject) =>
-        listeners.delete(listener),
-      addEventListener: (
-        _type: string,
-        listener: EventListenerOrEventListenerObject,
-      ) => listeners.add(listener),
-      removeEventListener: (
-        _type: string,
-        listener: EventListenerOrEventListenerObject,
-      ) => listeners.delete(listener),
-      dispatchEvent: (event: Event) => {
-        for (const listener of listeners) {
-          if (typeof listener === 'function') listener(event)
-          else listener.handleEvent(event)
-        }
-        return !event.defaultPrevented
-      },
-    } as MediaQueryList
-  })
+  // RootLayout and hook tests share one stable media-query object per query.
+  vi.stubGlobal('matchMedia', createMatchMediaController().matchMedia)
 })
 
 afterEach(async () => {

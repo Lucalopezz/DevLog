@@ -54,9 +54,11 @@ export function LoginForm() {
         </div>
 
         <div className="space-y-5">
+          {/* Keep the submitted values stable until the mutation settles. */}
           <FormInput
             autoComplete="email"
             control={form.control}
+            disabled={isLoading}
             label="E-mail"
             name="email"
             placeholder="you@example.com"
@@ -65,6 +67,7 @@ export function LoginForm() {
           <FormInput
             autoComplete="current-password"
             control={form.control}
+            disabled={isLoading}
             label="Password"
             name="password"
             placeholder="Enter your password"
