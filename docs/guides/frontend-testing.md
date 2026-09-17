@@ -1,8 +1,8 @@
 # Frontend testing: a guide for backend developers
 
-Status: learning guide and incremental strategy. Parts 0–6 of the
-[implementation plan](frontend-testing-plan.md) are implemented; the remaining
-feature, browser, and full-stack coverage will be added in Parts 7–9.
+Status: learning guide and incremental strategy. Parts 0–6 and 8 of the
+[implementation plan](frontend-testing-plan.md) are implemented. Part 7 was
+intentionally skipped; full-stack coverage remains planned for Part 9.
 
 This guide starts with the concepts. Read it before Part 0 of the plan. Examples
 use DevLog's current React, React Router, React Hook Form, Zod, Axios, and
@@ -84,6 +84,20 @@ of the frontend.
 
 Playwright opens a real browser. Use it for deep links, refresh, session
 cookies, focus, mobile navigation, and a small number of complete journeys.
+
+The intercepted Part 8 suite runs with `pnpm --filter web typecheck:e2e` and
+`pnpm --filter web test:e2e`. From the repository root, install its Chromium
+binary inside the ignored web package directory first:
+
+```bash
+PLAYWRIGHT_BROWSERS_PATH=apps/web/.playwright-browsers pnpm --filter web exec playwright install chromium
+```
+
+The suite builds a fresh preview and replaces every API request with an
+explicit Playwright route. An undeclared request fails instead of reaching a
+developer's backend. Its [browser observations](frontend-testing-browser-observations.md)
+record keyboard and narrow-layout checks as well as the standalone picker
+limitation caused by skipping Part 7.
 
 There are two distinct modes:
 

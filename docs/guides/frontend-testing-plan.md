@@ -1223,6 +1223,12 @@ cross-feature suites, full tests, lint/build.
 
 ## Part 8 — Shared UI, accessibility, and browser behavior
 
+Implementation status: **implemented**. The intercepted Chromium suite and
+Part 8 focused tests pass. The aggregate Vitest command currently has one
+unrelated tag-assignment contract failure from work outside this part; see the
+[browser observations](frontend-testing-browser-observations.md) for validation
+details. Part 7 remains intentionally skipped.
+
 **Goal:** cover the browser-dependent gaps left by jsdom. Keep small shared
 behavior tests and add a limited real-browser suite.
 
@@ -1261,7 +1267,8 @@ pnpm --filter web exec playwright install chromium
 
 Add `"test:e2e": "playwright test"` and
 `"test:e2e:ui": "playwright test --ui"` to the web scripts. Add
-`playwright-report/`, `test-results/`, and `playwright/.auth/` to its gitignore.
+`playwright-report/`, `test-results/`, `playwright/.auth/`, and the repo-local
+`.playwright-browsers/` directory to its gitignore.
 Saved browser state can contain session cookies and must never be committed.
 Playwright documents [authentication state handling](https://playwright.dev/docs/auth).
 
@@ -1343,23 +1350,23 @@ through to a developer's running backend.
 
 ### Browser behavior checklist
 
-- [ ] Direct navigation and reload on every existing route; guest/authenticated
+- [x] Direct navigation and reload on every existing route; guest/authenticated
   variants where relevant; browser Back/Forward restores filters.
-- [ ] At a viewport below the current 768 CSS-pixel breakpoint, Open navigation
+- [x] At a viewport below the current 768 CSS-pixel breakpoint, Open navigation
   menu opens the drawer; keyboard navigation reaches working links; selecting
   a link and dismissing the drawer behave deliberately.
-- [ ] At desktop width, sidebar collapse works and active-route indication is
+- [x] At desktop width, sidebar collapse works and active-route indication is
   correct, including archive versus active entries.
-- [ ] Dialog focus starts inside, remains inside while modal, Escape/Cancel
+- [x] Dialog focus starts inside, remains inside while modal, Escape/Cancel
   dismisses when allowed, and focus returns to its trigger.
-- [ ] Project tabs have accessible names, selected state and correct panels;
+- [x] Project tabs have accessible names, selected state and correct panels;
   complete arrow-key/Home/End behavior if the selected tab pattern requires it.
-- [ ] Forms have labels and associated errors; invalid field focus is useful;
+- [x] Forms have labels and associated errors; invalid field focus is useful;
   submit can be reached and activated with the keyboard.
-- [ ] Long Markdown code, tables, descriptions and project paths remain usable
+- [x] Long Markdown code, tables, descriptions and project paths remain usable
   at narrow widths. Verify in a real browser, not with jsdom dimensions.
-- [ ] Loading/error states remain understandable without color or animation.
-- [ ] Notification appears in the built app; development tools are absent.
+- [x] Loading/error states remain understandable without color or animation.
+- [x] Notification appears in the built app; development tools are absent.
 
 Viewport sizes in Playwright are browser API numbers, not CSS dimensions being
 introduced into application styles. Keep application styling changes in the
