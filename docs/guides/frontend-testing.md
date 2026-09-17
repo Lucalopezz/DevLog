@@ -1,8 +1,8 @@
 # Frontend testing: a guide for backend developers
 
-Status: learning guide and incremental strategy. Parts 0–4 of the
+Status: learning guide and incremental strategy. Parts 0–6 of the
 [implementation plan](frontend-testing-plan.md) are implemented; the remaining
-feature, browser, and full-stack coverage will be added in Parts 5–9.
+feature, browser, and full-stack coverage will be added in Parts 7–9.
 
 This guide starts with the concepts. Read it before Part 0 of the plan. Examples
 use DevLog's current React, React Router, React Hook Form, Zod, Axios, and

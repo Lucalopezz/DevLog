@@ -1,6 +1,6 @@
 # Frontend testing implementation plan
 
-Status: **Parts 0–4 implemented; Parts 5–9 remain proposed**. Source baseline:
+Status: **Parts 0–6 implemented; Parts 7–9 remain proposed**. Source baseline:
 commit `e608071`, inspected on 2026-09-14; completion review against `15df521`
 on 2026-09-15 (the intervening commit adds the draft testing documents).
 Recheck the named source files before implementing each part if the app changes.
@@ -73,11 +73,11 @@ part:
 
 | Finding | Evidence and consequence | Planned action |
 | --- | --- | --- |
-| Incomplete archived-project protection | Settings disables edit/delete, but `ProjectInlineContent` renders its Edit button without checking `archivedAt` | Part 5: verify the read-only rule and add a regression/fix for inline editing |
-| Archived entry edit affordances | Entry title and inline editors do not gate editing on `archivedAt` | Part 6: compare the documented API lifecycle rules, then test/fix the intended behavior |
-| Some entry mutations omit the project list branch | Create/archive/restore invalidate linked project entries; update/delete currently do not | Part 6: demonstrate stale project cards and totals, then add missing invalidation |
+| Incomplete archived-project protection | `ProjectInlineContent` previously offered Edit for archived projects | Part 5: fixed and covered alongside Settings and linked-entry creation |
+| Archived entry edit affordances | Entry title and inline editors remain available after archiving | Part 6: confirmed this matches the current API use cases, including deletion |
+| Some entry mutations omitted the project list branch | Update/delete previously left linked project entries stale | Part 6: repaired and covered with active global/project queries and totals |
 | Tag deletion omits project detail collections | Tag lists, global entry lists, and entry details refresh, but project entry cards can retain old badges | Part 7: cover and repair cross-feature synchronization |
-| Project deletion leaves cached entry associations | Prisma preserves linked entries with `projectId` set to null; the web mutation only removes the project branch and refreshes project lists | Parts 5–6: verify preserved entries lose the old project association in cached lists/details |
+| Project deletion left cached entry associations | Prisma preserves linked entries with `projectId` set to null | Parts 5–6: repaired and covered in global list and detail queries |
 | Logout removes only the current-user query | Project/tag/entry data can remain in the cache during account switching | Part 3: test two users on identical query keys; define cancellation and clearing of user-scoped data |
 | Project tabs use custom buttons | Click behavior exists; arrow-key tab navigation is not implemented | Part 8: test keyboard expectations and implement the chosen accessible tab pattern |
 | Detail error screens conflate failures | Project/entry detail pages render “not found” content for any query error | Parts 5–6: characterize 404; track a separate improvement for network/500 messaging |
@@ -880,6 +880,15 @@ through real hooks/HTTP. Run focused project suites, full web tests, lint/build.
 
 ## Part 5 — Project details, editing, and lifecycle
 
+Implementation status: **complete**. Detail tabs, independent collection
+states/pagination, edit and inline forms, Settings metadata/clipboard, and
+archive/restore/delete flows have integration coverage. Archived projects no
+longer offer inline description editing. Project deletion refreshes the
+surviving journal entries' list and detail associations. HTTP(S) is the
+intentional resource-link allowlist; other URL schemes display as text. The
+existing detail page still presents network/500 errors as “not found”; a
+separate error-state UX improvement remains outside this part.
+
 **Goal:** protect the most stateful project interactions. Split delivery into
 read-only detail sections, edits, and lifecycle/cache regressions.
 
@@ -889,22 +898,22 @@ Create `project-detail-page.spec.tsx` beside the page. Register handlers for the
 parent project and all three collection requests, even when testing Overview.
 All four hooks mount immediately in the current implementation.
 
-- [ ] Pending parent → named detail skeleton; successful parent → header and
+- [x] Pending parent → named detail skeleton; successful parent → header and
   Overview; 404 → Project not found and Back to projects.
-- [ ] Commands/Resources/Technical entries tabs render their own content.
-- [ ] Each collection independently handles pending, empty, error, retry, and
+- [x] Commands/Resources/Technical entries tabs render their own content.
+- [x] Each collection independently handles pending, empty, error, retry, and
   pagination; one collection failure must not erase the parent project.
-- [ ] Changing Commands to page 2 leaves Resources and Entries at page 1.
-- [ ] Overview metrics come from `meta.total`, not the number of visible rows.
-- [ ] Technologies show name and optional version; missing technologies show
+- [x] Changing Commands to page 2 leaves Resources and Entries at page 1.
+- [x] Overview metrics come from `meta.total`, not the number of visible rows.
+- [x] Technologies show name and optional version; missing technologies show
   the existing empty message. There is no technology editor to test yet.
-- [ ] Command title, content, optional description and execution order render.
-- [ ] Resource labels/types and hrefs match the response; HTTP(S) links open
+- [x] Command title, content, optional description and execution order render.
+- [x] Resource labels/types and hrefs match the response; HTTP(S) links open
   in a new tab with the existing `rel` protection. Do not navigate external
   services in tests.
-- [ ] Project entry cards preserve their links, type/status labels, dates,
+- [x] Project entry cards preserve their links, type/status labels, dates,
   conclusion preview, and tags when present.
-- [ ] Refetching the parent shows Updating project without losing useful data.
+- [x] Refetching the parent shows Updating project without losing useful data.
 
 If a resource has an unsupported or unsafe URL scheme, treat acceptance or
 rejection as a deliberate product/security rule to implement, rather than
@@ -952,8 +961,10 @@ confirmation and focus restoration in Part 8.
 For copying, use `userEvent.setup()`'s clipboard support or a scoped clipboard
 double. Test a rejected `writeText` promise as well as success. For the 1.5-second
 feedback reset use fake timers only in that test and configure
-`userEvent.setup({ advanceTimers: vi.advanceTimersByTime })`. Advance the clock
-inside React `act` when it causes a state update. Avoid fake timers around MSW
+`userEvent.setup({ advanceTimers: vi.advanceTimersByTime })` when using
+user-event. A scoped `fireEvent.click` is also suitable for this narrow timer
+assertion because it avoids user-event's own timers. Advance the clock inside
+React `act` when it causes a state update. Avoid fake timers around MSW
 requests unless necessary.
 
 **Exit criterion:** all five detail tabs and every implemented edit/lifecycle
@@ -962,6 +973,13 @@ read-only regressions are fixed or explicitly left incomplete. Run relevant
 suites, all web tests, lint/build.
 
 ## Part 6 — Technical journal
+
+Implementation status: **complete**. Active and archive route contracts,
+filters/history/pagination, creation, detail fields, editing, lifecycle
+confirmations, and project synchronization are covered. The API explicitly
+allows editing and deleting archived entries, so those controls remain
+available. The detail page's network/500 “not found” wording is the same
+separate UX limitation noted in Part 5; 404 behavior is covered.
 
 **Goal:** cover both journal routes, detail editing, and the link to projects.
 Deliver lists/filters, creation/detail, then lifecycle and cache regressions.
@@ -973,20 +991,20 @@ Create suites beside `technical-entries-page.tsx` and
 for equivalent cases, but keep at least one integration test for each actual
 route so testing one cannot conceal a bug in the other.
 
-- [ ] Default active request uses `archivedAt: 'null'`; archive request uses
+- [x] Default active request uses `archivedAt: 'null'`; archive request uses
   `archivedAt: 'not-null'`. Clear/Search/page changes retain that route scope.
-- [ ] Initial pending, success, empty and error/Try again states.
-- [ ] Page parsing: missing, invalid, zero, negative and fractional → request
+- [x] Initial pending, success, empty and error/Try again states.
+- [x] Page parsing: missing, invalid, zero, negative and fractional → request
   page 1. Valid pagination preserves title/type/status.
-- [ ] Filters are drafts until Search; title trimmed; filter changes reset page.
-- [ ] ISSUE permits OPEN/RESOLVED. LEARNING clears/disables Status and omits it
+- [x] Filters are drafts until Search; title trimmed; filter changes reset page.
+- [x] ISSUE permits OPEN/RESOLVED. LEARNING clears/disables Status and omits it
   from HTTP even for `?type=LEARNING&status=OPEN` entered manually.
-- [ ] Unknown type/status values are omitted; All options remove filters.
-- [ ] Changing search parameters through history updates the form draft.
-- [ ] Card links use the correct entry ID; type/status/tag/date/conclusion
+- [x] Unknown type/status values are omitted; All options remove filters.
+- [x] Changing search parameters through history updates the form draft.
+- [x] Card links use the correct entry ID; type/status/tag/date/conclusion
   rendering handles optional fields.
-- [ ] First/last page and fetching controls are correct for both lists.
-- [ ] `/technical-entries/archived` is never treated as an entry ID by routing.
+- [x] First/last page and fetching controls are correct for both lists.
+- [x] `/technical-entries/archived` is never treated as an entry ID by routing.
 
 ### 6B. Creation and detail editing
 
@@ -1078,16 +1096,16 @@ server value reaches the display.
 
 ### 6C. Cross-feature regressions
 
-- [ ] Create an entry from a project; it appears in that project's Entries tab
+- [x] Create an entry from a project; it appears in that project's Entries tab
   and changes the Overview total, without manual refresh.
-- [ ] Edit a linked entry title; both global list and project entry card update.
-- [ ] Archive a linked entry; it disappears from active/project lists and
+- [x] Edit a linked entry title; both global list and project entry card update.
+- [x] Archive a linked entry; it disappears from active/project lists and
   appears in the archive list. Restore reverses this.
-- [ ] Delete a linked entry; remove its cached detail and refresh global and
+- [x] Delete a linked entry; remove its cached detail and refresh global and
   project collections/totals. Returning to its route cannot show stale data.
-- [ ] Editing another project's entry does not invalidate unrelated command or
+- [x] Editing another project's entry does not invalidate unrelated command or
   resource collections.
-- [ ] Unlinked entries work without constructing a query key with an absent
+- [x] Unlinked entries work without constructing a query key with an absent
   project ID.
 
 Use the cache matrix below to guide expected synchronization. Update/delete
@@ -1650,13 +1668,13 @@ only assertion. The current key factories live beside their API functions.
 | Logout/account switch | Cancel old user queries, remove private cached state, prevent late responses/callbacks restoring it | Only current user is removed today; Part 3 regression/fix |
 | Register | Navigate to login without populating an authenticated session | Implemented; Part 3 |
 | Create project | Invalidate `projectsKeys.lists()` across filters/pages | Implemented; Part 4 |
-| Update project | Refresh complete project detail and project lists; preserve technologies omitted by PATCH | Current prefix invalidation also matches project collections; Part 5 |
-| Archive/restore project | Refresh project detail, its collection branch and project lists; preserve journal relationships | Implemented with overlapping prefixes; verify behavior in Part 5 |
-| Delete project | Remove the project's detail/collection branch; refresh project lists and entry lists/details whose project association becomes null | Project removal already matches child keys; entry synchronization needs a Part 5–6 regression/fix |
-| Create entry | Refresh `technicalEntriesKeys.lists()` and, when linked, `projectDetailKeys.technicalEntriesRoot(projectId)` | Implemented; Part 6 |
-| Update entry | Refresh `getTechnicalEntryQueryKey(id)`, global entry lists, and linked project entries | Linked project branch missing today; Part 6 regression/fix |
-| Archive/restore entry | Refresh entry detail, active/archive global lists, linked project entries and their totals | Implemented when response supplies projectId; Part 6 |
-| Delete entry | Remove entry detail; refresh global lists and linked project entries/totals | Linked branch missing; capture projectId before deleting; Part 6 |
+| Update project | Refresh complete project detail and project lists; preserve technologies omitted by PATCH | Covered in Part 5; prefix invalidation also matches project collections |
+| Archive/restore project | Refresh project detail, its collection branch and project lists; preserve journal relationships | Covered in Part 5 with active queries |
+| Delete project | Remove the project's detail/collection branch; refresh project lists and entry lists/details whose project association becomes null | Implemented and covered in Parts 5–6 |
+| Create entry | Refresh `technicalEntriesKeys.lists()` and, when linked, `projectDetailKeys.technicalEntriesRoot(projectId)` | Covered in Part 6 |
+| Update entry | Refresh `getTechnicalEntryQueryKey(id)`, global entry lists, and linked project entries | Implemented and covered in Part 6 |
+| Archive/restore entry | Refresh entry detail, active/archive global lists, linked project entries and their totals | Covered in Part 6 |
+| Delete entry | Remove entry detail; refresh global lists and linked project entries/totals | Implemented and covered in Part 6; project ID comes from cached detail before removal |
 | Create tag | Refresh `tagKeys.lists()` including picker searches; controlled parent receives created ID | Implemented; Part 7 |
 | Delete tag | Refresh tag lists, global entry lists, entry details, and project entry collections displaying the tag | Project collections missing; Part 7 regression/fix |
 
