@@ -9,7 +9,7 @@ const user = {
   email: 'ada@example.com',
 }
 
-const project = {
+export const project = {
   id: projectId,
   name: 'DevLog',
   description: 'A technical journal for software projects.',
@@ -18,7 +18,7 @@ const project = {
   updatedAt: '2026-09-14T10:00:00.000Z',
 }
 
-const entry = {
+export const entry = {
   id: entryId,
   projectId,
   title: 'Understand query invalidation',
@@ -61,7 +61,7 @@ export async function mockApi(page: Page, handler: Handler) {
       unexpected.push(`${request.method()} ${url.pathname}${url.search}`)
     }
     await route.fulfill({
-      status: reply?.status ?? 599,
+      status: reply ? (reply.status ?? 200) : 599,
       contentType: 'application/json',
       headers,
       body: JSON.stringify(reply?.body ?? { message: 'Unexpected API request' }),

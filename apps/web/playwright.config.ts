@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
+import { fileURLToPath } from 'node:url'
+
+// Anchor browser installation to this package, regardless of the shell's cwd.
+process.env.PLAYWRIGHT_BROWSERS_PATH ??= fileURLToPath(new URL('./.playwright-browsers', import.meta.url))
 
 export default defineConfig({
   testDir: './e2e/mocked',
