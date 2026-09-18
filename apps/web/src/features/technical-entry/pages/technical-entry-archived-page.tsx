@@ -40,6 +40,8 @@ export default function ArchivedTechnicalEntriesPage() {
     type !== "LEARNING" && isTechnicalEntryStatus(rawStatus)
       ? rawStatus
       : undefined;
+  const tagId = searchParams.get("tagId") || undefined;
+  const tagName = searchParams.get("tagName")?.trim() || undefined;
 
   const params = {
     ...defaultTechnicalEntryParams,
@@ -47,6 +49,7 @@ export default function ArchivedTechnicalEntriesPage() {
     ...(title ? { title } : {}),
     ...(type ? { type } : {}),
     ...(status ? { status } : {}),
+    ...(tagId ? { tagId } : {}),
   } satisfies ListTechnicalEntriesParams;
 
   const { data, isError, isFetching, isPending, refetch } =
@@ -58,6 +61,8 @@ export default function ArchivedTechnicalEntriesPage() {
     nextParams.delete("title");
     nextParams.delete("type");
     nextParams.delete("status");
+    nextParams.delete("tagId");
+    nextParams.delete("tagName");
     nextParams.set("page", "1");
 
     const normalizedTitle = filters.title.trim();
@@ -67,6 +72,10 @@ export default function ArchivedTechnicalEntriesPage() {
     // LEARNING entries do not have OPEN/RESOLVED status in the backend.
     if (filters.status && filters.type !== "LEARNING") {
       nextParams.set("status", filters.status);
+    }
+    if (filters.tagId) {
+      nextParams.set("tagId", filters.tagId);
+      nextParams.set("tagName", filters.tagName);
     }
 
     setSearchParams(nextParams);
@@ -98,8 +107,9 @@ export default function ArchivedTechnicalEntriesPage() {
         </div>
       </header>
       <TechnicalEntryFilters
-        key={`${title ?? ""}:${type ?? ""}:${status ?? ""}`}
+        key={`${title ?? ""}:${type ?? ""}:${status ?? ""}:${tagId ?? ""}`}
         initialStatus={status}
+        initialTag={tagId ? { id: tagId, name: tagName ?? tagId } : undefined}
         initialTitle={title ?? ""}
         initialType={type}
         onClear={handleClearFilters}

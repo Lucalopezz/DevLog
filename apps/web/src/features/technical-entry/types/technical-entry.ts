@@ -37,6 +37,7 @@ export type ListTechnicalEntriesParams = {
   type?: TechnicalEntryType;
   status?: TechnicalEntryStatus;
   projectId?: string;
+  tagId?: string;
   title?: string;
 };
 
@@ -45,6 +46,8 @@ export type TechnicalEntrySearchFormValues = {
   title: string;
   type: TechnicalEntryType | "";
   status: TechnicalEntryStatus | "";
+  tagId: string;
+  tagName: string;
 };
 
 export type TechnicalEntryTag = {

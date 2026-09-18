@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 import { deferred } from '@/test/deferred'
 import { createTechnicalEntry } from '@/test/factories/technical-entry'
+import { createTag } from '@/test/factories/tag'
 import { technicalEntriesKeys } from '../api/list-technical-entries'
 import { server } from '@/test/mocks/server'
 import { apiUrl } from '@/test/mocks/urls'
@@ -210,6 +211,42 @@ describe.each(cases)('$label technical-entry list', ({ route, scope, empty }) =>
     await user.click(within(screen.getByRole('form', { name: 'Search filters' })).getByRole('button', { name: 'Clear' }))
     await waitFor(() => expect(requests.at(-1)?.searchParams.has('type')).toBe(false))
     expect(requests.at(-1)?.searchParams.get('archivedAt')).toBe(scope)
+  })
+
+  it('searches tags remotely and sends the selected tag ID after submission', async () => {
+    const tag = createTag({ id: 'tag-1', name: 'database' })
+    const requests: URL[] = []
+
+    server.use(
+      http.get(apiUrl('/technical-entry'), ({ request }) => {
+        requests.push(new URL(request.url))
+        return HttpResponse.json(collection([]))
+      }),
+      http.get(apiUrl('/tag'), ({ request }) => {
+        expect(new URL(request.url).searchParams.get('name')).toBe('data')
+        return HttpResponse.json({
+          data: [tag],
+          meta: { currentPage: 1, perPage: 10, lastPage: 1, total: 1 },
+        })
+      }),
+    )
+
+    const { user } = renderList(route)
+    await screen.findByRole('heading', { name: empty })
+
+    const form = screen.getByRole('form', { name: 'Search filters' })
+    await user.click(within(form).getByRole('button', { name: 'All tags' }))
+    await user.type(
+      screen.getByRole('combobox', { name: 'Search tags' }),
+      'data',
+    )
+    await user.click(await screen.findByRole('option', { name: '#database' }))
+    await user.click(within(form).getByRole('button', { name: 'Search' }))
+
+    await waitFor(() => expect(requests).toHaveLength(2))
+    expect(requests.at(-1)?.searchParams.get('tagId')).toBe(tag.id)
+    expect(search().get('tagId')).toBe(tag.id)
+    expect(search().get('tagName')).toBe(tag.name)
   })
 
   it('preserves filters across pagination and disables boundary controls', async () => {

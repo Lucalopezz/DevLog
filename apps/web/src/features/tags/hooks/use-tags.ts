@@ -1,9 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { listTags, tagKeys } from "../api/list-tags";
-import type { ListTagsParams } from "../types/tag";
+import type { ListTagsParams, TagCollection } from "../types/tag";
 
-export function useTags(params: ListTagsParams = {}) {
+type UseTagsOptions = Pick<
+  UseQueryOptions<TagCollection, Error>,
+  "enabled"
+>;
+
+export function useTags(params: ListTagsParams = {}, options?: UseTagsOptions) {
   return useQuery({
+    ...options,
     queryKey: tagKeys.list(params),
     queryFn: () => listTags(params),
   });

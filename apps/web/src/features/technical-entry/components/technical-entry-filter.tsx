@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { SearchForm } from "@/components/search-form";
 import { Input } from "@/components/ui/input";
+import { TagSearchSelect } from "@/features/tags/components/tag-search-select";
+import type { Tag } from "@/features/tags/types/tag";
 import type {
   TechnicalEntrySearchFormValues,
   TechnicalEntryStatus,
@@ -11,6 +13,7 @@ type TechnicalEntryFiltersProps = {
   initialTitle: string;
   initialType?: TechnicalEntryType;
   initialStatus?: TechnicalEntryStatus;
+  initialTag?: Pick<Tag, "id" | "name">;
   onSearch: (filters: TechnicalEntrySearchFormValues) => void;
   onClear: () => void;
 };
@@ -19,6 +22,7 @@ export function TechnicalEntryFilters({
   initialTitle,
   initialType,
   initialStatus,
+  initialTag,
   onSearch,
   onClear,
 }: TechnicalEntryFiltersProps) {
@@ -27,16 +31,26 @@ export function TechnicalEntryFilters({
   const [status, setStatus] = useState<TechnicalEntryStatus | "">(
     initialStatus ?? "",
   );
+  const [tag, setTag] = useState<Pick<Tag, "id" | "name"> | undefined>(
+    initialTag,
+  );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onSearch({ title, type, status });
+    onSearch({
+      title,
+      type,
+      status,
+      tagId: tag?.id ?? "",
+      tagName: tag?.name ?? "",
+    });
   }
 
   function handleClear() {
     setTitle("");
     setType("");
     setStatus("");
+    setTag(undefined);
     onClear();
   }
 
@@ -95,6 +109,8 @@ export function TechnicalEntryFilters({
           <option value="RESOLVED">Resolved</option>
         </select>
       </div>
+
+      <TagSearchSelect onChange={setTag} value={tag} />
     </SearchForm>
   );
 }
