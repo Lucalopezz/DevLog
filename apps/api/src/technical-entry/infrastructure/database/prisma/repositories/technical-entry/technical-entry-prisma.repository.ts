@@ -118,6 +118,17 @@ export class TechnicalEntryPrismaRepository implements TechnicalEntryRepository 
     if (filter.projectId !== undefined) {
       where.projectId = filter.projectId;
     }
+    if (filter.tagId !== undefined) {
+      // The entry owner is already constrained above. The nested owner check
+      // adds defense in depth so a foreign user's tag ID cannot match an
+      // entry through a malformed relationship.
+      where.tags = {
+        some: {
+          tagId: filter.tagId,
+          tag: filter.userId ? { userId: filter.userId } : undefined,
+        },
+      };
+    }
     if (filter.title) {
       where.title = { contains: filter.title, mode: 'insensitive' };
     }

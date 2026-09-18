@@ -69,6 +69,10 @@ export class SearchTechnicalEntryDto implements Omit<
   projectId?: string | undefined;
 
   @IsOptional()
+  @IsUUID('4', { message: 'Invalid parameter' })
+  tagId?: string | undefined;
+
+  @IsOptional()
   @IsString({ message: 'Invalid parameter' })
   title?: string | undefined;
 }

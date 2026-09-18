@@ -16,6 +16,7 @@ describe('SearchTechnicalEntryDto', () => {
       type: TechnicalEntryType.ISSUE,
       status: TechnicalEntryStatus.OPEN,
       projectId: '5ab0c050-5050-4d2b-b0a0-44247985de2b',
+      tagId: '6ab0c050-5050-4d2b-b0a0-44247985de2b',
       title: 'NestJS',
     });
 
@@ -47,6 +48,7 @@ describe('SearchTechnicalEntryDto', () => {
       type: 'INVALID',
       status: 'INVALID',
       projectId: 'invalid-id',
+      tagId: 'invalid-id',
       title: 123,
     });
 
@@ -61,6 +63,7 @@ describe('SearchTechnicalEntryDto', () => {
         'type',
         'status',
         'projectId',
+        'tagId',
         'title',
       ]),
     );

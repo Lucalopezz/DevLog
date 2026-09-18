@@ -56,9 +56,34 @@ describe('TechnicalEntryPrismaRepository', () => {
       }),
     );
 
-    expect(count).toHaveBeenCalledWith({ where: { archivedAt: { not: null } } });
+    expect(count).toHaveBeenCalledWith({
+      where: { archivedAt: { not: null } },
+    });
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: { archivedAt: { not: null } } }),
+    );
+  });
+
+  it('filters entries through an owned tag relationship', async () => {
+    await repository.search(
+      new TechnicalEntrySearchParams({
+        filter: { userId: 'user-1', tagId: 'tag-1' },
+      }),
+    );
+
+    const expectedWhere = {
+      userId: 'user-1',
+      tags: {
+        some: {
+          tagId: 'tag-1',
+          tag: { userId: 'user-1' },
+        },
+      },
+    };
+
+    expect(count).toHaveBeenCalledWith({ where: expectedWhere });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expectedWhere }),
     );
   });
 

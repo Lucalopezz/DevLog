@@ -15,6 +15,8 @@ import {
 
 const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const PROJECT_ID = '123e4567-e89b-42d3-a456-426614174001';
+const ENTRY_ID = '123e4567-e89b-42d3-a456-426614174002';
+const TAG_ID = '123e4567-e89b-42d3-a456-426614174003';
 const AUTH_COOKIE = `${ACCESS_TOKEN_COOKIE}=e2e-token`;
 
 type ProjectResponse = {
@@ -52,6 +54,13 @@ describe('Project archive relationships (e2e)', () => {
         name: 'E2E user',
         email: 'archive-relations-e2e@example.com',
         passwordHash: 'not-used-in-this-test',
+        tags: {
+          create: {
+            id: TAG_ID,
+            name: 'Database',
+            normalizedName: 'database',
+          },
+        },
         projects: {
           create: {
             id: PROJECT_ID,
@@ -72,6 +81,7 @@ describe('Project archive relationships (e2e)', () => {
             },
             entries: {
               create: {
+                id: ENTRY_ID,
                 userId: USER_ID,
                 title: 'Preserved entry',
                 context: 'Technical context',
@@ -160,5 +170,27 @@ describe('Project archive relationships (e2e)', () => {
       message: 'Project with this name already exists for this user',
       error: 'Conflict',
     });
+  });
+
+  it('filters technical entries by tag over HTTP', async () => {
+    await prisma.technicalEntryTag.create({
+      data: {
+        technicalEntryId: ENTRY_ID,
+        tagId: TAG_ID,
+      },
+    });
+
+    const response = await request(app.getHttpServer())
+      .get(`/api/technical-entry?tagId=${TAG_ID}`)
+      .set('Cookie', AUTH_COOKIE)
+      .expect(200);
+
+    expect(response.body.data).toEqual([
+      expect.objectContaining({
+        id: ENTRY_ID,
+        title: 'Preserved entry',
+        tags: [expect.objectContaining({ id: TAG_ID, name: 'Database' })],
+      }),
+    ]);
   });
 });

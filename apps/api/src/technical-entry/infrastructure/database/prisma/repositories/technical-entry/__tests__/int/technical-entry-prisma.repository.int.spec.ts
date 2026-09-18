@@ -160,4 +160,29 @@ describe('TechnicalEntryPrismaRepository (integration)', () => {
       }),
     ).resolves.toBe(false);
   });
+
+  it('filters entries by tag while preserving user isolation', async () => {
+    await userRepository.insert(makeUser(USER_ID, 'tag-filter-owner'));
+    await userRepository.insert(makeUser(OTHER_USER_ID, 'tag-filter-other'));
+    await entryRepository.insert(makeEntry(ENTRY_ID, USER_ID));
+    await entryRepository.insert(makeEntry(OTHER_ENTRY_ID, OTHER_USER_ID));
+    await tagRepository.insert(
+      new TagEntity({ userId: USER_ID, name: 'Database' }, TAG_ID),
+    );
+    await entryTagRepository.add({
+      technicalEntryId: ENTRY_ID,
+      tagId: TAG_ID,
+    });
+
+    const result = await entryRepository.search(
+      new TechnicalEntrySearchParams({
+        page: 1,
+        perPage: 10,
+        filter: { userId: USER_ID, tagId: TAG_ID },
+      }),
+    );
+
+    expect(result.total).toBe(1);
+    expect(result.items[0].id).toBe(ENTRY_ID);
+  });
 });

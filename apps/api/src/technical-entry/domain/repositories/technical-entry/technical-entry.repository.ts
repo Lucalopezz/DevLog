@@ -16,6 +16,7 @@ export type TechnicalEntryArchivedAtFilter = Date | null | 'not-null';
 export type TechnicalEntryFilter = {
   userId?: string;
   projectId?: string;
+  tagId?: string;
   title?: string;
   type?: TechnicalEntryType;
   archivedAt?: TechnicalEntryArchivedAtFilter;

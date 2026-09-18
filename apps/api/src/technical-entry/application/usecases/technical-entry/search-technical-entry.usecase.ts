@@ -32,6 +32,7 @@ export type SearchTechnicalEntryUseCaseInput = {
   sortDir?: 'asc' | 'desc';
   // Filter
   projectId?: string;
+  tagId?: string;
   title?: string;
   type?: TechnicalEntryType;
   archivedAt?: TechnicalEntryArchivedAtFilter;
@@ -76,6 +77,7 @@ export class SearchTechnicalEntryUseCase implements UseCaseContract<
       filter.projectId = input.projectId;
     }
 
+    if (input.tagId) filter.tagId = input.tagId;
     if (input.title) filter.title = input.title;
     if (input.type) filter.type = input.type;
     if (input.status) filter.status = input.status;
