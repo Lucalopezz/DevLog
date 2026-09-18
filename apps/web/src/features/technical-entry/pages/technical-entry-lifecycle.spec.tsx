@@ -31,6 +31,10 @@ function renderLifecycle(archived = false) {
   })
   let deleted = false
   server.use(
+    http.get(apiUrl('/tag'), () => HttpResponse.json({
+      data: [],
+      meta: { currentPage: 1, perPage: 100, lastPage: 1, total: 0 },
+    })),
     http.get(apiUrl(`/technical-entry/${id}`), () =>
       deleted
         ? HttpResponse.json({ message: 'Not found' }, { status: 404 })

@@ -65,6 +65,10 @@ function collection<T>(data: T[], total = data.length, page = 1) {
 
 function installDetailHandlers() {
   server.use(
+    http.get(apiUrl('/tag'), () => HttpResponse.json({
+      data: [],
+      meta: { currentPage: 1, perPage: 100, lastPage: 1, total: 0 },
+    })),
     http.get(apiUrl(`/project/${project.id}`), () => HttpResponse.json(project)),
     http.get(apiUrl(`/project/${project.id}/technical-entries`), () =>
       HttpResponse.json(collection([entry], 14)),

@@ -26,6 +26,12 @@ export function useDeleteTag() {
         queryClient.invalidateQueries({
           queryKey: ["technical-entry"],
         }),
+        // A deleted tag can belong to entries in any project. Since this
+        // mutation only receives the tag ID, invalidate every project-detail
+        // query instead of trying to guess which projects were affected.
+        queryClient.invalidateQueries({
+          queryKey: ["project"],
+        }),
       ]);
     },
 

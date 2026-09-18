@@ -1,9 +1,10 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { useState } from 'react'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 import { deferred } from '@/test/deferred'
+import { createTag } from '@/test/factories/tag'
 import { createTechnicalEntry } from '@/test/factories/technical-entry'
 import { server } from '@/test/mocks/server'
 import { apiUrl } from '@/test/mocks/urls'
@@ -12,6 +13,8 @@ import { renderWithProviders } from '@/test/render-with-providers'
 import { TechnicalEntryForm } from './technical-entry-form'
 
 const projectId = '22222222-2222-4222-8222-222222222222'
+const reactTag = createTag({ id: '44444444-4444-4444-8444-444444444444', name: 'React' })
+const dockerTag = createTag({ id: '55555555-5555-4555-8555-555555555555', name: 'Docker' })
 
 function Harness({ linked = false }: { linked?: boolean }) {
   const [open, setOpen] = useState(true)
@@ -31,6 +34,16 @@ async function fillRequired(user: ReturnType<typeof renderWithProviders>['user']
 }
 
 describe('TechnicalEntryForm', () => {
+  beforeEach(() => {
+    // The form renders TagSelector even when a test is focused on entry fields.
+    // Give that selector an explicit response so these tests remain isolated
+    // from the real tag service.
+    server.use(http.get(apiUrl('/tag'), () => HttpResponse.json({
+      data: [reactTag, dockerTag],
+      meta: { currentPage: 1, perPage: 100, lastPage: 1, total: 2 },
+    })))
+  })
+
   it('defaults to Issue and rejects invalid input without POST', async () => {
     let requests = 0
     server.use(http.post(apiUrl('/technical-entry'), () => {
@@ -116,5 +129,68 @@ describe('TechnicalEntryForm', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Create entry' }))
     expect(await screen.findByText('Could not create')).toBeVisible()
     expect(within(dialog).getByRole('textbox', { name: 'Title' })).toHaveValue('Connection pooling')
+  })
+
+  it('creates the entry before assigning two selected tags', async () => {
+    const events: string[] = []
+    const assignmentIds: string[] = []
+    const entry = createTechnicalEntry({ tags: [] })
+
+    server.use(
+      http.post(apiUrl('/technical-entry'), () => {
+        events.push('entry')
+        return HttpResponse.json(entry, { status: 201 })
+      }),
+      http.post(apiUrl(`/technical-entry/${entry.id}/tags`), async ({ request }) => {
+        const body = await request.json() as { tagId: string }
+        events.push(`tag:${body.tagId}`)
+        assignmentIds.push(body.tagId)
+        return HttpResponse.json(body.tagId === reactTag.id ? reactTag : dockerTag, { status: 201 })
+      }),
+    )
+
+    const { user } = renderWithProviders(<Harness />)
+    const dialog = await fillRequired(user)
+    await user.click(within(dialog).getByRole('button', { name: 'Choose tags' }))
+    const picker = screen.getByRole('dialog', { name: 'Select tags' })
+    await user.click(await within(picker).findByRole('button', { name: '#React' }))
+    await user.click(await within(picker).findByRole('button', { name: '#Docker' }))
+    await user.click(within(picker).getByRole('button', { name: 'Close' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Create entry' }))
+
+    await waitFor(() => expect(assignmentIds).toHaveLength(2))
+    expect(events[0]).toBe('entry')
+    expect(assignmentIds).toEqual(expect.arrayContaining([reactTag.id, dockerTag.id]))
+  })
+
+  it('reports a partial result when one tag assignment fails', async () => {
+    const assignmentIds: string[] = []
+    const entry = createTechnicalEntry({ tags: [] })
+
+    server.use(
+      http.post(apiUrl('/technical-entry'), () =>
+        HttpResponse.json(entry, { status: 201 }),
+      ),
+      http.post(apiUrl(`/technical-entry/${entry.id}/tags`), async ({ request }) => {
+        const body = await request.json() as { tagId: string }
+        assignmentIds.push(body.tagId)
+        if (body.tagId === dockerTag.id) {
+          return HttpResponse.json({ message: 'Could not assign tag' }, { status: 500 })
+        }
+        return HttpResponse.json(reactTag, { status: 201 })
+      }),
+    )
+
+    const { user } = renderWithProviders(<Harness />)
+    const dialog = await fillRequired(user)
+    await user.click(within(dialog).getByRole('button', { name: 'Choose tags' }))
+    const picker = screen.getByRole('dialog', { name: 'Select tags' })
+    await user.click(await within(picker).findByRole('button', { name: '#React' }))
+    await user.click(await within(picker).findByRole('button', { name: '#Docker' }))
+    await user.click(within(picker).getByRole('button', { name: 'Close' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Create entry' }))
+
+    expect(await screen.findByText('The entry was created, but some tags could not be assigned.')).toBeVisible()
+    expect(assignmentIds).toEqual(expect.arrayContaining([reactTag.id, dockerTag.id]))
   })
 })

@@ -213,4 +213,24 @@ describe("technical entry API contracts", () => {
       }),
     ).resolves.toBeUndefined();
   });
+
+  it("propagates a tag assignment validation response", async () => {
+    server.use(
+      http.post(
+        apiUrl(`/technical-entry/${entryId}/tags`),
+        () =>
+          HttpResponse.json(
+            { message: ["Tag ID must be a valid UUID"] },
+            { status: 422 },
+          ),
+      ),
+    );
+
+    await expect(
+      assignTagToTechnicalEntry({
+        technicalEntryId: entryId,
+        tagId: "invalid-tag-id",
+      }),
+    ).rejects.toMatchObject({ response: { status: 422 } });
+  });
 });

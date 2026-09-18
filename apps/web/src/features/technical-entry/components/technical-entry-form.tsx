@@ -21,6 +21,10 @@ import { useTechnicalEntryForm } from "../hooks/use-technical-entry-form";
 import type { CreateTechnicalEntryFormValues } from "../schemas/technical-entry.schema";
 import type { CreateTechnicalEntryInput } from "../types/technical-entry";
 import { TechnicalEntryFormFields } from "./technical-entry-form-fields";
+import { useState } from "react";
+import { useAssignTag } from "../hooks/use-assign-tag";
+import { TagSelector } from "@/features/tags/components/tag-selector";
+import { toast } from "sonner";
 
 export type TechnicalEntryFormProps = {
   open: boolean;
@@ -50,6 +54,9 @@ export function TechnicalEntryForm({
   const form = useTechnicalEntryForm();
   const createMutation = useCreateTechnicalEntry();
 
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const assignTagMutation = useAssignTag();
+
   const onSubmit: SubmitHandler<CreateTechnicalEntryFormValues> = async (
     data,
   ) => {
@@ -64,8 +71,31 @@ export function TechnicalEntryForm({
 
     try {
       // handleSubmit has already run the Zod resolver before this callback.
-      await createMutation.mutateAsync(input);
+      const entry = await createMutation.mutateAsync(input);
+
+      // Promise.allSettled is used to ensure that all tag assignments are attempted, even if some fail.
+      // This allows the entry to be created even if some tags cannot be assigned.
+      const results = await Promise.allSettled(
+        selectedTagIds.map((tagId) => {
+          return assignTagMutation.mutateAsync({
+            technicalEntryId: entry.id,
+            tagId,
+            projectId: projectId,
+          });
+        }),
+      );
+      const failedAssignments = results.filter(
+        (result) => result.status === "rejected",
+      );
+      if (failedAssignments.length > 0) {
+        // The entry already exists, so do not pretend the whole operation
+        // failed. The user can retry the missing assignments from its detail.
+        toast.error(
+          "The entry was created, but some tags could not be assigned.",
+        );
+      }
       form.reset();
+      setSelectedTagIds([]); // restart the tag selector for the next entry
       onOpenChange(false);
     } catch {
       // The mutation hook displays the API error in a toast. Catching here
@@ -75,8 +105,18 @@ export function TechnicalEntryForm({
 
   const isLoading = form.formState.isSubmitting || createMutation.isPending;
 
+  // Handle the dialog's open state change. If the dialog is being closed, reset the form and clear selected tags.
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen) {
+      form.reset();
+      setSelectedTagIds([]);
+    }
+
+    onOpenChange(nextOpen);
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="gap-6 border-border/60 bg-card p-7 shadow-2xl ring-0 sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight">
@@ -118,10 +158,15 @@ export function TechnicalEntryForm({
                 </FormItem>
               )}
             />
+            <TagSelector
+              disabled={isLoading}
+              onChange={setSelectedTagIds}
+              value={selectedTagIds}
+            />
 
             <DialogFooter className="mx-0 mt-1 mb-0 border-t-0 bg-transparent p-0">
               <Button
-                onClick={() => onOpenChange(false)}
+                onClick={() => handleOpenChange(false)}
                 type="button"
                 variant="outline"
               >

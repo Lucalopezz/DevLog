@@ -10,7 +10,7 @@ export async function assignTagToTechnicalEntry(
   input: AssignTagInput,
 ): Promise<Tag> {
   const { data } = await api.post<Tag>(
-    `/technical-entries/${input.technicalEntryId}/tags`,
+    `/technical-entry/${input.technicalEntryId}/tags`,
     { tagId: input.tagId },
   );
   return data;

@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { Route, Routes } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 import { deferred } from '@/test/deferred'
 import { createTechnicalEntry } from '@/test/factories/technical-entry'
@@ -27,6 +27,13 @@ function installGet(entry = initial) {
   }
 }
 
+function installTagList() {
+  server.use(http.get(apiUrl('/tag'), () => HttpResponse.json({
+    data: [],
+    meta: { currentPage: 1, perPage: 100, lastPage: 1, total: 0 },
+  })))
+}
+
 function renderDetail() {
   return renderWithProviders(
     <Routes>
@@ -38,6 +45,8 @@ function renderDetail() {
 }
 
 describe('TechnicalEntryDetailPage', () => {
+  beforeEach(installTagList)
+
   it('shows pending, then the entry fields and linked project', async () => {
     const gate = deferred<void>()
     server.use(http.get(apiUrl(`/technical-entry/${initial.id}`), async () => {
@@ -75,7 +84,8 @@ describe('TechnicalEntryDetailPage', () => {
     renderDetail()
     await screen.findByRole('heading', { name: 'Understand query invalidation' })
     expect(screen.queryByRole('link', { name: 'View project' })).toBeNull()
-    expect(screen.queryByRole('heading', { name: 'Tags' })).toBeNull()
+    expect(screen.getByText('No tags selected.')).toBeVisible()
+    expect(screen.queryByText('#database')).toBeNull()
     expect(screen.getByText('No conclusion has been recorded yet.')).toBeVisible()
   })
 

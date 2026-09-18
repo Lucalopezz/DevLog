@@ -15,6 +15,7 @@ import {
   presentTechnicalEntryStatus,
   presentTechnicalEntryType,
 } from "../presentation";
+import { TechnicalEntryTagsEditor } from "../components/technical-entry-tags-editor";
 
 export default function TechnicalEntryDetailPage() {
   const { technicalEntryId = "" } = useParams<{
@@ -127,7 +128,9 @@ export default function TechnicalEntryDetailPage() {
               <div>
                 <dt className="text-muted-foreground">Type</dt>
                 <dd className="mt-1">
-                  <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${type.className}`}>
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${type.className}`}
+                  >
                     {type.label}
                   </span>
                 </dd>
@@ -136,7 +139,9 @@ export default function TechnicalEntryDetailPage() {
                 <div>
                   <dt className="text-muted-foreground">Status</dt>
                   <dd className="mt-1">
-                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${status.className}`}>
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${status.className}`}
+                    >
                       {status.label}
                     </span>
                   </dd>
@@ -146,7 +151,9 @@ export default function TechnicalEntryDetailPage() {
                 <dt className="text-muted-foreground">Created on</dt>
                 <dd className="mt-1 flex items-center gap-2 font-medium">
                   <CalendarDays className="size-4 text-muted-foreground" />
-                  <time dateTime={entry.createdAt}>{formatDate(entry.createdAt)}</time>
+                  <time dateTime={entry.createdAt}>
+                    {formatDate(entry.createdAt)}
+                  </time>
                 </dd>
               </div>
               <div>
@@ -158,6 +165,9 @@ export default function TechnicalEntryDetailPage() {
                 </dd>
               </div>
             </dl>
+          </section>
+          <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
+            <TechnicalEntryTagsEditor entry={entry} />
           </section>
 
           {entry.tags?.length ? (
