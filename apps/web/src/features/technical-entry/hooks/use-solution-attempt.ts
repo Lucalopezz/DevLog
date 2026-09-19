@@ -17,16 +17,20 @@ const defaultParams: ListSolutionAttemptsParams = {
   page: 1,
   perPage: 10,
   sort: "createdAt",
-  sortDir: "asc",
+  sortDir: "desc",
 };
 
 export function useSolutionAttempts(
   technicalEntryId: string,
-  params: ListSolutionAttemptsParams = defaultParams,
+  params: ListSolutionAttemptsParams = {},
 ) {
+  // Keep pagination overrides small while consistently applying the list's
+  // page size and newest-first order.
+  const queryParams = { ...defaultParams, ...params };
+
   return useQuery({
-    queryKey: solutionAttemptsKeys.list(technicalEntryId, params),
-    queryFn: () => listSolutionAttempts(technicalEntryId, params),
+    queryKey: solutionAttemptsKeys.list(technicalEntryId, queryParams),
+    queryFn: () => listSolutionAttempts(technicalEntryId, queryParams),
 
     // The route may not have provided the ID yet while the page is loading.
     enabled: Boolean(technicalEntryId),

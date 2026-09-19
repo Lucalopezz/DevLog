@@ -121,7 +121,9 @@ export default function TechnicalEntryDetailPage() {
             />
           </section>
           {entry.type === "ISSUE" ? (
-            <TechnicalEntrySolutionAttempts entry={entry} />
+            // Pagination state belongs to one entry and should not carry over
+            // when the user navigates directly between issue detail pages.
+            <TechnicalEntrySolutionAttempts entry={entry} key={entry.id} />
           ) : null}
         </div>
 

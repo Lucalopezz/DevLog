@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useAddSolutionAttempt } from "../hooks/use-add-solution-attempt";
 import { useAddSolutionAttemptForm } from "../hooks/use-add-solution-attempt-form";
 import { useSolutionAttempts } from "../hooks/use-solution-attempt";
+import { SolutionAttemptPagination } from "./solution-attempt-pagination";
 import type { AddSolutionAttemptFormOutput } from "../schemas/solution-attempt.schema";
 import type { TechnicalEntry } from "../types/technical-entry";
 import type { SolutionAttemptResult } from "../types/solution-attempt";
@@ -26,7 +28,8 @@ const resultLabels: Record<SolutionAttemptResult, string> = {
 };
 
 export function TechnicalEntrySolutionAttempts({ entry }: Props) {
-  const attemptsQuery = useSolutionAttempts(entry.id);
+  const [page, setPage] = useState(1);
+  const attemptsQuery = useSolutionAttempts(entry.id, { page });
   const addMutation = useAddSolutionAttempt();
   const form = useAddSolutionAttemptForm();
 
@@ -39,6 +42,10 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
         technicalEntryId: entry.id,
         input: values,
       });
+
+      // Newest-first ordering puts the created attempt on page 1, so return
+      // there after adding from any later page.
+      setPage(1);
 
       // Reset the form only after the API confirms the attempt was created.
       form.reset();
@@ -133,29 +140,36 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
             No solution attempts have been recorded yet.
           </p>
         ) : (
-          <ol className="space-y-4">
-            {attemptsQuery.data.data.map((attempt) => (
-              <li
-                className="rounded-xl border border-border/60 bg-background/60 p-4"
-                key={attempt.id}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
-                    {resultLabels[attempt.result]}
-                  </span>
-                  <time
-                    className="text-xs text-muted-foreground"
-                    dateTime={attempt.createdAt}
-                  >
-                    {formatRelativeDate(attempt.createdAt)}
-                  </time>
-                </div>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-6">
-                  {attempt.description}
-                </p>
-              </li>
-            ))}
-          </ol>
+          <div className="space-y-4">
+            <ol className="space-y-4">
+              {attemptsQuery.data.data.map((attempt) => (
+                <li
+                  className="rounded-xl border border-border/60 bg-background/60 p-4"
+                  key={attempt.id}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
+                      {resultLabels[attempt.result]}
+                    </span>
+                    <time
+                      className="text-xs text-muted-foreground"
+                      dateTime={attempt.createdAt}
+                    >
+                      {formatRelativeDate(attempt.createdAt)}
+                    </time>
+                  </div>
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6">
+                    {attempt.description}
+                  </p>
+                </li>
+              ))}
+            </ol>
+            <SolutionAttemptPagination
+              isFetching={attemptsQuery.isFetching}
+              meta={attemptsQuery.data.meta}
+              onPageChange={setPage}
+            />
+          </div>
         )}
       </div>
     </section>
