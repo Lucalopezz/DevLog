@@ -9,7 +9,7 @@ export async function listSolutionAttempts(
   params: ListSolutionAttemptsParams = {},
 ): Promise<SolutionAttemptCollection> {
   const { data } = await api.get<SolutionAttemptCollection>(
-    `/technical-entriy/${technicalEntryId}/solution-attempts`,
+    `/technical-entry/${technicalEntryId}/solution-attempts`,
     { params },
   );
 
