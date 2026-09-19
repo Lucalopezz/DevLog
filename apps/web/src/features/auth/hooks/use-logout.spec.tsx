@@ -124,6 +124,20 @@ describe('logout flow', () => {
           meta: { currentPage: 1, perPage: 10, lastPage: 1, total: 1 },
         })
       }),
+      // Signing in lands on the dashboard, which composes its summary from
+      // the same collection endpoints used by the dedicated list pages.
+      http.get(apiUrl('/technical-entry'), () =>
+        HttpResponse.json({
+          data: [],
+          meta: { currentPage: 1, perPage: 1, lastPage: 1, total: 0 },
+        }),
+      ),
+      http.get(apiUrl('/tag'), () =>
+        HttpResponse.json({
+          data: [],
+          meta: { currentPage: 1, perPage: 1, lastPage: 1, total: 0 },
+        }),
+      ),
       http.post(apiUrl('/auth/logout'), () => {
         sessionUser = undefined
         return new HttpResponse(null, { status: 204 })
@@ -150,7 +164,7 @@ describe('logout flow', () => {
       await user.type(screen.getByLabelText('E-mail'), accountB.email)
       await user.type(screen.getByLabelText('Password'), 'valid-password')
       await user.click(screen.getByRole('button', { name: 'Sign in' }))
-      await screen.findByRole('heading', { name: 'Frontend foundation ready' })
+      await screen.findByRole('heading', { name: 'Welcome back, Account.' })
 
       await user.click(screen.getByRole('link', { name: 'Projects' }))
       expect(await screen.findByText(projectB.name)).toBeVisible()
