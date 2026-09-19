@@ -112,36 +112,39 @@ export function TagSearchSelect({
   }
 
   return (
-    <div className="relative min-w-48 space-y-2" ref={rootRef}>
+    <div className="relative flex min-w-48 flex-col gap-2" ref={rootRef}>
       <label className="text-sm font-medium" htmlFor={`${inputId}-trigger`}>
         Tag
       </label>
-      <Button
-        aria-label={value ? `Selected tag: ${value.name}` : "All tags"}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-        className="h-8 w-full justify-between px-2.5 font-normal"
-        id={`${inputId}-trigger`}
-        onClick={isOpen ? () => setIsOpen(false) : handleOpen}
-        type="button"
-        variant="outline"
-      >
-        <span className={cn(!value && "text-muted-foreground")}>
-          {value ? `#${value.name}` : "All tags"}
-        </span>
-        <ChevronDown className="size-4 opacity-50" />
-      </Button>
-
-      {value ? (
-        <button
-          aria-label="Clear tag filter"
-          className="absolute right-8 bottom-1.5 rounded-sm p-1 text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-          onClick={handleClear}
+      {/* Anchor the clear action to the control, not the label's full field. */}
+      <div className="relative">
+        <Button
+          aria-label={value ? `Selected tag: ${value.name}` : "All tags"}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          className="h-8 w-full justify-between px-2.5 font-normal"
+          id={`${inputId}-trigger`}
+          onClick={isOpen ? () => setIsOpen(false) : handleOpen}
           type="button"
+          variant="outline"
         >
-          <X className="size-3.5" />
-        </button>
-      ) : null}
+          <span className={cn(!value && "text-muted-foreground")}>
+            {value ? `#${value.name}` : "All tags"}
+          </span>
+          <ChevronDown className="size-4 opacity-50" />
+        </Button>
+
+        {value ? (
+          <button
+            aria-label="Clear tag filter"
+            className="absolute right-8 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+            onClick={handleClear}
+            type="button"
+          >
+            <X className="size-3.5" />
+          </button>
+        ) : null}
+      </div>
 
       {isOpen ? (
         <div
