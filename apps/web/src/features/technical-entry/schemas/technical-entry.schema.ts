@@ -18,6 +18,12 @@ export const contextSchema = z
 // they want to clear the persisted conclusion.
 export const conclusionSchema = z.string();
 
+// Closing an issue requires a non-empty conclusion, even though conclusions
+// remain optional while an entry is open.
+export const resolveTechnicalIssueSchema = z.object({
+  conclusion: z.string().trim().min(1, "Conclusion is required."),
+});
+
 // The form keeps an empty string for an unselected project. It is converted to
 // undefined/null when the form is submitted, while non-empty values must be UUIDs.
 const projectIdSchema = z
@@ -59,4 +65,7 @@ export type UpdateTechnicalEntryFormValues = z.infer<
 
 export type UpdateTechnicalEntryTitleFormValues = z.infer<
   typeof updateTechnicalEntryTitleSchema
+>;
+export type ResolveTechnicalIssueFormValues = z.infer<
+  typeof resolveTechnicalIssueSchema
 >;

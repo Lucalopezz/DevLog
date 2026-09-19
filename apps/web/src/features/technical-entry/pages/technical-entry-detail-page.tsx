@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { formatDate, formatRelativeDate } from "@/lib/date";
 import { useGetTechnicalEntry } from "../hooks/use-get-technical-entry";
 import { TechnicalEntryDetailHeader } from "../components/technical-entry-detail-header";
-import { TechnicalEntryEditForm } from "../components/technical-entry-edit-form";
 import { TechnicalEntryInlineContent } from "../components/technical-entry-inline-content";
 import { TechnicalEntryDetailSkeleton } from "../components/technical-entry-detail-skeleton";
 import { DeleteTechnicalEntryButton } from "../components/technical-entry-delete-btn";
@@ -17,12 +16,13 @@ import {
 } from "../presentation";
 import { TechnicalEntryTagsEditor } from "../components/technical-entry-tags-editor";
 import { TechnicalEntrySolutionAttempts } from "../components/technical-entry-solution-attempts";
+import { TechnicalEntryStatusDialog } from "../components/technical-entry-status-dialog";
 
 export default function TechnicalEntryDetailPage() {
   const { technicalEntryId = "" } = useParams<{
     technicalEntryId: string;
   }>();
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const entryQuery = useGetTechnicalEntry(technicalEntryId);
 
   if (entryQuery.isPending) return <TechnicalEntryDetailSkeleton />;
@@ -68,15 +68,15 @@ export default function TechnicalEntryDetailPage() {
     <main className="mx-auto w-full max-w-6xl space-y-8">
       <TechnicalEntryDetailHeader
         entry={entry}
-        onEdit={() => setIsEditDialogOpen(true)}
+        onStatusClick={() => setIsStatusDialogOpen(true)}
       />
-      <TechnicalEntryEditForm
-        key={`${entry.id}:${entry.updatedAt}`}
-        entry={entry}
-        onOpenChange={setIsEditDialogOpen}
-        open={isEditDialogOpen}
-      />
-
+      {entry.status ? (
+        <TechnicalEntryStatusDialog
+          entry={entry}
+          onOpenChange={setIsStatusDialogOpen}
+          open={isStatusDialogOpen}
+        />
+      ) : null}
       <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
         <div className="min-w-0 space-y-5">
           <section className="min-w-0 rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm sm:p-8">
@@ -94,7 +94,9 @@ export default function TechnicalEntryDetailPage() {
             <TechnicalEntryInlineContent
               emptyMessage="Context is required."
               entry={entry}
+              editable={entry.status !== "RESOLVED"}
               field="context"
+              key={`${entry.id}:${entry.status ?? ""}`}
               label="Context"
               placeholder="Describe what happened, where it happened, and what you tried."
             />
@@ -115,7 +117,9 @@ export default function TechnicalEntryDetailPage() {
             <TechnicalEntryInlineContent
               emptyMessage="No conclusion has been recorded yet."
               entry={entry}
+              editable={entry.status !== "RESOLVED"}
               field="conclusion"
+              key={`${entry.id}:${entry.status ?? ""}`}
               label="Conclusion"
               placeholder="What did you learn or how did you solve it?"
             />
@@ -145,11 +149,14 @@ export default function TechnicalEntryDetailPage() {
                 <div>
                   <dt className="text-muted-foreground">Status</dt>
                   <dd className="mt-1">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${status.className}`}
+                    <button
+                      aria-label={`Change status, currently ${status.label}`}
+                      className={`inline-flex cursor-pointer rounded-full px-2.5 py-1 text-xs font-medium transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${status.className}`}
+                      onClick={() => setIsStatusDialogOpen(true)}
+                      type="button"
                     >
                       {status.label}
-                    </span>
+                    </button>
                   </dd>
                 </div>
               ) : null}
@@ -173,10 +180,32 @@ export default function TechnicalEntryDetailPage() {
             </dl>
           </section>
           <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
-            <TechnicalEntryTagsEditor entry={entry} />
+            {entry.status === "RESOLVED" ? (
+              <div>
+                <h2 className="font-semibold">Tags</h2>
+                {entry.tags?.length ? (
+                  <ul className="mt-4 flex flex-wrap gap-2">
+                    {entry.tags.map((tag) => (
+                      <li
+                        className="rounded-lg border border-border/60 bg-muted/50 px-3 py-2 text-sm text-muted-foreground"
+                        key={tag.id}
+                      >
+                        #{tag.name}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    No tags selected.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <TechnicalEntryTagsEditor entry={entry} />
+            )}
           </section>
 
-          {entry.tags?.length ? (
+          {entry.status !== "RESOLVED" && entry.tags?.length ? (
             <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
               <h2 className="font-semibold">Tags</h2>
               <ul className="mt-4 flex flex-wrap gap-2">

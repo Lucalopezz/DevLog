@@ -20,6 +20,7 @@ type Props = {
   label: string;
   placeholder: string;
   emptyMessage: string;
+  editable?: boolean;
 };
 
 /**
@@ -36,6 +37,7 @@ export function TechnicalEntryInlineContent({
   label,
   placeholder,
   emptyMessage,
+  editable = true,
 }: Props) {
   const value = entry[field] ?? "";
   const [draft, setDraft] = useState(value);
@@ -99,7 +101,7 @@ export function TechnicalEntryInlineContent({
     }
   }
 
-  if (isEditing) {
+  if (isEditing && editable) {
     const errorId = `${field}-editor-error`;
 
     return (
@@ -148,18 +150,20 @@ export function TechnicalEntryInlineContent({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button
-          aria-label={`Edit ${label.toLowerCase()}`}
-          onClick={handleStartEditing}
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
-          <Pencil data-icon="inline-start" />
-          Edit
-        </Button>
-      </div>
+      {editable ? (
+        <div className="flex justify-end">
+          <Button
+            aria-label={`Edit ${label.toLowerCase()}`}
+            onClick={handleStartEditing}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            <Pencil data-icon="inline-start" />
+            Edit
+          </Button>
+        </div>
+      ) : null}
 
       {value.trim() ? (
         <div className={`${contentViewportClassName} pr-2`}>

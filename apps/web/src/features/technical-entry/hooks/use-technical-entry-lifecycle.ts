@@ -1,40 +1,21 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
-import { projectDetailKeys } from "@/features/projects/api/list-project-details";
-import { getTechnicalEntryQueryKey } from "../api/get-technical-entry";
-import { technicalEntriesKeys } from "../api/list-technical-entries";
 import {
   archiveTechnicalEntry,
   restoreTechnicalEntry,
 } from "../api/archive-technical-entry";
+import {
+  reopenTechnicalIssue,
+  resolveTechnicalIssue,
+} from "../api/technical-entry-status";
+import { invalidateTechnicalEntryQueries } from "./invalidate-technical-entry-queries";
+import type { ResolveTechnicalIssueInput } from "../types/technical-entry";
 
-async function invalidateTechnicalEntryQueries(
-  queryClient: ReturnType<typeof useQueryClient>,
-  technicalEntryId: string,
-  projectId?: string,
-) {
-  const invalidations = [
-    queryClient.invalidateQueries({
-      queryKey: getTechnicalEntryQueryKey(technicalEntryId),
-    }),
-    queryClient.invalidateQueries({
-      queryKey: technicalEntriesKeys.lists(),
-    }),
-  ];
-
-  // Project detail lists have their own query-key branch and also hide
-  // archived entries by default, so they need an explicit refresh too.
-  if (projectId) {
-    invalidations.push(
-      queryClient.invalidateQueries({
-        queryKey: projectDetailKeys.technicalEntriesRoot(projectId),
-      }),
-    );
-  }
-
-  await Promise.all(invalidations);
-}
+export type ResolveTechnicalIssueMutationInput = {
+  technicalEntryId: string;
+  input: ResolveTechnicalIssueInput;
+};
 
 export function useArchiveTechnicalEntry() {
   const queryClient = useQueryClient();
@@ -73,6 +54,49 @@ export function useRestoreTechnicalEntry() {
     onError: (error) => {
       toast.error(
         getApiErrorMessage(error, "Could not restore the technical entry."),
+      );
+    },
+  });
+}
+
+export function useResolveTechnicalIssue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ technicalEntryId, input }: ResolveTechnicalIssueMutationInput) =>
+      resolveTechnicalIssue(technicalEntryId, input),
+    onSuccess: async (entry, { technicalEntryId }) => {
+      toast.success("Issue closed successfully.");
+      await invalidateTechnicalEntryQueries(
+        queryClient,
+        technicalEntryId,
+        entry.projectId,
+      );
+    },
+    onError: (error) => {
+      toast.error(
+        getApiErrorMessage(error, "Could not close the issue. Try again."),
+      );
+    },
+  });
+}
+
+export function useReopenTechnicalIssue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: reopenTechnicalIssue,
+    onSuccess: async (entry, technicalEntryId) => {
+      toast.success("Issue reopened successfully.");
+      await invalidateTechnicalEntryQueries(
+        queryClient,
+        technicalEntryId,
+        entry.projectId,
+      );
+    },
+    onError: (error) => {
+      toast.error(
+        getApiErrorMessage(error, "Could not reopen the issue. Try again."),
       );
     },
   });
