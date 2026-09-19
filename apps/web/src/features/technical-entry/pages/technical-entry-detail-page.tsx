@@ -16,6 +16,7 @@ import {
   presentTechnicalEntryType,
 } from "../presentation";
 import { TechnicalEntryTagsEditor } from "../components/technical-entry-tags-editor";
+import { TechnicalEntrySolutionAttempts } from "../components/technical-entry-solution-attempts";
 
 export default function TechnicalEntryDetailPage() {
   const { technicalEntryId = "" } = useParams<{
@@ -119,6 +120,9 @@ export default function TechnicalEntryDetailPage() {
               placeholder="What did you learn or how did you solve it?"
             />
           </section>
+          {entry.type === "ISSUE" ? (
+            <TechnicalEntrySolutionAttempts entry={entry} />
+          ) : null}
         </div>
 
         <aside className="space-y-5">
