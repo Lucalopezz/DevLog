@@ -17,6 +17,7 @@ const initial = createTechnicalEntry({
   status: 'RESOLVED',
   tags: [{ id: 'tag-1', name: 'database' }],
 })
+const solutionAttemptsPath = `/technical-entry/${initial.id}/solution-attempts`
 
 function installGet(entry = initial) {
   let current = entry
@@ -34,6 +35,13 @@ function installTagList() {
   })))
 }
 
+function installSolutionAttemptList() {
+  server.use(http.get(apiUrl(solutionAttemptsPath), () => HttpResponse.json({
+    data: [],
+    meta: { currentPage: 1, perPage: 10, lastPage: 1, total: 0 },
+  })))
+}
+
 function renderDetail() {
   return renderWithProviders(
     <Routes>
@@ -45,7 +53,58 @@ function renderDetail() {
 }
 
 describe('TechnicalEntryDetailPage', () => {
-  beforeEach(installTagList)
+  beforeEach(() => {
+    installTagList()
+    installSolutionAttemptList()
+  })
+
+  it('adds a solution attempt and refreshes the list', async () => {
+    installGet()
+    const attempt = {
+      id: '44444444-4444-4444-8444-444444444444',
+      technicalEntryId: initial.id,
+      description: 'Restarted the app after updating the pool settings.',
+      result: 'SUCCESSFUL',
+      createdAt: '2026-09-19T12:00:00.000Z',
+      updatedAt: '2026-09-19T12:00:00.000Z',
+    }
+    let attempts: typeof attempt[] = []
+    let submittedBody: unknown
+
+    server.use(
+      http.get(apiUrl(solutionAttemptsPath), () => HttpResponse.json({
+        data: attempts,
+        meta: { currentPage: 1, perPage: 10, lastPage: 1, total: attempts.length },
+      })),
+      http.post(apiUrl(solutionAttemptsPath), async ({ request }) => {
+        submittedBody = await request.json()
+        attempts = [attempt]
+        return HttpResponse.json(attempt, { status: 201 })
+      }),
+    )
+
+    const { user } = renderDetail()
+    await screen.findByRole('heading', { name: initial.title })
+
+    await user.type(
+      screen.getByRole('textbox', { name: 'What did you try?' }),
+      attempt.description,
+    )
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Outcome' }),
+      attempt.result,
+    )
+    await user.click(screen.getByRole('button', { name: 'Add attempt' }))
+
+    const renderedDescription = await screen.findByText(attempt.description)
+    const renderedAttempt = renderedDescription.closest('li')
+    expect(renderedAttempt).not.toBeNull()
+    expect(within(renderedAttempt!).getByText('Solved the issue')).toBeVisible()
+    expect(submittedBody).toEqual({
+      description: attempt.description,
+      result: attempt.result,
+    })
+  })
 
   it('shows pending, then the entry fields and linked project', async () => {
     const gate = deferred<void>()

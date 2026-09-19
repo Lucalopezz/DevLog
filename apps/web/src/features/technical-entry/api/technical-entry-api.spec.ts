@@ -17,10 +17,106 @@ import { updateTechnicalEntry } from "./update-technical-entry";
 import { assignTagToTechnicalEntry } from "./assign-tag-to-technical-entry";
 import { removeTagFromTechnicalEntry } from "./remove-tag-from-technical-entry";
 import { createTag } from "@/test/factories/tag";
+import { addSolutionAttempt } from "./add-solution-attempt";
+import { deleteSolutionAttempt } from "./delete-solution-attempt";
+import { listSolutionAttempts } from "./list-solution-attempts";
+import { updateSolutionAttempt } from "./update-solution-attempt";
 
 const entryId = "33333333-3333-4333-8333-333333333333";
+const attemptId = "44444444-4444-4444-8444-444444444444";
+const solutionAttemptsPath = `/technical-entry/${entryId}/solution-attempts`;
 
 describe("technical entry API contracts", () => {
+  it("lists solution attempts with the requested filters", async () => {
+    const collection = {
+      data: [],
+      meta: { currentPage: 2, perPage: 5, lastPage: 2, total: 6 },
+    };
+    let capturedUrl: URL | undefined;
+
+    server.use(
+      http.get(apiUrl(solutionAttemptsPath), ({ request }) => {
+        capturedUrl = new URL(request.url);
+        return HttpResponse.json(collection);
+      }),
+    );
+
+    await expect(
+      listSolutionAttempts(entryId, {
+        page: 2,
+        perPage: 5,
+        sort: "createdAt",
+        sortDir: "asc",
+        result: "FAILED",
+      }),
+    ).resolves.toEqual(collection);
+
+    expect(Object.fromEntries(capturedUrl?.searchParams ?? [])).toEqual({
+      page: "2",
+      perPage: "5",
+      sort: "createdAt",
+      sortDir: "asc",
+      result: "FAILED",
+    });
+  });
+
+  it("creates, updates, and deletes a solution attempt", async () => {
+    const attempt = {
+      id: attemptId,
+      technicalEntryId: entryId,
+      description: "Restarted the app after updating the pool settings.",
+      result: "SUCCESSFUL",
+      createdAt: "2026-09-19T12:00:00.000Z",
+      updatedAt: "2026-09-19T12:00:00.000Z",
+    } as const;
+    let createBody: unknown;
+    let updateBody: unknown;
+    let deleteCount = 0;
+
+    server.use(
+      http.post(apiUrl(solutionAttemptsPath), async ({ request }) => {
+        createBody = await request.json();
+        return HttpResponse.json(attempt, { status: 201 });
+      }),
+      http.patch(
+        apiUrl(`${solutionAttemptsPath}/${attemptId}`),
+        async ({ request }) => {
+          updateBody = await request.json();
+          return HttpResponse.json({
+            ...attempt,
+            ...((updateBody as object) ?? {}),
+          });
+        },
+      ),
+      http.delete(apiUrl(`${solutionAttemptsPath}/${attemptId}`), () => {
+        deleteCount += 1;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    await expect(
+      addSolutionAttempt(entryId, {
+        description: attempt.description,
+        result: attempt.result,
+      }),
+    ).resolves.toEqual(attempt);
+    await expect(
+      updateSolutionAttempt(entryId, attemptId, {
+        description: "Retried with the updated pool settings.",
+      }),
+    ).resolves.toMatchObject({ id: attemptId });
+    await expect(deleteSolutionAttempt(entryId, attemptId)).resolves.toBeUndefined();
+
+    expect(createBody).toEqual({
+      description: attempt.description,
+      result: attempt.result,
+    });
+    expect(updateBody).toEqual({
+      description: "Retried with the updated pool settings.",
+    });
+    expect(deleteCount).toBe(1);
+  });
+
   it("sends list filters as query parameters and unwraps the collection", async () => {
     const collection = {
       data: [createTechnicalEntryFixture()],
