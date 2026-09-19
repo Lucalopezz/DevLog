@@ -3,6 +3,7 @@ import { AlertTriangle, Loader2, Pencil, Trash2 } from "lucide-react";
 import { useAddSolutionAttempt } from "../hooks/use-add-solution-attempt";
 import { useAddSolutionAttemptForm } from "../hooks/use-add-solution-attempt-form";
 import { useDeleteSolutionAttempt } from "../hooks/use-delete-solution-attempt";
+import { useResolveTechnicalIssue } from "../hooks/use-technical-entry-lifecycle";
 import { useSolutionAttempts } from "../hooks/use-solution-attempt";
 import { useUpdateSolutionAttempt } from "../hooks/use-update-solution-attempt";
 import { SolutionAttemptPagination } from "./solution-attempt-pagination";
@@ -54,12 +55,17 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
   const [descriptionError, setDescriptionError] = useState<string>();
   const attemptsQuery = useSolutionAttempts(entry.id, { page });
   const addMutation = useAddSolutionAttempt();
+  const resolveMutation = useResolveTechnicalIssue();
   const deleteMutation = useDeleteSolutionAttempt();
   const updateMutation = useUpdateSolutionAttempt();
   const form = useAddSolutionAttemptForm();
 
-  const canAddAttempt = !entry.archivedAt;
-  const isSubmitting = form.formState.isSubmitting || addMutation.isPending;
+  const isResolved = entry.status === "RESOLVED";
+  const canAddAttempt = !entry.archivedAt && !isResolved;
+  const isSubmitting =
+    form.formState.isSubmitting ||
+    addMutation.isPending ||
+    resolveMutation.isPending;
 
   function handleStartEditing(attempt: SolutionAttempt) {
     // Read the latest server value when editing starts instead of keeping a
@@ -133,16 +139,28 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
         technicalEntryId: entry.id,
         input: values,
       });
-
-      // Newest-first ordering puts the created attempt on page 1, so return
-      // there after adding from any later page.
-      setPage(1);
-
-      // Reset the form only after the API confirms the attempt was created.
-      form.reset();
     } catch {
       // The mutation hook already shows the API error in a toast. Keeping the
       // fields populated lets the user retry without re-entering the attempt.
+      return;
+    }
+
+    // Newest-first ordering puts the created attempt on page 1, so return
+    // there after adding from any later page. Reset only after creation succeeds.
+    setPage(1);
+    form.reset();
+
+    if (values.result === "SUCCESSFUL" && entry.status === "OPEN") {
+      try {
+        // The existing API resolution flow accepts the attempt text as the
+        // conclusion, keeping the user's successful action and summary aligned.
+        await resolveMutation.mutateAsync({
+          technicalEntryId: entry.id,
+          input: { conclusion: values.description },
+        });
+      } catch {
+        // The attempt is already saved; the status dialog can retry closing it.
+      }
     }
   }
 
@@ -151,7 +169,9 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
       <header>
         <h2 className="font-semibold">Solution attempts</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Record what you tried and what happened.
+          {isResolved
+            ? "Recorded attempts for this issue."
+            : "Record what you tried and what happened."}
         </p>
       </header>
 
@@ -211,11 +231,11 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
             </div>
           </form>
         </Form>
-      ) : (
+      ) : !isResolved ? (
         <p className="border-t border-border/60 pt-5 text-sm text-muted-foreground">
           This entry is archived. Restore it to add a solution attempt.
         </p>
-      )}
+      ) : null}
 
       <div className="border-t border-border/60 pt-5">
         {attemptsQuery.isPending ? (
@@ -249,7 +269,7 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
                       {formatRelativeDate(attempt.createdAt)}
                     </time>
                   </div>
-                  {editingAttemptId === attempt.id ? (
+                  {editingAttemptId === attempt.id && !isResolved ? (
                     <div className="mt-3 space-y-3">
                       <textarea
                         aria-describedby={
@@ -300,27 +320,28 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
                       <p className="whitespace-pre-wrap text-sm leading-6">
                         {attempt.description}
                       </p>
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          aria-label="Edit attempt description"
-                          disabled={
-                            updateMutation.isPending || deleteMutation.isPending
-                          }
-                          onClick={() => handleStartEditing(attempt)}
-                          size="sm"
-                          type="button"
-                          variant="ghost"
-                        >
-                          <Pencil data-icon="inline-start" />
-                          Edit
-                        </Button>
-                        <AlertDialog
-                          onOpenChange={(open) =>
-                            setDeletingAttemptId(open ? attempt.id : undefined)
-                          }
-                          open={deletingAttemptId === attempt.id}
-                        >
-                          <AlertDialogTrigger asChild>
+                      {!isResolved ? (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            aria-label="Edit attempt description"
+                            disabled={
+                              updateMutation.isPending || deleteMutation.isPending
+                            }
+                            onClick={() => handleStartEditing(attempt)}
+                            size="sm"
+                            type="button"
+                            variant="ghost"
+                          >
+                            <Pencil data-icon="inline-start" />
+                            Edit
+                          </Button>
+                          <AlertDialog
+                            onOpenChange={(open) =>
+                              setDeletingAttemptId(open ? attempt.id : undefined)
+                            }
+                            open={deletingAttemptId === attempt.id}
+                          >
+                            <AlertDialogTrigger asChild>
                             <Button
                               aria-label="Delete solution attempt"
                               className="text-destructive hover:text-destructive"
@@ -335,8 +356,8 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
                               <Trash2 data-icon="inline-start" />
                               Delete
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogMedia className="bg-destructive/10 text-destructive">
                                 <AlertTriangle />
@@ -368,9 +389,10 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
                                 Delete permanently
                               </AlertDialogAction>
                             </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      ) : null}
                     </div>
                   )}
                 </li>

@@ -3,6 +3,9 @@ import { toast } from "sonner";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { addSolutionAttempt } from "../api/add-solution-attempt";
 import { solutionAttemptsKeys } from "./use-solution-attempt";
+import { getTechnicalEntryQueryKey } from "../api/get-technical-entry";
+import { invalidateTechnicalEntryQueries } from "./invalidate-technical-entry-queries";
+import type { TechnicalEntry } from "../types/technical-entry";
 import type { AddSolutionAttemptInput } from "../types/solution-attempt";
 
 export type AddSolutionAttemptMutationInput = {
@@ -23,11 +26,21 @@ export function useAddSolutionAttempt() {
     onSuccess: async (_attempt, { technicalEntryId }) => {
       toast.success("Solution attempt added.");
 
-      // Refresh every page and filter for this entry so the new attempt appears
-      // in the server-defined order.
-      await queryClient.invalidateQueries({
-        queryKey: solutionAttemptsKeys.forEntry(technicalEntryId),
-      });
+      // Successful attempts can also close the issue, so refresh its detail,
+      // journal lists, and project list alongside every page of attempts.
+      const entry = queryClient.getQueryData<TechnicalEntry>(
+        getTechnicalEntryQueryKey(technicalEntryId),
+      );
+      await Promise.all([
+        invalidateTechnicalEntryQueries(
+          queryClient,
+          technicalEntryId,
+          entry?.projectId,
+        ),
+        queryClient.invalidateQueries({
+          queryKey: solutionAttemptsKeys.forEntry(technicalEntryId),
+        }),
+      ]);
     },
 
     onError: (error) => {
