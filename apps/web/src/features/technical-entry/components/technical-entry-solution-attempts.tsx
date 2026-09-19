@@ -1,13 +1,32 @@
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
+import { AlertTriangle, Loader2, Pencil, Trash2 } from "lucide-react";
 import { useAddSolutionAttempt } from "../hooks/use-add-solution-attempt";
 import { useAddSolutionAttemptForm } from "../hooks/use-add-solution-attempt-form";
+import { useDeleteSolutionAttempt } from "../hooks/use-delete-solution-attempt";
 import { useSolutionAttempts } from "../hooks/use-solution-attempt";
+import { useUpdateSolutionAttempt } from "../hooks/use-update-solution-attempt";
 import { SolutionAttemptPagination } from "./solution-attempt-pagination";
+import { updateSolutionAttemptSchema } from "../schemas/solution-attempt.schema";
 import type { AddSolutionAttemptFormOutput } from "../schemas/solution-attempt.schema";
 import type { TechnicalEntry } from "../types/technical-entry";
-import type { SolutionAttemptResult } from "../types/solution-attempt";
+import type {
+  SolutionAttempt,
+  SolutionAttemptResult,
+} from "../types/solution-attempt";
 import { formatRelativeDate } from "@/lib/date";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -29,12 +48,84 @@ const resultLabels: Record<SolutionAttemptResult, string> = {
 
 export function TechnicalEntrySolutionAttempts({ entry }: Props) {
   const [page, setPage] = useState(1);
+  const [editingAttemptId, setEditingAttemptId] = useState<string>();
+  const [deletingAttemptId, setDeletingAttemptId] = useState<string>();
+  const [descriptionDraft, setDescriptionDraft] = useState("");
+  const [descriptionError, setDescriptionError] = useState<string>();
   const attemptsQuery = useSolutionAttempts(entry.id, { page });
   const addMutation = useAddSolutionAttempt();
+  const deleteMutation = useDeleteSolutionAttempt();
+  const updateMutation = useUpdateSolutionAttempt();
   const form = useAddSolutionAttemptForm();
 
   const canAddAttempt = !entry.archivedAt;
   const isSubmitting = form.formState.isSubmitting || addMutation.isPending;
+
+  function handleStartEditing(attempt: SolutionAttempt) {
+    // Read the latest server value when editing starts instead of keeping a
+    // draft that may have gone stale after a refetch.
+    setDescriptionDraft(attempt.description);
+    setDescriptionError(undefined);
+    setEditingAttemptId(attempt.id);
+  }
+
+  function handleCancelEditing() {
+    setEditingAttemptId(undefined);
+    setDescriptionDraft("");
+    setDescriptionError(undefined);
+  }
+
+  async function handleSaveDescription(attemptId: string) {
+    const parsed = updateSolutionAttemptSchema.safeParse({
+      description: descriptionDraft,
+    });
+
+    if (!parsed.success) {
+      setDescriptionError(
+        parsed.error.issues[0]?.message ?? "Description is required.",
+      );
+      return;
+    }
+
+    try {
+      // The schema trims and validates the draft before it crosses the API
+      // boundary. The result stays outside this editor and cannot be changed.
+      await updateMutation.mutateAsync({
+        technicalEntryId: entry.id,
+        attemptId,
+        input: parsed.data,
+      });
+      handleCancelEditing();
+    } catch {
+      // The mutation hook shows the API error; preserve the draft for retries.
+    }
+  }
+
+  async function handleDeleteAttempt(
+    event: MouseEvent<HTMLButtonElement>,
+    attemptId: string,
+  ) {
+    // AlertDialogAction closes by default. Prevent that until the API confirms
+    // deletion so a failed request leaves the confirmation available to retry.
+    event.preventDefault();
+    const shouldMoveToPreviousPage =
+      page > 1 && attemptsQuery.data?.data.length === 1;
+
+    try {
+      await deleteMutation.mutateAsync({
+        technicalEntryId: entry.id,
+        attemptId,
+      });
+      setDeletingAttemptId(undefined);
+
+      // Removing the only record on a later page would leave that page empty.
+      if (shouldMoveToPreviousPage) {
+        setPage((currentPage) => Math.max(1, currentPage - 1));
+      }
+    } catch {
+      // The mutation hook shows the API error; keep the dialog open for retry.
+    }
+  }
 
   async function onSubmit(values: AddSolutionAttemptFormOutput) {
     try {
@@ -158,9 +249,130 @@ export function TechnicalEntrySolutionAttempts({ entry }: Props) {
                       {formatRelativeDate(attempt.createdAt)}
                     </time>
                   </div>
-                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6">
-                    {attempt.description}
-                  </p>
+                  {editingAttemptId === attempt.id ? (
+                    <div className="mt-3 space-y-3">
+                      <textarea
+                        aria-describedby={
+                          descriptionError
+                            ? `${attempt.id}-description-error`
+                            : undefined
+                        }
+                        aria-invalid={Boolean(descriptionError)}
+                        aria-label="Attempt description"
+                        autoFocus
+                        className="min-h-24 w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm leading-6 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={updateMutation.isPending}
+                        onChange={(event) => {
+                          setDescriptionDraft(event.target.value);
+                          setDescriptionError(undefined);
+                        }}
+                        value={descriptionDraft}
+                      />
+                      {descriptionError ? (
+                        <p
+                          className="text-sm text-destructive"
+                          id={`${attempt.id}-description-error`}
+                          role="alert"
+                        >
+                          {descriptionError}
+                        </p>
+                      ) : null}
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          disabled={updateMutation.isPending}
+                          onClick={handleCancelEditing}
+                          type="button"
+                          variant="outline"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          disabled={updateMutation.isPending}
+                          onClick={() => void handleSaveDescription(attempt.id)}
+                          type="button"
+                        >
+                          {updateMutation.isPending ? "Saving..." : "Save"}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-3 space-y-2">
+                      <p className="whitespace-pre-wrap text-sm leading-6">
+                        {attempt.description}
+                      </p>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          aria-label="Edit attempt description"
+                          disabled={
+                            updateMutation.isPending || deleteMutation.isPending
+                          }
+                          onClick={() => handleStartEditing(attempt)}
+                          size="sm"
+                          type="button"
+                          variant="ghost"
+                        >
+                          <Pencil data-icon="inline-start" />
+                          Edit
+                        </Button>
+                        <AlertDialog
+                          onOpenChange={(open) =>
+                            setDeletingAttemptId(open ? attempt.id : undefined)
+                          }
+                          open={deletingAttemptId === attempt.id}
+                        >
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              aria-label="Delete solution attempt"
+                              className="text-destructive hover:text-destructive"
+                              disabled={
+                                updateMutation.isPending ||
+                                deleteMutation.isPending
+                              }
+                              size="sm"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Trash2 data-icon="inline-start" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                                <AlertTriangle />
+                              </AlertDialogMedia>
+                              <AlertDialogTitle>
+                                Delete this solution attempt?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This attempt will be permanently deleted. This
+                                action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel
+                                disabled={deleteMutation.isPending}
+                              >
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                disabled={deleteMutation.isPending}
+                                onClick={(event) =>
+                                  void handleDeleteAttempt(event, attempt.id)
+                                }
+                                variant="destructive"
+                              >
+                                {deleteMutation.isPending ? (
+                                  <Loader2 className="animate-spin" />
+                                ) : null}
+                                Delete permanently
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  )}
                 </li>
               ))}
             </ol>
