@@ -22,6 +22,18 @@ test('mobile drawer exposes working links and closes after navigation', async ({
   assertNoUnexpected()
 })
 
+test('dashboard stays available when the viewport changes to mobile', async ({ page }) => {
+  const assertNoUnexpected = await mockApi(page, authenticatedApi)
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Welcome back, Ada.' })).toBeVisible()
+
+  await page.setViewportSize({ width: 390, height: 844 })
+
+  await expect(page.getByRole('heading', { name: 'Welcome back, Ada.' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Workspace summary' })).toBeVisible()
+  assertNoUnexpected()
+})
+
 test('desktop sidebar collapses and identifies active entry scope', async ({ page }) => {
   const assertNoUnexpected = await mockApi(page, authenticatedApi)
   await page.goto('/technical-entries/archived')
@@ -72,7 +84,7 @@ test('project tabs support arrow keys, Home and End with matching panels', async
   assertNoUnexpected()
 })
 
-test('keyboard submit reports login errors and the built app shows a notification without Devtools', async ({ page }) => {
+test('keyboard submit reports login errors and the built app renders the dashboard without Devtools', async ({ page }) => {
   const assertNoUnexpected = await mockApi(page, (request, url) => {
     return url.pathname === '/api/users/me' ? guestApi(request, url) : undefined
   })
@@ -86,10 +98,8 @@ test('keyboard submit reports login errors and the built app shows a notificatio
 
   const authenticated = await mockApi(page, authenticatedApi)
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Frontend foundation ready' })).toBeVisible()
-  await expect(page.getByText('Use React Query for API queries and mutations.')).toBeVisible()
-  await page.getByRole('button', { name: 'Test notification' }).click()
-  await expect(page.getByText('Sonner is configured!')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Welcome back, Ada.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Recent journal entries' })).toBeVisible()
   await expect(page.locator('.tsqd-parent-container')).toHaveCount(0)
   authenticated()
 })

@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SheetClose } from "@/components/ui/sheet";
 import { useGetUser } from "@/features/auth/hooks/use-get-user";
 import { useLogout } from "@/features/auth/hooks/use-logout";
 import { cn } from "@/lib/utils";
@@ -113,6 +112,17 @@ const sidebarSections: SidebarSection[] = [
   },
 ];
 
+function closeMobileSidebar(isMobile: boolean) {
+  if (!isMobile) return;
+
+  // The generated sidebar owns its drawer state. Reusing its public trigger
+  // keeps route links independent from Radix's dialog context and also makes
+  // resizing between desktop and mobile safe.
+  document
+    .querySelector<HTMLButtonElement>('[data-sidebar="trigger"]')
+    ?.click();
+}
+
 function SidebarItemLink({ item }: { item: SidebarItem }) {
   const Icon = item.icon;
   const isMobile = useIsMobile();
@@ -137,6 +147,7 @@ function SidebarItemLink({ item }: { item: SidebarItem }) {
     <NavLink
       end={item.end}
       to={item.to}
+      onClick={() => closeMobileSidebar(isMobile)}
       className={({ isActive }) =>
         cn(
           "w-full",
@@ -152,9 +163,7 @@ function SidebarItemLink({ item }: { item: SidebarItem }) {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild>
-        {/* SheetClose participates in the mobile drawer only; desktop links
-            retain ordinary navigation without a modal context. */}
-        {isMobile ? <SheetClose asChild>{link}</SheetClose> : link}
+        {link}
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -174,6 +183,7 @@ function SidebarLink({
     <NavLink
       end={end}
       to={to}
+      onClick={() => closeMobileSidebar(isMobile)}
       className={({ isActive }) =>
         cn(
           "w-full",
@@ -187,7 +197,7 @@ function SidebarLink({
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild>
-        {isMobile ? <SheetClose asChild>{link}</SheetClose> : link}
+        {link}
       </SidebarMenuButton>
     </SidebarMenuItem>
   );

@@ -20,7 +20,7 @@ test('a guest can reload public routes and a protected deep link redirects', asy
 test('an authenticated user can open and reload every protected route', async ({ page }) => {
   const assertNoUnexpected = await mockApi(page, authenticatedApi)
   const routes = [
-    ['/', 'Frontend foundation ready'],
+    ['/', 'Welcome back, Ada.'],
     ['/account', 'User account'],
     ['/projects', 'Projects'],
     [`/projects/${projectId}`, 'DevLog'],

@@ -1,64 +1,81 @@
-import { BookOpenText, CheckCircle2, Sparkles } from "lucide-react";
-import { toast } from "sonner";
-import { Markdown } from "@/components/markdown";
-import { Button } from "@/components/ui/button";
-import { formatRelativeDate } from "@/lib/date";
+import { useGetUser } from "@/features/auth/hooks/use-get-user";
+import { useProjects } from "@/features/projects/hooks/use-projects";
+import { useTags } from "@/features/tags/hooks/use-tags";
+import { useTechnicalEntries } from "@/features/technical-entry/hooks/use-technical-entries";
+import { HomeHero } from "../components/home-hero";
+import { RecentEntriesSection } from "../components/recent-entries-section";
+import { RecentProjectsSection } from "../components/recent-projects-section";
+import { WorkspaceSummary } from "../components/workspace-summary";
+
+const recentProjectsParams = {
+  page: 1,
+  perPage: 3,
+  archivedAt: "null",
+  sort: "updatedAt",
+  sortDir: "desc",
+} as const;
+
+const recentEntriesParams = {
+  page: 1,
+  perPage: 5,
+  archivedAt: "null",
+  sort: "updatedAt",
+  sortDir: "desc",
+} as const;
+
+const openIssuesParams = {
+  page: 1,
+  perPage: 1,
+  archivedAt: "null",
+  type: "ISSUE",
+  status: "OPEN",
+} as const;
+
+const tagCountParams = { page: 1, perPage: 1 } as const;
 
 function HomePage() {
+  // The page coordinates remote data. Presentational components receive only
+  // the data and states they need, so layout concerns stay independent from
+  // React Query and remain easier to evolve or test in isolation.
+  const { data: user } = useGetUser();
+  const projects = useProjects(recentProjectsParams);
+  const entries = useTechnicalEntries(recentEntriesParams);
+  const openIssues = useTechnicalEntries(openIssuesParams);
+  const tags = useTags(tagCountParams);
+
   return (
-    <main className="relative isolate min-h-svh overflow-hidden bg-background">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-      >
-        <div className="absolute left-1/2 -top-72 size-144 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -right-48 -bottom-64 size-128 rounded-full bg-primary/5 blur-3xl" />
-      </div>
+    <main className="mx-auto w-full max-w-7xl space-y-6 pb-8">
+      <HomeHero userName={user?.name} />
 
-      <div className="mx-auto flex min-h-svh w-full max-w-4xl flex-col justify-center gap-10 px-6 py-16 sm:px-8">
-        <header className="space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1.5 text-sm text-muted-foreground backdrop-blur">
-            <BookOpenText className="size-4 text-primary" />
-            DevLog
-          </div>
-          <div className="space-y-4">
-            <h1 className="max-w-3xl text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-              Frontend foundation ready
-            </h1>
-            <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-              Routes, remote data, forms, the interface, and technical content now
-              have a consistent foundation for upcoming features.
-            </p>
-          </div>
-        </header>
+      {/* Totals come from pagination metadata. The dashboard therefore fetches
+          only the records it renders instead of downloading complete lists. */}
+      <WorkspaceSummary
+        entries={{
+          isPending: entries.isPending,
+          total: entries.data?.meta.total,
+        }}
+        openIssues={{
+          isPending: openIssues.isPending,
+          total: openIssues.data?.meta.total,
+        }}
+        projects={{
+          isPending: projects.isPending,
+          total: projects.data?.meta.total,
+        }}
+        tags={{ isPending: tags.isPending, total: tags.data?.meta.total }}
+      />
 
-        <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
-          <div className="mb-5 flex items-center gap-3 font-medium">
-            <span className="flex size-9 items-center justify-center rounded-full bg-emerald-500/10">
-              <CheckCircle2 className="size-5 text-emerald-400" />
-            </span>
-            <span>Initial setup</span>
-          </div>
-          <Markdown className="text-card-foreground/80">
-            {`- Use \`api\` for HTTP calls with authentication cookies.
-- Use React Query for API queries and mutations.
-- Use \`useLoginForm\` as a reference for new Zod + Hook Form forms.`}
-          </Markdown>
-        </section>
-
-        <div className="flex flex-wrap items-center gap-4">
-          <Button
-            className="shadow-lg shadow-primary/10"
-            size="lg"
-            onClick={() => toast.success("Sonner is configured!")}
-          >
-            <Sparkles data-icon="inline-start" />
-            Test notification
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Configured {formatRelativeDate(new Date())}
-          </span>
-        </div>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(18rem,1fr)]">
+        <RecentEntriesSection
+          entries={entries.data?.data}
+          isError={entries.isError}
+          isPending={entries.isPending}
+        />
+        <RecentProjectsSection
+          isError={projects.isError}
+          isPending={projects.isPending}
+          projects={projects.data?.data}
+        />
       </div>
     </main>
   );

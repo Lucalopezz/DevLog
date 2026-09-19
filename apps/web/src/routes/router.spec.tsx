@@ -72,7 +72,7 @@ describe('application routing', () => {
   })
 
   it.each([
-    ['/', 'Frontend foundation ready'],
+    ['/', 'Welcome back, Ada.'],
     ['/account', 'User account'],
     ['/projects', 'Projects'],
     [`/projects/${projectId}`, 'Route project'],
@@ -97,7 +97,7 @@ describe('application routing', () => {
 
       expect(
         await screen.findByRole('heading', {
-          name: 'Frontend foundation ready',
+          name: 'Welcome back, Ada.',
         }),
       ).toBeVisible()
     },
