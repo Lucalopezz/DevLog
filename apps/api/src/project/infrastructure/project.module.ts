@@ -21,6 +21,7 @@ import { AddProjectTechnologyUseCase } from '../application/usecases/technology/
 import { ProjectTechnologyRepository } from '../domain/repositories/technology/project-technology.repository';
 import { ProjectTechnologyPrismaRepository } from './database/prisma/repositories/technology/project-technology-prisma.repository';
 import { RemoveProjectTechnologyUseCase } from '../application/usecases/technology/remove-project-technology.usecase';
+import { SearchProjectTechnologyUseCase } from '../application/usecases/technology/search-project-technology.usecase';
 import { ProjectCommandRepository } from '../domain/repositories/command/project-command.repository';
 import { ProjectCommandPrismaRepository } from './database/prisma/repositories/command/project-command-prisma.repository';
 import { AddProjectCommandUseCase } from '../application/usecases/command/add-project-command.usecase';
@@ -195,6 +196,15 @@ import { GetProjectResourceUseCase } from '../application/usecases/resource/get-
         );
       },
       inject: ['ProjectRepository', 'ProjectTechnologyRepository'],
+    },
+    {
+      provide: SearchProjectTechnologyUseCase,
+      useFactory: (
+        projectTechnologyRepository: ProjectTechnologyRepository,
+      ) => {
+        return new SearchProjectTechnologyUseCase(projectTechnologyRepository);
+      },
+      inject: ['ProjectTechnologyRepository'],
     },
     {
       provide: AddProjectCommandUseCase,

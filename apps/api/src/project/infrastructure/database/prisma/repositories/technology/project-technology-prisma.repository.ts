@@ -1,6 +1,10 @@
 import { ProjectTechnologyEntity } from '@/project/domain/entities/technology/project-technology.entity';
-import { ProjectTechnologyRepository } from '@/project/domain/repositories/technology/project-technology.repository';
+import {
+  ProjectTechnologyRepository,
+  ProjectTechnologyOwnerSearch,
+} from '@/project/domain/repositories/technology/project-technology.repository';
 import { PrismaService } from '@/shared/infrastructure/database/prisma.service';
+import { Prisma } from '@generated/prisma/client';
 import { ProjectTechnologyModelMapper } from './models/project-technology-model.mapper';
 
 export class ProjectTechnologyPrismaRepository implements ProjectTechnologyRepository {
@@ -44,6 +48,43 @@ export class ProjectTechnologyPrismaRepository implements ProjectTechnologyRepos
     });
 
     return models.map((model) => ProjectTechnologyModelMapper.toEntity(model));
+  }
+
+  async searchForOwner(params: ProjectTechnologyOwnerSearch) {
+    const where: Prisma.ProjectTechnologyWhereInput = {
+      project: { is: { userId: params.userId } },
+    };
+
+    if (params.name) {
+      where.name = { contains: params.name, mode: 'insensitive' };
+    }
+    if (params.projectId) {
+      where.projectId = params.projectId;
+    }
+
+    const [total, models] = await Promise.all([
+      this.prismaService.projectTechnology.count({ where }),
+      this.prismaService.projectTechnology.findMany({
+        where,
+        include: { project: { select: { name: true } } },
+        orderBy: [{ project: { name: 'asc' } }, { name: 'asc' }],
+        skip: (params.page - 1) * params.perPage,
+        take: params.perPage,
+      }),
+    ]);
+
+    return {
+      items: models.map((model) => ({
+        id: model.id,
+        projectId: model.projectId,
+        projectName: model.project.name,
+        name: model.name,
+        version: model.version ?? undefined,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+      })),
+      total,
+    };
   }
 
   async update(entity: ProjectTechnologyEntity): Promise<void> {

@@ -37,6 +37,9 @@ import { TechnicalEntryCollectionPresenter } from '@/technical-entry/infrastruct
 import { AddProjectTechnologyDto } from './dto/technology/add-project-technology.dto';
 import { AddProjectTechnologyUseCase } from '../application/usecases/technology/add-project-technology.usecase';
 import { RemoveProjectTechnologyUseCase } from '../application/usecases/technology/remove-project-technology.usecase';
+import { SearchProjectTechnologyUseCase } from '../application/usecases/technology/search-project-technology.usecase';
+import { SearchProjectTechnologyDto } from './dto/technology/search-project-technology.dto';
+import { ProjectTechnologyCollectionPresenter } from './presenter/technology/project-technology.presenter';
 import { AddProjectCommandDto } from './dto/command/add-project-command.dto';
 import { AddProjectCommandUseCase } from '../application/usecases/command/add-project-command.usecase';
 import {
@@ -98,6 +101,9 @@ export class ProjectController {
 
   @Inject(RemoveProjectTechnologyUseCase)
   private readonly removeProjectTechnologyUseCase: RemoveProjectTechnologyUseCase;
+
+  @Inject(SearchProjectTechnologyUseCase)
+  private readonly searchProjectTechnologyUseCase: SearchProjectTechnologyUseCase;
 
   @Inject(AddProjectCommandUseCase)
   private readonly addProjectCommandUseCase: AddProjectCommandUseCase;
@@ -177,6 +183,19 @@ export class ProjectController {
     });
 
     return ProjectController.listProjectsToResponse(output);
+  }
+
+  @Get('technologies')
+  async searchTechnologies(
+    @Query() searchParams: SearchProjectTechnologyDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.searchProjectTechnologyUseCase.execute({
+      ...searchParams,
+      userId: user.id,
+    });
+
+    return new ProjectTechnologyCollectionPresenter(output);
   }
 
   @Get(':id/technical-entries')
