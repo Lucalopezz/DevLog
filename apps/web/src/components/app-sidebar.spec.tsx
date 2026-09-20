@@ -13,7 +13,9 @@ import { AppSidebar } from './app-sidebar'
 
 function renderSidebar(route = '/') {
   return renderWithProviders(
-    <SidebarProvider><AppSidebar /></SidebarProvider>,
+    <SidebarProvider>
+      <AppSidebar />
+    </SidebarProvider>,
     { route },
   )
 }
@@ -29,6 +31,9 @@ describe('AppSidebar', () => {
     try {
       renderSidebar('/login')
       expect(screen.getByText('Checking session...')).toBeVisible()
+      expect(
+        screen.queryByRole('link', { name: 'Sign in' }),
+      ).not.toBeInTheDocument()
     } finally {
       responseGate.resolve(undefined)
     }
@@ -38,14 +43,50 @@ describe('AppSidebar', () => {
     expect(screen.queryByRole('link', { name: 'Projects' })).not.toBeInTheDocument()
   })
 
-  it('shows account identity, active archive route and disabled future items', async () => {
+  it('shows account identity, active archive route and available actions', async () => {
     server.use(http.get(apiUrl('/users/me'), () => HttpResponse.json(createUser())))
     renderSidebar('/technical-entries/archived')
 
     expect(await screen.findByRole('link', { name: 'Ada Lovelace' })).toBeVisible()
-    expect(screen.getByRole('link', { name: 'Archived Entries' })).toHaveAttribute('aria-current', 'page')
-    expect(screen.getByRole('link', { name: 'Technical Journal' })).not.toHaveAttribute('aria-current', 'page')
-    expect(screen.getByRole('button', { name: 'Quick Capture' })).toBeDisabled()
+    expect(
+      screen.getByRole('link', { name: 'Archived Entries' }),
+    ).toHaveAttribute('aria-current', 'page')
+    expect(
+      screen.getByRole('link', { name: 'All Entries' }),
+    ).not.toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('button', { name: 'Quick Capture' })).toBeEnabled()
     expect(screen.getAllByText('Soon').length).toBeGreaterThan(0)
+  })
+
+  it.each([
+    ['/technical-entries', 'All Entries'],
+    ['/technical-entries?title=react', 'All Entries'],
+    ['/technical-entries?tag=typescript', 'All Entries'],
+    ['/technical-entries?type=ISSUE&status=OPEN', 'Open Issues'],
+    ['/technical-entries?type=LEARNING', 'Learnings'],
+    ['/technical-entries?type=ISSUE&status=RESOLVED', 'Resolved Issues'],
+    ['/technical-entries/archived', 'Archived Entries'],
+  ])('activates only %s journal item', async (route, activeLabel) => {
+    server.use(http.get(apiUrl('/users/me'), () => HttpResponse.json(createUser())))
+    renderSidebar(route)
+
+    await screen.findByRole('link', { name: 'Ada Lovelace' })
+
+    const journalLabels = [
+      'All Entries',
+      'Open Issues',
+      'Learnings',
+      'Resolved Issues',
+      'Archived Entries',
+    ]
+
+    for (const label of journalLabels) {
+      const link = screen.getByRole('link', { name: label })
+      if (label === activeLabel) {
+        expect(link).toHaveAttribute('aria-current', 'page')
+      } else {
+        expect(link).not.toHaveAttribute('aria-current', 'page')
+      }
+    }
   })
 })
