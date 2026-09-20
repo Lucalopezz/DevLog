@@ -161,8 +161,11 @@ describe('ProjectDetailPage', () => {
     expect(within(panel).getByRole('link', { name: /Project docs/ })).toHaveAttribute('rel', 'noreferrer')
 
     panel = await openTab(user, 'Technical entries')
-    expect(within(panel).getByRole('link', { name: entry.title })).toHaveAttribute(
-      'href', `/technical-entries/${entry.id}`,
+    expect(
+      within(panel).getByRole('link', { name: new RegExp(entry.title) }),
+    ).toHaveAttribute(
+      'href',
+      `/technical-entries/${entry.id}`,
     )
     expect(within(panel).getByText('Resolved')).toBeVisible()
     expect(within(panel).getByText('#cache')).toBeVisible()

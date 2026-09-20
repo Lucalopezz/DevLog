@@ -1,91 +1,17 @@
-import {
-  CircleAlert,
-  ExternalLink,
-  Lightbulb,
-  RefreshCw,
-  Terminal,
-} from "lucide-react";
+import { ArrowUpRight, ExternalLink, Terminal } from "lucide-react";
 import type { Meta } from "@/api/types";
-import { Button } from "@/components/ui/button";
 import { formatRelativeDate } from "@/lib/date";
 import { Link } from "react-router";
+import { presentTechnicalEntryType } from "@/features/technical-entry/presentation";
 import type { ProjectCommand, ProjectResource } from "../types/project-detail";
 import type { TechnicalEntry } from "@/features/technical-entry/types/technical-entry";
 import { resourcePresentation } from "../presentation";
-
-function SectionError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-start gap-3 rounded-xl border border-destructive/25 bg-destructive/5 p-5 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-muted-foreground">
-        Could not load this section.
-      </p>
-      <Button onClick={onRetry} size="sm" type="button" variant="outline">
-        <RefreshCw data-icon="inline-start" />
-        Try again
-      </Button>
-    </div>
-  );
-}
-
-function EmptySection({ children }: { children: string }) {
-  return (
-    <div className="rounded-xl border border-dashed border-border/80 p-8 text-center">
-      <p className="text-sm text-muted-foreground">{children}</p>
-    </div>
-  );
-}
-
-function DetailPagination({
-  isFetching,
-  meta,
-  onPageChange,
-}: {
-  isFetching: boolean;
-  meta?: Meta;
-  onPageChange: (page: number) => void;
-}) {
-  if (!meta || meta.lastPage <= 1) return null;
-
-  const isFirstPage = meta.currentPage <= 1;
-  const isLastPage = meta.currentPage >= meta.lastPage;
-
-  return (
-    <nav
-      aria-label="Section pagination"
-      className="flex flex-col gap-3 border-t border-border/60 pt-4 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <p aria-live="polite" className="text-sm text-muted-foreground">
-        Page {meta.currentPage} of {meta.lastPage} ·{" "}
-        {meta.total.toLocaleString("en-US")} item(s)
-      </p>
-      <div className="flex items-center gap-2">
-        <Button
-          disabled={isFirstPage || isFetching}
-          onClick={() => onPageChange(meta.currentPage - 1)}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          Previous
-        </Button>
-        <Button
-          disabled={isLastPage || isFetching}
-          onClick={() => onPageChange(meta.currentPage + 1)}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          Next
-        </Button>
-      </div>
-    </nav>
-  );
-}
-
-const technicalEntryTypePresentation = {
-  ISSUE: { label: "Issue", icon: CircleAlert },
-  LEARNING: { label: "Learning", icon: Lightbulb },
-} as const;
+import {
+  DetailPagination,
+  EmptySection,
+  LoadingSection,
+  SectionError,
+} from "./project-detail-section-ui";
 
 function isSafeResourceUrl(value: string) {
   try {
@@ -130,67 +56,74 @@ export function TechnicalEntriesSection({
     <div className="space-y-5">
       <div className="grid gap-4 md:grid-cols-2">
         {entries.map((entry) => {
-          const type = technicalEntryTypePresentation[entry.type];
+          const type = presentTechnicalEntryType(entry.type);
           const TypeIcon = type.icon;
 
           return (
-            <article
-              className="flex h-full flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm"
+            // A single anchor makes every part of the card a keyboard-accessible
+            // navigation target and avoids nesting the title link inside it.
+            <Link
+              className="group block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               key={entry.id}
+              to={`/technical-entries/${entry.id}`}
             >
-              <header className="flex items-start justify-between gap-4">
-                <div className="flex min-w-0 items-start gap-3">
-                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <TypeIcon className="size-4 text-primary" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      {type.label}
-                    </p>
-                    <h3 className="mt-1 break-words font-semibold">
-                      <Link className="hover:underline" to={`/technical-entries/${entry.id}`}>
-                        {entry.title}
-                      </Link>
-                    </h3>
+              <article className="flex h-full flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm transition-colors group-hover:border-primary/40 group-hover:bg-card">
+                <header className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <TypeIcon className="size-4 text-primary" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        {type.label}
+                      </p>
+                      <h3 className="mt-1 flex items-start gap-1 break-words font-semibold">
+                        <span>{entry.title}</span>
+                        <ArrowUpRight
+                          aria-hidden="true"
+                          className="mt-0.5 size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                        />
+                      </h3>
+                    </div>
                   </div>
-                </div>
-                {entry.status ? (
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {entry.status === "RESOLVED" ? "Resolved" : "Open"}
-                  </span>
-                ) : null}
-              </header>
+                  {entry.status ? (
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {entry.status === "RESOLVED" ? "Resolved" : "Open"}
+                    </span>
+                  ) : null}
+                </header>
 
-              <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
-                {entry.context}
-              </p>
-
-              {entry.conclusion ? (
-                <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
-                  {entry.conclusion}
+                <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
+                  {entry.context}
                 </p>
-              ) : null}
 
-              {entry.tags?.length ? (
-                <ul className="flex flex-wrap gap-1.5">
-                  {entry.tags.map((tag) => (
-                    <li
-                      className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
-                      key={tag.id}
-                    >
-                      #{tag.name}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
+                {entry.conclusion ? (
+                  <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+                    {entry.conclusion}
+                  </p>
+                ) : null}
 
-              <time
-                className="mt-auto text-xs text-muted-foreground"
-                dateTime={entry.updatedAt}
-              >
-                Updated {formatRelativeDate(entry.updatedAt)}
-              </time>
-            </article>
+                {entry.tags?.length ? (
+                  <ul className="flex flex-wrap gap-1.5">
+                    {entry.tags.map((tag) => (
+                      <li
+                        className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
+                        key={tag.id}
+                      >
+                        #{tag.name}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                <time
+                  className="mt-auto text-xs text-muted-foreground"
+                  dateTime={entry.updatedAt}
+                >
+                  Updated {formatRelativeDate(entry.updatedAt)}
+                </time>
+              </article>
+            </Link>
           );
         })}
       </div>
@@ -224,7 +157,9 @@ export function CommandsSection({
   if (isPending) return <LoadingSection />;
   if (!commands?.length) {
     return (
-      <EmptySection>No commands have been recorded for this project.</EmptySection>
+      <EmptySection>
+        No commands have been recorded for this project.
+      </EmptySection>
     );
   }
 
@@ -298,7 +233,9 @@ export function ResourcesSection({
   if (isPending) return <LoadingSection />;
   if (!resources?.length) {
     return (
-      <EmptySection>No resources have been recorded for this project.</EmptySection>
+      <EmptySection>
+        No resources have been recorded for this project.
+      </EmptySection>
     );
   }
 
@@ -345,22 +282,6 @@ export function ResourcesSection({
         meta={meta}
         onPageChange={onPageChange}
       />
-    </div>
-  );
-}
-
-function LoadingSection() {
-  // aria-live/role=status announces asynchronous changes without relying on
-  // visual animation, helping people who use assistive technology.
-  return (
-    <div
-      className="rounded-2xl border border-border/60 bg-card/60 p-8 text-center"
-      role="status"
-    >
-      <RefreshCw className="mx-auto size-5 animate-spin text-primary" />
-      <p className="mt-3 text-sm text-muted-foreground">
-        Loading content...
-      </p>
     </div>
   );
 }
