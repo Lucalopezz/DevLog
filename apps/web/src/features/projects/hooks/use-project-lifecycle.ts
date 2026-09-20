@@ -9,6 +9,7 @@ import { restoreProject } from "../api/restore-project";
 import { deleteProject } from "../api/delete-project";
 import { technicalEntriesKeys } from "@/features/technical-entry/api/list-technical-entries";
 import type { TechnicalEntry } from "@/features/technical-entry/types/technical-entry";
+import { technologiesKeys } from "@/features/technologies/api/technology-api";
 
 export function useArchiveProject() {
   const queryClient = useQueryClient();
@@ -80,6 +81,9 @@ export function useDeleteProject() {
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: projectsKeys.lists() }),
+        queryClient.invalidateQueries({
+          queryKey: technologiesKeys.lists(),
+        }),
         queryClient.invalidateQueries({ queryKey: technicalEntriesKeys.lists() }),
         queryClient.invalidateQueries({
           queryKey: ["technical-entry"],

@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { getApiErrorMessage } from '@/lib/get-api-error-message'
 import { getProjectQueryKey } from '../api/get-project'
 import { projectsKeys } from '../api/list-projects'
+import { technologiesKeys } from '@/features/technologies/api/technology-api'
 import { updateProject } from '../api/update-project'
 import type { UpdateProjectInput } from '../types/project'
 
@@ -30,6 +31,9 @@ export function useUpdateProject() {
         }),
         queryClient.invalidateQueries({
           queryKey: projectsKeys.lists(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: technologiesKeys.lists(),
         }),
       ])
     },

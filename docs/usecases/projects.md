@@ -450,3 +450,26 @@ is repeated in alternative flows only when it changes the meaning of the use cas
 ### Alternative flows
 
 - An archived project or a resource outside the project prevents removal.
+
+## UC-30 — Search project technologies
+
+| Field          | Description                                                   |
+| -------------- | ------------------------------------------------------------- |
+| Primary actor  | Authenticated user                                            |
+| Interests      | Browse technologies recorded across the user's projects.      |
+| Preconditions  | Authenticated request.                                        |
+| Trigger        | The user opens the Technologies page with optional filters.   |
+| Postconditions | No state change.                                               |
+| Endpoint       | `GET /api/project/technologies`                               |
+
+### Main flow
+
+1. The user provides optional technology-name and project filters.
+2. The system restricts the search to technologies in the user's projects.
+3. The system paginates the result and includes each technology's project name.
+4. The system returns the resulting page for grouping by project in the UI.
+
+### Alternative flows
+
+- If there are no matches, the page is empty.
+- An unknown or out-of-scope project filter returns an empty page without exposing another user's data.

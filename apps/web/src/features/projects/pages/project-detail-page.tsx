@@ -19,13 +19,20 @@ import {
 } from "../components/project-detail-sections";
 import { ProjectSettingsPane } from "../components/project-settings-pane";
 import { TechnicalEntryForm } from "@/features/technical-entry/components/technical-entry-form";
+import { ProjectTechnologiesSection } from "@/features/technologies/components/project-technologies-section";
 
 type ProjectDetailTab =
-  "overview" | "entries" | "commands" | "resources" | "settings";
+  | "overview"
+  | "entries"
+  | "technologies"
+  | "commands"
+  | "resources"
+  | "settings";
 
 const tabs: { id: ProjectDetailTab; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "entries", label: "Technical entries" },
+  { id: "technologies", label: "Technologies" },
   { id: "commands", label: "Commands" },
   { id: "resources", label: "Resources" },
   { id: "settings", label: "Settings" },
@@ -211,6 +218,19 @@ export default function ProjectDetailPage() {
               isPending={technicalEntriesQuery.isPending}
               onRetry={() => technicalEntriesQuery.refetch()}
               onPageChange={setEntriesPage}
+            />
+          </SectionFrame>
+        ) : null}
+
+        {activeTab === tab.id && tab.id === "technologies" ? (
+          <SectionFrame
+            description="Languages, frameworks, databases, and tools used by this project."
+            title="Technologies"
+          >
+            <ProjectTechnologiesSection
+              isArchived={Boolean(project.archivedAt)}
+              projectId={project.id}
+              technologies={project.technologies ?? []}
             />
           </SectionFrame>
         ) : null}

@@ -90,7 +90,13 @@ export const sidebarSections: SidebarSection[] = [
     label: "Project Knowledge",
     items: [
       { type: "route", label: "Tags", icon: Tags, to: "/tags", end: true },
-      { type: "planned", label: "Technologies", icon: Cpu },
+      {
+        type: "route",
+        label: "Technologies",
+        icon: Cpu,
+        to: "/technologies",
+        end: true,
+      },
       { type: "planned", label: "Environments", icon: Boxes },
     ],
   },
