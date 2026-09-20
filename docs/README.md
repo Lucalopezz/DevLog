@@ -61,24 +61,24 @@ Tracks planned implementation and known pending work. Use it to find what still 
 4. Choose a technical guide related to your question.
 5. Check [`backlog/backend.md`](backlog/backend.md) before implementing a new task.
 
-The current frontend Projects surface includes project details and a Settings
-tab for editing, archiving, restoring, metadata inspection, and confirmed
-deletion. The API behavior behind those actions is documented in
-[`usecases/projects.md`](usecases/projects.md).
+The project and technical-journal workflows shipped for MVP 1.0 are complete
+in the frontend. Project screens aggregate technologies, entries, commands,
+and resources; the journal supports tags, solution attempts, and issue
+resolution. See the [web application guide](../apps/web/README.md) for the
+current screens and [`usecases/`](usecases/) for API behavior.
 
 ## Current implementation status
 
-As of 2026-09-14, the API MVP functional scope is implemented and has 70 unit
-test suites with 343 passing tests. The web application has authentication,
-account details, project management, and the first technical-journal slice:
-paginated active and archived lists, filters for title/type/status, creation,
-detail views, Markdown rendering, content/title editing, and entry lifecycle
-actions.
+MVP 1.0 is complete for the project and technical-journal workflows. The
+`/account` page is currently read-only; account updates and these follow-up
+frontend areas remain planned:
 
-The next implementation focus is the remaining user-facing journal behavior:
-project/tag filters, tag assignment, solution attempts, and resolve/reopen
-actions. After that, implement editing of project technologies, commands, and
-resources, then add frontend behavior tests and the missing API HTTP coverage.
+- Account data management (profile name and password);
+- A project environments listing;
+- An activity timeline;
+- A knowledge overview.
 
 The authoritative task breakdown is kept in [`backlog/backend.md`](backlog/backend.md)
-and [`backlog/frontend.md`](backlog/frontend.md).
+and [`backlog/frontend.md`](backlog/frontend.md). The backend use cases for
+profile updates and password changes are documented in
+[`usecases/account-and-tags.md`](usecases/account-and-tags.md).

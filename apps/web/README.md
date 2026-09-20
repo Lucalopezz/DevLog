@@ -1,36 +1,72 @@
 # DevLog Web
 
-DevLog frontend. This application provides the interface for browsing projects, recording issues and lessons learned, and finding previously attempted technical solutions.
+DevLog's React frontend for recording technical knowledge and organizing it by
+project.
 
-## Current state
+## MVP 1.0 status
 
-The frontend includes its application foundation, authentication screens,
-account details, and a working Projects experience. Users can list, search,
-filter, create, edit, and inspect projects. A project detail page contains
-`Overview`, `Technical entries`, `Commands`, `Resources`, and `Settings` tabs.
-The Settings tab supports project metadata, lifecycle actions, safe deletion,
-and read-only behavior for archived projects.
+The project and technical-journal workflows are complete in the web app.
+Authenticated users can manage projects and their related data, record and
+resolve technical issues, and find entries through the journal and tag filters.
 
-The technical journal is also available through `/technical-entries`. It
-supports paginated active and archived lists, title/type/status filters,
-Markdown rendering, creation, inline editing of context and conclusion, title
-editing, detail views, archiving, restoration, and confirmed deletion. The
-project detail page can create and list entries for a project.
+### Projects
 
-The `/` route remains an initial infrastructure demonstration. Tag assignment,
-solution attempts, issue resolve/reopen actions, and project subresource
-editing continue to evolve in the frontend, while their API support is already
-available.
+The `/projects` page supports paginated search, filtering, and project
+creation. A project detail page brings together its overview, technologies,
+technical entries, commands, resources, and settings. Users can create, edit,
+and remove project commands and resources, add and remove technologies, and
+manage project metadata and lifecycle. Archived projects are read-only, and
+permanent deletion is protected by confirmation.
 
-The foundation includes:
+### Technical journal
 
-- React Router routing;
-- An Axios HTTP client configured for the API and cookies;
-- Remote data caching and synchronization with TanStack Query;
-- React Hook Form and Zod form validation;
-- Tailwind CSS, shadcn/ui, and Radix interface components;
-- Sonner notifications and Markdown rendering;
-- React Query Devtools in development only.
+The journal provides paginated active and archived lists, filters for title,
+type, issue status, and tag, plus entry details with Markdown rendering. Users
+can create entries, edit title/context/conclusion, assign or remove tags, and
+archive, restore, or permanently delete entries.
+
+For `ISSUE` entries, users can record, edit, and remove solution attempts,
+resolve an issue with a conclusion, and reopen a resolved issue while keeping
+its attempts and conclusion. A successful solution attempt can resolve an open
+issue using the attempt description as its conclusion.
+
+Quick Capture is available from the sidebar. It opens the regular technical
+entry form, so captured items are complete entries rather than drafts.
+
+### Account
+
+The `/account` page currently displays the signed-in user's name and email.
+The API supports changing a user's name and password, but the frontend flows to
+manage those values are still planned. Email is read-only under the current API
+contract.
+
+## Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Workspace overview with recent projects and entries |
+| `/account` | Authenticated account details |
+| `/projects` | Paginated project list and creation |
+| `/projects/:projectId` | Project overview and related data |
+| `/technical-entries` | Paginated active journal and filters |
+| `/technical-entries/:technicalEntryId` | Technical entry details and actions |
+| `/technical-entries/archived` | Paginated archived entries |
+| `/tags` | Search and manage tags |
+| `/technologies` | Search technologies recorded on projects |
+
+Quick Capture is a sidebar action and does not have its own route.
+
+## Planned after MVP 1.0
+
+- Account data management: profile name and password flows.
+- Environments: a page listing project environments/stacks, for example
+  Next.js with Ubuntu. The data source and model remain to be defined.
+- Activity Timeline: a chronological view of project and journal activity.
+- Knowledge Overview: a summary of the technical knowledge recorded across
+  projects and entries.
+
+The complete status and follow-up roadmap are in
+[`../../docs/backlog/frontend.md`](../../docs/backlog/frontend.md).
 
 ## Technologies
 
@@ -52,17 +88,21 @@ src/
   app/providers/       # Global application providers
   components/          # Shared components and UI primitives
   features/            # Code organized by feature
-    auth/              # Authentication schemas, types, hooks, and screens
-    home/              # Current home page
-    projects/          # Project APIs, forms, lifecycle, settings, and screens
-    technical-entry/   # Journal lists, details, forms, and lifecycle actions
+    auth/              # Authentication, account details, and session flows
+    home/              # Workspace overview
+    projects/          # Project APIs, forms, lifecycle, and detail screens
+    tags/              # Tag search, management, and selection controls
+    technologies/      # Technology listing and project associations
+    technical-entry/   # Journal lists, details, attempts, and lifecycle
   lib/                 # Query client, dates, and utilities
   routes/              # Browser route definitions
   main.tsx             # React entry point
   index.css            # Tailwind, theme, and visual tokens
 ```
 
-Features with their own rules belong in `features/`. Reusable components belong in `components/`; cross-cutting concerns such as dates and caching belong in `lib/`.
+Features with their own rules belong in `features/`. Reusable components belong
+in `components/`; cross-cutting concerns such as dates and caching belong in
+`lib/`.
 
 ## Local configuration
 
@@ -79,7 +119,8 @@ cp apps/web/.env.example apps/web/.env
 VITE_API_URL=http://localhost:3000/api
 ```
 
-If the variable is absent, the same address is used as a fallback. The API must be running and allow the Vite origin in `CORS_ALLOWED_ORIGINS`.
+If the variable is absent, the same address is used as a fallback. The API must
+be running and allow the Vite origin in `CORS_ALLOWED_ORIGINS`.
 
 ## Running
 
@@ -93,6 +134,12 @@ pnpm --filter web build
 # Run lint checks
 pnpm --filter web lint
 
+# Run frontend unit/component tests
+pnpm --filter web test
+
+# Run browser end-to-end tests
+pnpm --filter web test:e2e
+
 # Preview the generated build locally
 pnpm --filter web preview
 ```
@@ -103,40 +150,22 @@ Vite usually serves the app at `http://localhost:5173`.
 
 ### API communication
 
-Use the `api` instance from `src/api/http.ts` for new calls. It sets `withCredentials: true`, required because the backend stores the JWT in a protected cookie. Isolated Axios instances may break authentication or produce inconsistent URLs.
+Use the `api` instance from `src/api/http.ts` for new calls. It sets
+`withCredentials: true`, required because the backend stores the JWT in a
+protected cookie. Isolated Axios instances may break authentication or produce
+inconsistent URLs.
 
 ### Remote data
 
-`queryClient` treats data as fresh for 30 seconds, does not refetch on window focus, and avoids retries for HTTP `4xx` errors. This policy distinguishes validation or authorization errors from temporary server failures.
+`queryClient` treats data as fresh for 30 seconds, does not refetch on window
+focus, and avoids retries for HTTP `4xx` errors. This policy distinguishes
+validation or authorization errors from temporary server failures.
 
 ### Forms and UI
 
-`useLoginForm` is the form reference: Zod describes the data, and React Hook Form controls state and validation. Use the tokens and components in `src/index.css` and `src/components/ui`, composing styles with Tailwind classes.
+`useLoginForm` is the form reference: Zod describes the data, and React Hook Form
+controls state and validation. Use the tokens and components in `src/index.css`
+and `src/components/ui`, composing styles with Tailwind classes.
 
-All interface text, accessibility labels, validation messages, and notifications must be in English. Dates and numbers use `en-US`.
-
-## Current Projects surface
-
-The project detail route is `/projects/:projectId`. Its Settings tab is built
-from feature-local components and mutations:
-
-- `api/`: project fetch, update, archive, restore, and delete requests;
-- `hooks/`: React Query queries and lifecycle mutations with cache invalidation;
-- `components/project-settings-pane.tsx`: settings layout and project metadata;
-- `components/project-archive-btn.tsx`, `project-restore-btn.tsx`, and
-  `project-delete-btn.tsx`: confirmed lifecycle actions.
-
-Archived projects are displayed as read-only. Deletion requires typing the
-project name and redirects to `/projects` after success. The backend also
-requires an archived project to be restored before it can be deleted. Project
-creation also reports a conflict when the authenticated user already has a
-project with the same name.
-
-## Next areas to develop
-
-Continue with project/tag filters, tag and solution-attempt workflows, issue
-resolve/reopen actions, and editing of project subresources. The frontend
-roadmap, including the proposed Quick Capture flow, is tracked in
-[`../../docs/backlog/frontend.md`](../../docs/backlog/frontend.md).
-
-The web app does not yet have a test runner. Until one is added, the minimum checks for frontend changes are `lint` and `build`.
+All interface text, accessibility labels, validation messages, and
+notifications must be in English. Dates and numbers use `en-US`.

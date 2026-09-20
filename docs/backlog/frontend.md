@@ -1,118 +1,68 @@
-# Frontend backlog — DevLog
+# Frontend roadmap — DevLog
 
 Scope: React screens, navigation, forms, client-side validation, API
-integration, loading states, and frontend user experience.
-
-This backlog complements [`backlog/backend.md`](backend.md). A frontend task
-may consume an existing API capability without requiring a backend change.
+integration, and frontend user experience. API behavior and domain rules are
+documented separately in [`../usecases/`](../usecases/).
 
 > [!NOTE]
-> Review on 2026-09-14: authentication, account details, project management,
-> and the first technical-journal slice are implemented. Checked items below
-> describe behavior verified in the current web source; unchecked items are
-> the remaining work or intentionally planned product work.
+> The frontend scope for MVP 1.0 is complete. This roadmap records the
+> implemented project and technical-entry workflows, then lists the product
+> areas that remain for a later release.
 
-## 1. Technical journal
+## MVP 1.0 — complete
 
-- [x] Create the `/technical-entries` page with pagination and entry cards.
-- [x] Add filters for title, type, and issue status.
-- [ ] Add project and tag filters.
-- [x] Create the `/technical-entries/:technicalEntryId` detail page.
-- [x] Add technical entry creation and editing forms for title, context, and
-  conclusion.
-- [x] Add Markdown rendering for entry content.
-- [x] Add active and archived entry lists with pagination and empty/loading/error
-  states.
-- [ ] Add tags to the entry form and tag relationship actions.
-- [ ] Add solution attempt creation, editing, and removal for `ISSUE` entries.
-- [ ] Add resolve and reopen actions for technical issues.
-- [x] Add archive, restore, and delete actions with confirmation flows.
+### Projects and project knowledge
 
-## 2. Quick Capture
+- [x] List, search, filter, create, edit, archive, restore, and delete projects.
+- [x] Show project overview data, status, technologies, and aggregate counts.
+- [x] Browse a project's paginated technical entries, commands, and resources.
+- [x] Create, edit, and delete project commands and resources.
+- [x] Add and remove technologies from a project.
+- [x] Keep archived projects read-only and protect permanent deletion with a
+  confirmation flow.
 
-### Product intent
+### Technical journal and issue resolution
 
-`Quick Capture` is a fast way to register a technical observation while the
-context is still fresh. It is a simplified entry-creation experience, not a
-new type of entry and not a separate domain entity.
+- [x] Create and browse paginated active and archived entries.
+- [x] Filter the active journal by title, type, issue status, and tag.
+- [x] View entry details and render Markdown content.
+- [x] Edit an entry's title, context, and conclusion.
+- [x] Assign and remove tags from an entry; manage the user's tags separately.
+- [x] Record, edit, and remove solution attempts for issues.
+- [x] Resolve an issue with a conclusion and reopen a resolved issue while
+  preserving its history.
+- [x] Archive, restore, and permanently delete entries with confirmation where
+  appropriate.
+- [x] Open Quick Capture from the sidebar to create a regular technical entry
+  through the existing entry form and API flow.
 
-The first version should create a normal `TechnicalEntry` immediately. It is
-not a draft or an inbox. The user can later open the complete entry and add
-tags, a conclusion, solution attempts, or resolution details.
+### Application foundation
 
-### Proposed first version
+- [x] Provide registration, login, logout, authenticated navigation, and a
+  read-only account page.
+- [x] Provide frontend unit/component tests with Vitest and browser test
+  commands with Playwright.
+- [x] Represent loading, empty, and error states across the main list and detail
+  flows.
 
-The sidebar item opens a small modal or drawer containing only the information
-needed to create a valid entry:
+Quick Capture is a shortcut into the regular entry creation flow, not a draft
+or a separate domain entity. The existing backend use cases remain the source
+of truth for API validation and lifecycle rules.
 
-- `Title` — required;
-- `Type` — `ISSUE` or `LEARNING`, required;
-- `Context` — required;
-- `Project` — optional.
+## Planned after MVP 1.0
 
-The form should use the same frontend conventions as the other forms:
+- [ ] **Account data management:** add frontend flows to update the profile name
+  and change the password using the existing API. The email remains read-only
+  under the current API contract.
+- [ ] **Environments:** add a page to list project environments or stacks, such
+  as Next.js running on Ubuntu. The source and shape of this data still need to
+  be defined.
+- [ ] **Activity Timeline:** add a chronological view of project and journal
+  activity.
+- [ ] **Knowledge Overview:** add a summary view for the technical knowledge
+  recorded across projects and entries.
 
-1. React Hook Form owns the form state and submission lifecycle.
-2. A Zod schema validates the client-side shape before the request.
-3. The API client sends `POST /api/technical-entry` with the authenticated
-   session cookie.
-4. On success, the modal closes, a success notification is shown, and the
-   relevant entry queries are invalidated.
-5. The created entry may then be opened in the full detail screen once that
-   route exists.
-
-The UI must represent loading, validation errors, API errors, and successful
-creation. The primary action should make it clear that the capture is saved
-immediately.
-
-### Backend impact
-
-The first version does not require a new backend endpoint, database column,
-entity, or use case. It reuses the existing `CreateTechnicalEntry` flow and
-its validation rules. The current API already accepts the proposed fields in
-`CreateTechnicalEntryDto`; `userId` continues to come from the authenticated
-request rather than from the browser.
-
-This keeps Quick Capture as a presentation-level shortcut. A dedicated
-`POST /api/technical-entry/quick-capture` endpoint would duplicate the normal
-creation contract without adding domain behavior.
-
-### Future draft support
-
-If the product later needs captures with missing required fields, Quick
-Capture must evolve into an explicit draft concept. Possible designs include a
-`DRAFT` lifecycle status on `TechnicalEntry` or a separate inbox entity. That
-decision would affect domain validation, list queries, API contracts, and
-database migrations, so it should not be introduced as part of the first
-version.
-
-### Acceptance criteria
-
-- [ ] The authenticated user can open Quick Capture from the sidebar.
-- [ ] The form prevents submission when required fields are invalid.
-- [ ] A valid submission creates a regular technical entry through the
-  existing API.
-- [ ] The user receives visible feedback while saving and after success or
-  failure.
-- [ ] The new entry becomes available to the journal list without a manual
-  page refresh.
-- [ ] The flow works in the mobile sidebar drawer as well as desktop.
-
-## 3. Project knowledge
-
-- [x] Connect project technical entries to the journal experience through the
-  project detail page.
-- [x] Connect technologies, commands, links, and resources to project detail
-  views as paginated read-only sections.
-- [ ] Add tag management surfaces when the product needs a dedicated tag
-  workflow.
-- [ ] Design documentation-only environment and service views.
-
-## 4. Shared frontend experience
-
-- [ ] Replace placeholder sidebar items with routes as each feature becomes
-  available.
-- [ ] Add empty, loading, error, and archived states consistently across
-  feature pages.
-- [ ] Add a frontend test runner and behavior tests for forms and navigation.
-- [ ] Add the planned Settings and Help & feedback surfaces.
+The roadmap keeps these follow-up features separate from MVP 1.0 so the shipped
+project and journal workflows stay easy to identify. Environment data modeling
+and the precise scope of the two overview pages should be decided when those
+features are designed.

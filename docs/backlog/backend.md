@@ -10,10 +10,11 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 > Mark a task complete only when a verifiable backend implementation exists. A Prisma table alone, for example, does not mean its use case and endpoints are ready.
 
 > [!NOTE]
-> Review on 2026-09-14: the main MVP functional scope is implemented and
-> validated by the API build and unit tests (70 suites, 343 tests). Remaining
-> work covers explicit functional gaps (such as tag filtering and complete
-> project aggregation), post-MVP decisions, and additional HTTP coverage.
+> Review on 2026-09-20: the API use cases for the MVP project and technical
+> journal workflows are implemented and documented under [`../usecases/`](../usecases/).
+> Tag filtering is implemented. Remaining unchecked items below track targeted
+> test coverage and follow-up design work; they do not mean that the shipped
+> project and issue workflows are unavailable.
 
 ## Cross-cutting rules
 
@@ -103,9 +104,11 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 > and Prisma repository. Creation, paginated listing, retrieval, updates, hard
 > deletion, logical archiving/restoration, solution attempts, and resolution
 > have use cases, presenters, and AuthGuard-protected endpoints. Project/tag
-> relationships include validation and tag aggregation in responses. At this
-> review stage, tags in creation/updates, tag filtering, complete project
-> aggregation, and complete HTTP tests remain pending.
+> relationships include ownership validation and tag aggregation in responses.
+> Tag assignment/removal, solution attempts, and issue resolution have dedicated
+> endpoints. The project detail experience composes the project response with
+> separate paginated endpoints for entries, commands, and resources; those
+> collections are not returned by one aggregate endpoint.
 
 ### CreateTechnicalEntry
 
@@ -129,7 +132,7 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 - [x] Create the `GetTechnicalEntry` use case.
 - [x] Support lookup by identifier in the contract and Prisma repository.
 - [x] Return the entry with `projectId`, associated tags, and derived status for `ISSUE`.
-- [ ] Return project details and, for `ISSUE`, attempts and resolution history.
+- [x] Keep project details and solution attempts on their dedicated endpoints; the frontend composes the entry detail experience from those responses.
 - [x] Ensure the current user cannot find another user's entry.
 - [x] Create authenticated `GET /api/technical-entry/:id`.
 - [x] Unit-test basic retrieval and user isolation.
@@ -144,7 +147,7 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 - [x] Define `title` as the official text search parameter and apply case-insensitive partial matching in the repository.
 - [x] Implement `projectId` and `type` filters in the use case/API.
 - [x] When `projectId` is supplied, validate that the project exists and belongs to the authenticated user.
-- [ ] Implement the `tagId` filter; the relationship exists, but filtering is not implemented.
+- [x] Implement and validate the `tagId` filter through the API and Prisma repository.
 - [x] Implement `status` filtering, validating the enum and mapping `OPEN`/`RESOLVED` to `resolvedAt` conditions restricted to `ISSUE`.
 - [x] Expose pagination and sorting through the DTO, use case, and collection presenter.
 - [x] Keep `perPage` without a maximum, following the product decision to let users choose page size.
@@ -233,7 +236,7 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 ### GetProject and ListProjects
 
 - [x] Create the `GetProject` use case.
-- [ ] Return the user project with related technologies, commands, and resources.
+- [x] Return the project with its technologies; expose commands and resources through separate paginated endpoints for the frontend detail view.
 - [x] Expose related technical entries through a separate paginated endpoint: `GET /api/project/:id/technical-entries`.
 - [x] Create the `ListProjects` use case.
 - [x] List only authenticated user projects.
@@ -242,7 +245,7 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 - [ ] Implement technology filtering as a planned extension.
 - [x] Create retrieval and listing endpoints.
 - [x] Test use case rules, filters, and user isolation.
-- [ ] Test HTTP endpoints and the relationship aggregation still to be implemented.
+- [ ] Expand HTTP coverage for project retrieval and child-resource routes.
 
 ### UpdateProject
 

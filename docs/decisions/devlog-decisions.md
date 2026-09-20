@@ -663,9 +663,14 @@ These features would increase scope without strengthening the main project goal.
 
 ---
 
-## 13. Future extension: environments and services
+## 13. Post-MVP extension: environments and services
 
-The project dashboard may later document environments and services.
+MVP 1.0 does not include project environments or services. The planned next
+step is a page that lists a project's environments or runtime stacks. The
+examples may include a framework and operating system, such as Next.js on
+Ubuntu, but the data source and fields still need a product decision.
+
+The model below is a proposal for discussion, not an implemented API contract.
 
 Possible model:
 
@@ -730,7 +735,13 @@ Possible extensions:
 - Deployment information.
 - Commands to start and stop services.
 
-The first extension should be documentation only.
+The first environment page should document project setup. Decide whether each
+record represents a deployment stage (`LOCAL`, `DEVELOPMENT`, `STAGING`, or
+`PRODUCTION`) or a runtime stack (such as framework and operating system)
+before defining its persisted fields. The UI and data source remain planned.
+
+Services remain a separate future extension; they are not part of the current
+frontend roadmap.
 
 Executing commands, accessing Docker, opening SSH connections, reading logs, or controlling services introduces a different level of complexity and security. Consider it only after the core is stable.
 
@@ -744,7 +755,8 @@ The product is a personal technical knowledge base organized by project context.
 Technical journal = product core
 Projects = context and organization
 Tags = classification by topic or technology
-Services and environments = future extension
+Environments, Activity Timeline, and Knowledge Overview = post-MVP roadmap
+Services = later extension
 ```
 
 The priority is a small, useful application that can be used early, avoiding features that distract from its main goal.
