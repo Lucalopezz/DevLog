@@ -20,6 +20,8 @@ import {
 import { ProjectSettingsPane } from "../components/project-settings-pane";
 import { TechnicalEntryForm } from "@/features/technical-entry/components/technical-entry-form";
 import { ProjectTechnologiesSection } from "@/features/technologies/components/project-technologies-section";
+import { ProjectCommandForm } from "../components/project-command-form";
+import type { ProjectCommand } from "../types/project-detail";
 
 type ProjectDetailTab =
   | "overview"
@@ -51,6 +53,8 @@ export default function ProjectDetailPage() {
   const [isEditProjectDialogOpen, setIsEditProjectDialogOpen] = useState(false);
   const [isCreateEntryDialogOpen, setIsCreateEntryDialogOpen] =
     useState(false);
+  const [isCommandDialogOpen, setIsCommandDialogOpen] = useState(false);
+  const [editingCommand, setEditingCommand] = useState<ProjectCommand>();
 
   // Each hook represents an independent API collection. Pages are also
   // independent: advancing commands does not change the resource page.
@@ -140,6 +144,18 @@ export default function ProjectDetailPage() {
       <TechnicalEntryForm
         open={isCreateEntryDialogOpen}
         onOpenChange={setIsCreateEntryDialogOpen}
+        projectId={project.id}
+      />
+      <ProjectCommandForm
+        command={editingCommand}
+        onOpenChange={(open) => {
+          setIsCommandDialogOpen(open);
+          if (!open) setEditingCommand(undefined);
+        }}
+        onSaved={(wasCreated) => {
+          if (wasCreated) setCommandsPage(1);
+        }}
+        open={isCommandDialogOpen}
         projectId={project.id}
       />
 
@@ -237,17 +253,41 @@ export default function ProjectDetailPage() {
 
         {activeTab === tab.id && tab.id === "commands" ? (
           <SectionFrame
+            action={
+              <Button
+                disabled={Boolean(project.archivedAt)}
+                onClick={() => {
+                  setEditingCommand(undefined);
+                  setIsCommandDialogOpen(true);
+                }}
+                type="button"
+              >
+                <Plus data-icon="inline-start" />
+                New command
+              </Button>
+            }
             description="Recurring commands to set up, run, and maintain the project."
             title="Commands"
           >
             <CommandsSection
               commands={commandsQuery.data?.data}
+              isArchived={Boolean(project.archivedAt)}
               isError={commandsQuery.isError}
               isFetching={commandsQuery.isFetching}
               meta={commandsQuery.data?.meta}
               isPending={commandsQuery.isPending}
+              onDeleted={() => {
+                if (commandsQuery.data?.data.length === 1 && commandsPage > 1) {
+                  setCommandsPage(commandsPage - 1);
+                }
+              }}
+              onEdit={(command) => {
+                setEditingCommand(command);
+                setIsCommandDialogOpen(true);
+              }}
               onRetry={() => commandsQuery.refetch()}
               onPageChange={setCommandsPage}
+              projectId={project.id}
             />
           </SectionFrame>
         ) : null}

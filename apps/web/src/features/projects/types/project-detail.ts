@@ -10,6 +10,20 @@ export type ProjectCommand = {
   updatedAt: string;
 };
 
+export type ProjectCommandInput = {
+  title: string;
+  command: string;
+  description?: string;
+  executionOrder?: number;
+};
+
+export type UpdateProjectCommandInput = {
+  title: string;
+  command: string;
+  description: string | null;
+  executionOrder: number | null;
+};
+
 export type ProjectDetailListParams = {
   page?: number;
   perPage?: number;

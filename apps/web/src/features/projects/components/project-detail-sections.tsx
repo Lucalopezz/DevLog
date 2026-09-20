@@ -6,6 +6,8 @@ import { presentTechnicalEntryType } from "@/features/technical-entry/presentati
 import type { ProjectCommand, ProjectResource } from "../types/project-detail";
 import type { TechnicalEntry } from "@/features/technical-entry/types/technical-entry";
 import { resourcePresentation } from "../presentation";
+import { Button } from "@/components/ui/button";
+import { ProjectCommandDeleteButton } from "./project-command-delete-btn";
 import {
   DetailPagination,
   EmptySection,
@@ -138,20 +140,28 @@ export function TechnicalEntriesSection({
 
 export function CommandsSection({
   commands,
+  isArchived,
   isError,
   isFetching,
   meta,
   isPending,
   onRetry,
   onPageChange,
+  onEdit,
+  onDeleted,
+  projectId,
 }: {
   commands?: ProjectCommand[];
+  isArchived: boolean;
   isError: boolean;
   isFetching: boolean;
   meta?: Meta;
   isPending: boolean;
   onRetry: () => void;
   onPageChange: (page: number) => void;
+  onEdit: (command: ProjectCommand) => void;
+  onDeleted: () => void;
+  projectId: string;
 }) {
   if (isError) return <SectionError onRetry={onRetry} />;
   if (isPending) return <LoadingSection />;
@@ -185,12 +195,33 @@ export function CommandsSection({
                   </h3>
                 </div>
               </div>
-              <time
-                className="text-xs text-muted-foreground"
-                dateTime={command.updatedAt}
-              >
-                {formatRelativeDate(command.updatedAt)}
-              </time>
+              <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
+                <time
+                  className="text-xs text-muted-foreground"
+                  dateTime={command.updatedAt}
+                >
+                  {formatRelativeDate(command.updatedAt)}
+                </time>
+                <div className="flex items-center gap-2">
+                  <Button
+                    aria-label={`Edit ${command.title}`}
+                    disabled={isArchived}
+                    onClick={() => onEdit(command)}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    Edit
+                  </Button>
+                  <ProjectCommandDeleteButton
+                    commandId={command.id}
+                    disabled={isArchived}
+                    onDeleted={onDeleted}
+                    projectId={projectId}
+                    title={command.title}
+                  />
+                </div>
+              </div>
             </div>
 
             <pre className="mt-4 overflow-x-auto rounded-xl bg-foreground p-4 text-sm leading-6 text-background">
