@@ -21,7 +21,8 @@ import { ProjectSettingsPane } from "../components/project-settings-pane";
 import { TechnicalEntryForm } from "@/features/technical-entry/components/technical-entry-form";
 import { ProjectTechnologiesSection } from "@/features/technologies/components/project-technologies-section";
 import { ProjectCommandForm } from "../components/project-command-form";
-import type { ProjectCommand } from "../types/project-detail";
+import { ProjectResourceForm } from "../components/project-resource-form";
+import type { ProjectCommand, ProjectResource } from "../types/project-detail";
 
 type ProjectDetailTab =
   | "overview"
@@ -55,6 +56,8 @@ export default function ProjectDetailPage() {
     useState(false);
   const [isCommandDialogOpen, setIsCommandDialogOpen] = useState(false);
   const [editingCommand, setEditingCommand] = useState<ProjectCommand>();
+  const [isResourceDialogOpen, setIsResourceDialogOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<ProjectResource>();
 
   // Each hook represents an independent API collection. Pages are also
   // independent: advancing commands does not change the resource page.
@@ -157,6 +160,18 @@ export default function ProjectDetailPage() {
         }}
         open={isCommandDialogOpen}
         projectId={project.id}
+      />
+      <ProjectResourceForm
+        onOpenChange={(open) => {
+          setIsResourceDialogOpen(open);
+          if (!open) setEditingResource(undefined);
+        }}
+        onSaved={(wasCreated) => {
+          if (wasCreated) setResourcesPage(1);
+        }}
+        open={isResourceDialogOpen}
+        projectId={project.id}
+        resource={editingResource}
       />
 
       {/* ARIA roles make navigation understandable to screen readers;
@@ -294,16 +309,40 @@ export default function ProjectDetailPage() {
 
         {activeTab === tab.id && tab.id === "resources" ? (
           <SectionFrame
+            action={
+              <Button
+                disabled={Boolean(project.archivedAt)}
+                onClick={() => {
+                  setEditingResource(undefined);
+                  setIsResourceDialogOpen(true);
+                }}
+                type="button"
+              >
+                <Plus data-icon="inline-start" />
+                New resource
+              </Button>
+            }
             description="Useful links and references to continue your work."
             title="Resources"
           >
             <ResourcesSection
+              isArchived={Boolean(project.archivedAt)}
               isError={resourcesQuery.isError}
               isFetching={resourcesQuery.isFetching}
               meta={resourcesQuery.data?.meta}
               isPending={resourcesQuery.isPending}
+              onDeleted={() => {
+                if (resourcesQuery.data?.data.length === 1 && resourcesPage > 1) {
+                  setResourcesPage(resourcesPage - 1);
+                }
+              }}
+              onEdit={(resource) => {
+                setEditingResource(resource);
+                setIsResourceDialogOpen(true);
+              }}
               onRetry={() => resourcesQuery.refetch()}
               onPageChange={setResourcesPage}
+              projectId={project.id}
               resources={resourcesQuery.data?.data}
             />
           </SectionFrame>

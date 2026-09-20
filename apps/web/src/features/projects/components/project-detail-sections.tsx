@@ -8,6 +8,7 @@ import type { TechnicalEntry } from "@/features/technical-entry/types/technical-
 import { resourcePresentation } from "../presentation";
 import { Button } from "@/components/ui/button";
 import { ProjectCommandDeleteButton } from "./project-command-delete-btn";
+import { ProjectResourceDeleteButton } from "./project-resource-delete-btn";
 import {
   DetailPagination,
   EmptySection,
@@ -244,20 +245,28 @@ export function CommandsSection({
   );
 }
 export function ResourcesSection({
+  isArchived,
   isError,
   isFetching,
   meta,
   isPending,
   onRetry,
   onPageChange,
+  onEdit,
+  onDeleted,
+  projectId,
   resources,
 }: {
+  isArchived: boolean;
   isError: boolean;
   isFetching: boolean;
   meta?: Meta;
   isPending: boolean;
   onRetry: () => void;
   onPageChange: (page: number) => void;
+  onEdit: (resource: ProjectResource) => void;
+  onDeleted: () => void;
+  projectId: string;
   resources?: ProjectResource[];
 }) {
   if (isError) return <SectionError onRetry={onRetry} />;
@@ -276,35 +285,67 @@ export function ResourcesSection({
         {resources.map((resource) => {
           const presentation = resourcePresentation[resource.type];
           const ResourceIcon = presentation.icon;
-          const isExternal = isSafeResourceUrl(resource.url);
+          const hasSafeLink = isSafeResourceUrl(resource.url);
 
           return (
-            <a
-              className="group flex min-w-0 items-start gap-3 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm transition-colors hover:border-primary/40 hover:bg-card"
-              href={isExternal ? resource.url : undefined}
+            <article
+              className="flex min-w-0 items-start gap-3 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm"
               key={resource.id}
-              rel={isExternal ? "noreferrer" : undefined}
-              target={isExternal ? "_blank" : undefined}
             >
               <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                 <ResourceIcon className="size-4 text-primary" />
               </span>
-              <span className="min-w-0">
-                <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                  {presentation.label}
-                  <ExternalLink className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
-                </span>
-                <span className="mt-1 block truncate font-medium">
-                  {resource.label}
-                </span>
-                <span
-                  className="mt-1 block truncate font-mono text-xs text-muted-foreground"
-                  title={resource.url}
-                >
-                  {resource.url}
-                </span>
-              </span>
-            </a>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      {presentation.label}
+                    </p>
+                    <h3 className="mt-1 break-words font-medium">
+                      {resource.label}
+                    </h3>
+                    {hasSafeLink ? (
+                      <a
+                        className="mt-1 flex min-w-0 items-center gap-1 truncate font-mono text-xs text-muted-foreground hover:text-foreground hover:underline"
+                        href={resource.url}
+                        rel="noreferrer"
+                        target="_blank"
+                        title={resource.url}
+                      >
+                        <span className="truncate">{resource.url}</span>
+                        <ExternalLink aria-hidden="true" className="size-3 shrink-0" />
+                      </a>
+                    ) : (
+                      <p
+                        className="mt-1 truncate font-mono text-xs text-muted-foreground"
+                        title={resource.url}
+                      >
+                        {resource.url}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Button
+                      aria-label={`Edit ${resource.label}`}
+                      disabled={isArchived}
+                      onClick={() => onEdit(resource)}
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                    >
+                      Edit
+                    </Button>
+                    <ProjectResourceDeleteButton
+                      disabled={isArchived}
+                      label={resource.label}
+                      onDeleted={onDeleted}
+                      projectId={projectId}
+                      resourceId={resource.id}
+                    />
+                  </div>
+                </div>
+              </div>
+            </article>
           );
         })}
       </div>

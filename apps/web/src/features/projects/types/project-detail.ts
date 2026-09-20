@@ -45,5 +45,13 @@ export type ProjectResource = {
   updatedAt: string;
 };
 
+export type ProjectResourceInput = {
+  label: string;
+  url: string;
+  type: ProjectResourceType;
+};
+
+export type UpdateProjectResourceInput = ProjectResourceInput;
+
 export type ProjectCommandCollection = Pagination<ProjectCommand>;
 export type ProjectResourceCollection = Pagination<ProjectResource>;

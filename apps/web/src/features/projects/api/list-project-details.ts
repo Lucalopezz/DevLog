@@ -54,6 +54,9 @@ export const projectDetailKeys = {
   commandsRoot: (projectId: string) =>
     [...projectDetailKeys.all(projectId), "commands"] as const,
 
+  resourcesRoot: (projectId: string) =>
+    [...projectDetailKeys.all(projectId), "resources"] as const,
+
   technicalEntries: (projectId: string, params: ProjectDetailListParams) =>
     [...projectDetailKeys.technicalEntriesRoot(projectId), params] as const,
 
@@ -61,7 +64,7 @@ export const projectDetailKeys = {
     [...projectDetailKeys.commandsRoot(projectId), params] as const,
 
   resources: (projectId: string, params: ProjectDetailListParams) =>
-    [...projectDetailKeys.all(projectId), "resources", params] as const,
+    [...projectDetailKeys.resourcesRoot(projectId), params] as const,
 };
 
 export async function listProjectTechnicalEntries(
