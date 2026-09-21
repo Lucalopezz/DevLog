@@ -53,11 +53,12 @@ docs/       # Project decisions and guides
 
 ## Available frontend routes
 
-The authenticated web application currently exposes:
+The web application currently exposes:
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Workspace overview with recent projects and entries |
+| `/` | Public introduction to DevLog; no authentication required |
+| `/dashboard` | Authenticated workspace overview with recent projects and entries |
 | `/account` | Authenticated account details |
 | `/projects` | Paginated project list with search, filters, and creation |
 | `/projects/:projectId` | Project overview, entries, commands, resources, and settings |

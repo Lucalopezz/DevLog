@@ -9,6 +9,11 @@ The project and technical-journal workflows are complete in the web app.
 Authenticated users can manage projects and their related data, record and
 resolve technical issues, and find entries through the journal and tag filters.
 
+The `/` route is a public product introduction. It explains DevLog before a
+visitor creates an account or signs in, and it deliberately does not request
+the authenticated session endpoint. The private workspace overview lives at
+`/dashboard`.
+
 ### Projects
 
 The `/projects` page supports paginated search, filtering, and project
@@ -44,7 +49,8 @@ contract.
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Workspace overview with recent projects and entries |
+| `/` | Public DevLog introduction; no authentication required |
+| `/dashboard` | Authenticated workspace overview with recent work |
 | `/account` | Authenticated account details |
 | `/projects` | Paginated project list and creation |
 | `/projects/:projectId` | Project overview and related data |
@@ -90,6 +96,7 @@ src/
   features/            # Code organized by feature
     auth/              # Authentication, account details, and session flows
     home/              # Workspace overview
+    landing/           # Public product introduction
     projects/          # Project APIs, forms, lifecycle, and detail screens
     tags/              # Tag search, management, and selection controls
     technologies/      # Technology listing and project associations
