@@ -52,8 +52,30 @@ function useSignedInApplication() {
 }
 
 describe('application routing', () => {
+  it('renders the public landing page without checking a session', async () => {
+    let sessionRequestCount = 0
+    server.use(
+      http.get(apiUrl('/users/me'), () => {
+        sessionRequestCount += 1
+        return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 })
+      }),
+    )
+
+    renderApp('/')
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Keep the reasoning behind your code.',
+      }),
+    ).toBeVisible()
+    expect(
+      screen.getAllByRole('link', { name: 'Create account' }).length,
+    ).toBeGreaterThan(0)
+    expect(sessionRequestCount).toBe(0)
+  })
+
   it.each([
-    '/',
+    '/dashboard',
     '/account',
     '/projects',
     `/projects/${projectId}`,
@@ -72,7 +94,7 @@ describe('application routing', () => {
   })
 
   it.each([
-    ['/', 'Welcome back, Ada.'],
+    ['/dashboard', 'Welcome back, Ada.'],
     ['/account', 'User account'],
     ['/projects', 'Projects'],
     [`/projects/${projectId}`, 'Route project'],

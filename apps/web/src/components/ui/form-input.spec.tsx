@@ -14,7 +14,7 @@ function renderLogin() {
   return renderWithProviders(
     <Routes>
       <Route path="/login" element={<LoginForm />} />
-      <Route path="/" element={<p>Signed in</p>} />
+      <Route path="/dashboard" element={<p>Signed in</p>} />
     </Routes>,
     { route: '/login' },
   )

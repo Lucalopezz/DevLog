@@ -24,7 +24,7 @@ export const sidebarSections: SidebarSection[] = [
         type: "route",
         label: "Overview",
         icon: LayoutDashboard,
-        to: "/",
+        to: "/dashboard",
         end: true,
       },
       {

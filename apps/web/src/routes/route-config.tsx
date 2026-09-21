@@ -5,6 +5,7 @@ import AccountPage from '@/features/auth/pages/account-page'
 import LoginPage from '@/features/auth/pages/login-page'
 import RegisterPage from '@/features/auth/pages/register-page'
 import HomePage from '@/features/home/pages/home-page'
+import LandingPage from '@/features/landing/pages/landing-page'
 import ProjectDetailPage from '@/features/projects/pages/project-detail-page'
 import ProjectsPage from '@/features/projects/pages/projects-page'
 import TagsPage from '@/features/tags/pages/tags-page'
@@ -28,12 +29,15 @@ export function createAppRoutes(client: QueryClient): RouteObject[] {
 
   return [
     {
-      element: <RootLayout />,
       // Data routers render this boundary while initial loaders resolve. The
-      // existing application intentionally waits for the session before
-      // revealing a public or private screen, so the fallback stays empty.
+      // fallback prevents a protected route from flashing before its session
+      // loader resolves. The public landing page itself has no loader.
       HydrateFallback: () => null,
       children: [
+        {
+          index: true,
+          Component: LandingPage,
+        },
         {
           path: '/login',
           loader: redirectAuthenticatedUser,
@@ -46,8 +50,9 @@ export function createAppRoutes(client: QueryClient): RouteObject[] {
         },
         {
           loader: requireUser,
+          element: <RootLayout />,
           children: [
-            { index: true, Component: HomePage },
+            { path: 'dashboard', Component: HomePage },
             { path: 'account', Component: AccountPage },
             { path: 'projects', Component: ProjectsPage },
             { path: 'projects/:projectId', Component: ProjectDetailPage },

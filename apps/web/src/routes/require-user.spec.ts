@@ -78,7 +78,7 @@ describe('guest route loader', () => {
     await expect(redirectAuthenticatedUser()).resolves.toBeUndefined()
   })
 
-  it('redirects an authenticated user home', async () => {
+  it('redirects an authenticated user to the dashboard', async () => {
     server.use(
       http.get(apiUrl('/users/me'), () => HttpResponse.json(createUser())),
     )
@@ -89,7 +89,7 @@ describe('guest route loader', () => {
     const response = await rejectedValue(redirectAuthenticatedUser())
     expect(response).toBeInstanceOf(Response)
     expect((response as Response).status).toBe(302)
-    expect((response as Response).headers.get('Location')).toBe('/')
+    expect((response as Response).headers.get('Location')).toBe('/dashboard')
   })
 
   it.each([403, 500])('propagates an HTTP %i response', async (status) => {

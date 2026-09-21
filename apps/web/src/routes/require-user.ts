@@ -43,7 +43,7 @@ export function createAuthLoaders(client: QueryClient) {
         retry: false,
       })
 
-      throw redirect('/')
+      throw redirect('/dashboard')
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 401) {
         return

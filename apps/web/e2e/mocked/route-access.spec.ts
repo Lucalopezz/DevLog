@@ -4,6 +4,15 @@ import { authenticatedApi, entryId, guestApi, mockApi, projectId } from './mock-
 test('a guest can reload public routes and a protected deep link redirects', async ({ page }) => {
   const assertNoUnexpected = await mockApi(page, guestApi)
 
+  await page.goto('/')
+  await expect(
+    page.getByRole('heading', { name: 'Keep the reasoning behind your code.' }),
+  ).toBeVisible()
+  await page.reload()
+  await expect(
+    page.getByRole('heading', { name: 'Keep the reasoning behind your code.' }),
+  ).toBeVisible()
+
   for (const path of ['/login', '/register']) {
     await page.goto(path)
     await expect(page).toHaveURL(new RegExp(`${path}$`))
@@ -20,7 +29,7 @@ test('a guest can reload public routes and a protected deep link redirects', asy
 test('an authenticated user can open and reload every protected route', async ({ page }) => {
   const assertNoUnexpected = await mockApi(page, authenticatedApi)
   const routes = [
-    ['/', 'Welcome back, Ada.'],
+    ['/dashboard', 'Welcome back, Ada.'],
     ['/account', 'User account'],
     ['/projects', 'Projects'],
     [`/projects/${projectId}`, 'DevLog'],
@@ -38,7 +47,7 @@ test('an authenticated user can open and reload every protected route', async ({
   }
 
   await page.goto('/login')
-  await expect(page).toHaveURL(/localhost:4173\/$/)
+  await expect(page).toHaveURL(/\/dashboard$/)
   assertNoUnexpected()
 })
 
