@@ -1,3 +1,4 @@
+import type { FormEvent } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -45,6 +46,15 @@ export function TagForm({ onCreated, open, onOpenChange }: TagFormProps) {
     }
   };
 
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    // This dialog can be opened from inside another form. Although its content
+    // is rendered in a portal, React events still bubble through the component
+    // tree. Stop the tag submission from accidentally submitting the parent
+    // form before the new tag ID is available to it.
+    event.stopPropagation();
+    void form.handleSubmit(onSubmit)(event);
+  }
+
   const isLoading = form.formState.isSubmitting || createMutation.isPending;
 
   return (
@@ -63,7 +73,7 @@ export function TagForm({ onCreated, open, onOpenChange }: TagFormProps) {
           <form
             className="space-y-6"
             noValidate
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={handleSubmit}
           >
             <FormInput
               autoComplete="off"

@@ -163,6 +163,56 @@ describe('TechnicalEntryForm', () => {
     expect(assignmentIds).toEqual(expect.arrayContaining([reactTag.id, dockerTag.id]))
   })
 
+  it('waits for a newly created tag before creating and assigning the entry', async () => {
+    const createdTag = createTag({
+      id: '66666666-6666-4666-8666-666666666666',
+      name: 'TypeScript',
+    })
+    const entry = createTechnicalEntry({ tags: [] })
+    const events: string[] = []
+
+    server.use(
+      http.post(apiUrl('/tag'), () => {
+        events.push('create-tag')
+        return HttpResponse.json(createdTag, { status: 201 })
+      }),
+      http.post(apiUrl('/technical-entry'), () => {
+        events.push('create-entry')
+        return HttpResponse.json(entry, { status: 201 })
+      }),
+      http.post(apiUrl(`/technical-entry/${entry.id}/tags`), async ({ request }) => {
+        const body = await request.json() as { tagId: string }
+        events.push(`assign-tag:${body.tagId}`)
+        return HttpResponse.json(createdTag, { status: 201 })
+      }),
+    )
+
+    const { user } = renderWithProviders(<Harness />)
+    const entryDialog = await fillRequired(user)
+    await user.click(within(entryDialog).getByRole('button', { name: 'Choose tags' }))
+    const picker = screen.getByRole('dialog', { name: 'Select tags' })
+    await user.click(within(picker).getByRole('button', { name: 'Create new tag' }))
+
+    const tagDialog = screen.getByRole('dialog', { name: 'New tag' })
+    await user.type(within(tagDialog).getByRole('textbox', { name: 'Name' }), createdTag.name)
+    await user.click(within(tagDialog).getByRole('button', { name: 'Create tag' }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'New tag' })).toBeNull())
+    expect(events).toEqual(['create-tag'])
+
+    await user.click(within(picker).getByRole('button', { name: 'Close' }))
+    expect(within(entryDialog).getByText(`#${createdTag.name}`)).toBeVisible()
+    await user.click(within(entryDialog).getByRole('button', { name: 'Create entry' }))
+
+    await waitFor(() =>
+      expect(events).toEqual([
+        'create-tag',
+        'create-entry',
+        `assign-tag:${createdTag.id}`,
+      ]),
+    )
+  })
+
   it('reports a partial result when one tag assignment fails', async () => {
     const assignmentIds: string[] = []
     const entry = createTechnicalEntry({ tags: [] })
