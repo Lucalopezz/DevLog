@@ -58,6 +58,32 @@ describe('AppSidebar', () => {
     expect(screen.getAllByText('Soon').length).toBeGreaterThan(0)
   })
 
+  it('opens the help dialog with LinkedIn and portfolio contact links', async () => {
+    server.use(http.get(apiUrl('/users/me'), () => HttpResponse.json(createUser())))
+    const { user } = renderSidebar()
+
+    await screen.findByRole('link', { name: 'Ada Lovelace' })
+    await user.click(screen.getByRole('button', { name: 'Help & feedback' }))
+
+    expect(screen.getByRole('dialog', { name: 'Help & feedback' })).toBeVisible()
+
+    const linkedinLink = screen.getByRole('link', { name: /Connect on LinkedIn/ })
+    expect(linkedinLink).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/in/lucas-dalossa-a24381356/',
+    )
+    expect(linkedinLink).toHaveAttribute('target', '_blank')
+    expect(linkedinLink).toHaveAttribute('rel', 'noopener noreferrer')
+
+    const portfolioLink = screen.getByRole('link', { name: /Visit my portfolio/ })
+    expect(portfolioLink).toHaveAttribute('href', 'https://lucasdolopes.vercel.app/')
+    expect(portfolioLink).toHaveAttribute('target', '_blank')
+    expect(portfolioLink).toHaveAttribute('rel', 'noopener noreferrer')
+
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog', { name: 'Help & feedback' })).not.toBeInTheDocument()
+  })
+
   it.each([
     ['/technical-entries', 'All Entries'],
     ['/technical-entries?title=react', 'All Entries'],
