@@ -23,11 +23,10 @@ export function AppSidebarFooter({ user }: { user: User }) {
         </SidebarRouteLink>
 
         <SidebarMenuItem>
-          <SidebarMenuButton disabled tooltip="Settings — coming soon">
+          <SidebarRouteLink to="/settings">
             <Settings2 />
             <span>Settings</span>
-          </SidebarMenuButton>
-          <SidebarMenuBadge>Soon</SidebarMenuBadge>
+          </SidebarRouteLink>
         </SidebarMenuItem>
 
         <SidebarMenuItem>
