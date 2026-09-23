@@ -21,7 +21,8 @@
     "test:e2e": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json --runInBand",
     "db:test:up": "docker compose --env-file ../../.env -f ../../docker/compose.yaml up -d --wait database-test && NODE_ENV=test prisma migrate deploy",
     "db:test:down": "docker compose --env-file ../../.env -f ../../docker/compose.yaml down database-test",
-    "db:test:reset": "NODE_ENV=test prisma migrate reset --force"
+    "db:test:reset": "NODE_ENV=test prisma migrate reset --force",
+    "db:seed:demo": "ts-node --project tsconfig.scripts.json --transpile-only -r tsconfig-paths/register scripts/seed-demo-data.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

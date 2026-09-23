@@ -87,6 +87,18 @@ pnpm --filter api exec prisma generate
 pnpm --filter api exec prisma migrate deploy
 ```
 
+To replace the projects, entries, tags, and related records for the existing
+`teste@teste.com` account with fictional developer-focused examples, run this
+from the monorepo root:
+
+```bash
+pnpm --filter api db:seed:demo -- --confirm-email=teste@teste.com
+```
+
+The command keeps the account and its credentials, and refuses to run unless
+`NODE_ENV=development`, the database host is local, and the exact email flag is
+provided. Make sure `apps/api/.env` points to the local development database.
+
 The configuration service reads `JWT_EXPIRES_IN_SECONDS` for JWT lifetime. Example files still use the legacy `JWT_EXPIRES_IN` name; to change the lifetime, use the name read by the service or align the examples in a future change.
 
 ## Running
