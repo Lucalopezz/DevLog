@@ -1,3 +1,4 @@
+import { LoaderCircle } from 'lucide-react'
 import type { SubmitHandler } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
@@ -43,6 +44,7 @@ export function LoginForm() {
     <Form {...form}>
       <form
         className="w-full max-w-md space-y-6 rounded-2xl border border-border/60 bg-card p-6 shadow-2xl shadow-black/10 sm:p-8"
+        aria-busy={isLoading}
         noValidate
         onSubmit={handleSubmit(onSubmit)}
       >
@@ -76,7 +78,14 @@ export function LoginForm() {
         </div>
 
         <Button className="w-full" disabled={isLoading} size="lg" type="submit">
-          {isLoading ? 'Signing in...' : 'Sign in'}
+          {isLoading ? (
+            <span aria-live="polite" className="inline-flex items-center gap-2">
+              <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+              Signing in...
+            </span>
+          ) : (
+            'Sign in'
+          )}
         </Button>
       </form>
     </Form>

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { LoaderCircle } from 'lucide-react'
 import type { SubmitHandler } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'
@@ -66,6 +67,7 @@ export default function RegisterPage() {
 
           <Form {...form}>
             <form
+              aria-busy={isLoading}
               className="space-y-5 rounded-2xl border bg-card p-6 shadow-2xl shadow-black/10"
               noValidate
               onSubmit={form.handleSubmit(onSubmit)}
@@ -73,12 +75,14 @@ export default function RegisterPage() {
               <FormInput
                 autoComplete="name"
                 control={form.control}
+                disabled={isLoading}
                 label="Name"
                 name="name"
               />
               <FormInput
                 autoComplete="email"
                 control={form.control}
+                disabled={isLoading}
                 label="E-mail"
                 name="email"
                 type="email"
@@ -86,6 +90,7 @@ export default function RegisterPage() {
               <FormInput
                 autoComplete="new-password"
                 control={form.control}
+                disabled={isLoading}
                 label="Password"
                 name="password"
                 type="password"
@@ -93,13 +98,27 @@ export default function RegisterPage() {
               <FormInput
                 autoComplete="new-password"
                 control={form.control}
+                disabled={isLoading}
                 label="Confirm password"
                 name="confirmPassword"
                 type="password"
               />
 
               <Button className="w-full" disabled={isLoading} type="submit">
-                {isLoading ? 'Creating...' : 'Create account'}
+                {isLoading ? (
+                  <span
+                    aria-live="polite"
+                    className="inline-flex items-center gap-2"
+                  >
+                    <LoaderCircle
+                      aria-hidden="true"
+                      className="size-4 animate-spin"
+                    />
+                    Creating...
+                  </span>
+                ) : (
+                  'Create account'
+                )}
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">

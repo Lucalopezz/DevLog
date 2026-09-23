@@ -14,8 +14,9 @@ import ArchivedTechnicalEntriesPage from '@/features/technical-entry/pages/techn
 import TechnicalEntryDetailPage from '@/features/technical-entry/pages/technical-entry-detail-page'
 import TechnicalEntriesPage from '@/features/technical-entry/pages/technical-entries-page'
 
-import { createAuthLoaders } from './require-user'
+import { GuestOnlyRoute } from './guest-only-route'
 import { RootLayout } from './root-layout'
+import { createAuthLoaders } from './require-user'
 
 /**
  * Builds the production route tree around the supplied cache.
@@ -25,13 +26,12 @@ import { RootLayout } from './root-layout'
  * single long-lived client in router.tsx.
  */
 export function createAppRoutes(client: QueryClient): RouteObject[] {
-  const { redirectAuthenticatedUser, requireUser } = createAuthLoaders(client)
+  const { requireUser } = createAuthLoaders(client)
 
   return [
     {
-      // Data routers render this boundary while initial loaders resolve. The
-      // fallback prevents a protected route from flashing before its session
-      // loader resolves. The public landing page itself has no loader.
+      // The fallback prevents protected routes from flashing before their
+      // session loader resolves. Public routes have no blocking loader.
       HydrateFallback: () => null,
       children: [
         {
@@ -39,14 +39,11 @@ export function createAppRoutes(client: QueryClient): RouteObject[] {
           Component: LandingPage,
         },
         {
-          path: '/login',
-          loader: redirectAuthenticatedUser,
-          Component: LoginPage,
-        },
-        {
-          path: '/register',
-          loader: redirectAuthenticatedUser,
-          Component: RegisterPage,
+          element: <GuestOnlyRoute />,
+          children: [
+            { path: '/login', Component: LoginPage },
+            { path: '/register', Component: RegisterPage },
+          ],
         },
         {
           loader: requireUser,
