@@ -68,6 +68,21 @@ import {
   ProjectResourceCollectionPresenter,
   ProjectResourcePresenter,
 } from './presenter/resource/project-resource.presenter';
+import { AddProjectEnvironmentDto } from './dto/environment/add-project-environment.dto';
+import { UpdateProjectEnvironmentDto } from './dto/environment/update-project-environment.dto';
+import {
+  SearchOwnerProjectEnvironmentsDto,
+  SearchProjectEnvironmentDto,
+} from './dto/environment/search-project-environment.dto';
+import { AddProjectEnvironmentUseCase } from '../application/usecases/environment/add-project-environment.usecase';
+import { SearchProjectEnvironmentUseCase } from '../application/usecases/environment/search-project-environment.usecase';
+import { SearchOwnerProjectEnvironmentsUseCase } from '../application/usecases/environment/search-owner-project-environments.usecase';
+import { UpdateProjectEnvironmentUseCase } from '../application/usecases/environment/update-project-environment.usecase';
+import { RemoveProjectEnvironmentUseCase } from '../application/usecases/environment/remove-project-environment.usecase';
+import {
+  ProjectEnvironmentCollectionPresenter,
+  ProjectEnvironmentPresenter,
+} from './presenter/environment/project-environment.presenter';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -135,6 +150,21 @@ export class ProjectController {
   @Inject(GetProjectResourceUseCase)
   private readonly getProjectResourceUseCase: GetProjectResourceUseCase;
 
+  @Inject(AddProjectEnvironmentUseCase)
+  private readonly addProjectEnvironmentUseCase: AddProjectEnvironmentUseCase;
+
+  @Inject(SearchProjectEnvironmentUseCase)
+  private readonly searchProjectEnvironmentUseCase: SearchProjectEnvironmentUseCase;
+
+  @Inject(SearchOwnerProjectEnvironmentsUseCase)
+  private readonly searchOwnerProjectEnvironmentsUseCase: SearchOwnerProjectEnvironmentsUseCase;
+
+  @Inject(UpdateProjectEnvironmentUseCase)
+  private readonly updateProjectEnvironmentUseCase: UpdateProjectEnvironmentUseCase;
+
+  @Inject(RemoveProjectEnvironmentUseCase)
+  private readonly removeProjectEnvironmentUseCase: RemoveProjectEnvironmentUseCase;
+
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
   }
@@ -196,6 +226,77 @@ export class ProjectController {
     });
 
     return new ProjectTechnologyCollectionPresenter(output);
+  }
+
+  // Keep the static route ahead of project-id routes so it remains unambiguous.
+  @Get('environments')
+  async searchEnvironments(
+    @Query() searchParams: SearchOwnerProjectEnvironmentsDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.searchOwnerProjectEnvironmentsUseCase.execute({
+      ...searchParams,
+      userId: user.id,
+    });
+    return new ProjectEnvironmentCollectionPresenter(output);
+  }
+
+  @Get(':projectId/environments')
+  async searchProjectEnvironments(
+    @Param('projectId') projectId: string,
+    @Query() searchParams: SearchProjectEnvironmentDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.searchProjectEnvironmentUseCase.execute({
+      ...searchParams,
+      projectId,
+      userId: user.id,
+    });
+    return new ProjectEnvironmentCollectionPresenter(output);
+  }
+
+  @Post(':projectId/environments')
+  async addEnvironment(
+    @Param('projectId') projectId: string,
+    @Body() body: AddProjectEnvironmentDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.addProjectEnvironmentUseCase.execute({
+      ...body,
+      projectId,
+      userId: user.id,
+    });
+    return new ProjectEnvironmentPresenter(output);
+  }
+
+  @Patch(':projectId/environments/:environmentId')
+  async updateEnvironment(
+    @Param('projectId') projectId: string,
+    @Param('environmentId') environmentId: string,
+    @Body() body: UpdateProjectEnvironmentDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.updateProjectEnvironmentUseCase.execute({
+      ...body,
+      projectId,
+      environmentId,
+      userId: user.id,
+    });
+    return new ProjectEnvironmentPresenter(output);
+  }
+
+  @Delete(':projectId/environments/:environmentId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeEnvironment(
+    @Param('projectId') projectId: string,
+    @Param('environmentId') environmentId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    await this.removeProjectEnvironmentUseCase.execute({
+      projectId,
+      environmentId,
+      userId: user.id,
+    });
   }
 
   @Get(':id/technical-entries')

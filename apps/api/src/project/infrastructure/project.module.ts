@@ -36,6 +36,13 @@ import { UpdateProjectResourceUseCase } from '../application/usecases/resource/u
 import { RemoveProjectResourceUseCase } from '../application/usecases/resource/remove-project-resource.usecase';
 import { SearchProjectResourceUseCase } from '../application/usecases/resource/search-project-resource.usecase';
 import { GetProjectResourceUseCase } from '../application/usecases/resource/get-project-resource.usecase';
+import { ProjectEnvironmentRepository } from '../domain/repositories/environment/project-environment.repository';
+import { ProjectEnvironmentPrismaRepository } from './database/prisma/repositories/environment/project-environment-prisma.repository';
+import { AddProjectEnvironmentUseCase } from '../application/usecases/environment/add-project-environment.usecase';
+import { SearchProjectEnvironmentUseCase } from '../application/usecases/environment/search-project-environment.usecase';
+import { SearchOwnerProjectEnvironmentsUseCase } from '../application/usecases/environment/search-owner-project-environments.usecase';
+import { UpdateProjectEnvironmentUseCase } from '../application/usecases/environment/update-project-environment.usecase';
+import { RemoveProjectEnvironmentUseCase } from '../application/usecases/environment/remove-project-environment.usecase';
 
 @Module({
   controllers: [ProjectController],
@@ -93,6 +100,52 @@ import { GetProjectResourceUseCase } from '../application/usecases/resource/get-
         return new ProjectResourcePrismaRepository(prismaService);
       },
       inject: ['PrismaService'],
+    },
+    {
+      provide: 'ProjectEnvironmentRepository',
+      useFactory: (prismaService: PrismaService) =>
+        new ProjectEnvironmentPrismaRepository(prismaService),
+      inject: ['PrismaService'],
+    },
+    {
+      provide: AddProjectEnvironmentUseCase,
+      useFactory: (
+        projects: ProjectRepository,
+        environments: ProjectEnvironmentRepository,
+      ) => new AddProjectEnvironmentUseCase(projects, environments),
+      inject: ['ProjectRepository', 'ProjectEnvironmentRepository'],
+    },
+    {
+      provide: SearchProjectEnvironmentUseCase,
+      useFactory: (
+        projects: ProjectRepository,
+        environments: ProjectEnvironmentRepository,
+      ) => new SearchProjectEnvironmentUseCase(projects, environments),
+      inject: ['ProjectRepository', 'ProjectEnvironmentRepository'],
+    },
+    {
+      provide: SearchOwnerProjectEnvironmentsUseCase,
+      useFactory: (
+        projects: ProjectRepository,
+        environments: ProjectEnvironmentRepository,
+      ) => new SearchOwnerProjectEnvironmentsUseCase(projects, environments),
+      inject: ['ProjectRepository', 'ProjectEnvironmentRepository'],
+    },
+    {
+      provide: UpdateProjectEnvironmentUseCase,
+      useFactory: (
+        projects: ProjectRepository,
+        environments: ProjectEnvironmentRepository,
+      ) => new UpdateProjectEnvironmentUseCase(projects, environments),
+      inject: ['ProjectRepository', 'ProjectEnvironmentRepository'],
+    },
+    {
+      provide: RemoveProjectEnvironmentUseCase,
+      useFactory: (
+        projects: ProjectRepository,
+        environments: ProjectEnvironmentRepository,
+      ) => new RemoveProjectEnvironmentUseCase(projects, environments),
+      inject: ['ProjectRepository', 'ProjectEnvironmentRepository'],
     },
     {
       provide: CreateProjectUseCase,
