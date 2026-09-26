@@ -24,7 +24,7 @@ export class CreateProjectUseCase implements UseCaseContract<
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly userRepository: UserRepository,
-  ) { }
+  ) {}
 
   async execute(
     input: CreateProjectUseCaseInput,

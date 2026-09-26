@@ -8,10 +8,7 @@ const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 const OTHER_USER_ID = '123e4567-e89b-42d3-a456-426614174001';
 const ENTRY_ID = '123e4567-e89b-42d3-a456-426614174010';
 
-function makeEntry(
-  userId = USER_ID,
-  archivedAt?: Date,
-): TechnicalEntryEntity {
+function makeEntry(userId = USER_ID, archivedAt?: Date): TechnicalEntryEntity {
   return new TechnicalEntryEntity(
     {
       userId,

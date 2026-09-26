@@ -12,7 +12,7 @@ import { ProjectModelMapper } from './models/project-model.mapper';
 export class ProjectPrismaRepository implements ProjectRepository {
   sortableFields: string[] = ['createdAt', 'updatedAt', 'name'];
 
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(private readonly prismaService: PrismaService) {}
 
   async insert(entity: ProjectEntity): Promise<void> {
     await this.prismaService.project.create({

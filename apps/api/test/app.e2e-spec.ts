@@ -185,7 +185,7 @@ describe('Project archive relationships (e2e)', () => {
       .set('Cookie', AUTH_COOKIE)
       .expect(200);
 
-    expect(response.body.data).toEqual([
+    expect((response.body as CollectionResponse).data).toEqual([
       expect.objectContaining({
         id: ENTRY_ID,
         title: 'Preserved entry',
