@@ -473,3 +473,113 @@ is repeated in alternative flows only when it changes the meaning of the use cas
 
 - If there are no matches, the page is empty.
 - An unknown or out-of-scope project filter returns an empty page without exposing another user's data.
+
+## UC-44 — Create project environment
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Authenticated user |
+| Interests | Record where a project runs and its runtime conditions. |
+| Preconditions | An owned, unarchived project. |
+| Trigger | The user submits an environment name, category, and optional details. |
+| Postconditions | The environment belongs to the project. |
+| Endpoint | `POST /api/project/:projectId/environments` |
+
+### Main flow
+
+1. The system verifies ownership and that the project can be changed.
+2. It trims and validates the name and optional details.
+3. It saves the environment with a normalized name and returns it with the project name.
+
+### Alternative flows
+
+- Names equal after trimming and case normalization conflict within one project, including under concurrent requests.
+- Archived or foreign projects cannot receive environments.
+- Environment fields are descriptive; credentials and arbitrary configuration are outside this model.
+
+## UC-45 — List project environments
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Authenticated user |
+| Interests | Review a project's documented environments. |
+| Preconditions | An owned project. |
+| Trigger | The user opens the Environments tab. |
+| Postconditions | No state change. |
+| Endpoint | `GET /api/project/:projectId/environments` |
+
+### Main flow
+
+1. The system verifies ownership.
+2. It returns a sorted, paginated list, including the project name.
+
+### Alternative flows
+
+- Archived projects remain readable.
+- Missing or foreign projects are reported as not found.
+
+## UC-46 — Search owned environments
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Authenticated user |
+| Interests | Find environments across projects. |
+| Preconditions | Authenticated request. |
+| Trigger | The user opens `/environments` or changes URL filters. |
+| Postconditions | No state change. |
+| Endpoint | `GET /api/project/environments` |
+
+### Main flow
+
+1. The system restricts records to projects owned by the current user.
+2. It optionally searches the name, operating system, and runtime, and filters by category and project.
+3. It returns a sorted, paginated result with project names.
+
+### Alternative flows
+
+- A project filter outside the user's scope returns an empty result.
+- Archived projects' environments remain in the list.
+
+## UC-47 — Update project environment
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Authenticated user |
+| Interests | Correct an environment's descriptive details. |
+| Preconditions | An owned, unarchived project containing the environment. |
+| Trigger | The user saves the edit form. |
+| Postconditions | Supplied fields are updated. |
+| Endpoint | `PATCH /api/project/:projectId/environments/:environmentId` |
+
+### Main flow
+
+1. The system verifies project ownership, lifecycle, and the environment's association.
+2. It validates the nonempty partial update and checks name uniqueness.
+3. It saves the result and returns it with the project name.
+
+### Alternative flows
+
+- Omitted optional fields are preserved; `null` clears them.
+- A duplicate normalized name returns a conflict.
+- An environment outside the supplied project is reported as not found.
+
+## UC-48 — Remove project environment
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Authenticated user |
+| Interests | Remove obsolete environment documentation. |
+| Preconditions | An owned, unarchived project containing the environment. |
+| Trigger | The user confirms deletion. |
+| Postconditions | The environment is removed. |
+| Endpoint | `DELETE /api/project/:projectId/environments/:environmentId` |
+
+### Main flow
+
+1. The system verifies project ownership, lifecycle, and the environment's association.
+2. It deletes the environment and returns no content.
+
+### Alternative flows
+
+- Missing, foreign, or mismatched environments are reported as not found.
+- Archived projects cannot have environments removed.

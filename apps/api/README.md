@@ -1,6 +1,6 @@
 # DevLog API
 
-DevLog backend. The API turns the technical journal into persisted resources organized by user and project: entries about issues and lessons learned, solution attempts, tags, technologies, commands, and useful links.
+DevLog backend. The API turns the technical journal into persisted resources organized by user and project: entries about issues and lessons learned, solution attempts, tags, technologies, environments, commands, and useful links.
 
 ## Current state
 
@@ -12,7 +12,7 @@ The API includes modules for:
 - `ISSUE` and `LEARNING` technical entries;
 - Solution attempts and issue resolution/reopening;
 - Tags associated with entries;
-- Technologies, commands, and resources linked to projects.
+- Technologies, environments, commands, and resources linked to projects.
 
 All routes except user registration and the authentication flow require an authenticated user. The global API prefix is `/api`.
 
@@ -128,7 +128,10 @@ Controllers are the source of truth for payload and pagination details. This ove
 | Tags | `GET`, `POST`, and `DELETE /api/tag/...` | Authenticated |
 
 Projects also expose subresources for technical entries, technologies,
-commands, and resources. Project lifecycle endpoints are:
+commands, resources, and environments. Project environments can be listed at
+`GET /api/project/:projectId/environments` or searched across owned projects at
+`GET /api/project/environments`; project-scoped `POST`, `PATCH`, and `DELETE`
+manage them. Project lifecycle endpoints are:
 
 | Operation | Endpoint |
 | --- | --- |
@@ -137,7 +140,7 @@ commands, and resources. Project lifecycle endpoints are:
 | Delete | `DELETE /api/project/:id` |
 
 Entries expose tags and solution attempts. Deleting a project cascades to its
-technologies, commands, and resources; associated technical entries remain and
+technologies, environments, commands, and resources; associated technical entries remain and
 are unlinked from the deleted project.
 
 ## Tests and quality

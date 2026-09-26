@@ -34,6 +34,11 @@ represented in the behavioral documentation.
 | `GET /api/project/:projectId/resources/:resourceId`                 | [UC-27 — View project resource](projects.md#uc-27--view-project-resource)                |    Yes    |
 | `PATCH /api/project/:projectId/resources/:resourceId`               | [UC-28 — Update project resource](projects.md#uc-28--update-project-resource)            |    Yes    |
 | `DELETE /api/project/:projectId/resources/:resourceId`              | [UC-29 — Remove project resource](projects.md#uc-29--remove-project-resource)            |    Yes    |
+| `POST /api/project/:projectId/environments` | [UC-44 — Create project environment](projects.md#uc-44--create-project-environment) | Yes |
+| `GET /api/project/:projectId/environments` | [UC-45 — List project environments](projects.md#uc-45--list-project-environments) | Yes |
+| `GET /api/project/environments` | [UC-46 — Search owned environments](projects.md#uc-46--search-owned-environments) | Yes |
+| `PATCH /api/project/:projectId/environments/:environmentId` | [UC-47 — Update project environment](projects.md#uc-47--update-project-environment) | Yes |
+| `DELETE /api/project/:projectId/environments/:environmentId` | [UC-48 — Remove project environment](projects.md#uc-48--remove-project-environment) | Yes |
 | `POST /api/technical-entry`                                         | [UC-30 — Create technical entry](technical-entries.md#uc-30--create-technical-entry)     |    Yes    |
 | `GET /api/technical-entry`                                          | [UC-31 — Search technical entries](technical-entries.md#uc-31--search-technical-entries) |    Yes    |
 | `GET /api/technical-entry/:id`                                      | [UC-32 — View technical entry](technical-entries.md#uc-32--view-technical-entry)         |    Yes    |

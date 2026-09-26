@@ -37,6 +37,7 @@ class Project {
   +addTechnology(name, version): ProjectTechnology
   +addCommand(title, command, description, order): ProjectCommand
   +addResource(label, url, type): ProjectResource
+  +addEnvironment(input): ProjectEnvironment
   +update(changes): void
   +archive(): void
   +restore(): void
@@ -67,6 +68,20 @@ class ProjectResource {
   -label: string
   -url: string
   -type: ProjectResourceType
+  -createdAt: Date
+  -updatedAt: Date
+  +update(changes): void
+}
+
+class ProjectEnvironment {
+  -projectId: UUID
+  -name: string
+  -normalizedName: string
+  -category: ProjectEnvironmentCategory
+  -operatingSystem: string?
+  -runtime: string?
+  -runtimeVersion: string?
+  -description: string?
   -createdAt: Date
   -updatedAt: Date
   +update(changes): void
@@ -156,11 +171,22 @@ class ProjectResourceType {
   OTHER
 }
 
+class ProjectEnvironmentCategory {
+  <<enumeration>>
+  LOCAL
+  DEVELOPMENT
+  TESTING
+  STAGING
+  PRODUCTION
+  OTHER
+}
+
 Entity <|-- User
 Entity <|-- Project
 Entity <|-- ProjectTechnology
 Entity <|-- ProjectCommand
 Entity <|-- ProjectResource
+Entity <|-- ProjectEnvironment
 Entity <|-- TechnicalEntry
 Entity <|-- SolutionAttempt
 Entity <|-- Tag
@@ -172,6 +198,7 @@ User "1" -- "0..*" Tag : owns
 Project "1" *-- "0..*" ProjectTechnology : composes
 Project "1" *-- "0..*" ProjectCommand : composes
 Project "1" *-- "0..*" ProjectResource : composes
+Project "1" *-- "0..*" ProjectEnvironment : composes
 Project "0..1" <-- "0..*" TechnicalEntry : provides context
 TechnicalEntry "1" *-- "0..*" SolutionAttempt : composes
 
@@ -181,6 +208,7 @@ Tag ..> TagName : normalizes with
 
 Project --> ProjectStatus
 ProjectResource --> ProjectResourceType
+ProjectEnvironment --> ProjectEnvironmentCategory
 TechnicalEntry --> TechnicalEntryType
 TechnicalEntry ..> TechnicalEntryStatus : derives
 SolutionAttempt --> SolutionAttemptResult
@@ -188,7 +216,7 @@ SolutionAttempt --> SolutionAttemptResult
 
 ### Reading the relationships
 
-- `Project` composes technologies, commands, and resources because these objects
+- `Project` composes technologies, environments, commands, and resources because these objects
   are created within a project, have no meaning without it, and are deleted
   in a cascade.
 - `TechnicalEntry` composes `SolutionAttempt` through the same lifecycle relationship.

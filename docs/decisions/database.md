@@ -4,9 +4,34 @@ The database keeps the **technical entry at its core**, with projects as optiona
 
 ### Main entities
 
-![Relational model](./database-model.png)
+```mermaid
+erDiagram
+    User ||--o{ Project : owns
+    User ||--o{ TechnicalEntry : owns
+    User ||--o{ Tag : owns
+    Project |o--o{ TechnicalEntry : contextualizes
+    Project ||--o{ ProjectTechnology : contains
+    Project ||--o{ ProjectEnvironment : contains
+    Project ||--o{ ProjectCommand : contains
+    Project ||--o{ ProjectResource : contains
+    TechnicalEntry ||--o{ SolutionAttempt : contains
+    TechnicalEntry ||--o{ TechnicalEntryTag : classified_by
+    Tag ||--o{ TechnicalEntryTag : assigned_to
 
-### Cardinalidades
+    ProjectEnvironment {
+        uuid id PK
+        uuid project_id FK
+        string name
+        string normalized_name
+        string category
+        string operating_system
+        string runtime
+        string runtime_version
+        string description
+    }
+```
+
+### Cardinalities
 
 | Relationship | Cardinality | Explanation |
 | -------------------------------- | ------------: | ------------------------------------------------------------------------------ |
@@ -17,6 +42,7 @@ The database keeps the **technical entry at its core**, with projects as optiona
 | TechnicalEntry → SolutionAttempt | 1:N | An issue can have multiple attempts. |
 | TechnicalEntry ↔ Tag | N:N | An entry can have multiple tags, and a tag can appear on multiple entries. |
 | Project → ProjectTechnology | 1:N | A project can use multiple technologies. |
+| Project → ProjectEnvironment | 1:N | A project can document multiple execution contexts. |
 | Project → ProjectCommand | 1:N | A project can have multiple commands. |
 | Project → ProjectResource | 1:N | A project can have multiple links and resources. |
 
@@ -370,6 +396,32 @@ Technologies are information specific to one project.
 
 ---
 
+## `project_environments`
+
+```text
+project_environments
+--------------------
+id                 UUID PK
+project_id         UUID NOT NULL FK -> projects.id
+name               VARCHAR(100) NOT NULL
+normalized_name    VARCHAR(100) NOT NULL
+category           project_environment_category NOT NULL
+operating_system   VARCHAR(100) NULL
+runtime            VARCHAR(100) NULL
+runtime_version    VARCHAR(50) NULL
+description        TEXT NULL
+created_at         TIMESTAMPTZ NOT NULL
+updated_at         TIMESTAMPTZ NOT NULL
+```
+
+The category enum contains `LOCAL`, `DEVELOPMENT`, `TESTING`, `STAGING`,
+`PRODUCTION`, and `OTHER`. `UNIQUE (project_id, normalized_name)` protects
+case-insensitive, trimmed name uniqueness, including concurrent requests.
+The user's display capitalization remains in `name`. Environments describe
+runtime conditions; they do not contain secrets or executable configuration.
+
+---
+
 ## `project_commands`
 
 ```text
@@ -444,14 +496,18 @@ Relationships use these behaviors:
 | `User` → `Tag` | `ON DELETE CASCADE` |
 | `Project` → `TechnicalEntry` | `ON DELETE SET NULL` |
 | `Project` → `ProjectTechnology` | `ON DELETE CASCADE` |
+| `Project` → `ProjectEnvironment` | `ON DELETE CASCADE` |
 | `Project` → `ProjectCommand` | `ON DELETE CASCADE` |
 | `Project` → `ProjectResource` | `ON DELETE CASCADE` |
 | `TechnicalEntry` → `SolutionAttempt` | `ON DELETE CASCADE` |
 | `TechnicalEntry`/`Tag` → `TechnicalEntryTag` | `ON DELETE CASCADE` |
 
-Directly deleting a project deletes its technologies, commands, and resources. Associated technical entries are preserved with `project_id = NULL`.
+Directly deleting a project deletes its technologies, environments, commands,
+and resources. Associated technical entries are preserved with `project_id = NULL`.
 
-Deleting a user also cascades to their projects, entries, and tags. Deleting those projects cascades to their technologies, commands, and resources.
+Deleting a user also cascades to their projects, entries, and tags. Deleting
+those projects cascades to their technologies, environments, commands, and
+resources.
 
 In normal use, projects and technical entries are archived rather than permanently deleted.
 

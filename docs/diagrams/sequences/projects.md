@@ -119,7 +119,8 @@ sequenceDiagram
     else UC-17 delete
         UC->>Project: ensureCanBeModified()
         alt archived project
-            Project-->>UserActor: 422 read-only
+            Project-->>UC: read-only error
+            UC-->>UserActor: 422 read-only
         else editable project
             UC->>PRepo: delete(id)
             PRepo->>DB: DELETE project
@@ -284,4 +285,52 @@ sequenceDiagram
             UC-->>UserActor: 204 No Content
         end
     end
+```
+
+## UC-44 through UC-48 — Project environments
+
+```mermaid
+sequenceDiagram
+    actor UserActor as Authenticated user
+    participant C as ProjectController
+    participant UC as Environment use case
+    participant PRepo as ProjectRepository
+    participant Project as Project aggregate
+    participant ERepo as ProjectEnvironmentRepository
+    participant DB as PostgreSQL
+
+    UserActor->>C: POST/PATCH/DELETE /api/project/:projectId/environments
+    C->>UC: request + authenticated user ID
+    UC->>PRepo: findById(projectId)
+    PRepo-->>UC: project
+    alt project missing or owned by another user
+        UC-->>UserActor: 404 Not Found
+    else owned project
+        UC->>Project: ensureCanBeModified()
+        alt archived project
+            Project-->>UserActor: 422 read-only
+        else active project
+            UC->>ERepo: find by normalized name or environment ID
+            ERepo-->>UC: matching record or none
+            alt duplicate normalized name
+                UC-->>UserActor: 409 Conflict
+            else valid change
+                UC->>ERepo: insert / update / delete
+                ERepo->>DB: persist with unique key (projectId, normalizedName)
+                DB-->>ERepo: persisted result
+                UC-->>UserActor: environment response / 204
+            end
+        end
+    end
+
+    UserActor->>C: GET /api/project/environments?filters
+    C->>UC: filters + authenticated user ID
+    UC->>ERepo: search(SearchParams with owner and filters)
+    ERepo->>DB: count and find paginated environments
+    DB-->>ERepo: environment models
+    ERepo-->>UC: entities + pagination metadata
+    UC->>PRepo: findByOwnerId(userId)
+    PRepo-->>UC: owned projects for display names
+    UC->>UC: map entities to output
+    UC-->>UserActor: environment collection
 ```

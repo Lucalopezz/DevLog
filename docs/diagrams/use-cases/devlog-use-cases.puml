@@ -48,6 +48,11 @@ rectangle "DevLog API" {
     usecase "Get resource" as UC27
     usecase "Update resource" as UC28
     usecase "Remove resource" as UC29
+    usecase "Create environment" as UC44
+    usecase "List project environments" as UC45
+    usecase "Search owned environments" as UC46
+    usecase "Update environment" as UC47
+    usecase "Remove environment" as UC48
   }
 
   package "Technical journal" {
@@ -112,6 +117,11 @@ AuthUser -- UC40
 AuthUser -- UC41
 AuthUser -- UC42
 AuthUser -- UC43
+AuthUser -- UC44
+AuthUser -- UC45
+AuthUser -- UC46
+AuthUser -- UC47
+AuthUser -- UC48
 
 note bottom of UC34
   Only ISSUE entries in the OPEN state.

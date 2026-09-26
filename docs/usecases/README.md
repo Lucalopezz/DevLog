@@ -12,7 +12,7 @@ Each case follows the full format used in the course: primary actor, interests, 
 Documents are grouped by area:
 
 - [Account, authentication, and tags](account-and-tags.md)
-- [Projects, technologies, commands, and resources](projects.md)
+- [Projects, technologies, environments, commands, and resources](projects.md)
 - [Technical entries, classifications, and attempts](technical-entries.md)
 - [Endpoint → use case matrix](traceability.md)
 - [Historical/planned specification](cases.md)
@@ -42,7 +42,8 @@ The current code has no external secondary actor. The database, controllers, use
 
 | Term | Meaning |
 | --- | --- |
-| Project | Development context to which entries, technologies, commands, and resources may belong. |
+| Project | Development context to which entries, technologies, environments, commands, and resources may belong. |
+| Project environment | Documented execution or deployment context with a category and optional operating system and runtime details. |
 | Technical entry | An issue (`ISSUE`) or lesson learned (`LEARNING`). |
 | Solution attempt | Documented experiment for an issue, with a `FAILED`, `PARTIAL`, or `SUCCESSFUL` result. |
 | Tag | Reusable classification unique to a user. |
@@ -52,7 +53,7 @@ The current code has no external secondary actor. The database, controllers, use
 ## Modeling decisions
 
 - Request authentication is not modeled as `<<include>>` in dozens of cases. The specialized Authenticated user actor communicates the same precondition and keeps the diagram readable.
-- Technologies, commands, and resources are project parts: they are created within it and deleted in a cascade when the project is deleted.
+- Technologies, environments, commands, and resources are project parts: they are created within it and deleted in a cascade when the project is deleted.
 - Attempts belong to a technical entry and depend on its lifecycle.
 - The entry/tag link has its own information (`createdAt`), so it appears as an association class.
 - The project/entry link is an optional association, not composition: deleting the project preserves the entry and only removes its reference.
@@ -66,7 +67,7 @@ delete requires an unarchived project and confirmation in the interface.
 These items were not changed in the models; they are documented to keep the diagrams faithful to the implementation:
 
 - The domain calls the intermediate project state `INACTIVE`, while the database stores `PAUSED`. A mapper explicitly translates these values.
-- Archived projects are read-only for their details, technologies, commands, and resources. Archived technical entries can still be updated, resolved, reopened, classified, have existing attempts changed/removed, and be deleted. Only adding a new attempt explicitly blocks archived entries.
+- Archived projects are read-only for their details, technologies, environments, commands, and resources. Archived technical entries can still be updated, resolved, reopened, classified, have existing attempts changed/removed, and be deleted. Only adding a new attempt explicitly blocks archived entries.
 - Archived technical entries can be restored explicitly through
   `PATCH /api/technical-entry/:id/restore`; archiving and restoration are
   separate idempotent operations rather than a toggle.
