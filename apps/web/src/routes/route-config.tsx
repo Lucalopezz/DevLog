@@ -11,6 +11,7 @@ import ProjectDetailPage from '@/features/projects/pages/project-detail-page'
 import ProjectsPage from '@/features/projects/pages/projects-page'
 import TagsPage from '@/features/tags/pages/tags-page'
 import TechnologiesPage from '@/features/technologies/pages/technologies-page'
+import EnvironmentsPage from '@/features/environments/pages/environments-page'
 import ArchivedTechnicalEntriesPage from '@/features/technical-entry/pages/technical-entry-archived-page'
 import TechnicalEntryDetailPage from '@/features/technical-entry/pages/technical-entry-detail-page'
 import TechnicalEntriesPage from '@/features/technical-entry/pages/technical-entries-page'
@@ -66,6 +67,7 @@ export function createAppRoutes(client: QueryClient): RouteObject[] {
             },
             { path: 'tags', Component: TagsPage },
             { path: 'technologies', Component: TechnologiesPage },
+            { path: 'environments', Component: EnvironmentsPage },
           ],
         },
       ],

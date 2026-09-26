@@ -97,7 +97,7 @@ export const sidebarSections: SidebarSection[] = [
         to: "/technologies",
         end: true,
       },
-      { type: "planned", label: "Environments", icon: Boxes },
+      { type: "route", label: "Environments", icon: Boxes, to: "/environments", end: true },
     ],
   },
   {

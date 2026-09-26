@@ -31,6 +31,7 @@ function useSignedInApplication() {
   server.use(
     http.get(apiUrl('/users/me'), () => HttpResponse.json(createUser())),
     http.get(apiUrl('/project'), () => HttpResponse.json(emptyCollection)),
+    http.get(apiUrl('/project/environments'), () => HttpResponse.json(emptyCollection)),
     http.get(apiUrl(`/project/${projectId}`), () => HttpResponse.json(project)),
     http.get(apiUrl(`/project/${projectId}/technical-entries`), () =>
       HttpResponse.json(emptyCollection),
@@ -83,6 +84,7 @@ describe('application routing', () => {
     `/technical-entries/${entryId}`,
     '/technical-entries/archived',
     '/tags',
+    '/environments',
   ])('redirects a guest from protected route %s', async (route) => {
     useGuestSession()
 
@@ -97,6 +99,7 @@ describe('application routing', () => {
     ['/dashboard', 'Welcome back, Ada.'],
     ['/account', 'User account'],
     ['/projects', 'Projects'],
+    ['/environments', 'Environments'],
     [`/projects/${projectId}`, 'Route project'],
     ['/technical-entries', 'Technical journal'],
     [`/technical-entries/${entryId}`, 'Route entry'],
