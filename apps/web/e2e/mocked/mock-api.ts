@@ -77,6 +77,7 @@ export function authenticatedApi(request: Request, url: URL): Reply | undefined 
   const path = url.pathname
   if (path === '/api/users/me') return { body: user }
   if (path === '/api/project') return { body: { data: [project], meta: { ...meta, total: 1 } } }
+  if (path === '/api/project/environments') return { body: { data: [], meta } }
   if (path === `/api/project/${projectId}`) return { body: project }
   if (path === `/api/project/${projectId}/technical-entries`) return { body: { data: [], meta } }
   if (path === `/api/project/${projectId}/commands`) return { body: { data: [], meta } }

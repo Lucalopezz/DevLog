@@ -37,6 +37,7 @@ test('an authenticated user can open and reload every protected route', async ({
     [`/technical-entries/${entryId}`, 'Understand query invalidation'],
     ['/technical-entries/archived', 'Archived technical entries'],
     ['/tags', 'Tags'],
+    ['/environments', 'Environments'],
   ] as const
 
   for (const [path, heading] of routes) {
