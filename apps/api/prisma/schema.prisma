@@ -42,6 +42,7 @@ model Project {
   technologies ProjectTechnology[]
   commands     ProjectCommand[]
   resources    ProjectResource[]
+  environments ProjectEnvironment[]
 
   @@unique([userId, name], map: "projects_user_id_name_key")
   @@index([userId], map: "idx_projects_user")
@@ -157,6 +158,26 @@ model ProjectResource {
   @@map("project_resources")
 }
 
+model ProjectEnvironment {
+  id              String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId       String                     @map("project_id") @db.Uuid
+  name            String                     @db.VarChar(100)
+  normalizedName  String                     @map("normalized_name") @db.VarChar(100)
+  category        ProjectEnvironmentCategory
+  operatingSystem String?                    @map("operating_system") @db.VarChar(100)
+  runtime         String?                    @db.VarChar(100)
+  runtimeVersion  String?                    @map("runtime_version") @db.VarChar(50)
+  description     String?
+  createdAt       DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project         Project                    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, normalizedName], map: "project_environments_project_id_normalized_name_key")
+  @@index([projectId], map: "idx_project_environments_project")
+  @@index([category], map: "idx_project_environments_category")
+  @@map("project_environments")
+}
+
 enum ProjectStatus {
   ACTIVE
   PAUSED
@@ -188,4 +209,15 @@ enum ProjectResourceType {
   OTHER
 
   @@map("project_resource_type")
+}
+
+enum ProjectEnvironmentCategory {
+  LOCAL
+  DEVELOPMENT
+  TESTING
+  STAGING
+  PRODUCTION
+  OTHER
+
+  @@map("project_environment_category")
 }
