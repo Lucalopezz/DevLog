@@ -6,6 +6,8 @@ import { ProjectTechnologyEntity } from '../technology/project-technology.entity
 import { ProjectCommandEntity } from '../command/project-command.entity';
 import { ProjectResourceEntity } from '../resource/project-resource.entity';
 import { ProjectResourceType } from '../resource/project-resource-type.enum';
+import { ProjectEnvironmentEntity } from '../environment/project-environment.entity';
+import { ProjectEnvironmentCategory } from '../environment/project-environment-category.enum';
 
 export type ProjectProps = {
   userId: string;
@@ -77,6 +79,18 @@ export class ProjectEntity extends Entity<ProjectProps> {
       url,
       type,
     });
+  }
+
+  addEnvironment(input: {
+    name: string;
+    category: ProjectEnvironmentCategory;
+    operatingSystem?: string;
+    runtime?: string;
+    runtimeVersion?: string;
+    description?: string;
+  }): ProjectEnvironmentEntity {
+    this.ensureCanBeModified();
+    return new ProjectEnvironmentEntity({ projectId: this.id, ...input });
   }
 
   update(props: ProjectUpdateProps): void {
