@@ -4,14 +4,16 @@ export type ProjectDetailTab =
   | "overview"
   | "entries"
   | "technologies"
+  | "environments"
   | "commands"
   | "resources"
   | "settings";
 
-export const projectDetailTabs: { id: ProjectDetailTab; label: string }[] = [
+const projectDetailTabs: { id: ProjectDetailTab; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "entries", label: "Technical entries" },
   { id: "technologies", label: "Technologies" },
+  { id: "environments", label: "Environments" },
   { id: "commands", label: "Commands" },
   { id: "resources", label: "Resources" },
   { id: "settings", label: "Settings" },

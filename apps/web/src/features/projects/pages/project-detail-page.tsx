@@ -25,6 +25,9 @@ import {
   type ProjectDetailTab,
 } from "../components/project-detail-tabs";
 import type { ProjectCommand, ProjectResource } from "../types/project-detail";
+import { useProjectEnvironments } from "@/features/environments/hooks/use-environments";
+import { ProjectEnvironmentsTab } from "@/features/environments/components/project-environments-tab";
+import type { ProjectEnvironment } from "@/features/environments/types/environment";
 
 export default function ProjectDetailPage() {
   const { projectId = "" } = useParams<{ projectId: string }>();
@@ -35,12 +38,15 @@ export default function ProjectDetailPage() {
   const [entriesPage, setEntriesPage] = useState(1);
   const [commandsPage, setCommandsPage] = useState(1);
   const [resourcesPage, setResourcesPage] = useState(1);
+  const [environmentsPage, setEnvironmentsPage] = useState(1);
   const [isEditProjectDialogOpen, setIsEditProjectDialogOpen] = useState(false);
   const [isCreateEntryDialogOpen, setIsCreateEntryDialogOpen] = useState(false);
   const [isCommandDialogOpen, setIsCommandDialogOpen] = useState(false);
   const [editingCommand, setEditingCommand] = useState<ProjectCommand>();
   const [isResourceDialogOpen, setIsResourceDialogOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<ProjectResource>();
+  const [isEnvironmentDialogOpen, setIsEnvironmentDialogOpen] = useState(false);
+  const [editingEnvironment, setEditingEnvironment] = useState<ProjectEnvironment>();
 
   // Collection requests and pagination are independent so one tab's actions
   // cannot accidentally change another tab's cached page.
@@ -51,6 +57,7 @@ export default function ProjectDetailPage() {
   );
   const commandsQuery = useProjectCommands(projectId, commandsPage);
   const resourcesQuery = useProjectResources(projectId, resourcesPage);
+  const environmentsQuery = useProjectEnvironments(projectId, environmentsPage, activeTab === "environments");
 
   if (projectQuery.isPending) return <ProjectDetailSkeleton />;
 
@@ -94,6 +101,8 @@ export default function ProjectDetailPage() {
 
       <ProjectDetailDialogs
         command={editingCommand}
+        environment={editingEnvironment}
+        isEnvironmentOpen={isEnvironmentDialogOpen}
         isCommandOpen={isCommandDialogOpen}
         isCreateEntryOpen={isCreateEntryDialogOpen}
         isEditProjectOpen={isEditProjectDialogOpen}
@@ -102,6 +111,11 @@ export default function ProjectDetailPage() {
         onCommandOpenChange={setIsCommandDialogOpen}
         onCommandSaved={(wasCreated) => {
           if (wasCreated) setCommandsPage(1);
+        }}
+        onEnvironmentChange={setEditingEnvironment}
+        onEnvironmentOpenChange={setIsEnvironmentDialogOpen}
+        onEnvironmentSaved={(wasCreated) => {
+          if (wasCreated) setEnvironmentsPage(1);
         }}
         onCreateEntryOpenChange={setIsCreateEntryDialogOpen}
         onEditProjectOpenChange={setIsEditProjectDialogOpen}
@@ -144,6 +158,25 @@ export default function ProjectDetailPage() {
           isArchived={isArchived}
           projectId={project.id}
           technologies={project.technologies ?? []}
+        />
+      </ProjectDetailTabPanel>
+
+      <ProjectDetailTabPanel activeTab={activeTab} id="environments">
+        <ProjectEnvironmentsTab
+          environments={environmentsQuery.data?.data}
+          isArchived={isArchived}
+          isError={environmentsQuery.isError}
+          isFetching={environmentsQuery.isFetching}
+          isPending={environmentsQuery.isPending}
+          meta={environmentsQuery.data?.meta}
+          onAdd={() => { setEditingEnvironment(undefined); setIsEnvironmentDialogOpen(true); }}
+          onDeleted={() => {
+            if (environmentsQuery.data?.data.length === 1 && environmentsPage > 1) setEnvironmentsPage(environmentsPage - 1);
+          }}
+          onEdit={(environment) => { setEditingEnvironment(environment); setIsEnvironmentDialogOpen(true); }}
+          onPageChange={setEnvironmentsPage}
+          onRetry={() => environmentsQuery.refetch()}
+          projectId={project.id}
         />
       </ProjectDetailTabPanel>
 

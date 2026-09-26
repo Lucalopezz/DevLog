@@ -4,9 +4,13 @@ import { ProjectResourceForm } from "./project-resource-form";
 import { TechnicalEntryForm } from "@/features/technical-entry/components/technical-entry-form";
 import type { ProjectCommand, ProjectResource } from "../types/project-detail";
 import type { Project } from "../types/project";
+import { ProjectEnvironmentForm } from "@/features/environments/components/project-environment-form";
+import type { ProjectEnvironment } from "@/features/environments/types/environment";
 
 export function ProjectDetailDialogs({
   command,
+  environment,
+  isEnvironmentOpen,
   isCommandOpen,
   isCreateEntryOpen,
   isEditProjectOpen,
@@ -14,6 +18,9 @@ export function ProjectDetailDialogs({
   onCommandChange,
   onCommandOpenChange,
   onCommandSaved,
+  onEnvironmentChange,
+  onEnvironmentOpenChange,
+  onEnvironmentSaved,
   onCreateEntryOpenChange,
   onEditProjectOpenChange,
   onResourceChange,
@@ -23,6 +30,8 @@ export function ProjectDetailDialogs({
   resource,
 }: {
   command?: ProjectCommand;
+  environment?: ProjectEnvironment;
+  isEnvironmentOpen: boolean;
   isCommandOpen: boolean;
   isCreateEntryOpen: boolean;
   isEditProjectOpen: boolean;
@@ -30,6 +39,9 @@ export function ProjectDetailDialogs({
   onCommandChange: (command?: ProjectCommand) => void;
   onCommandOpenChange: (open: boolean) => void;
   onCommandSaved: (wasCreated: boolean) => void;
+  onEnvironmentChange: (environment?: ProjectEnvironment) => void;
+  onEnvironmentOpenChange: (open: boolean) => void;
+  onEnvironmentSaved: (wasCreated: boolean) => void;
   onCreateEntryOpenChange: (open: boolean) => void;
   onEditProjectOpenChange: (open: boolean) => void;
   onResourceChange: (resource?: ProjectResource) => void;
@@ -70,6 +82,16 @@ export function ProjectDetailDialogs({
         open={isResourceOpen}
         projectId={project.id}
         resource={resource}
+      />
+      <ProjectEnvironmentForm
+        environment={environment}
+        onOpenChange={(open) => {
+          onEnvironmentOpenChange(open);
+          if (!open) onEnvironmentChange(undefined);
+        }}
+        onSaved={onEnvironmentSaved}
+        open={isEnvironmentOpen}
+        projectId={project.id}
       />
     </>
   );
