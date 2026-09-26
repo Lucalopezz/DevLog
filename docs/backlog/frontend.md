@@ -18,6 +18,9 @@ documented separately in [`../usecases/`](../usecases/).
 - [x] Browse a project's paginated technical entries, commands, and resources.
 - [x] Create, edit, and delete project commands and resources.
 - [x] Add and remove technologies from a project.
+- [x] Create, edit, and remove environments from a project; keep archived
+  environments visible and read-only.
+- [x] Search environments across owned projects with URL filters and pagination.
 - [x] Keep archived projects read-only and protect permanent deletion with a
   confirmation flow.
 
@@ -54,15 +57,11 @@ of truth for API validation and lifecycle rules.
 - [ ] **Account data management:** add frontend flows to update the profile name
   and change the password using the existing API. The email remains read-only
   under the current API contract.
-- [ ] **Environments:** add a page to list project environments or stacks, such
-  as Next.js running on Ubuntu. The source and shape of this data still need to
-  be defined.
 - [ ] **Activity Timeline:** add a chronological view of project and journal
   activity.
 - [ ] **Knowledge Overview:** add a summary view for the technical knowledge
   recorded across projects and entries.
 
 The roadmap keeps these follow-up features separate from MVP 1.0 so the shipped
-project and journal workflows stay easy to identify. Environment data modeling
-and the precise scope of the two overview pages should be decided when those
-features are designed.
+project and journal workflows stay easy to identify. The precise scope of the
+two overview pages should be decided when those features are designed.

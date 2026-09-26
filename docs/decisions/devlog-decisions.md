@@ -663,87 +663,30 @@ These features would increase scope without strengthening the main project goal.
 
 ---
 
-## 13. Post-MVP extension: environments and services
+## 13. Post-MVP project environments
 
-MVP 1.0 does not include project environments or services. The planned next
-step is a page that lists a project's environments or runtime stacks. The
-examples may include a framework and operating system, such as Next.js on
-Ubuntu, but the data source and fields still need a product decision.
+Project environments were added after MVP 1.0 as documented execution or
+deployment contexts. Each environment belongs to exactly one project and has a
+name, a category (`LOCAL`, `DEVELOPMENT`, `TESTING`, `STAGING`, `PRODUCTION`, or
+`OTHER`), and optional operating-system, runtime, runtime-version, and
+description fields. Frameworks such as Next.js remain project technologies;
+an environment describes where and under which conditions they run.
 
-The model below is a proposal for discussion, not an implemented API contract.
+Names are unique within a project after trimming and case normalization. The
+database stores a separate normalized name and enforces this rule with a
+composite unique constraint. An archived project's environments stay visible
+but cannot be changed; permanent project deletion cascades to them.
 
-Possible model:
+The project detail Environments tab manages records. `/environments` searches
+all environments owned by the authenticated user, with category and project
+filters plus pagination. Filters live in the URL. The API routes and current
+flows are recorded in [project use cases](../usecases/projects.md#uc-44--create-project-environment).
 
-```text
-Project
-  └── Environment
-        └── Service
-```
-
-### Environment
-
-```text
-Environment
-- id
-- projectId
-- name
-- type
-```
-
-Possible types:
-
-```text
-LOCAL
-DEVELOPMENT
-STAGING
-PRODUCTION
-```
-
-### Service
-
-```text
-Service
-- id
-- environmentId
-- name
-- type
-- host
-- port
-- healthCheckUrl?
-- status
-```
-
-Example:
-
-```text
-Project: GAM
-Environment: Local
-
-Services:
-- frontend — localhost:5173
-- backend — localhost:3000
-- postgres — localhost:5432
-- proxy — localhost:80
-```
-
-Possible extensions:
-
-- Service dependencies.
-- Ports and domains.
-- Availability history.
-- Health checks.
-- Deployment information.
-- Commands to start and stop services.
-
-The first environment page should document project setup. Decide whether each
-record represents a deployment stage (`LOCAL`, `DEVELOPMENT`, `STAGING`, or
-`PRODUCTION`) or a runtime stack (such as framework and operating system)
-before defining its persisted fields. The UI and data source remain planned.
-
-Services remain a separate future extension; they are not part of the current
-frontend roadmap.
-
-Executing commands, accessing Docker, opening SSH connections, reading logs, or controlling services introduces a different level of complexity and security. Consider it only after the core is stable.
+The environment model intentionally has no service, host, port, health-check,
+credential, or arbitrary key-value configuration fields. Service monitoring,
+deployment control, and secret storage would require separate product and
+security decisions. DevLog does not execute commands or inspect Docker, SSH,
+cloud services, or logs through environments.
 
 ---
 
@@ -755,7 +698,8 @@ The product is a personal technical knowledge base organized by project context.
 Technical journal = product core
 Projects = context and organization
 Tags = classification by topic or technology
-Environments, Activity Timeline, and Knowledge Overview = post-MVP roadmap
+Environments = documented project runtime contexts
+Activity Timeline and Knowledge Overview = post-MVP roadmap
 Services = later extension
 ```
 

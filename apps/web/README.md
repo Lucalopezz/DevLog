@@ -18,10 +18,15 @@ the authenticated session endpoint. The private workspace overview lives at
 
 The `/projects` page supports paginated search, filtering, and project
 creation. A project detail page brings together its overview, technologies,
-technical entries, commands, resources, and settings. Users can create, edit,
-and remove project commands and resources, add and remove technologies, and
+technical entries, environments, commands, resources, and settings. Users can create, edit,
+and remove project environments, commands, and resources, add and remove technologies, and
 manage project metadata and lifecycle. Archived projects are read-only, and
 permanent deletion is protected by confirmation.
+
+The `/environments` page searches and filters the user's environment records
+by name or runtime details, category, and project. Its filters and page are
+kept in the URL. Environment details describe runtime conditions and do not
+store credentials or deployment configuration.
 
 ### Technical journal
 
@@ -59,14 +64,13 @@ contract.
 | `/technical-entries/archived` | Paginated archived entries |
 | `/tags` | Search and manage tags |
 | `/technologies` | Search technologies recorded on projects |
+| `/environments` | Search and filter environments recorded on projects |
 
 Quick Capture is a sidebar action and does not have its own route.
 
 ## Planned after MVP 1.0
 
 - Account data management: profile name and password flows.
-- Environments: a page listing project environments/stacks, for example
-  Next.js with Ubuntu. The data source and model remain to be defined.
 - Activity Timeline: a chronological view of project and journal activity.
 - Knowledge Overview: a summary of the technical knowledge recorded across
   projects and entries.
@@ -100,6 +104,7 @@ src/
     projects/          # Project APIs, forms, lifecycle, and detail screens
     tags/              # Tag search, management, and selection controls
     technologies/      # Technology listing and project associations
+    environments/      # Environment forms, project tab, and global search
     technical-entry/   # Journal lists, details, attempts, and lifecycle
   lib/                 # Query client, dates, and utilities
   routes/              # Browser route definitions

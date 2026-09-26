@@ -8,7 +8,7 @@ It combines a technical journal with a project dashboard. Use it to document iss
 
 The MVP 1.0 workflows for projects and the technical journal are complete in
 the API and web application. The remaining frontend roadmap is account data
-management, project environments, an activity timeline, and a knowledge
+management, an activity timeline, and a knowledge
 overview; see [`docs/backlog/frontend.md`](docs/backlog/frontend.md).
 
 ## Current capabilities
@@ -16,7 +16,8 @@ overview; see [`docs/backlog/frontend.md`](docs/backlog/frontend.md).
 - User registration, login, logout, and profile viewing;
 - Project creation, listing, filtering, editing, and lifecycle management;
 - Project detail views that aggregate technologies, technical entries,
-  commands, and resources, with create/edit/remove workflows for project data;
+  commands, resources, and environments, with create/edit/remove workflows for
+  project data;
 - Project settings for metadata and local path, archive/restore actions, and
   protected permanent deletion;
 - Technical entries for issues (`ISSUE`) and lessons learned (`LEARNING`);
@@ -26,7 +27,7 @@ overview; see [`docs/backlog/frontend.md`](docs/backlog/frontend.md).
   resolve/reopen workflows in the web application;
 - Technical entry archiving, restoration, and confirmed deletion;
 - Quick Capture from the sidebar, using the regular technical-entry flow;
-- Dedicated tag and technology pages;
+- Dedicated tag, technology, and environment pages;
 - Ownership checks that restrict authenticated users to their own data.
 
 The account page currently displays the signed-in user's name and email.
@@ -61,12 +62,13 @@ The web application currently exposes:
 | `/dashboard` | Authenticated workspace overview with recent projects and entries |
 | `/account` | Authenticated account details |
 | `/projects` | Paginated project list with search, filters, and creation |
-| `/projects/:projectId` | Project overview, entries, commands, resources, and settings |
+| `/projects/:projectId` | Project overview, entries, technologies, environments, commands, resources, and settings |
 | `/technical-entries` | Paginated active technical journal with search and filters |
 | `/technical-entries/:technicalEntryId` | Technical entry details, content editing, and lifecycle actions |
 | `/technical-entries/archived` | Paginated archived technical entries |
 | `/tags` | Search and manage tags |
 | `/technologies` | Search technologies recorded on projects |
+| `/environments` | Search and filter environments across owned projects |
 
 The project settings area supports editing, archiving, restoring, and
 permanently deleting an unarchived project after confirmation.
@@ -136,6 +138,6 @@ English is the standard language for the application, documentation, API message
 
 ## Planned after MVP 1.0
 
-The next frontend areas are account data management, a project environments
-listing, an activity timeline, and a knowledge overview. The roadmap is
-tracked in [`docs/backlog/frontend.md`](docs/backlog/frontend.md).
+The next frontend areas are account data management, an activity timeline, and
+a knowledge overview. The roadmap is tracked in
+[`docs/backlog/frontend.md`](docs/backlog/frontend.md).
