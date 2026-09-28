@@ -7,13 +7,13 @@ It combines a technical journal with a project dashboard. Use it to document iss
 ## Release status
 
 The MVP 1.0 workflows for projects and the technical journal are complete in
-the API and web application. The remaining frontend roadmap is account data
-management, an activity timeline, and a knowledge
-overview; see [`docs/backlog/frontend.md`](docs/backlog/frontend.md).
+the API and web application. The current frontend also implements account
+settings, Activity Timeline, and Knowledge Overview; see
+[`docs/backlog/frontend.md`](docs/backlog/frontend.md).
 
 ## Current capabilities
 
-- User registration, login, logout, and profile viewing;
+- User registration, login, logout, profile viewing, and name/password updates;
 - Project creation, listing, filtering, editing, and lifecycle management;
 - Project detail views that aggregate technologies, technical entries,
   commands, resources, and environments, with create/edit/remove workflows for
@@ -28,12 +28,18 @@ overview; see [`docs/backlog/frontend.md`](docs/backlog/frontend.md).
 - Technical entry archiving, restoration, and confirmed deletion;
 - Quick Capture from the sidebar, using the regular technical-entry flow;
 - Dedicated tag, technology, and environment pages;
+- Activity Timeline with active entries grouped by local creation day, project
+  and type filters, and incremental loading;
+- Knowledge Overview with journal totals, current issue composition, recent
+  learnings and resolutions, and project-scoped links to the journal;
 - Ownership checks that restrict authenticated users to their own data.
 
-The account page currently displays the signed-in user's name and email.
-Profile updates and password changes are API capabilities but do not yet have
-frontend management flows. The email is immutable under the current API
-contract.
+The account page displays the signed-in user's name and email. The settings
+page lets the user update their name and change their password. Email remains
+read-only under the current API contract.
+
+Timeline and overview summarize the current, unarchived journal. They do not
+store a permanent history of edits or lifecycle actions.
 
 ## Technologies
 
@@ -61,9 +67,12 @@ The web application currently exposes:
 | `/` | Public introduction to DevLog; no authentication required |
 | `/dashboard` | Authenticated workspace overview with recent projects and entries |
 | `/account` | Authenticated account details |
+| `/settings` | Update the profile name and change the password |
+| `/activity-timeline` | Active journal entries grouped by local creation day |
+| `/knowledge-overview` | Journal totals, issue composition, and recent knowledge |
 | `/projects` | Paginated project list with search, filters, and creation |
 | `/projects/:projectId` | Project overview, entries, technologies, environments, commands, resources, and settings |
-| `/technical-entries` | Paginated active technical journal with search and filters |
+| `/technical-entries` | Paginated active technical journal with search, filters, and optional `projectId` URL scope |
 | `/technical-entries/:technicalEntryId` | Technical entry details, content editing, and lifecycle actions |
 | `/technical-entries/archived` | Paginated archived technical entries |
 | `/tags` | Search and manage tags |
@@ -136,8 +145,8 @@ If you are new to the project, start with [`docs/README.md`](docs/README.md) aft
 
 English is the standard language for the application, documentation, API messages, and code comments. See [`AGENTS.md`](AGENTS.md) for repository guidelines.
 
-## Planned after MVP 1.0
+## After MVP 1.0
 
-The next frontend areas are account data management, an activity timeline, and
-a knowledge overview. The roadmap is tracked in
+Account settings, Activity Timeline, and Knowledge Overview are implemented in
+the current working tree. Their status and scope are tracked in
 [`docs/backlog/frontend.md`](docs/backlog/frontend.md).

@@ -13,7 +13,7 @@ Use this table as your starting point. Most questions are addressed in the liste
 | What does the API implement today?                                    | [`usecases/README.md`](usecases/README.md)                                     |
 | What does the frontend implement today?                               | [`../apps/web/README.md`](../apps/web/README.md)                               |
 | Where is the historical/planned MVP specification?                    | [`usecases/cases.md`](usecases/cases.md)                                       |
-| Where are the UML diagrams?                                           | [`diagrams/README.md`](diagrams/README.md)                                     |
+| Where are the API models and frontend flow diagrams?                 | [`diagrams/README.md`](diagrams/README.md)                                     |
 | What remains to be implemented in the backend?                        | [`backlog/backend.md`](backlog/backend.md)                                     |
 | What remains to be implemented in the frontend?                       | [`backlog/frontend.md`](backlog/frontend.md)                                   |
 | How do I configure the environment and connect the API to PostgreSQL? | [`guides/configs_workflow.md`](guides/configs_workflow.md)                     |
@@ -22,6 +22,9 @@ Use this table as your starting point. Most questions are addressed in the liste
 | Where are the tests, and how do I run them?                           | [`guides/testing.md`](guides/testing.md)                                       |
 | How are backend modules organized?                                    | [`guides/backend_structure.md`](guides/backend_structure.md)                   |
 | How is the frontend organized?                                        | [`guides/frontend_structure.md`](guides/frontend_structure.md)                 |
+| How do profile and password settings work?                            | [`guides/account-settings.md`](guides/account-settings.md)                     |
+| How does the activity timeline load and group entries?                | [`guides/activity-timeline.md`](guides/activity-timeline.md)                   |
+| How are knowledge totals and issue composition calculated?            | [`guides/knowledge-overview.md`](guides/knowledge-overview.md)                 |
 | How do project environments work?                                     | [`guides/project-environments-plan.md`](guides/project-environments-plan.md)   |
 | How is the monorepo structured?                                       | [`guides/monorepo.md`](guides/monorepo.md)                                     |
 | Which commands are used frequently?                                   | [`guides/utils.md`](guides/utils.md)                                           |
@@ -37,6 +40,11 @@ Records product, architecture, and database decisions. Read these files to under
 ### `guides/`
 
 Explains technical workflows and step-by-step procedures. Use this directory to understand how a part works or should be implemented.
+
+### `diagrams/`
+
+Contains versioned API models and frontend flow diagrams. Each frontend diagram
+links to its implementation guide and the source files it describes.
 
 ### `usecases/`
 
@@ -70,13 +78,15 @@ current screens and [`usecases/`](usecases/) for API behavior.
 
 ## Current implementation status
 
-MVP 1.0 is complete for the project and technical-journal workflows. The
-`/account` page is currently read-only; account updates and these follow-up
-frontend areas remain planned:
+MVP 1.0 is complete for the project and technical-journal workflows. These
+follow-up frontend areas are also implemented in the current working tree:
 
-- Account data management (profile name and password);
-- An activity timeline;
-- A knowledge overview.
+- Account settings at `/settings` for profile name and password updates;
+  `/account` remains a read-only profile view, and email cannot be edited.
+- Activity Timeline at `/activity-timeline`, grouping active journal entries
+  by local creation day with project/type filters and incremental loading.
+- Knowledge Overview at `/knowledge-overview`, showing current journal totals,
+  issue composition, and recent learnings/resolutions under a shared project scope.
 
 The authoritative task breakdown is kept in [`backlog/backend.md`](backlog/backend.md)
 and [`backlog/frontend.md`](backlog/frontend.md). The backend use cases for

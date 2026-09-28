@@ -6,8 +6,8 @@ documented separately in [`../usecases/`](../usecases/).
 
 > [!NOTE]
 > The frontend scope for MVP 1.0 is complete. This roadmap records the
-> implemented project and technical-entry workflows, then lists the product
-> areas that remain for a later release.
+> implemented project and technical-entry workflows, followed by the post-MVP
+> features implemented in the current working tree.
 
 ## MVP 1.0 — complete
 
@@ -42,8 +42,9 @@ documented separately in [`../usecases/`](../usecases/).
 
 ### Application foundation
 
-- [x] Provide registration, login, logout, authenticated navigation, and a
-  read-only account page.
+- [x] Provide registration, login, logout, authenticated navigation, and
+  account/profile views. Editable name and password settings are listed under
+  implemented post-MVP features below.
 - [x] Provide frontend unit/component tests with Vitest and browser test
   commands with Playwright.
 - [x] Represent loading, empty, and error states across the main list and detail
@@ -53,11 +54,12 @@ Quick Capture is a shortcut into the regular entry creation flow, not a draft
 or a separate domain entity. The existing backend use cases remain the source
 of truth for API validation and lifecycle rules.
 
-## Planned after MVP 1.0
+## Post-MVP features — implemented
 
-- [ ] **Account data management:** add frontend flows to update the profile name
-  and change the password using the existing API. The email remains read-only
-  under the current API contract.
+- [x] **Account data management:** update the profile name and change the
+  password at `/settings` using the existing API. Email remains read-only;
+  `/account` continues to display profile details.
+  See [scope and implementation](../guides/account-settings.md).
 - [x] **Activity Timeline:** explore active journal entries by creation date,
   grouped by local day, with project/type filters and incremental loading.
   See [scope and implementation](../guides/activity-timeline.md).

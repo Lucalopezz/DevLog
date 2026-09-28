@@ -76,7 +76,13 @@ For frontend styling, prefer the Tailwind spacing and sizing scale over arbitrar
 
 ## Testing Guidelines
 
-API unit tests use Jest and belong beside source as `*.spec.ts`. End-to-end tests belong in `apps/api/test/` and use the `*.e2e-spec.ts` convention with Supertest. Add tests for new backend behavior and run the smallest relevant test command before submitting. The web app has no test runner configured yet; at minimum run its lint and build commands after frontend changes.
+API unit tests use Jest and belong beside source as `*.spec.ts`. End-to-end
+tests belong in `apps/api/test/` and use the `*.e2e-spec.ts` convention with
+Supertest. Add tests for new backend behavior and run the smallest relevant
+test command before submitting. The web app uses Vitest for unit/component
+tests and Playwright for browser tests. After frontend changes, run relevant
+focused tests plus web lint and build commands; use browser tests when changing
+browser-level behavior.
 
 ## Commit & Pull Request Guidelines
 

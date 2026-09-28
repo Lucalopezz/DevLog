@@ -6,6 +6,9 @@ project, and excludes archived entries. Deleting or archiving an entry removes
 it from this view. Issue badges describe the **current status**; this is not an
 audit log of edits, resolutions, or reopenings.
 
+See the [timeline flow diagrams](../diagrams/frontend/activity-timeline.md)
+for pagination, local-day grouping, and the shared journal cache.
+
 ## Data flow
 
 1. The URL stores `projectId` and `type`. The controls apply changes immediately,
@@ -29,9 +32,10 @@ invalidate both representations. Creation, edits, tags, archive, restore,
 deletion, and project deletion therefore reuse the existing cache refresh flow.
 
 The entry response contains a project ID, not a name. `useProjectOptions`, shared
-with Environments, fetches all project pages to populate the filter and resolve
-names. Archived projects remain available because an active entry can still
-belong to one. Only the **entry's** archive state controls timeline inclusion.
+with Environments and Knowledge Overview, fetches all project pages to populate
+the filter and resolve names. Archived projects remain available because an
+active entry can still belong to one. Only the **entry's** archive state
+controls timeline inclusion.
 Fetching all projects is a simple trade-off for this version; a large workspace
 would benefit from searchable project options and names supplied with entries.
 

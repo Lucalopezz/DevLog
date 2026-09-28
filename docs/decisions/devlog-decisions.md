@@ -477,7 +477,10 @@ The entry/project association can be set while creating or updating an entry, wi
 
 ---
 
-## 8. Initial screens
+## 8. Implemented screens
+
+The [web application guide](../../apps/web/README.md#routes) lists every current
+route. The workflows below describe the implemented product scope.
 
 ### `/login`
 
@@ -497,9 +500,11 @@ Filters:
 Title search
 Type
 Status
+Tag
+Project scope through the projectId URL parameter
 ```
 
-Project and tag filters remain planned frontend work.
+Knowledge Overview links preserve the selected project when opening this list.
 
 ### `/technical-entries/:technicalEntryId`
 
@@ -513,10 +518,12 @@ Conclusion
 Related project
 Tags
 Status
+Solution attempts
+Resolve/reopen actions
 Archive/restore/delete actions
 ```
 
-Solution attempts and resolve/reopen actions remain planned frontend work.
+Users can edit entry content, manage tags, and record/edit/remove attempts.
 
 ### `/projects`
 
@@ -529,14 +536,36 @@ Currently displays:
 ```text
 General information
 Technologies
+Environments
 Commands
 Links and resources
 Related technical entries
 Settings and lifecycle actions
 ```
 
-There is currently no dedicated tag screen in the web application. Tag
-assignment and removal in the entry UI remain planned frontend work.
+### `/tags`, `/technologies`, and `/environments`
+
+Dedicated pages search tags, project technologies, and project environments.
+Tags can be created/deleted on their page and assigned/removed in entry details.
+The environment page has URL filters and pagination across owned projects.
+
+### `/account` and `/settings`
+
+The account page displays the signed-in user's profile. Settings provides
+profile-name and password forms using the existing user endpoints; email
+remains read-only. See the [settings guide](../guides/account-settings.md).
+
+### `/activity-timeline` and `/knowledge-overview`
+
+Activity Timeline groups active entries by local creation day, with project
+and type filters and incremental loading. Knowledge Overview shows current
+journal totals, issue composition, and recent learnings/resolutions under a
+shared project filter. Both reuse technical-entry searches and existing cache
+invalidation. They do not introduce a historical event model or new endpoints.
+
+See the [timeline guide](../guides/activity-timeline.md) and the
+[overview guide](../guides/knowledge-overview.md) for data semantics and
+limitations.
 
 ---
 
@@ -699,7 +728,8 @@ Technical journal = product core
 Projects = context and organization
 Tags = classification by topic or technology
 Environments = documented project runtime contexts
-Activity Timeline and Knowledge Overview = post-MVP roadmap
+Activity Timeline and Knowledge Overview = implemented views of the current
+journal
 Services = later extension
 ```
 

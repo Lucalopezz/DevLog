@@ -5,6 +5,9 @@ current journal: learnings, open issues, resolved issues, and the share of issue
 that are currently resolved. It includes entries without projects and excludes
 archived entries. Archiving or deleting entries removes them from this view.
 
+See the [overview flow diagrams](../diagrams/frontend/knowledge-overview.md)
+for query composition, derived issue statistics, and journal navigation.
+
 ## Queries and derived data
 
 `useKnowledgeOverview(projectId)` composes five independent queries against the
