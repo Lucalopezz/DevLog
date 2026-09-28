@@ -27,7 +27,8 @@ documented separately in [`../usecases/`](../usecases/).
 ### Technical journal and issue resolution
 
 - [x] Create and browse paginated active and archived entries.
-- [x] Filter the active journal by title, type, issue status, and tag.
+- [x] Filter the active journal by title, type, issue status, and tag; preserve
+  project scope when exploring entries from Knowledge Overview.
 - [x] View entry details and render Markdown content.
 - [x] Edit an entry's title, context, and conclusion.
 - [x] Assign and remove tags from an entry; manage the user's tags separately.
@@ -57,11 +58,13 @@ of truth for API validation and lifecycle rules.
 - [ ] **Account data management:** add frontend flows to update the profile name
   and change the password using the existing API. The email remains read-only
   under the current API contract.
-- [ ] **Activity Timeline:** add a chronological view of project and journal
-  activity.
-- [ ] **Knowledge Overview:** add a summary view for the technical knowledge
-  recorded across projects and entries.
+- [x] **Activity Timeline:** explore active journal entries by creation date,
+  grouped by local day, with project/type filters and incremental loading.
+  See [scope and implementation](../guides/activity-timeline.md).
+- [x] **Knowledge Overview:** show learning and issue totals, current issue
+  composition, and recent learnings/resolutions with a shared project filter.
+  See [scope and implementation](../guides/knowledge-overview.md).
 
 The roadmap keeps these follow-up features separate from MVP 1.0 so the shipped
-project and journal workflows stay easy to identify. The precise scope of the
-two overview pages should be decided when those features are designed.
+project and journal workflows stay easy to identify. The timeline describes the
+current journal rather than a permanent history of project or entry actions.
