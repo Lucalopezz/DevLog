@@ -5,9 +5,9 @@ import {
 } from "@/features/projects/api/list-projects";
 import type { Project } from "@/features/projects/types/project";
 
-export function useEnvironmentProjectOptions() {
+export function useProjectOptions() {
   return useQuery({
-    queryKey: [...projectsKeys.lists(), "environment-options"],
+    queryKey: [...projectsKeys.lists(), "options"],
     queryFn: async (): Promise<Project[]> => {
       const projects: Project[] = [];
       // The project filter must include every owned project, even past the

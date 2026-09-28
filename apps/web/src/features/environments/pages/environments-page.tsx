@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useEnvironmentProjectOptions } from "../hooks/use-environment-project-options";
+import { useProjectOptions } from "@/features/projects/hooks/use-project-options";
 import { useEnvironments } from "../hooks/use-environments";
 import {
   environmentCategoryLabel,
@@ -41,7 +41,7 @@ export default function EnvironmentsPage() {
     ...(category ? { category } : {}),
     ...(projectId ? { projectId } : {}),
   });
-  const projectsQuery = useEnvironmentProjectOptions();
+  const projectsQuery = useProjectOptions();
 
   // URL parameters are the source of truth, including browser back/forward navigation.
   function updateParams(
