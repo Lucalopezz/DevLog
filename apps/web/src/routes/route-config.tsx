@@ -1,11 +1,13 @@
 import type { QueryClient } from '@tanstack/react-query'
 import type { RouteObject } from 'react-router'
 
+import ActivityTimelinePage from '@/features/activity-timeline/pages/activity-timeline-page'
 import AccountPage from '@/features/auth/pages/account-page'
 import SettingsPage from '@/features/auth/pages/settings-page'
 import LoginPage from '@/features/auth/pages/login-page'
 import RegisterPage from '@/features/auth/pages/register-page'
 import HomePage from '@/features/home/pages/home-page'
+import KnowledgeOverviewPage from '@/features/knowledge-overview/pages/knowledge-overview-page'
 import LandingPage from '@/features/landing/pages/landing-page'
 import ProjectDetailPage from '@/features/projects/pages/project-detail-page'
 import ProjectsPage from '@/features/projects/pages/projects-page'
@@ -52,6 +54,8 @@ export function createAppRoutes(client: QueryClient): RouteObject[] {
           element: <RootLayout />,
           children: [
             { path: 'dashboard', Component: HomePage },
+            { path: 'activity-timeline', Component: ActivityTimelinePage },
+            { path: 'knowledge-overview', Component: KnowledgeOverviewPage },
             { path: 'account', Component: AccountPage },
             { path: 'settings', Component: SettingsPage },
             { path: 'projects', Component: ProjectsPage },

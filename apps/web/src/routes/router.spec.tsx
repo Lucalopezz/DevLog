@@ -77,6 +77,8 @@ describe('application routing', () => {
 
   it.each([
     '/dashboard',
+    '/activity-timeline',
+    '/knowledge-overview',
     '/account',
     '/projects',
     `/projects/${projectId}`,
@@ -97,6 +99,8 @@ describe('application routing', () => {
 
   it.each([
     ['/dashboard', 'Welcome back, Ada.'],
+    ['/activity-timeline', 'Activity Timeline'],
+    ['/knowledge-overview', 'Knowledge Overview'],
     ['/account', 'User account'],
     ['/projects', 'Projects'],
     ['/environments', 'Environments'],

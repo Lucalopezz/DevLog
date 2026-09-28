@@ -55,7 +55,7 @@ describe('AppSidebar', () => {
       screen.getByRole('link', { name: 'All Entries' }),
     ).not.toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('button', { name: 'Quick Capture' })).toBeEnabled()
-    expect(screen.getAllByText('Soon').length).toBeGreaterThan(0)
+    expect(screen.getByRole('link', { name: 'Knowledge Overview' })).toHaveAttribute('href', '/knowledge-overview')
   })
 
   it('opens the help dialog with LinkedIn and portfolio contact links', async () => {
@@ -92,6 +92,8 @@ describe('AppSidebar', () => {
     ['/technical-entries?type=LEARNING', 'Learnings'],
     ['/technical-entries?type=ISSUE&status=RESOLVED', 'Resolved Issues'],
     ['/technical-entries/archived', 'Archived Entries'],
+    ['/activity-timeline?type=ISSUE', 'Activity Timeline'],
+    ['/knowledge-overview', 'Knowledge Overview'],
   ])('activates only %s journal item', async (route, activeLabel) => {
     server.use(http.get(apiUrl('/users/me'), () => HttpResponse.json(createUser())))
     renderSidebar(route)
@@ -104,6 +106,8 @@ describe('AppSidebar', () => {
       'Learnings',
       'Resolved Issues',
       'Archived Entries',
+      'Activity Timeline',
+      'Knowledge Overview',
     ]
 
     for (const label of journalLabels) {

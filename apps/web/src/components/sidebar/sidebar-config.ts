@@ -103,8 +103,8 @@ export const sidebarSections: SidebarSection[] = [
   {
     label: "Insights",
     items: [
-      { type: "planned", label: "Activity Timeline", icon: Activity },
-      { type: "planned", label: "Knowledge Overview", icon: BarChart3 },
+      { type: "route", label: "Activity Timeline", icon: Activity, to: "/activity-timeline", end: true },
+      { type: "route", label: "Knowledge Overview", icon: BarChart3, to: "/knowledge-overview", end: true },
     ],
   },
 ];

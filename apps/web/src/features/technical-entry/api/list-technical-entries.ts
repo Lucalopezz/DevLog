@@ -6,9 +6,11 @@ import type {
 
 export async function listTechnicalEntries(
   params: ListTechnicalEntriesParams,
+  signal?: AbortSignal,
 ): Promise<TechnicalEntryCollection> {
   const { data } = await api.get<TechnicalEntryCollection>("/technical-entry", {
     params,
+    signal,
   });
   return data;
 }
@@ -25,4 +27,8 @@ export const technicalEntriesKeys = {
   lists: () => [...technicalEntriesKeys.all, "lists"] as const,
   list: (params: ListTechnicalEntriesParams) =>
     [...technicalEntriesKeys.lists(), "list", params] as const,
+  // Infinite queries store { pages, pageParams }, not one collection. Keep
+  // their keys distinct while sharing the existing list invalidations.
+  infinite: (params: Omit<ListTechnicalEntriesParams, "page">) =>
+    [...technicalEntriesKeys.lists(), "infinite", params] as const,
 };

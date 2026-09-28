@@ -1,5 +1,5 @@
 import { BookOpen, Plus, RefreshCw } from "lucide-react";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTechnicalEntries } from "../hooks/use-technical-entries";
@@ -31,10 +31,10 @@ function parsePage(value: string | null) {
 
 export default function TechnicalEntriesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isCreateEntryDialogOpen, setIsCreateEntryDialogOpen] =
-    useState(false);
+  const [isCreateEntryDialogOpen, setIsCreateEntryDialogOpen] = useState(false);
 
   const page = parsePage(searchParams.get("page"));
+  const projectId = searchParams.get("projectId")?.trim() || undefined;
   const title = searchParams.get("title")?.trim() || undefined;
   const rawType = searchParams.get("type");
   const type = isTechnicalEntryType(rawType) ? rawType : undefined;
@@ -49,6 +49,7 @@ export default function TechnicalEntriesPage() {
   const params = {
     ...defaultTechnicalEntryParams,
     page,
+    ...(projectId ? { projectId } : {}),
     ...(title ? { title } : {}),
     ...(type ? { type } : {}),
     ...(status ? { status } : {}),
@@ -134,6 +135,33 @@ export default function TechnicalEntriesPage() {
         open={isCreateEntryDialogOpen}
         onOpenChange={setIsCreateEntryDialogOpen}
       />
+
+      {projectId ? (
+        <section
+          aria-label="Project scope"
+          className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-4 text-sm"
+        >
+          <p>Showing entries from the selected project.</p>
+          <Button asChild size="sm" variant="outline">
+            <Link to={`/projects/${projectId}`}>View project</Link>
+          </Button>
+          <Button
+            onClick={() => {
+              // Leave the type/status chosen in Knowledge Overview intact when
+              // widening the project scope, and restart regular pagination.
+              const params = new URLSearchParams(searchParams);
+              params.delete("projectId");
+              params.set("page", "1");
+              setSearchParams(params);
+            }}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            Show all projects
+          </Button>
+        </section>
+      ) : null}
 
       <TechnicalEntryFilters
         key={`${title ?? ""}:${type ?? ""}:${status ?? ""}:${tagId ?? ""}`}

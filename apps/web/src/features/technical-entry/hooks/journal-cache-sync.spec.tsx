@@ -18,6 +18,7 @@ import { useTechnicalEntries } from './use-technical-entries'
 import { technicalEntriesKeys } from '../api/list-technical-entries'
 import { useArchiveTechnicalEntry, useRestoreTechnicalEntry } from './use-technical-entry-lifecycle'
 import { useUpdateTechnicalEntry } from './use-update-technical-entry'
+import { useActivityTimeline } from '@/features/activity-timeline/hooks/use-activity-timeline'
 
 const projectId = '22222222-2222-4222-8222-222222222222'
 const otherProjectId = '55555555-5555-4555-8555-555555555555'
@@ -105,6 +106,7 @@ function installJournalApi() {
 
 function JournalHarness() {
   const active = useTechnicalEntries({ page: 1, archivedAt: 'null' })
+  const timeline = useActivityTimeline({})
   const archived = useTechnicalEntries({ page: 1, archivedAt: 'not-null' })
   const project = useProjectTechnicalEntries(projectId)
   const commands = useProjectCommands(projectId)
@@ -122,6 +124,7 @@ function JournalHarness() {
   return (
     <>
       <output aria-label="Active entries">{active.data?.data.map((item) => item.title).join(', ') ?? 'Loading'}</output>
+      <output aria-label="Timeline entries">{timeline.data?.pages.flatMap((page) => page.data).map((item) => item.title).join(', ') ?? 'Loading'}</output>
       <output aria-label="Archived entries">{archived.data?.data.map((item) => item.title).join(', ') ?? 'Loading'}</output>
       <output aria-label="Project entries">{project.data?.data.map((item) => item.title).join(', ') ?? 'Loading'}</output>
       <output aria-label="Project total">{project.data?.meta.total ?? 'Loading'}</output>
@@ -155,6 +158,7 @@ describe('journal cache synchronization', () => {
     await waitFor(() => expect(value('Other commands total')).toBe('0'))
     await waitFor(() => expect(value('Other resources total')).toBe('0'))
     expect(value('Active entries')).toBe('Original entry')
+    expect(value('Timeline entries')).toBe('Original entry')
     expect(value('Archived entries')).toBe('')
     const unaffected = {
       commands: calls.commands,
@@ -167,11 +171,13 @@ describe('journal cache synchronization', () => {
     await user.click(screen.getByRole('button', { name: 'Create linked' }))
     await waitFor(() => expect(value('Project total')).toBe('2'))
     expect(value('Active entries')).toContain('Created entry')
+    await waitFor(() => expect(value('Timeline entries')).toContain('Created entry'))
 
     await user.click(screen.getByRole('button', { name: 'Update linked' }))
     await waitFor(() => expect(value('Detail title')).toBe('Updated entry'))
     await waitFor(() => expect(value('Project entries')).toContain('Updated entry'))
     expect(value('Active entries')).toContain('Updated entry')
+    await waitFor(() => expect(value('Timeline entries')).toContain('Updated entry'))
     expect(calls.commands).toBe(unaffected.commands)
     expect(calls.resources).toBe(unaffected.resources)
     expect(calls.otherEntries).toBe(unaffected.otherEntries)
@@ -181,17 +187,20 @@ describe('journal cache synchronization', () => {
     await user.click(screen.getByRole('button', { name: 'Archive linked' }))
     await waitFor(() => expect(value('Project total')).toBe('1'))
     expect(value('Active entries')).not.toContain('Updated entry')
+    await waitFor(() => expect(value('Timeline entries')).not.toContain('Updated entry'))
     expect(value('Archived entries')).toContain('Updated entry')
 
     await user.click(screen.getByRole('button', { name: 'Restore linked' }))
     await waitFor(() => expect(value('Project total')).toBe('2'))
     expect(value('Active entries')).toContain('Updated entry')
     expect(value('Archived entries')).not.toContain('Updated entry')
+    await waitFor(() => expect(value('Timeline entries')).toContain('Updated entry'))
 
     await user.click(screen.getByRole('button', { name: 'Delete linked' }))
     await waitFor(() => expect(value('Project total')).toBe('1'))
     expect(value('Active entries')).not.toContain('Updated entry')
     expect(client.getQueryData(['technical-entry', entryId])).toBeUndefined()
+    await waitFor(() => expect(value('Timeline entries')).not.toContain('Updated entry'))
     expect(calls.projectEntries).toBeGreaterThan(4)
   })
 
