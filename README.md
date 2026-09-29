@@ -62,22 +62,22 @@ docs/       # Project decisions and guides
 
 The web application currently exposes:
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Public introduction to DevLog; no authentication required |
-| `/dashboard` | Authenticated workspace overview with recent projects and entries |
-| `/account` | Authenticated account details |
-| `/settings` | Update the profile name and change the password |
-| `/activity-timeline` | Active journal entries grouped by local creation day |
-| `/knowledge-overview` | Journal totals, issue composition, and recent knowledge |
-| `/projects` | Paginated project list with search, filters, and creation |
-| `/projects/:projectId` | Project overview, entries, technologies, environments, commands, resources, and settings |
-| `/technical-entries` | Paginated active technical journal with search, filters, and optional `projectId` URL scope |
-| `/technical-entries/:technicalEntryId` | Technical entry details, content editing, and lifecycle actions |
-| `/technical-entries/archived` | Paginated archived technical entries |
-| `/tags` | Search and manage tags |
-| `/technologies` | Search technologies recorded on projects |
-| `/environments` | Search and filter environments across owned projects |
+| Route                                  | Purpose                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `/`                                    | Public introduction to DevLog; no authentication required                                   |
+| `/dashboard`                           | Authenticated workspace overview with recent projects and entries                           |
+| `/account`                             | Authenticated account details                                                               |
+| `/settings`                            | Update the profile name and change the password                                             |
+| `/activity-timeline`                   | Active journal entries grouped by local creation day                                        |
+| `/knowledge-overview`                  | Journal totals, issue composition, and recent knowledge                                     |
+| `/projects`                            | Paginated project list with search, filters, and creation                                   |
+| `/projects/:projectId`                 | Project overview, entries, technologies, environments, commands, resources, and settings    |
+| `/technical-entries`                   | Paginated active technical journal with search, filters, and optional `projectId` URL scope |
+| `/technical-entries/:technicalEntryId` | Technical entry details, content editing, and lifecycle actions                             |
+| `/technical-entries/archived`          | Paginated archived technical entries                                                        |
+| `/tags`                                | Search and manage tags                                                                      |
+| `/technologies`                        | Search technologies recorded on projects                                                    |
+| `/environments`                        | Search and filter environments across owned projects                                        |
 
 The project settings area supports editing, archiving, restoring, and
 permanently deleting an unarchived project after confirmation.
@@ -102,7 +102,7 @@ Prerequisites: Node.js, pnpm 11.21.0, and Docker.
    POSTGRES_PORT=5432
    ```
 
-3. Start the database:
+3. Start the PostgreSQL database:
 
    ```bash
    pnpm db:up
