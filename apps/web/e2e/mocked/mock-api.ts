@@ -75,6 +75,7 @@ export function authenticatedApi(request: Request, url: URL): Reply | undefined 
   if (request.method() !== 'GET') return undefined
 
   const path = url.pathname
+  if (path === '/api/health') return { body: { status: 'ok' } }
   if (path === '/api/users/me') return { body: user }
   if (path === '/api/project') return { body: { data: [project], meta: { ...meta, total: 1 } } }
   if (path === '/api/project/environments') return { body: { data: [], meta } }
@@ -92,6 +93,9 @@ export function authenticatedApi(request: Request, url: URL): Reply | undefined 
 }
 
 export function guestApi(request: Request, url: URL): Reply | undefined {
+  if (request.method() === 'GET' && url.pathname === '/api/health') {
+    return { body: { status: 'ok' } }
+  }
   if (request.method() === 'GET' && url.pathname === '/api/users/me') {
     return { status: 401, body: { message: 'Unauthorized' } }
   }

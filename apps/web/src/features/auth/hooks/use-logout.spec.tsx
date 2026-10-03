@@ -97,6 +97,7 @@ describe('logout flow', () => {
     let projectRequestCount = 0
 
     server.use(
+      http.get(apiUrl('/health'), () => HttpResponse.json({ status: 'ok' })),
       http.get(apiUrl('/users/me'), () =>
         sessionUser
           ? HttpResponse.json(sessionUser)

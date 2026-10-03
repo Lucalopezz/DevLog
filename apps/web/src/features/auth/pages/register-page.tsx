@@ -10,8 +10,11 @@ import { FormInput } from '@/components/ui/form-input'
 import { useRegister } from '@/features/auth/hooks/use-register'
 import { registerSchema } from '@/features/auth/schemas/register.schema'
 import type { RegisterFormData } from '@/features/auth/types/auth'
+import { useApiWarmup } from '@/hooks/use-api-warmup'
 
 export default function RegisterPage() {
+  useApiWarmup()
+
   const registerMutation = useRegister()
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),

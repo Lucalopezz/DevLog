@@ -1,7 +1,8 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
+import { deferred } from '@/test/deferred'
 import { createProjectFixture } from '@/test/factories/project'
 import { createTechnicalEntry } from '@/test/factories/technical-entry'
 import { createUser } from '@/test/factories/user'
@@ -53,6 +54,12 @@ function useSignedInApplication() {
 }
 
 describe('application routing', () => {
+  beforeEach(() => {
+    server.use(
+      http.get(apiUrl('/health'), () => HttpResponse.json({ status: 'ok' })),
+    )
+  })
+
   it('renders the public landing page without checking a session', async () => {
     let sessionRequestCount = 0
     server.use(
@@ -73,6 +80,60 @@ describe('application routing', () => {
       screen.getAllByRole('link', { name: 'Create account' }).length,
     ).toBeGreaterThan(0)
     expect(sessionRequestCount).toBe(0)
+  })
+
+  it.each([
+    ['/', 'Keep the reasoning behind your code.'],
+    ['/login', 'Sign in'],
+    ['/register', 'Create account'],
+  ])('renders %s and starts warming the API without waiting', async (route, heading) => {
+    const healthGate = deferred<void>()
+    let healthRequestCount = 0
+    useGuestSession()
+    server.use(
+      http.get(apiUrl('/health'), async ({ request }) => {
+        expect(request.cache).toBe('no-store')
+        healthRequestCount += 1
+        await healthGate.promise
+        return HttpResponse.json({ status: 'ok' })
+      }),
+    )
+
+    try {
+      renderApp(route)
+
+      expect(await screen.findByRole('heading', { name: heading })).toBeVisible()
+      await waitFor(() => expect(healthRequestCount).toBe(1))
+      if (route !== '/') {
+        expect(screen.getByRole('button', { name: heading })).toBeEnabled()
+      }
+    } finally {
+      healthGate.resolve(undefined)
+    }
+  })
+
+  it.each([
+    ['/', 'Keep the reasoning behind your code.'],
+    ['/login', 'Sign in'],
+    ['/register', 'Create account'],
+  ])('keeps %s usable when the warmup request fails', async (route, heading) => {
+    let healthRequestCount = 0
+    useGuestSession()
+    server.use(
+      http.get(apiUrl('/health'), () => {
+        healthRequestCount += 1
+        return HttpResponse.error()
+      }),
+    )
+
+    renderApp(route)
+
+    expect(await screen.findByRole('heading', { name: heading })).toBeVisible()
+    await waitFor(() => expect(healthRequestCount).toBe(1))
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    if (route !== '/') {
+      expect(screen.getByRole('button', { name: heading })).toBeEnabled()
+    }
   })
 
   it.each([

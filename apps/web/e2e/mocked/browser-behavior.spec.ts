@@ -85,9 +85,7 @@ test('project tabs support arrow keys, Home and End with matching panels', async
 })
 
 test('keyboard submit reports login errors and the built app renders the dashboard without Devtools', async ({ page }) => {
-  const assertNoUnexpected = await mockApi(page, (request, url) => {
-    return url.pathname === '/api/users/me' ? guestApi(request, url) : undefined
-  })
+  const assertNoUnexpected = await mockApi(page, guestApi)
   await page.goto('/login')
   const email = page.getByRole('textbox', { name: 'E-mail' })
   await email.focus()

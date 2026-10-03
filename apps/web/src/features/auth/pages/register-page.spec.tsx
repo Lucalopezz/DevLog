@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { Route, Routes } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 import { currentUserQueryKey } from '@/features/auth/api/get-current-user'
 import { deferred } from '@/test/deferred'
@@ -32,6 +32,12 @@ async function completeForm(
 }
 
 describe('RegisterPage', () => {
+  beforeEach(() => {
+    server.use(
+      http.get(apiUrl('/health'), () => HttpResponse.json({ status: 'ok' })),
+    )
+  })
+
   it('shows field validation and attaches mismatch to confirmation', async () => {
     let postCount = 0
     server.use(
