@@ -8,6 +8,7 @@ import { server } from './mocks/server'
 import { createMatchMediaController } from './match-media'
 import { disposeTestQueryClients } from './query-client'
 import { disposeTestRouters } from './router-registry'
+import { backendConnection } from '@/lib/backend-connection'
 
 const unexpectedRequests: string[] = []
 
@@ -32,6 +33,7 @@ afterEach(async () => {
   // Unmount first so active observers cannot start another refetch while the
   // shared test resources are being disposed.
   cleanup()
+  backendConnection.stop()
   disposeTestRouters()
   await disposeTestQueryClients()
   server.resetHandlers()

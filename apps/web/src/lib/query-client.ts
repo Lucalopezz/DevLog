@@ -1,24 +1,20 @@
 import { QueryClient } from '@tanstack/react-query'
-import { isAxiosError } from 'axios'
+import { retryRead } from './is-temporary-api-error'
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // How long cached data remains fresh before it becomes stale
-      // This does not mean data is removed from the cache after that time; 
+      // This does not mean data is removed from the cache after that time;
       // only that it becomes stale and can be refetched if needed
       staleTime: 30_000,
-      // Disables automatic refetching when the browser window gains focus
+      // Connection supervision already reacts to focus. Disable Query's broad
+      // focus refetch so returning to a cold API does not reload every stale query.
       refetchOnWindowFocus: false,
-      retry: (failureCount, error) => {
-        // For Axios errors with a response status below 500, do not retry the request
-        // Client errors (4xx) should be handled differently from server errors (5xx)
-        if (isAxiosError(error) && error.response?.status && error.response.status < 500) {
-          return false
-        }
-        // Allows up to 2 retries after an error
-        return failureCount < 2
-      },
+      retry: retryRead,
     },
+    // Losing a response does not tell us whether a write reached the database.
+    // Automatic repeats would require server-side idempotency guarantees first.
+    mutations: { retry: false },
   },
 })
