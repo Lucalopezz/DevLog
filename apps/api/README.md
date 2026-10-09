@@ -78,6 +78,7 @@ The file should include at least:
 | `NODE_ENV` | Environment, usually `development` |
 | `DATABASE_URL` | PostgreSQL connection URL |
 | `JWT_SECRET` | Secret used to sign tokens |
+| `JWT_EXPIRES_IN_SECONDS` | Token lifetime in seconds; use `3600` to match the cookie lifetime |
 | `CORS_ALLOWED_ORIGINS` | Allowed frontend origins |
 
 After the first installation, generate Prisma Client and apply migrations:

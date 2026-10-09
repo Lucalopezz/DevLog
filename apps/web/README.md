@@ -156,6 +156,12 @@ VITE_API_URL=http://localhost:3000/api
 If the variable is absent, the same address is used as a fallback. The API must
 be running and allow the Vite origin in `CORS_ALLOWED_ORIGINS`.
 
+API warmup and reconnection run globally, including protected routes. Slow checks
+show a waiting notice; failed active reads can recover while session data and
+form drafts remain available. Login and registration wait for availability
+before a single submission. See [API availability and cold starts](../../docs/guides/backend-connection.md)
+for responsibilities, retry limits, trade-offs, and deployment checks.
+
 ## Running
 
 ```bash

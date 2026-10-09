@@ -12,6 +12,7 @@ Use this table as your starting point. Most questions are addressed in the liste
 | How is the database modeled, and why are tables related this way?     | [`decisions/database.md`](decisions/database.md)                               |
 | What does the API implement today?                                    | [`usecases/README.md`](usecases/README.md)                                     |
 | What does the frontend implement today?                               | [`../apps/web/README.md`](../apps/web/README.md)                               |
+| How does the app handle a sleeping or unavailable API?                | [`guides/backend-connection.md`](guides/backend-connection.md)                 |
 | Where is the historical/planned MVP specification?                    | [`usecases/cases.md`](usecases/cases.md)                                       |
 | Where are the API models and frontend flow diagrams?                 | [`diagrams/README.md`](diagrams/README.md)                                     |
 | What remains to be implemented in the backend?                        | [`backlog/backend.md`](backlog/backend.md)                                     |
