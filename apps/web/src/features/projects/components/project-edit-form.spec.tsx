@@ -98,7 +98,7 @@ describe('ProjectEditForm', () => {
     await user.clear(within(dialog).getByRole('textbox', { name: 'Name' }))
     await user.type(within(dialog).getByRole('textbox', { name: 'Name' }), 'Draft project')
     await user.click(within(dialog).getByRole('button', { name: 'Save changes' }))
-    expect(await screen.findByText('Could not save')).toBeVisible()
+    expect(await screen.findByText('Could not update the project. Try again.')).toBeVisible()
     expect(within(dialog).getByRole('textbox', { name: 'Name' })).toHaveValue('Draft project')
   })
 })

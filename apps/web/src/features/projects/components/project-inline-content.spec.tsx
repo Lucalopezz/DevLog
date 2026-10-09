@@ -85,7 +85,7 @@ describe('ProjectInlineContent', () => {
     await user.clear(screen.getByRole('textbox', { name: 'Project description' }))
     await user.type(screen.getByRole('textbox', { name: 'Project description' }), 'Recovered value')
     await user.click(screen.getByRole('button', { name: 'Save' }))
-    expect(await screen.findByText('Save failed')).toBeVisible()
+    expect(await screen.findByText('Could not update the project. Try again.')).toBeVisible()
     expect(screen.getByRole('textbox', { name: 'Project description' })).toHaveValue('Recovered value')
     await user.click(screen.getByRole('button', { name: 'Save' }))
     expect(await screen.findByText('Recovered value')).toBeVisible()

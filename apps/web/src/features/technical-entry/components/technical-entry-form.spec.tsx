@@ -127,7 +127,7 @@ describe('TechnicalEntryForm', () => {
     const { user } = renderWithProviders(<Harness />)
     const dialog = await fillRequired(user)
     await user.click(within(dialog).getByRole('button', { name: 'Create entry' }))
-    expect(await screen.findByText('Could not create')).toBeVisible()
+    expect(await screen.findByText('Could not create the technical entry. Try again.')).toBeVisible()
     expect(within(dialog).getByRole('textbox', { name: 'Title' })).toHaveValue('Connection pooling')
   })
 

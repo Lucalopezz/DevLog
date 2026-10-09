@@ -118,7 +118,7 @@ describe('project lifecycle', () => {
     } finally {
       gate.resolve(undefined)
     }
-    expect(await screen.findByText('Archive failed')).toBeVisible()
+    expect(await screen.findByText('Could not archive the project.')).toBeVisible()
     expect(within(dialog).getByRole('button', { name: 'Archive project' })).toBeEnabled()
   })
 
@@ -142,7 +142,7 @@ describe('project lifecycle', () => {
     await user.click(screen.getByRole('button', { name: 'Restore project' }))
     dialog = await screen.findByRole('alertdialog')
     await user.click(within(dialog).getByRole('button', { name: 'Restore project' }))
-    expect(await screen.findByText('Restore failed')).toBeVisible()
+    expect(await screen.findByText('Could not restore the project.')).toBeVisible()
     expect(within(dialog).getByRole('button', { name: 'Restore project' })).toBeEnabled()
     await user.click(within(dialog).getByRole('button', { name: 'Restore project' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Edit project' })).toBeEnabled())
@@ -210,7 +210,7 @@ describe('project lifecycle', () => {
     const dialog = await screen.findByRole('alertdialog')
     await user.type(within(dialog).getByRole('textbox', { name: /Type DevLog to confirm/ }), project.name)
     await user.click(within(dialog).getByRole('button', { name: 'Delete permanently' }))
-    expect(await screen.findByText('Delete failed')).toBeVisible()
+    expect(await screen.findByText('Could not delete the project.')).toBeVisible()
     expect(within(dialog).getByRole('textbox', { name: /Type DevLog to confirm/ })).toHaveValue(project.name)
     expect(within(dialog).getByRole('button', { name: 'Delete permanently' })).toBeEnabled()
   })

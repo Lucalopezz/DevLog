@@ -14,6 +14,9 @@ export function getApiErrorMessage(error: unknown, fallback: string) {
     return fallback
   }
 
+  // Validation messages are useful; infrastructure/internal errors can contain
+  // implementation details and must use the operation's public fallback.
+  if (error.response && error.response.status >= 500) return fallback
   const message = error.response?.data?.message
 
   if (Array.isArray(message)) {
