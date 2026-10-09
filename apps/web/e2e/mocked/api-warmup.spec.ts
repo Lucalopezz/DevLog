@@ -2,10 +2,14 @@ import { expect, test } from '@playwright/test'
 
 import { authenticatedApi, guestApi, mockApi } from './mock-api'
 
-test('warms the API on landing, login, and registration while health is pending', async ({ page }) => {
+test('shares one global warmup across landing, login, and registration', async ({
+  page,
+}) => {
   const assertNoUnexpected = await mockApi(page, guestApi)
   let releaseHealth!: () => void
-  const healthGate = new Promise<void>((resolve) => { releaseHealth = resolve })
+  const healthGate = new Promise<void>((resolve) => {
+    releaseHealth = resolve
+  })
   let healthRequestCount = 0
   let healthResponseCount = 0
 
@@ -22,20 +26,32 @@ test('warms the API on landing, login, and registration while health is pending'
 
   try {
     await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'Keep the reasoning behind your code.' })).toBeVisible()
+    await expect(
+      page.getByRole('heading', {
+        name: 'Keep the reasoning behind your code.',
+      }),
+    ).toBeVisible()
     await expect.poll(() => healthRequestCount).toBe(1)
 
     await page.getByRole('link', { name: 'Sign in', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Sign in' })).toBeEnabled()
-    await expect.poll(() => healthRequestCount).toBe(2)
+    await expect.poll(() => healthRequestCount).toBe(1)
 
     await page.getByRole('link', { name: 'Go to the DevLog home page' }).click()
-    await expect(page.getByRole('heading', { name: 'Keep the reasoning behind your code.' })).toBeVisible()
-    await expect.poll(() => healthRequestCount).toBe(3)
+    await expect(
+      page.getByRole('heading', {
+        name: 'Keep the reasoning behind your code.',
+      }),
+    ).toBeVisible()
+    await expect.poll(() => healthRequestCount).toBe(1)
 
-    await page.getByRole('link', { name: 'Create account', exact: true }).click()
-    await expect(page.getByRole('button', { name: 'Create account' })).toBeEnabled()
-    await expect.poll(() => healthRequestCount).toBe(4)
+    await page
+      .getByRole('link', { name: 'Create account', exact: true })
+      .click()
+    await expect(
+      page.getByRole('button', { name: 'Create account' }),
+    ).toBeEnabled()
+    await expect.poll(() => healthRequestCount).toBe(1)
   } finally {
     releaseHealth()
     await expect.poll(() => healthResponseCount).toBe(healthRequestCount)

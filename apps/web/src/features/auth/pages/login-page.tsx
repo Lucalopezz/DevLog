@@ -1,6 +1,5 @@
 import { Link } from "react-router";
 import { LoginForm } from "@/features/auth/components/login-form";
-import { useApiWarmup } from "@/hooks/use-api-warmup";
 
 /**
  * Page responsible for the visual context of the login screen.
@@ -11,7 +10,6 @@ import { useApiWarmup } from "@/hooks/use-api-warmup";
  * that is easy to test.
  */
 export default function LoginPage() {
-  useApiWarmup();
 
   return (
     <main className="relative isolate flex min-h-svh items-center justify-center overflow-hidden bg-background px-6 py-12 sm:px-8">

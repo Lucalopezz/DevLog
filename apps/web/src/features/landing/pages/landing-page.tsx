@@ -12,7 +12,6 @@ import {
 import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
-import { useApiWarmup } from "@/hooks/use-api-warmup";
 
 const features = [
   {
@@ -62,7 +61,6 @@ const workflow = [
  * without making a private API request or briefly seeing workspace navigation.
  */
 export default function LandingPage() {
-  useApiWarmup();
 
   return (
     <div className="min-h-svh overflow-hidden bg-zinc-950 text-zinc-50">

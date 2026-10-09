@@ -4,15 +4,16 @@ import { Toaster } from 'sonner'
 
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { queryClient as productionQueryClient } from '@/lib/query-client'
+import { BackendConnectionProvider } from './backend-connection-provider'
 
 // In DEV, asynchronously imports ReactQueryDevtools; otherwise, sets it to null
 const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(async () => {
-      const module = await import("@tanstack/react-query-devtools");
+      const module = await import('@tanstack/react-query-devtools')
 
-      return { default: module.ReactQueryDevtools };
+      return { default: module.ReactQueryDevtools }
     })
-  : null;
+  : null
 
 interface AppProvidersProps {
   children: ReactNode
@@ -28,7 +29,7 @@ export function AppProviders({
   return (
     <TooltipProvider>
       <QueryClientProvider client={client}>
-        {children}
+        <BackendConnectionProvider>{children}</BackendConnectionProvider>
         <Toaster closeButton position="top-right" richColors theme="dark" />
         {showDevtools && ReactQueryDevtools ? (
           <Suspense fallback={null}>
