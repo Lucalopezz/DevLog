@@ -205,22 +205,6 @@ export default function TechnicalEntryDetailPage() {
             )}
           </section>
 
-          {entry.status !== "RESOLVED" && entry.tags?.length ? (
-            <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
-              <h2 className="font-semibold">Tags</h2>
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {entry.tags.map((tag) => (
-                  <li
-                    className="rounded-lg border border-border/60 bg-muted/50 px-3 py-2 text-sm text-muted-foreground"
-                    key={tag.id}
-                  >
-                    #{tag.name}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
           <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
             <h2 className="font-semibold">Entry lifecycle</h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
