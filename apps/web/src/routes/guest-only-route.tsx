@@ -9,14 +9,14 @@ import { useGetUser } from '@/features/auth/hooks/use-get-user'
  * the form itself.
  */
 export function GuestOnlyRoute() {
-  const { data: user } = useGetUser()
+  const { data: user, error } = useGetUser()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (user) {
+    if (user && !error) {
       navigate('/dashboard', { replace: true })
     }
-  }, [navigate, user])
+  }, [error, navigate, user])
 
   return <Outlet />
 }

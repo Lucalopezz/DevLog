@@ -20,9 +20,7 @@ async function rejectedValue(promise: Promise<unknown>) {
 describe('authenticated route loader', () => {
   it('returns the authenticated user through the supplied cache', async () => {
     const user = createUser()
-    server.use(
-      http.get(apiUrl('/users/me'), () => HttpResponse.json(user)),
-    )
+    server.use(http.get(apiUrl('/users/me'), () => HttpResponse.json(user)))
     const client = createTestQueryClient()
     const { requireUser } = createAuthLoaders(client)
 
@@ -43,24 +41,57 @@ describe('authenticated route loader', () => {
     expect((response as Response).headers.get('Location')).toBe('/login')
   })
 
-  it.each([403, 500])('propagates an HTTP %i response', async (status) => {
-    server.use(
-      http.get(apiUrl('/users/me'), () =>
-        HttpResponse.json({ message: 'Request failed.' }, { status }),
-      ),
-    )
-    const { requireUser } = createAuthLoaders(createTestQueryClient())
+  it.each([403, 500, 502, 503, 504])(
+    'propagates an HTTP %i response',
+    async (status) => {
+      server.use(
+        http.get(apiUrl('/users/me'), () =>
+          HttpResponse.json({ message: 'Request failed.' }, { status }),
+        ),
+      )
+      const { requireUser } = createAuthLoaders(createTestQueryClient())
 
-    await expect(requireUser()).rejects.toMatchObject({
-      response: { status },
-    })
-  })
+      await expect(requireUser()).rejects.toMatchObject({
+        response: { status },
+      })
+    },
+  )
 
   it('propagates a network error', async () => {
     server.use(http.get(apiUrl('/users/me'), () => HttpResponse.error()))
     const { requireUser } = createAuthLoaders(createTestQueryClient())
 
     await expect(requireUser()).rejects.toBeDefined()
+  })
+
+  it('preserves cached workspace data on a temporary failure', async () => {
+    server.use(
+      http.get(
+        apiUrl('/users/me'),
+        () => new HttpResponse(null, { status: 503 }),
+      ),
+    )
+    const client = createTestQueryClient()
+    client.setQueryData(['projects'], ['Saved project'])
+    const { requireUser } = createAuthLoaders(client)
+    await expect(requireUser()).rejects.toMatchObject({
+      response: { status: 503 },
+    })
+    expect(client.getQueryData(['projects'])).toEqual(['Saved project'])
+  })
+
+  it('clears user-scoped data only after an explicit 401', async () => {
+    server.use(
+      http.get(
+        apiUrl('/users/me'),
+        () => new HttpResponse(null, { status: 401 }),
+      ),
+    )
+    const client = createTestQueryClient()
+    client.setQueryData(['projects'], ['Previous account project'])
+    const { requireUser } = createAuthLoaders(client)
+    await rejectedValue(requireUser())
+    expect(client.getQueryData(['projects'])).toBeUndefined()
   })
 })
 

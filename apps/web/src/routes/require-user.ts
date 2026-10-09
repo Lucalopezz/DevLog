@@ -20,21 +20,29 @@ export function createAuthLoaders(client: QueryClient) {
       return await client.query({
         queryKey: currentUserQueryKey,
         queryFn: getCurrentUser,
+        // Let the route error boundary coordinate recovery with the shared
+        // health round instead of adding a separate loader retry sequence.
         retry: false,
       })
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 401) {
+        // A confirmed invalid session must not leave another account's cached
+        // workspace available after the next login. Temporary errors skip this.
+        await client.cancelQueries()
+        client.clear()
         throw redirect('/login')
       }
 
+      // Propagate temporary failures to the route error boundary. Treating them
+      // as "no user" would send a valid session to login during a cold start.
       throw error
     }
   }
 
-/**
- * Loader for pages intended only for guests.
- * A 401 response is expected here: it means there is no session.
- */
+  /**
+   * Loader for pages intended only for guests.
+   * A 401 response is expected here: it means there is no session.
+   */
   async function redirectAuthenticatedUser(): Promise<void> {
     try {
       await client.query({

@@ -21,6 +21,8 @@ import TechnicalEntriesPage from '@/features/technical-entry/pages/technical-ent
 import { GuestOnlyRoute } from './guest-only-route'
 import { RootLayout } from './root-layout'
 import { createAuthLoaders } from './require-user'
+import { RouteError } from './route-error'
+import { RouteLoading } from './route-loading'
 
 /**
  * Builds the production route tree around the supplied cache.
@@ -36,7 +38,8 @@ export function createAppRoutes(client: QueryClient): RouteObject[] {
     {
       // The fallback prevents protected routes from flashing before their
       // session loader resolves. Public routes have no blocking loader.
-      HydrateFallback: () => null,
+      HydrateFallback: RouteLoading,
+      ErrorBoundary: RouteError,
       children: [
         {
           index: true,
