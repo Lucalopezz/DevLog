@@ -4,6 +4,37 @@
 
 DevLog is a pnpm/Turborepo monorepo. Application code lives in `apps/`: `apps/api` is the NestJS backend, with source in `src/` and end-to-end tests in `test/`; `apps/web` is the React + Vite frontend, with code in `src/` and static files in `public/`. Reserve `packages/` for genuinely shared workspace packages. Infrastructure is in `docker/`, while project decisions and setup notes live in `docs/`.
 
+## Project Skills
+
+Project-specific skills are versioned in `.agents/skills/`. Read and apply only
+the skills relevant to the task; their linked guides and current source provide
+the detailed context.
+
+- Before creating or moving a repository file, read and apply
+  [devlog-structure](.agents/skills/devlog-structure/SKILL.md) to choose its owner,
+  location, and dependency boundaries.
+- During planning and implementation of requested changes, apply
+  [devlog-suggestions](.agents/skills/devlog-suggestions/SKILL.md) to surface useful
+  options and newly discovered questions. Invite user input on consequential
+  choices while continuing independent work. Do not manufacture questions for
+  routine details or repeat requests for already settled decisions.
+- Select the specialist skills below when the work matches their scope. Skills
+  supplement these guidelines and reference maintained documentation rather than
+  replacing it. Keep the learning-focused explanations required below.
+
+| Skill | When to apply |
+| --- | --- |
+| [devlog-structure](.agents/skills/devlog-structure/SKILL.md) | Creating or moving files, features, tests, or shared code. |
+| [devlog-backend-domain](.agents/skills/devlog-backend-domain/SKILL.md) | Implementing domain rules, use cases, and backend boundaries. |
+| [devlog-ui-design](.agents/skills/devlog-ui-design/SKILL.md) | Creating or changing screens, components, and interactions. |
+| [devlog-frontend-data-flow](.agents/skills/devlog-frontend-data-flow/SKILL.md) | Connecting forms, API calls, queries, mutations, and URL state. |
+| [devlog-testing](.agents/skills/devlog-testing/SKILL.md) | Choosing tests and validation for changed behavior. |
+| [devlog-database](.agents/skills/devlog-database/SKILL.md) | Changing Prisma models, migrations, or persistence behavior. |
+| [devlog-auth-ownership](.agents/skills/devlog-auth-ownership/SKILL.md) | Changing authentication, sessions, or access to owned resources. |
+| [devlog-documentation](.agents/skills/devlog-documentation/SKILL.md) | Updating behavior, contract, architecture, or setup documentation. |
+| [devlog-architecture-review](.agents/skills/devlog-architecture-review/SKILL.md) | Reviewing feature or refactor architecture when requested. |
+| [devlog-suggestions](.agents/skills/devlog-suggestions/SKILL.md) | Discussing useful options and questions throughout requested work. |
+
 ## Language Standard
 
 English is the standard language for the application and all repository content.

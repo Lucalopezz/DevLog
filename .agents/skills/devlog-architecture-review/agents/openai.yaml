@@ -1,0 +1,3 @@
+interface:
+  display_name: "DevLog Architecture Review"
+  short_description: "Review responsibilities, boundaries, and trade-offs"

@@ -1,0 +1,3 @@
+interface:
+  display_name: "DevLog Auth and Ownership"
+  short_description: "Protect sessions and access to user-owned records"

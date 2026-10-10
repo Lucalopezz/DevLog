@@ -28,6 +28,7 @@ Use this table as your starting point. Most questions are addressed in the liste
 | How are knowledge totals and issue composition calculated?            | [`guides/knowledge-overview.md`](guides/knowledge-overview.md)                 |
 | How do project environments work?                                     | [`guides/project-environments-plan.md`](guides/project-environments-plan.md)   |
 | How is the monorepo structured?                                       | [`guides/monorepo.md`](guides/monorepo.md)                                     |
+| Which project skills guide coding-agent work?                         | [`../AGENTS.md#project-skills`](../AGENTS.md#project-skills)                    |
 | Which commands are used frequently?                                   | [`guides/utils.md`](guides/utils.md)                                           |
 
 For setup questions, first read the [root README](../README.md). It contains prerequisites, installation instructions, and the main commands.

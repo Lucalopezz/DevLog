@@ -1,0 +1,3 @@
+interface:
+  display_name: "DevLog Structure"
+  short_description: "Choose file locations and dependency boundaries"

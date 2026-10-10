@@ -1,0 +1,3 @@
+interface:
+  display_name: "DevLog Database"
+  short_description: "Evolve Prisma models, migrations, and persistence"

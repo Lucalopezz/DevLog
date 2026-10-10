@@ -1,0 +1,3 @@
+interface:
+  display_name: "DevLog Frontend Data Flow"
+  short_description: "Connect forms, requests, URL state, and query cache"

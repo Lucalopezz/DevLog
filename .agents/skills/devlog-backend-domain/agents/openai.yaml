@@ -1,0 +1,3 @@
+interface:
+  display_name: "DevLog Backend Domain"
+  short_description: "Model business rules and backend responsibilities"
