@@ -25,6 +25,15 @@ create, edit, and remove project environments, commands, and resources, add and
 remove technologies, and manage project metadata and lifecycle. Archived projects are read-only, and
 permanent deletion is protected by confirmation.
 
+Only the project Overview shows a Repositories card below Technologies. It
+lists all resources of type `REPOSITORY`, including GitHub and other providers,
+with links that open in a new tab. Add or manage these links in Resources.
+The card follows every page of the existing resource API with a type filter;
+filtering only the Resources tab's current page would hide other repositories.
+Its separate query shares the resource cache root, so resource mutations also
+refresh the card. Loading, empty results, and failures with retry are distinct;
+unsupported URL schemes are displayed as text.
+
 The `/environments` page searches and filters the user's environment records
 by name or runtime details, category, and project. Its filters and page are
 kept in the URL. Environment details describe runtime conditions and do not

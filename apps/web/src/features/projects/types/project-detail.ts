@@ -35,6 +35,10 @@ export type ProjectDetailListParams = {
 export type ProjectResourceType =
   "REPOSITORY" | "DOCUMENTATION" | "LOCAL_URL" | "EXTERNAL_URL" | "OTHER";
 
+export type ProjectResourceListParams = ProjectDetailListParams & {
+  type?: ProjectResourceType;
+};
+
 export type ProjectResource = {
   id: string;
   projectId: string;

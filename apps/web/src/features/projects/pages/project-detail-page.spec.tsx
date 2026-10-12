@@ -43,6 +43,13 @@ const resource: ProjectResource = {
   createdAt: project.createdAt,
   updatedAt: project.updatedAt,
 }
+const repository: ProjectResource = {
+  ...resource,
+  id: 'repository-1',
+  label: 'Project repository',
+  url: 'https://github.com/example/devlog',
+  type: 'REPOSITORY',
+}
 const entry = createTechnicalEntry({
   title: 'Fix query synchronization',
   type: 'ISSUE',
@@ -76,9 +83,10 @@ function installDetailHandlers() {
     http.get(apiUrl(`/project/${project.id}/commands`), () =>
       HttpResponse.json(collection([command], 8)),
     ),
-    http.get(apiUrl(`/project/${project.id}/resources`), () =>
-      HttpResponse.json(collection([resource], 7)),
-    ),
+    http.get(apiUrl(`/project/${project.id}/resources`), ({ request }) => {
+      const isRepositories = new URL(request.url).searchParams.get('type') === 'REPOSITORY'
+      return HttpResponse.json(isRepositories ? collection([]) : collection([resource], 7))
+    }),
   )
 }
 
@@ -97,6 +105,177 @@ async function openTab(user: ReturnType<typeof renderDetail>['user'], name: stri
 }
 
 describe('ProjectDetailPage', () => {
+  it('shows every repository page only in Overview without depending on Resources pagination', async () => {
+    installDetailHandlers()
+    const secondRepository = {
+      ...repository,
+      id: 'repository-2',
+      label: 'Worker repository',
+      url: 'https://gitlab.com/example/worker',
+    }
+    const repositoryPages: number[] = []
+    server.use(
+      http.get(apiUrl(`/project/${project.id}/resources`), ({ request }) => {
+        const params = new URL(request.url).searchParams
+        const page = Number(params.get('page'))
+        if (params.get('type') !== 'REPOSITORY') {
+          return HttpResponse.json(collection([resource], 7, page))
+        }
+        repositoryPages.push(page)
+        expect(params.get('perPage')).toBe('100')
+        expect(params.get('sort')).toBe('label')
+        expect(params.get('sortDir')).toBe('asc')
+        // The server can cap page size; its metadata determines completion.
+        return HttpResponse.json({
+          data: [page === 1 ? repository : secondRepository],
+          meta: { currentPage: page, perPage: 1, lastPage: 2, total: 2 },
+        })
+      }),
+    )
+    const { user } = renderDetail()
+    const card = await screen.findByRole('region', { name: 'Repositories' })
+    for (const item of [repository, secondRepository]) {
+      const link = await within(card).findByRole('link', { name: `${item.label} (opens in a new tab)` })
+      expect(link).toHaveAttribute('href', item.url)
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', 'noreferrer')
+    }
+    expect(within(card).queryByText(resource.label)).toBeNull()
+    expect(repositoryPages).toEqual([1, 2])
+    await openTab(user, 'Resources')
+    expect(screen.queryByRole('region', { name: 'Repositories' })).toBeNull()
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await screen.findByText(/Page 2 of 2/)
+    await openTab(user, 'Overview')
+    expect(await screen.findByRole('link', { name: `${repository.label} (opens in a new tab)` })).toBeVisible()
+    expect(screen.getByRole('link', { name: `${secondRepository.label} (opens in a new tab)` })).toBeVisible()
+  })
+
+  it('shows an empty Repositories card when the project has only other resources', async () => {
+    installDetailHandlers()
+    renderDetail()
+    expect(await screen.findByText('No repositories have been recorded for this project.')).toBeVisible()
+    expect(screen.queryByRole('link', { name: /Project docs/ })).toBeNull()
+  })
+
+  it('keeps the overview available while repositories load, fail, and retry', async () => {
+    installDetailHandlers()
+    const gate = deferred<void>()
+    let requests = 0
+    server.use(
+      http.get(apiUrl(`/project/${project.id}/resources`), async ({ request }) => {
+        if (new URL(request.url).searchParams.get('type') !== 'REPOSITORY') {
+          return HttpResponse.json(collection([resource], 7))
+        }
+        requests += 1
+        if (requests === 1) {
+          await gate.promise
+          return HttpResponse.json({ message: 'Offline' }, { status: 500 })
+        }
+        return HttpResponse.json(collection([repository]))
+      }),
+    )
+    const { user } = renderDetail()
+    try {
+      const card = await screen.findByRole('region', { name: 'Repositories' })
+      expect(within(card).getByRole('status')).toHaveTextContent('Loading repositories...')
+      expect(screen.getByRole('heading', { name: 'About the project' })).toBeVisible()
+    } finally {
+      gate.resolve(undefined)
+    }
+    const card = screen.getByRole('region', { name: 'Repositories' })
+    expect(await within(card).findByText('Could not load this section.')).toBeVisible()
+    expect(within(card).queryByText('No repositories have been recorded for this project.')).toBeNull()
+    await user.click(within(card).getByRole('button', { name: 'Try again' }))
+    expect(await within(card).findByRole('link', { name: /Project repository/ })).toBeVisible()
+    expect(requests).toBe(2)
+  })
+
+  it('displays a repository with an unsupported URL as text', async () => {
+    installDetailHandlers()
+    server.use(
+      http.get(apiUrl(`/project/${project.id}/resources`), ({ request }) =>
+        HttpResponse.json(collection(new URL(request.url).searchParams.has('type')
+          ? [{ ...repository, url: 'javascript:alert(1)' }]
+          : [resource])),
+      ),
+    )
+    renderDetail()
+    const card = await screen.findByRole('region', { name: 'Repositories' })
+    expect(await within(card).findByText(repository.label)).toBeVisible()
+    expect(within(card).getByText('javascript:alert(1)')).toBeVisible()
+    expect(within(card).queryByRole('link')).toBeNull()
+  })
+
+  it('refreshes repositories after resource creation, editing, type changes, and deletion', async () => {
+    installDetailHandlers()
+    let records: ProjectResource[] = []
+    server.use(
+      http.get(apiUrl(`/project/${project.id}/resources`), ({ request }) => {
+        const type = new URL(request.url).searchParams.get('type')
+        return HttpResponse.json(collection(type ? records.filter((item) => item.type === type) : records))
+      }),
+      http.post(apiUrl(`/project/${project.id}/resources`), async ({ request }) => {
+        const created = { ...repository, ...await request.json() as ProjectResource }
+        records = [created]
+        return HttpResponse.json(created, { status: 201 })
+      }),
+      http.patch(apiUrl(`/project/${project.id}/resources/${repository.id}`), async ({ request }) => {
+        const updated = { ...records[0], ...await request.json() as ProjectResource }
+        records = [updated]
+        return HttpResponse.json(updated)
+      }),
+      http.delete(apiUrl(`/project/${project.id}/resources/${repository.id}`), () => {
+        records = []
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    const { user } = renderDetail()
+    await screen.findByText('No repositories have been recorded for this project.')
+    await openTab(user, 'Resources')
+    await user.click(screen.getByRole('button', { name: 'New resource' }))
+    let dialog = screen.getByRole('dialog', { name: 'New resource' })
+    await user.type(within(dialog).getByRole('textbox', { name: 'Label' }), repository.label)
+    await user.type(within(dialog).getByRole('textbox', { name: 'URL' }), repository.url)
+    await user.selectOptions(within(dialog).getByRole('combobox', { name: 'Type' }), 'REPOSITORY')
+    await user.click(within(dialog).getByRole('button', { name: 'Create resource' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    await openTab(user, 'Overview')
+    expect(await screen.findByRole('link', { name: /Project repository/ })).toHaveAttribute('href', repository.url)
+
+    await openTab(user, 'Resources')
+    await user.click(screen.getByRole('button', { name: `Edit ${repository.label}` }))
+    dialog = screen.getByRole('dialog', { name: 'Edit resource' })
+    await user.clear(within(dialog).getByRole('textbox', { name: 'URL' }))
+    await user.type(within(dialog).getByRole('textbox', { name: 'URL' }), 'https://github.com/example/renamed')
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    await openTab(user, 'Overview')
+    await waitFor(() => expect(screen.getByRole('link', { name: /Project repository/ })).toHaveAttribute('href', 'https://github.com/example/renamed'))
+
+    for (const type of ['DOCUMENTATION', 'REPOSITORY']) {
+      await openTab(user, 'Resources')
+      await user.click(screen.getByRole('button', { name: `Edit ${repository.label}` }))
+      dialog = screen.getByRole('dialog', { name: 'Edit resource' })
+      await user.selectOptions(within(dialog).getByRole('combobox', { name: 'Type' }), type)
+      await user.click(within(dialog).getByRole('button', { name: 'Save changes' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+      await openTab(user, 'Overview')
+      if (type === 'DOCUMENTATION') {
+        expect(await screen.findByText('No repositories have been recorded for this project.')).toBeVisible()
+      } else {
+        expect(await screen.findByRole('link', { name: /Project repository/ })).toBeVisible()
+      }
+    }
+
+    await openTab(user, 'Resources')
+    await user.click(screen.getByRole('button', { name: `Delete ${repository.label}` }))
+    await user.click(screen.getByRole('button', { name: 'Delete resource' }))
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull())
+    await openTab(user, 'Overview')
+    expect(await screen.findByText('No repositories have been recorded for this project.')).toBeVisible()
+  })
+
   it('shows the parent skeleton, then Overview totals from metadata and technologies', async () => {
     installDetailHandlers()
     const gate = deferred<void>()
@@ -156,9 +335,10 @@ describe('ProjectDetailPage', () => {
     expect(within(panel).getByText('2. Command')).toBeVisible()
 
     panel = await openTab(user, 'Resources')
-    expect(within(panel).getByRole('link', { name: /Project docs/ })).toHaveAttribute('href', resource.url)
-    expect(within(panel).getByRole('link', { name: /Project docs/ })).toHaveAttribute('target', '_blank')
-    expect(within(panel).getByRole('link', { name: /Project docs/ })).toHaveAttribute('rel', 'noreferrer')
+    const resourceLink = within(panel).getByRole('link', { name: resource.url })
+    expect(resourceLink).toHaveAttribute('href', resource.url)
+    expect(resourceLink).toHaveAttribute('target', '_blank')
+    expect(resourceLink).toHaveAttribute('rel', 'noreferrer')
 
     panel = await openTab(user, 'Technical entries')
     expect(
@@ -182,7 +362,10 @@ describe('ProjectDetailPage', () => {
     const gate = deferred<void>()
     let requestCount = 0
     server.use(
-      http.get(apiUrl(`/project/${project.id}/${endpoint}`), async () => {
+      http.get(apiUrl(`/project/${project.id}/${endpoint}`), async ({ request }) => {
+        if (new URL(request.url).searchParams.get('type') === 'REPOSITORY') {
+          return HttpResponse.json(collection([]))
+        }
         requestCount += 1
         if (requestCount === 1) {
           await gate.promise
@@ -220,6 +403,9 @@ describe('ProjectDetailPage', () => {
         return HttpResponse.json(collection([command], 8, page))
       }),
       http.get(apiUrl(`/project/${project.id}/resources`), ({ request }) => {
+        if (new URL(request.url).searchParams.get('type') === 'REPOSITORY') {
+          return HttpResponse.json(collection([]))
+        }
         const page = Number(new URL(request.url).searchParams.get('page'))
         seen.resources.push(page)
         return HttpResponse.json(collection([resource], 7, page))
@@ -352,7 +538,7 @@ describe('ProjectDetailPage', () => {
     await user.type(within(dialog).getByRole('textbox', { name: 'Title' }), 'Fix query synchronization')
     await user.type(within(dialog).getByRole('textbox', { name: 'Context' }), 'Investigate a stale project list.')
     await user.click(within(dialog).getByRole('button', { name: 'Create entry' }))
-    expect(await screen.findByRole('link', { name: entry.title })).toBeVisible()
+    expect(await screen.findByRole('link', { name: new RegExp(entry.title) })).toBeVisible()
     expect(postBody).toMatchObject({ projectId: project.id })
     await openTab(user, 'Overview')
     expect(screen.getByText('1')).toBeVisible()

@@ -5,7 +5,7 @@ import { Link } from "react-router";
 import { presentTechnicalEntryType } from "@/features/technical-entry/presentation";
 import type { ProjectCommand, ProjectResource } from "../types/project-detail";
 import type { TechnicalEntry } from "@/features/technical-entry/types/technical-entry";
-import { resourcePresentation } from "../presentation";
+import { isSafeResourceUrl, resourcePresentation } from "../presentation";
 import { Button } from "@/components/ui/button";
 import { ProjectCommandDeleteButton } from "./project-command-delete-btn";
 import { ProjectResourceDeleteButton } from "./project-resource-delete-btn";
@@ -15,16 +15,6 @@ import {
   LoadingSection,
   SectionError,
 } from "./project-detail-section-ui";
-
-function isSafeResourceUrl(value: string) {
-  try {
-    // An API response is still untrusted input for an href. Only HTTP(S)
-    // resources should become links; other schemes remain readable text.
-    return ["http:", "https:"].includes(new URL(value).protocol);
-  } catch {
-    return false;
-  }
-}
 
 export function TechnicalEntriesSection({
   entries,
@@ -313,7 +303,10 @@ export function ResourcesSection({
                         title={resource.url}
                       >
                         <span className="truncate">{resource.url}</span>
-                        <ExternalLink aria-hidden="true" className="size-3 shrink-0" />
+                        <ExternalLink
+                          aria-hidden="true"
+                          className="size-3 shrink-0"
+                        />
                       </a>
                     ) : (
                       <p

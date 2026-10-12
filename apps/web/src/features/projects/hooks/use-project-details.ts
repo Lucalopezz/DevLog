@@ -5,6 +5,7 @@ import {
   listProjectTechnicalEntries,
   projectDetailKeys,
 } from "../api/list-project-details";
+import type { ProjectResource } from "../types/project-detail";
 
 const projectDetailParams = {
   page: 1,
@@ -52,6 +53,33 @@ export function useProjectResources(projectId: string, page = 1) {
     // making coordination between API, cache, and component explicit.
     queryKey: projectDetailKeys.resources(projectId, params),
     queryFn: () => listProjectResources(projectId, params),
+    enabled: Boolean(projectId),
+    retry: false,
+  });
+}
+
+export function useProjectRepositories(projectId: string) {
+  return useQuery({
+    queryKey: projectDetailKeys.repositories(projectId),
+    queryFn: async (): Promise<ProjectResource[]> => {
+      const repositories: ProjectResource[] = [];
+
+      // Filtering on the server includes repositories beyond the Resources
+      // tab's current page. Follow lastPage instead of imposing a list limit.
+      for (let page = 1; ; page += 1) {
+        const result = await listProjectResources(projectId, {
+          page,
+          perPage: 100,
+          type: "REPOSITORY",
+          sort: "label",
+          sortDir: "asc",
+        });
+        repositories.push(...result.data);
+        if (page >= result.meta.lastPage) break;
+      }
+
+      return repositories;
+    },
     enabled: Boolean(projectId),
     retry: false,
   });

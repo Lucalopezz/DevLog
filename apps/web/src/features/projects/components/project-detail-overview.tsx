@@ -9,6 +9,7 @@ import { formatRelativeDate } from "@/lib/date";
 import { presentProjectStatus } from "../presentation";
 import type { Project } from "../types/project";
 import { ProjectInlineContent } from "./project-inline-content";
+import { ProjectRepositoriesCard } from "./project-repositories-card";
 
 type ProjectDetailOverviewProps = {
   project: Project;
@@ -57,7 +58,7 @@ export function ProjectDetailOverview({
         <Metric icon={ExternalLink} label="Resources" value={resourcesTotal} />
       </section>
 
-      {/* Grid items stretch by default; let the shorter stack card keep its own height. */}
+      {/* Keep the sidebar cards stacked at their natural heights. */}
       <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr] lg:items-start">
         <section className="min-w-0 rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm sm:p-8">
           <div className="mb-6 flex items-center gap-3">
@@ -95,39 +96,42 @@ export function ProjectDetailOverview({
           </dl>
         </section>
 
-        <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm sm:p-8">
-          <div className="mb-5 flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
-              <Code2 className="size-5 text-primary" />
-            </span>
-            <div>
-              <h2 className="font-semibold">Technologies</h2>
-              <p className="text-sm text-muted-foreground">Recorded stack</p>
+        <div className="min-w-0 space-y-5">
+          <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm sm:p-8">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
+                <Code2 className="size-5 text-primary" />
+              </span>
+              <div>
+                <h2 className="font-semibold">Technologies</h2>
+                <p className="text-sm text-muted-foreground">Recorded stack</p>
+              </div>
             </div>
-          </div>
 
-          {project.technologies?.length ? (
-            <ul className="flex flex-wrap gap-2">
-              {project.technologies.map((technology) => (
-                <li
-                  className="rounded-lg border border-border/60 bg-background/70 px-3 py-2 text-sm"
-                  key={technology.id}
-                >
-                  <span className="font-medium">{technology.name}</span>
-                  {technology.version ? (
-                    <span className="ml-1.5 text-muted-foreground">
-                      {technology.version}
-                    </span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm leading-6 text-muted-foreground">
-              No technologies have been recorded yet.
-            </p>
-          )}
-        </section>
+            {project.technologies?.length ? (
+              <ul className="flex flex-wrap gap-2">
+                {project.technologies.map((technology) => (
+                  <li
+                    className="rounded-lg border border-border/60 bg-background/70 px-3 py-2 text-sm"
+                    key={technology.id}
+                  >
+                    <span className="font-medium">{technology.name}</span>
+                    {technology.version ? (
+                      <span className="ml-1.5 text-muted-foreground">
+                        {technology.version}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm leading-6 text-muted-foreground">
+                No technologies have been recorded yet.
+              </p>
+            )}
+          </section>
+          <ProjectRepositoriesCard projectId={project.id} />
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import type {
   ProjectCommandCollection,
   ProjectDetailListParams,
   ProjectResourceCollection,
+  ProjectResourceListParams,
 } from "../types/project-detail";
 import type { TechnicalEntryCollection } from "@/features/technical-entry/types/technical-entry";
 
@@ -57,13 +58,18 @@ export const projectDetailKeys = {
   resourcesRoot: (projectId: string) =>
     [...projectDetailKeys.all(projectId), "resources"] as const,
 
+  // This query returns every repository as an array, so its key must stay
+  // distinct from paginated resources while sharing their invalidation root.
+  repositories: (projectId: string) =>
+    [...projectDetailKeys.resourcesRoot(projectId), "repositories"] as const,
+
   technicalEntries: (projectId: string, params: ProjectDetailListParams) =>
     [...projectDetailKeys.technicalEntriesRoot(projectId), params] as const,
 
   commands: (projectId: string, params: ProjectDetailListParams) =>
     [...projectDetailKeys.commandsRoot(projectId), params] as const,
 
-  resources: (projectId: string, params: ProjectDetailListParams) =>
+  resources: (projectId: string, params: ProjectResourceListParams) =>
     [...projectDetailKeys.resourcesRoot(projectId), params] as const,
 };
 
@@ -95,7 +101,7 @@ export async function listProjectCommands(
 
 export async function listProjectResources(
   projectId: string,
-  params: ProjectDetailListParams = defaultParams,
+  params: ProjectResourceListParams = defaultParams,
 ): Promise<ProjectResourceCollection> {
   const { data } = await api.get<ProjectResourceCollection>(
     `/project/${projectId}/resources`,

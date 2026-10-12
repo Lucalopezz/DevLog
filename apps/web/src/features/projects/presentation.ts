@@ -56,3 +56,13 @@ export const resourcePresentation: Record<
   EXTERNAL_URL: { label: "External link", icon: Globe2 },
   OTHER: { label: "Resource", icon: ExternalLink },
 };
+
+export function isSafeResourceUrl(value: string) {
+  try {
+    // API URLs are untrusted href input. Both resource views allow HTTP(S)
+    // links and keep unsupported schemes readable as plain text.
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
