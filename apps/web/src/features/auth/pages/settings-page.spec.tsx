@@ -124,4 +124,102 @@ describe('SettingsPage', () => {
     expect(await screen.findByText('Passwords do not match.')).toBeVisible()
     expect(requestCount).toBe(0)
   })
+
+  it('preserves a rejected profile draft and the cached identity until a retry succeeds', async () => {
+    const account = createUser()
+    const updated = createUser({ name: 'Ada Byron' })
+    let attempts = 0
+    server.use(
+      http.get(apiUrl('/users/me'), () => HttpResponse.json(account)),
+      http.patch(apiUrl('/users/me'), () => {
+        attempts += 1
+        return attempts === 1
+          ? HttpResponse.json({ message: 'Profile could not be saved.' }, { status: 500 })
+          : HttpResponse.json(updated)
+      }),
+    )
+
+    const { user, client } = renderWithProviders(<SettingsPage />)
+    const name = await screen.findByRole('textbox', { name: 'Name' })
+    await user.clear(name)
+    await user.type(name, updated.name)
+    await user.click(screen.getByRole('button', { name: 'Save profile' }))
+
+    expect(await screen.findByText('Could not update your profile. Try again.')).toBeVisible()
+    expect(name).toHaveValue(updated.name)
+    expect(client.getQueryData(currentUserQueryKey)).toEqual(account)
+    await user.click(screen.getByRole('button', { name: 'Save profile' }))
+
+    expect(await screen.findByText('Profile updated successfully!')).toBeVisible()
+    expect(client.getQueryData(currentUserQueryKey)).toEqual(updated)
+    expect(attempts).toBe(2)
+  })
+
+  it('disables profile edits and repeated saves while its request is pending', async () => {
+    const gate = deferred<void>()
+    let requests = 0
+    server.use(
+      http.get(apiUrl('/users/me'), () => HttpResponse.json(createUser())),
+      http.patch(apiUrl('/users/me'), async () => {
+        requests += 1
+        await gate.promise
+        return HttpResponse.json(createUser({ name: 'Ada Byron' }))
+      }),
+    )
+
+    const { user } = renderWithProviders(<SettingsPage />)
+    const name = await screen.findByRole('textbox', { name: 'Name' })
+    await user.clear(name)
+    await user.type(name, 'Ada Byron')
+    try {
+      await user.click(screen.getByRole('button', { name: 'Save profile' }))
+      const pending = await screen.findByRole('button', { name: 'Saving...' })
+      expect(pending).toBeDisabled()
+      expect(name).toBeDisabled()
+      await user.click(pending)
+      expect(requests).toBe(1)
+    } finally {
+      gate.resolve(undefined)
+    }
+    expect(await screen.findByRole('button', { name: 'Save profile' })).toBeEnabled()
+  })
+
+  it('retains rejected password fields for correction and clears them only after a successful retry', async () => {
+    let attempts = 0
+    let submitted: unknown
+    server.use(
+      http.get(apiUrl('/users/me'), () => HttpResponse.json(createUser())),
+      http.patch(apiUrl('/users/me/password'), async ({ request }) => {
+        submitted = await request.json()
+        attempts += 1
+        return attempts === 1
+          ? HttpResponse.json({ message: 'Current password is incorrect.' }, { status: 422 })
+          : HttpResponse.json(createUser())
+      }),
+    )
+
+    const { user } = renderWithProviders(<SettingsPage />)
+    const current = await screen.findByLabelText('Current password')
+    const password = screen.getByLabelText('New password')
+    const confirmation = screen.getByLabelText('Confirm new password')
+    await user.type(current, 'wrong-password')
+    await user.type(password, 'new-password')
+    await user.type(confirmation, 'new-password')
+    await user.click(screen.getByRole('button', { name: 'Update password' }))
+
+    expect(await screen.findByText('Current password is incorrect.')).toBeVisible()
+    expect(current).toHaveValue('wrong-password')
+    expect(password).toHaveValue('new-password')
+    expect(confirmation).toHaveValue('new-password')
+    await user.clear(current)
+    await user.type(current, 'correct-password')
+    await user.click(screen.getByRole('button', { name: 'Update password' }))
+
+    expect(await screen.findByText('Password updated successfully!')).toBeVisible()
+    await waitFor(() => expect(current).toHaveValue(''))
+    expect(password).toHaveValue('')
+    expect(confirmation).toHaveValue('')
+    expect(submitted).toEqual({ currentPassword: 'correct-password', password: 'new-password', confirmPassword: 'new-password' })
+    expect(attempts).toBe(2)
+  })
 })
