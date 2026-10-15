@@ -30,13 +30,17 @@ describe('SearchProjectTechnologyUseCase', () => {
 
     const output = await useCase.execute({ userId: USER_ID });
 
-    expect(repository.searchForOwner).toHaveBeenCalledWith({
-      userId: USER_ID,
-      name: undefined,
-      projectId: undefined,
-      page: 1,
-      perPage: 15,
-    });
+    expect(repository.searchForOwner.mock.calls).toEqual([
+      [
+        {
+          userId: USER_ID,
+          name: undefined,
+          projectId: undefined,
+          page: 1,
+          perPage: 15,
+        },
+      ],
+    ]);
     expect(output).toEqual({
       items: [item],
       total: 31,
@@ -58,7 +62,7 @@ describe('SearchProjectTechnologyUseCase', () => {
 
     const output = await useCase.execute(input);
 
-    expect(repository.searchForOwner).toHaveBeenCalledWith(input);
+    expect(repository.searchForOwner.mock.calls).toEqual([[input]]);
     expect(output).toMatchObject({
       total: 21,
       currentPage: 3,

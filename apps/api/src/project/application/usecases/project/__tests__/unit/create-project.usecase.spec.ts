@@ -1,5 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ProjectEntity } from '@/project/domain/entities/project/project.entity';
+import { ProjectStatusEnum } from '@/project/domain/entities/project/project-status-enum';
 import { ProjectRepository } from '@/project/domain/repositories/project/project.repository';
 import { UserRepository } from '@/user/domain/repositories/user.repository';
 import { CreateProjectUseCase } from '../../create-project.usecase';
@@ -9,7 +10,7 @@ const USER_ID = '123e4567-e89b-42d3-a456-426614174000';
 describe('CreateProjectUseCase', () => {
   function makeUseCase() {
     const insert = jest
-      .fn<(entity: ProjectEntity) => Promise<void>>()
+      .fn<Promise<void>, [ProjectEntity]>()
       .mockResolvedValue(undefined);
     const findByNameAndOwnerId = jest.fn().mockResolvedValue(null);
     const projectRepository = {
@@ -81,7 +82,7 @@ describe('CreateProjectUseCase', () => {
       new ProjectEntity({
         userId: USER_ID,
         name: 'DevLog',
-        status: 'ACTIVE',
+        status: ProjectStatusEnum.ACTIVE,
       }),
     );
     const execution = useCase.execute({ userId: USER_ID, name: 'DevLog' });

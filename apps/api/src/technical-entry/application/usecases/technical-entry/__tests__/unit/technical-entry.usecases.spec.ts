@@ -2,10 +2,12 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { SearchResult } from '@/shared/domain/repositories/searchable.repository';
 import { TechnicalEntryEntity } from '@/technical-entry/domain/entities/technical-entry/technical-entry.entity';
 import { TechnicalEntryType } from '@/technical-entry/domain/entities/technical-entry/technical-entry-type.enum';
-import { TechnicalEntryRepository } from '@/technical-entry/domain/repositories/technical-entry/technical-entry.repository';
+import {
+  TechnicalEntryRepository,
+  TechnicalEntrySearchResult,
+} from '@/technical-entry/domain/repositories/technical-entry/technical-entry.repository';
 import { DeleteTechnicalEntryUseCase } from '../../delete-technical-entry.usecase';
 import { GetTechnicalEntryUseCase } from '../../get-technical-entry.usecase';
 import { UpdateTechnicalEntryUseCase } from '../../update-technical-entry.usecase';
@@ -53,7 +55,7 @@ class InMemoryTechnicalEntryRepository implements TechnicalEntryRepository {
     );
   }
 
-  search(): Promise<SearchResult<TechnicalEntryEntity>> {
+  search(): Promise<TechnicalEntrySearchResult> {
     return Promise.reject(new Error('Not implemented in this test'));
   }
 }

@@ -41,9 +41,7 @@ describe('Project archive relationships (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
-    applyGlobalConfig(app, {
-      getCorsAllowedOrigins: () => [],
-    } as EnvConfigService);
+    applyGlobalConfig(app, app.get(EnvConfigService));
     await app.init();
     prisma = app.get(PrismaService);
 

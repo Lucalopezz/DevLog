@@ -74,9 +74,13 @@ describe('AuthController', () => {
       response,
     );
 
-    expect(response.cookie.mock.calls[0]?.[2]).toEqual(
-      expect.objectContaining({ secure: true }),
-    );
+    expect(response.cookie.mock.calls).toEqual([
+      [
+        ACCESS_TOKEN_COOKIE,
+        'access-token',
+        expect.objectContaining({ secure: true }),
+      ],
+    ]);
   });
 
   it('clears the cookie using the same relevant attributes on logout', () => {

@@ -23,9 +23,7 @@ describe('Health (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
-    applyGlobalConfig(app, {
-      getCorsAllowedOrigins: () => [],
-    } as EnvConfigService);
+    applyGlobalConfig(app, app.get(EnvConfigService));
     await app.init();
   });
 
