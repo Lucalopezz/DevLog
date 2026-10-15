@@ -107,13 +107,38 @@ For frontend styling, prefer the Tailwind spacing and sizing scale over arbitrar
 
 ## Testing Guidelines
 
-API unit tests use Jest and belong beside source as `*.spec.ts`. End-to-end
-tests belong in `apps/api/test/` and use the `*.e2e-spec.ts` convention with
-Supertest. Add tests for new backend behavior and run the smallest relevant
-test command before submitting. The web app uses Vitest for unit/component
-tests and Playwright for browser tests. After frontend changes, run relevant
+Follow test-driven development (TDD) for behavior changes: write the test first,
+run it and confirm that it fails for the intended reason (Red), implement the
+smallest change that makes it pass (Green), then refactor while keeping the tests
+green. Do not implement a feature or bug fix before its test. When expanding
+coverage of existing behavior, write the characterization test first and check
+that its assertions detect a relevant defect; existing correct behavior may
+already make it pass.
+
+Every bug fix must include a regression test in the same focused change. First
+reproduce the bug with a failing test, then verify that the fix makes it pass.
+Choose the smallest test layer that can reproduce the bug with the necessary
+real collaborators; add integration or end-to-end coverage when an isolated unit
+test cannot protect the failing flow.
+
+Always preserve the existing frontend and backend test conventions and runner
+discovery rules:
+
+- API unit tests use Jest and belong in nearby `__tests__/unit/*.spec.ts`.
+- API repository integration tests belong in nearby
+  `__tests__/int/*.int.spec.ts` and use the isolated test database.
+- API end-to-end tests use Supertest in `apps/api/test/*.e2e-spec.ts`.
+- Web unit and component integration tests use Vitest, Testing Library, and MSW
+  in `*.spec.ts` or `*.spec.tsx` files beside the code they protect. Reuse
+  `apps/web/src/test/` helpers and factories.
+- Web browser tests use Playwright under `apps/web/e2e/`, following the applicable
+  configuration. Keep intercepted-API tests distinct from full-stack journeys.
+
+Run the smallest relevant tests first. After frontend changes, run relevant
 focused tests plus web lint and build commands; use browser tests when changing
-browser-level behavior.
+browser-level behavior. Follow [the API testing guide](docs/guides/testing.md)
+and [the frontend testing guide](docs/guides/frontend-testing.md) for setup,
+isolation, commands, and the limits of each layer.
 
 ## Commit & Pull Request Guidelines
 
