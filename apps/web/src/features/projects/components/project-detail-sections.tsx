@@ -56,6 +56,7 @@ export function TechnicalEntriesSection({
             // A single anchor makes every part of the card a keyboard-accessible
             // navigation target and avoids nesting the title link inside it.
             <Link
+              aria-label={entry.title}
               className="group block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               key={entry.id}
               to={`/technical-entries/${entry.id}`}

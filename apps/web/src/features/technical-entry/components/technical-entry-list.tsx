@@ -41,6 +41,9 @@ export function TechnicalEntryList({
           return (
             <li className="min-w-0" key={entry.id}>
               <Link
+                // Keep the whole card clickable while naming only its destination,
+                // independently of the nested article's accessibility semantics.
+                aria-label={entry.title}
                 className="group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 to={`/technical-entries/${entry.id}`}
               >

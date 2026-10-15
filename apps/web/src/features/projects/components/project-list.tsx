@@ -28,6 +28,9 @@ export function ProjectList({ projects }: ProjectListProps) {
           return (
             <li key={project.id}>
               <Link
+                // A card contains an article and metadata; name its destination
+                // explicitly so browsers expose a short, stable link name.
+                aria-label={project.name}
                 className="group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 to={`/projects/${project.id}`}
               >
