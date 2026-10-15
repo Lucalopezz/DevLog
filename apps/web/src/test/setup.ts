@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest'
+import type {} from 'vitest/jsdom'
 
 import { cleanup } from '@testing-library/react'
 import { toast } from 'sonner'
@@ -23,6 +24,11 @@ beforeAll(() => {
 
 beforeEach(() => {
   unexpectedRequests.length = 0
+
+  // Vitest preserves Node's storage globals when they exist. Use the actual
+  // jsdom window so browser tests never depend on Node's file-backed storage.
+  vi.stubGlobal('localStorage', jsdom.window.localStorage)
+  vi.stubGlobal('sessionStorage', jsdom.window.sessionStorage)
 
   // RootLayout and hook tests share one stable media-query object per query.
   vi.stubGlobal('matchMedia', createMatchMediaController().matchMedia)
