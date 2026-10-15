@@ -1,6 +1,8 @@
 # Frontend testing implementation plan
 
-Status: **Parts 0–6 implemented; Parts 7–9 remain proposed**. Source baseline:
+Status: **Parts 0–6 and 8 implemented; Part 7 skipped; Part 9 partially implemented**.
+Six real-stack browser journeys and per-test cleanup are implemented as of
+2026-10-15. CI and the dedicated tag browser journey remain proposed. Source baseline:
 commit `e608071`, inspected on 2026-09-14; completion review against `15df521`
 on 2026-09-15 (the intervening commit adds the draft testing documents).
 Recheck the named source files before implementing each part if the app changes.
@@ -1390,6 +1392,13 @@ browser limitation is explicit. Add Firefox/WebKit or screenshot baselines
 only after the initial Chromium suite is reliable and the benefit is clear.
 
 ## Part 9 — Full-stack journeys, CI, and completion
+
+Implemented entry point: `pnpm --filter web test:e2e:full-stack`. The maintained
+[setup guide](frontend-testing.md#full-stack-browser-journeys) describes the
+current configuration and its six journeys. `e2e/fixtures/real-api.ts` owns
+account/manifest tracking; `apps/api/scripts/cleanup-e2e-users.ts` removes only
+tracked E2E accounts after validating the test target. The inventory and CI
+proposals below include follow-up work and are not a completion claim.
 
 **Goal:** establish that the built frontend, real authentication, API contracts,
 and database work together, then make the checks repeatable. Keep exhaustive

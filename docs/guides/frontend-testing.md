@@ -2,7 +2,8 @@
 
 Status: learning guide and incremental strategy. Parts 0–6 and 8 of the
 [implementation plan](frontend-testing-plan.md) are implemented. Part 7 was
-intentionally skipped; full-stack coverage remains planned for Part 9.
+intentionally skipped. Part 9 now includes six full-stack browser journeys;
+its CI rollout and dedicated tag journey remain planned.
 
 This guide starts with the concepts. Read it before Part 0 of the plan. Examples
 use DevLog's current React, React Router, React Hook Form, Zod, Axios, and
@@ -90,7 +91,7 @@ The intercepted Part 8 suite runs with `pnpm --filter web typecheck:e2e` and
 binary inside the ignored web package directory first:
 
 ```bash
-PLAYWRIGHT_BROWSERS_PATH=apps/web/.playwright-browsers pnpm --filter web exec playwright install chromium
+pnpm --filter web exec env PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright install chromium
 ```
 
 The suite builds a fresh preview and replaces every API request with an
@@ -108,7 +109,67 @@ There are two distinct modes:
 
 A mocked login response does not prove that the backend sets a usable cookie.
 A successful Supertest login does not prove the browser accepts that cookie
-under the configured origins. We need a small full-stack suite for that seam.
+under the configured origins. The full-stack suite covers that seam.
+
+#### Full-stack browser journeys
+
+Prepare `apps/api/.env.test` from its example. Its PostgreSQL credentials must
+match `database-test` in `docker/compose.yaml`; the database name must contain
+an underscore-separated `test` segment, such as `devlog_test`. This is also
+checked by the narrowly scoped E2E cleanup command.
+
+From the repository root:
+
+```bash
+NODE_ENV=test pnpm --filter api exec prisma generate
+pnpm --filter api db:test:up
+pnpm --filter api build
+pnpm --filter web typecheck:e2e
+pnpm --filter web test:e2e:full-stack
+```
+
+`playwright.full-stack.config.ts` starts the compiled Nest API on
+`http://localhost:3001` and builds/serves the frontend on
+`http://localhost:4173`. It sets the API's explicit CORS origin and the frontend's
+API URL before building. Startup waits for health; API initialization also
+connects Prisma. Existing servers are never reused. Keep `localhost` consistent
+across both origins so the browser exercises the intended cookie policy.
+
+The six independent journeys cover:
+
+- Registration, browser login, cookie metadata, protected reload, and logout.
+- Account switching in one browser without showing the previous user's projects.
+- Creating a project and linked entry, editing content, and reading it after reload.
+- Editing, archiving, restoring, and deleting a project.
+- A successful solution attempt, reopening, and entry archive/restore/delete.
+- Profile persistence and signing in with a changed password.
+
+`e2e/fixtures/real-api.ts` creates unique prerequisite accounts through the real
+HTTP API. The authentication journey registers through the UI. Every journey
+signs in through the browser and uses a fresh context, with no intercepted API
+responses or shared authentication state. Reload assertions establish that
+results survive disposal of the in-memory query cache.
+
+The fixture records created user IDs in `test-results/full-stack/**/created-users.json`
+and invokes the API-owned cleanup in `finally`, including after assertions fail.
+Cleanup deletes only tracked E2E accounts; their related records cascade. If a
+process is interrupted, read the manifest before the next run and pass its IDs:
+
+```bash
+pnpm --filter api db:test:cleanup-users -- <user-uuid> <another-user-uuid>
+```
+
+Run intercepted browser tests, full-stack tests, and API database suites
+sequentially in one checkout. Browser configurations rebuild the same `dist`
+directory and use port 4173; repository suites also clear shared test data.
+Full-stack traces/reports are separate under `test-results/full-stack` and
+`playwright-report/full-stack`. Intercepted runs use the sibling `mocked`
+directories so they cannot erase full-stack traces or interrupted-run manifests.
+These artifacts and account manifests are ignored. Open either HTML report with
+`pnpm --filter web exec playwright show-report playwright-report/full-stack`
+or the equivalent `playwright-report/mocked` path.
+Local HTTP tests establish the test cookie policy; production HTTPS deployment
+behavior still needs a check using the deployed origins.
 
 ### Visual and accessibility checks
 
@@ -271,7 +332,8 @@ the application keeps its normal dependency, while a test controls the instance.
 - jsdom does not establish actual responsive layout, browser cookie policy,
   scrolling geometry, or real clipboard permissions.
 - An MSW success response does not prove the API accepts the payload. Keep
-  request expectations aligned with DTOs and add full-stack journeys.
+  request expectations aligned with DTOs and use full-stack journeys for the
+  real service boundary.
 - Disabling an action is user experience protection; backend authorization and
   ownership rules remain mandatory.
 - A schema test cannot prove a field is labeled or reachable by keyboard.
@@ -353,10 +415,10 @@ bypasses the integration that the test is meant to establish.
 
 Keep full-stack tests few and independent. They provide confidence at service
 boundaries but take longer to prepare and diagnose than a focused component
-test. The plan's [Part 9](frontend-testing-plan.md#part-9--full-stack-journeys-ci-and-completion)
-specifies the database lifecycle, environment pitfalls, journeys, CI jobs and
-completion checklist. This remains a plan; none of those checks are installed
-by editing these documents.
+test. The [full-stack setup](#full-stack-browser-journeys) describes the installed
+suite. The plan's [Part 9](frontend-testing-plan.md#part-9--full-stack-journeys-ci-and-completion)
+also records follow-up journeys, proposed CI jobs, and a completion checklist;
+CI remains pending.
 
 ## 12. How to judge whether a test is useful
 

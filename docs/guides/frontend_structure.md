@@ -178,6 +178,8 @@ features/projects/
 
 This proximity makes it easier to remove or change a feature without leaving orphaned tests in a global directory.
 
-Browser tests live in `e2e/mocked/` and use Playwright. See the
+Browser tests use Playwright in `e2e/mocked/` for intercepted APIs and
+`e2e/full-stack/` for the real Nest API and test database. Shared Node-only
+browser fixtures belong in `e2e/fixtures/`. See the
 [frontend testing guide](frontend-testing.md) for the responsibilities of each
 test layer.

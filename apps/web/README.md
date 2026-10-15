@@ -186,14 +186,22 @@ pnpm --filter web lint
 # Run frontend unit/component tests
 pnpm --filter web test
 
-# Run browser end-to-end tests
+# Run browser tests with intercepted API responses
 pnpm --filter web test:e2e
+
+# Run real browser/API/database journeys after preparing the test stack
+pnpm --filter web test:e2e:full-stack
 
 # Preview the generated build locally
 pnpm --filter web preview
 ```
 
 Vite usually serves the app at `http://localhost:5173`.
+
+The [frontend testing guide](../../docs/guides/frontend-testing.md#full-stack-browser-journeys)
+explains Chromium installation, isolated database preparation, API compilation,
+the two browser configurations, and cleanup. Run database suites and both browser
+configurations sequentially in a shared checkout.
 
 ## Foundation decisions
 
