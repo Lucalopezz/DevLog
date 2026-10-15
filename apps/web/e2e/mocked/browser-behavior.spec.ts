@@ -4,12 +4,12 @@ import { authenticatedApi, entry, entryId, guestApi, mockApi, project, projectId
 test('mobile drawer exposes working links and closes after navigation', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   const assertNoUnexpected = await mockApi(page, authenticatedApi)
-  await page.goto('/')
+  await page.goto('/dashboard')
   await page.getByRole('button', { name: 'Open navigation menu' }).click()
   const drawer = page.getByRole('dialog')
   await expect(drawer).toBeVisible()
   await expect(drawer.getByText('Ada Lovelace')).toBeVisible()
-  await expect(drawer.getByRole('button', { name: /Quick Capture/ })).toBeDisabled()
+  await expect(drawer.getByRole('button', { name: /Quick Capture/ })).toBeEnabled()
 
   await drawer.getByRole('link', { name: 'Projects' }).focus()
   await page.keyboard.press('Enter')
@@ -24,7 +24,7 @@ test('mobile drawer exposes working links and closes after navigation', async ({
 
 test('dashboard stays available when the viewport changes to mobile', async ({ page }) => {
   const assertNoUnexpected = await mockApi(page, authenticatedApi)
-  await page.goto('/')
+  await page.goto('/dashboard')
   await expect(page.getByRole('heading', { name: 'Welcome back, Ada.' })).toBeVisible()
 
   await page.setViewportSize({ width: 390, height: 844 })
@@ -38,7 +38,7 @@ test('desktop sidebar collapses and identifies active entry scope', async ({ pag
   const assertNoUnexpected = await mockApi(page, authenticatedApi)
   await page.goto('/technical-entries/archived')
   const archived = page.getByRole('link', { name: 'Archived Entries' })
-  const active = page.getByRole('link', { name: 'Technical Journal' })
+  const active = page.getByRole('link', { name: 'All Entries', exact: true })
   await expect(archived).toHaveAttribute('aria-current', 'page')
   await expect(active).not.toHaveAttribute('aria-current', 'page')
 
@@ -95,7 +95,7 @@ test('keyboard submit reports login errors and the built app renders the dashboa
   assertNoUnexpected()
 
   const authenticated = await mockApi(page, authenticatedApi)
-  await page.goto('/')
+  await page.goto('/dashboard')
   await expect(page.getByRole('heading', { name: 'Welcome back, Ada.' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Recent journal entries' })).toBeVisible()
   await expect(page.locator('.tsqd-parent-container')).toHaveCount(0)

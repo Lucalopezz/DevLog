@@ -31,12 +31,16 @@ test('an authenticated user can open and reload every protected route', async ({
   const routes = [
     ['/dashboard', 'Welcome back, Ada.'],
     ['/account', 'User account'],
+    ['/settings', 'Settings'],
+    ['/activity-timeline', 'Activity Timeline'],
+    ['/knowledge-overview', 'Knowledge Overview'],
     ['/projects', 'Projects'],
     [`/projects/${projectId}`, 'DevLog'],
     ['/technical-entries', 'Technical journal'],
     [`/technical-entries/${entryId}`, 'Understand query invalidation'],
     ['/technical-entries/archived', 'Archived technical entries'],
     ['/tags', 'Tags'],
+    ['/technologies', 'Technologies'],
     ['/environments', 'Environments'],
   ] as const
 
