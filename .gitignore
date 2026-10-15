@@ -4,3 +4,4 @@ node_modules
 apps/api/.env.test
 
 apps/api/dist/
+apps/api/coverage/
