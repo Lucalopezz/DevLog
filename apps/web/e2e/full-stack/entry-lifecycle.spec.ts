@@ -1,0 +1,45 @@
+import { apiOrigin, expect, seedProject, signIn, test } from '../fixtures/real-api'
+
+test('records a successful attempt, reopens, archives, restores, and deletes the persisted issue', async ({ page, request, accounts }) => {
+  const account = await accounts.create()
+  const project = await seedProject(request, account)
+  const response = await request.post(`${apiOrigin}/technical-entry`, { data: {
+    projectId: project.id, title: 'Browser issue lifecycle', type: 'ISSUE', context: 'Investigate a stale project card.',
+  } })
+  expect(response.status()).toBe(201)
+  const entry = await response.json() as { id: string; title: string }
+  await signIn(page, account)
+  await page.goto(`/technical-entries/${entry.id}`)
+  await page.getByLabel('What did you try?', { exact: true }).fill('Invalidate the project and journal queries together.')
+  await page.getByRole('combobox', { name: 'Outcome', exact: true }).selectOption('SUCCESSFUL')
+  await page.getByRole('button', { name: 'Add attempt', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Change status, currently Resolved', exact: true }).first()).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Change status, currently Resolved', exact: true }).first()).toBeVisible()
+  await expect(page.getByText('Solved the issue', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Edit entry', exact: true })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Change status, currently Resolved', exact: true }).first().click()
+  await page.getByRole('dialog', { name: 'Reopen this issue', exact: true }).getByRole('button', { name: 'Reopen issue', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Edit entry', exact: true })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Archive entry', exact: true }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Archive entry', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Restore entry', exact: true })).toBeVisible()
+  await page.goto('/technical-entries')
+  await expect(page.getByRole('heading', { name: 'Technical journal', exact: true })).toBeVisible()
+  // Wait for the settled empty collection, not merely the page's static heading.
+  await expect(page.getByRole('heading', { name: 'No technical entries found', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: new RegExp(entry.title) })).toHaveCount(0)
+  await page.goto('/technical-entries/archived')
+  await page.getByRole('link', { name: new RegExp(entry.title) }).click()
+  await page.getByRole('button', { name: 'Restore entry', exact: true }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Restore entry', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Archive entry', exact: true })).toBeVisible()
+  await page.goto('/technical-entries')
+  await page.getByRole('link', { name: new RegExp(entry.title) }).click()
+  await page.getByRole('button', { name: 'Delete entry', exact: true }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Delete permanently', exact: true }).click()
+  await expect(page).toHaveURL(/\/technical-entries$/)
+  await page.goto(`/technical-entries/${entry.id}`)
+  await expect(page.getByRole('heading', { name: 'Technical entry not found', exact: true })).toBeVisible()
+})

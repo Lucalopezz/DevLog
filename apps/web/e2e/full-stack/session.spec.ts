@@ -1,0 +1,57 @@
+import { apiOrigin, expect, seedProject, signIn, test } from '../fixtures/real-api'
+
+test('registers, signs in with a browser cookie, survives reload, and signs out', async ({ page, accounts, context }) => {
+  const account = accounts.draft()
+  await page.goto('/register')
+  await page.getByLabel('Name', { exact: true }).fill(account.name)
+  await page.getByLabel('E-mail', { exact: true }).fill(account.email)
+  await page.getByLabel('Password', { exact: true }).fill(account.password)
+  await page.getByLabel('Confirm password', { exact: true }).fill(account.password)
+  const registered = page.waitForResponse((response) => response.url() === `${apiOrigin}/users` && response.request().method() === 'POST')
+  await page.getByRole('button', { name: 'Create account', exact: true }).click()
+  const response = await registered
+  expect(response.status()).toBe(201)
+  await accounts.track((await response.json() as { id: string }).id)
+  await expect(page).toHaveURL(/\/login$/)
+  expect((await context.cookies()).some((cookie) => cookie.name === 'devlog_access_token')).toBe(false)
+  await page.goto('/account')
+  await expect(page).toHaveURL(/\/login$/)
+
+  await signIn(page, account)
+  const cookie = (await context.cookies()).find((item) => item.name === 'devlog_access_token')
+  // Inspect policy without including a session token in an assertion or report.
+  expect(cookie ? { httpOnly: cookie.httpOnly, sameSite: cookie.sameSite, path: cookie.path } : null).toEqual({ httpOnly: true, sameSite: 'Lax', path: '/' })
+  await page.goto('/account')
+  await expect(page.getByText(account.email, { exact: true })).toBeVisible()
+  const profile = page.waitForResponse((item) => item.url() === `${apiOrigin}/users/me`)
+  await page.reload()
+  expect((await profile).status()).toBe(200)
+  await expect(page.getByText(account.email, { exact: true })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click()
+  await expect(page).toHaveURL(/\/login$/)
+  expect((await context.cookies()).some((item) => item.name === 'devlog_access_token')).toBe(false)
+  await page.goto('/account')
+  await expect(page).toHaveURL(/\/login$/)
+  expect((await context.request.get(`${apiOrigin}/users/me`)).status()).toBe(401)
+})
+
+test('keeps private project data isolated when switching accounts in the same browser', async ({ page, accounts, request }) => {
+  const first = await accounts.create()
+  const second = await accounts.create()
+  await seedProject(request, first, 'First private project')
+  await seedProject(request, second, 'Second private project')
+
+  await signIn(page, first)
+  await page.goto('/projects')
+  await expect(page.getByRole('heading', { name: 'First private project', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click()
+  await expect(page).toHaveURL(/\/login$/)
+  await signIn(page, second)
+  await page.goto('/projects')
+  await expect(page.getByRole('heading', { name: 'Second private project', exact: true })).toBeVisible()
+  await expect(page.getByText('First private project', { exact: true })).toHaveCount(0)
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Second private project', exact: true })).toBeVisible()
+  await expect(page.getByText('First private project', { exact: true })).toHaveCount(0)
+})

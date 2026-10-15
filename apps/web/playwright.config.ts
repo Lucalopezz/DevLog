@@ -6,10 +6,11 @@ process.env.PLAYWRIGHT_BROWSERS_PATH ??= fileURLToPath(new URL('./.playwright-br
 
 export default defineConfig({
   testDir: './e2e/mocked',
+  outputDir: './test-results/mocked',
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { outputFolder: 'playwright-report/mocked', open: 'never' }]],
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'retain-on-failure',
