@@ -14,7 +14,7 @@ import TechnicalEntryDetailPage from './technical-entry-detail-page'
 const initial = createTechnicalEntry({
   title: 'Connection pooling',
   type: 'ISSUE',
-  status: 'RESOLVED',
+  status: 'OPEN',
   tags: [{ id: 'tag-1', name: 'database' }],
 })
 const solutionAttemptsPath = `/technical-entry/${initial.id}/solution-attempts`
@@ -59,7 +59,7 @@ describe('TechnicalEntryDetailPage', () => {
   })
 
   it('adds a solution attempt and refreshes the list', async () => {
-    installGet()
+    const state = installGet()
     const attempt = {
       id: '44444444-4444-4444-8444-444444444444',
       technicalEntryId: initial.id,
@@ -81,6 +81,11 @@ describe('TechnicalEntryDetailPage', () => {
         attempts = [attempt]
         return HttpResponse.json(attempt, { status: 201 })
       }),
+      http.patch(apiUrl(`/technical-entry/${initial.id}/resolve`), () => {
+        const resolved = { ...state.get(), status: 'RESOLVED' as const, conclusion: attempt.description }
+        state.set(resolved)
+        return HttpResponse.json(resolved)
+      }),
     )
 
     const { user } = renderDetail()
@@ -96,7 +101,8 @@ describe('TechnicalEntryDetailPage', () => {
     )
     await user.click(screen.getByRole('button', { name: 'Add attempt' }))
 
-    const renderedDescription = await screen.findByText(attempt.description)
+    const attemptsSection = screen.getByRole('heading', { name: 'Solution attempts' }).closest('section')!
+    const renderedDescription = await within(attemptsSection).findByText(attempt.description)
     const renderedAttempt = renderedDescription.closest('li')
     expect(renderedAttempt).not.toBeNull()
     expect(within(renderedAttempt!).getByText('Solved the issue')).toBeVisible()
@@ -104,13 +110,33 @@ describe('TechnicalEntryDetailPage', () => {
       description: attempt.description,
       result: attempt.result,
     })
+    // A successful attempt also resolves the open issue through a second request.
+    await waitFor(() => expect(
+      screen.queryByRole('textbox', { name: 'What did you try?' }),
+    ).not.toBeInTheDocument())
+    expect(state.get().status).toBe('RESOLVED')
+  })
+
+  it('keeps resolved issue content readable while hiding edit and attempt controls', async () => {
+    installGet({ ...initial, status: 'RESOLVED' })
+    renderDetail()
+
+    await screen.findByRole('heading', { name: initial.title })
+    expect(screen.getByText(initial.context)).toBeVisible()
+    expect(screen.getByText(initial.conclusion!)).toBeVisible()
+    expect(screen.getByText('#database')).toBeVisible()
+    for (const name of ['Edit entry', 'Edit context', 'Edit conclusion', 'Edit tags']) {
+      expect(screen.queryByRole('button', { name })).not.toBeInTheDocument()
+    }
+    expect(screen.queryByRole('textbox', { name: 'What did you try?' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Change status, currently Resolved' })).toHaveLength(2)
   })
 
   it('shows pending, then the entry fields and linked project', async () => {
     const gate = deferred<void>()
     server.use(http.get(apiUrl(`/technical-entry/${initial.id}`), async () => {
       await gate.promise
-      return HttpResponse.json(initial)
+      return HttpResponse.json({ ...initial, status: 'RESOLVED' })
     }))
     try {
       renderDetail()
