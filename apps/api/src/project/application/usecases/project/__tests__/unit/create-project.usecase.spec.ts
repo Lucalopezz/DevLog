@@ -39,7 +39,7 @@ describe('CreateProjectUseCase', () => {
       description: 'Study project',
     });
 
-    const [project] = insert.mock.calls[0] as [ProjectEntity];
+    const [project] = insert.mock.calls[0];
 
     expect(project).toBeInstanceOf(ProjectEntity);
     expect(project.userId).toBe(USER_ID);
@@ -60,7 +60,7 @@ describe('CreateProjectUseCase', () => {
       name: 'DevLog',
     });
 
-    const [project] = insert.mock.calls[0] as [ProjectEntity];
+    const [project] = insert.mock.calls[0];
 
     expect(project.description).toBeUndefined();
   });
