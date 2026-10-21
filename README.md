@@ -121,10 +121,10 @@ You can also run them separately with `pnpm --filter api dev` and `pnpm --filter
 The API is served at `http://localhost:3000/api` and Vite usually serves the
 frontend at `http://localhost:5173`.
 
-The staged unified Vercel deployment is explained in
-[`docs/guides/vercel-deployment.md`](docs/guides/vercel-deployment.md). The
-existing production Vercel and Render path remains active during Preview
-validation.
+The unified Vercel deployment serves `https://devlog-eosin.vercel.app` and
+deploys automatically from `main`. See
+[`docs/guides/vercel-deployment.md`](docs/guides/vercel-deployment.md) for the
+private API path, environment variables, validation, and rollback procedure.
 
 ## Useful commands
 

@@ -1,7 +1,7 @@
 # API availability and cold starts
 
-Implemented on October 8, 2026. The unified Vercel deployment is being
-validated separately; see [the deployment guide](vercel-deployment.md).
+Implemented on October 8, 2026. The unified Vercel deployment serves the
+public domain; see [the deployment guide](vercel-deployment.md).
 
 ## Architecture and purpose
 
