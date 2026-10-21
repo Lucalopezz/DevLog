@@ -115,7 +115,7 @@ the old hostname will remain attached automatically.
 | --- | --- | --- |
 | Preview of this branch | `https://devlog-unified-preview-alxrtll81-lucas-projects-36c39d5f.vercel.app` | Browser registration flow called `/api/health` and submitted the intercepted account request to this same origin. Earlier direct API calls registered and signed in with an identifiable test account in Neon. |
 | Production target in the separate unified project | `https://devlog-unified-preview.vercel.app` | Deployment is Ready. `/register` and `/api/health` returned 200; `/api/users/me` returned 401 without a session. An earlier deployment of the same API completed registration, sign-in, session lookup, and sign-out against Neon. The current browser asset matches the Preview asset verified above. |
-| Existing production project | `https://devlog-eosin.vercel.app` | Still points to the existing `devlog` project and Render path. No alias, Git branch, or domain was moved. |
+| Existing production project | `https://devlog-eosin.vercel.app` | Still points to the existing `devlog` project and Render path. Its `/api/health` returned 200 after a slow Render warmup. No alias, Git branch, or domain was moved. |
 
 Vercel Authentication protects the new project's Production target. Its local
 development OIDC token accesses Preview but receives
