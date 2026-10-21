@@ -2,22 +2,29 @@
 
 ## Current migration state
 
-The unified deployment is being validated in the separate
-`devlog-unified-preview` Vercel project. The existing `devlog` project and its
-Render rewrite remain the production path until the owner asks to switch
-`main`. Do not attach the production domain or change the production branch
-during Preview validation.
+The `main` branch contains the unified deployment. Its previous tip,
+`91370fa`, is preserved as
+`backup/main-before-unified-vercel-2026-10-21`. The Vercel project
+`devlog-unified-preview` is connected to `Lucalopezz/DevLog`, tracks `main` for
+Production, and has Git deployments enabled. The former `devlog` Vercel
+project is paused and disconnected from Git, so a push to `main` has one
+production deployment target.
+
+`https://devlog-eosin.vercel.app` is attached to the unified project. The old
+project retains `https://devlog-antigo.vercel.app` as a rollback reference.
+Keep the old project's configuration and Render service intact until the
+Git-triggered production deployment has been checked on the public domain.
 
 The PostgreSQL database is hosted by Neon, independently of the Render API
 service. Reusing its existing connection string preserves the records; this
-change does not copy or reset the database. Preview tests against that database
-must use an identifiable disposable account and avoid broad cleanup commands.
+change does not copy or reset the database. Tests against that database must
+use an identifiable disposable account and avoid broad cleanup commands.
 
 The repository has no scheduled jobs, queue consumers, or long-running workers
-to move from Render. Render currently supplies the Nest API process; the old
-Vercel project's `/api` rewrite points to that process. The unified project
-replaces that compute path with the `gateway` and private `api` services while
-leaving Neon and the old deployment available during validation.
+to move from Render. Render supplied the former Nest API process; the old
+Vercel project's `/api` rewrite pointed to it. The unified project serves the
+public `/api` path through the `gateway` and private `api` services. Neon stays
+independent of either compute provider.
 
 ## Request flow
 
@@ -82,13 +89,12 @@ or a `VITE_*` variable unless the value is meant for the browser.
 Do not set `BACKEND_INTERNAL_URL`: Vercel generates it from the gateway binding
 for each deployment. The container listens on port 80 by default; Vercel can
 override it with `PORT`. `CORS_ALLOWED_ORIGINS` is unnecessary for the
-same-origin gateway path; keep the existing Render setting
-while the old production deployment is live. Local development still uses
+same-origin gateway path. Local development still uses
 `apps/api/.env` and `apps/web/.env` with separate ports and explicit CORS.
 
-## Validation and cutover
+## Validation and rollback
 
-1. On this branch, run focused gateway and web tests, lint, and builds. Run
+1. Before merging a later change, run focused gateway and web tests, lint, and builds. Run
    `pnpm --filter api test:vercel-container` with Docker available to build the
    API image and check health, authorization, and secret exclusion. Use
    `vercel build --environment preview` to verify all three services. The
@@ -97,8 +103,8 @@ while the old production deployment is live. Local development still uses
    playwright.vercel.config.ts` from `apps/web` with `VERCEL_PREVIEW_URL` and a
    Vercel OIDC token to check the browser's same-origin API requests without
    writing to the database.
-2. Set the required Preview variables on `devlog-unified-preview` and deploy
-   this branch to Preview. Confirm the deployment is Ready, a web deep link
+2. Confirm the required Preview and Production variables remain set on
+   `devlog-unified-preview`. Check the Preview deployment is Ready, a web deep link
    serves the SPA, `/api/health` returns Nest's JSON response, and unauthenticated
    `/api/users/me` returns 401 rather than an HTML fallback.
 3. Run browser registration, login, reload, protected navigation, and logout
@@ -107,18 +113,14 @@ while the old production deployment is live. Local development still uses
    data. The application has no user deletion endpoint; retain the test account
    unless its ownership is verified before targeted cleanup.
 4. Inspect Prisma migration status against the existing database. Do not run
-   `prisma migrate reset` or a seed script against it. Monitor Preview service
-   errors and compare the existing production site's health.
-5. Test a production-target deployment in the separate
-   `devlog-unified-preview` project without moving the public domain. After
-   owner approval, connect `main` as the production branch of the unified
-   project and attach/promote the existing domain. Test the same flows on the
-   final production URL. Keep Render and the old Vercel project available for
-   rollback until the new deployment is verified.
-
-The production switch is intentionally pending. Record the final Preview and
-production URLs and changed links after each deployment, rather than assuming
-the old hostname will remain attached automatically.
+   `prisma migrate reset` or a seed script against it. Monitor service errors
+   and check the public domain's health after each production deployment.
+5. A push to `main` should create a Production deployment in
+   `devlog-unified-preview`. Verify its Git commit, Ready state, and the public
+   domain before considering the release complete. To roll back code, promote a
+   previous unified deployment. To return to the old architecture, reconnect
+   the paused project to the backup branch, resume it, and move the domain
+   back. The database is shared and is not rolled back by moving an alias.
 
 ## Staged validation on 2026-10-21
 
@@ -126,16 +128,16 @@ the old hostname will remain attached automatically.
 | --- | --- | --- |
 | Preview of this branch | `https://devlog-unified-preview-ipshnnr9k-lucas-projects-36c39d5f.vercel.app` | Deployment is Ready. The browser registration test passed with same-origin API requests after the gateway compression fix. A real HTTP regression test also confirmed that compressed collection JSON remains readable through the gateway. Earlier direct API calls registered and signed in with an identifiable test account in Neon. |
 | Production target in the separate unified project | `https://devlog-unified-preview.vercel.app` | Deployment `dpl_CG9UfgqwEHPMoS3A7Gx8CA4FqJZW` is Ready with the compression fix. `/api/health` returned 200 with JSON and `private, no-store` even when requesting gzip; `/api/project` returned 401 without a session. An earlier deployment of the same API completed registration, sign-in, session lookup, and sign-out against Neon. The owner reloaded the dashboard and confirmed that existing projects and entries appeared. |
-| Existing production project | `https://devlog-eosin.vercel.app` | Still points to the existing `devlog` project and Render path. Its `/api/health` returned 200 after a slow Render warmup. No alias, Git branch, or domain was moved. |
+| Former production project | `https://devlog-antigo.vercel.app` | The `devlog` project is paused and disconnected from Git. Its former deployment is retained for rollback but does not serve traffic or receive new commits. |
+| Public production domain | `https://devlog-eosin.vercel.app` | Attached to the unified project and returned 200 with JSON for `/api/health` before Git integration was enabled. Verify the first Git-triggered `main` deployment separately. |
 
-Vercel Authentication protects the new project's Production target. Its local
-development OIDC token accesses Preview but receives
-`TRUSTED_SOURCES_ENVIRONMENT_MISMATCH` on Production, so the automated browser
-test cannot run there under the current access rules. `vercel curl` verified
-the protected Production HTTP responses. Keep the production browser journey
-on the final cutover checklist; changing Trusted Sources requires a separate
-access-control decision. The two identifiable API test accounts remain in the
-shared database because the application has no targeted user deletion route.
+Vercel Authentication protects generated Production deployment URLs, while the
+attached public domain is served without that protection. The local development
+OIDC token accesses Preview but receives
+`TRUSTED_SOURCES_ENVIRONMENT_MISMATCH` on protected Production URLs. Use the
+public domain for the final browser journey. The two identifiable API test
+accounts remain in the shared database because the application has no targeted
+user deletion route.
 
 Study topics: service bindings versus public rewrites, same-origin cookies,
 immutable deployments, and the difference between a database migration and a
