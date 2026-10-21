@@ -4,7 +4,7 @@
     "web": {
       "root": "apps/web",
       "framework": "vite",
-      "buildCommand": "pnpm build",
+      "buildCommand": "VITE_API_URL=/api pnpm build",
       "outputDirectory": "dist",
       "rewrites": [
         { "source": "/(.*)", "destination": "/index.html" }
@@ -24,10 +24,9 @@
       ]
     },
     "api": {
-      "root": "apps/api",
-      "framework": "nestjs",
-      "entrypoint": "src/main.ts",
-      "buildCommand": "pnpm exec prisma generate && pnpm build"
+      "root": ".",
+      "entrypoint": "Dockerfile.vercel",
+      "runtime": "container"
     }
   },
   "rewrites": [
