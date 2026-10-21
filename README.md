@@ -46,13 +46,15 @@ store a permanent history of edits or lifecycle actions.
 - Monorepo with pnpm Workspaces and Turborepo;
 - NestJS, Prisma, and PostgreSQL backend;
 - React, Vite, and TypeScript frontend;
-- Database running in Docker.
+- A Node gateway for private service communication on Vercel;
+- PostgreSQL in Docker locally and Neon for the hosted environment.
 
 ## Structure
 
 ```text
 apps/
   api/      # NestJS API
+  gateway/  # Same-origin API gateway for Vercel
   web/      # React interface
 docker/     # PostgreSQL configuration
 docs/       # Project decisions and guides
@@ -118,6 +120,11 @@ You can also run them separately with `pnpm --filter api dev` and `pnpm --filter
 
 The API is served at `http://localhost:3000/api` and Vite usually serves the
 frontend at `http://localhost:5173`.
+
+The staged unified Vercel deployment is explained in
+[`docs/guides/vercel-deployment.md`](docs/guides/vercel-deployment.md). The
+existing production Vercel and Render path remains active during Preview
+validation.
 
 ## Useful commands
 

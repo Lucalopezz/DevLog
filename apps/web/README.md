@@ -162,8 +162,11 @@ cp apps/web/.env.example apps/web/.env
 VITE_API_URL=http://localhost:3000/api
 ```
 
-If the variable is absent, the same address is used as a fallback. The API must
-be running and allow the Vite origin in `CORS_ALLOWED_ORIGINS`.
+If the variable is absent, local development uses the same address and a
+production build uses the same-origin `/api` gateway. In local development, the
+API must be running and allow the Vite origin in `CORS_ALLOWED_ORIGINS`. See
+[unified Vercel deployment](../../docs/guides/vercel-deployment.md) for the
+hosted request path and private binding.
 
 API warmup and reconnection run globally, including protected routes. Slow checks
 show a waiting notice; failed active reads can recover while session data and
