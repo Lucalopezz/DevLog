@@ -94,7 +94,11 @@ same-origin gateway path. Local development still uses
 
 ## Validation and rollback
 
-1. Before merging a later change, run focused gateway and web tests, lint, and builds. Run
+1. Open a pull request against `main` and wait for its required `quality`,
+   `integration`, Vercel Preview, and GitGuardian checks. The workflow uses a
+   disposable PostgreSQL database;
+   see the [CI guide](testing.md#pull-request-ci). For changes to the Vercel
+   container or service routing, additionally run
    `pnpm --filter api test:vercel-container` with Docker available to build the
    API image and check health, authorization, and secret exclusion. Use
    `vercel build --environment preview` to verify all three services. The
