@@ -12,7 +12,7 @@
     "db:reset": "docker compose --env-file .env -f docker/compose.yaml down -v"
   },
   "devDependencies": {
-    "turbo": "latest"
+    "turbo": "2.10.13"
   },
   "packageManager": "pnpm@11.21.0"
 }
