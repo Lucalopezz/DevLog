@@ -77,6 +77,35 @@ test service before running them. Repository integration suites clear test
 users between cases; run them sequentially with API and browser E2E suites
 that use the same database. Never use `pnpm db:reset` merely to run tests.
 
+## Pull request CI
+
+`.github/workflows/ci.yml` runs for pull requests targeting `main`, pushes to
+`main`, and manual dispatch. The `quality` check installs the pinned workspace
+dependencies, generates Prisma Client, lints without modifying files, builds all
+workspaces, type checks browser tests, and runs API, web, and gateway unit tests.
+The `integration` check starts a disposable PostgreSQL service, applies the
+committed migrations, and runs Prisma repository, Nest HTTP, intercepted browser,
+and full-stack browser suites in sequence. The browser suites share a build
+directory and port; database suites share the same test database within the job.
+
+CI copies `apps/api/.env.test.example` for these runs. The integration job
+replaces the example password with its run ID so the PostgreSQL service and
+test clients use the same disposable credential. It connects only to
+`devlog_test`; GitHub Actions has no Neon or Vercel production secrets. The
+API's local `lint` script includes `--fix`, so
+the CI command calls ESLint without that flag: a check should fail on violations
+instead of silently editing the runner's checkout.
+
+The repository's `main` ruleset requires a pull request plus successful
+`quality`, `integration`, `Vercel`, and `GitGuardian Security Checks` results
+before merge. Vercel verifies the Preview build; GitGuardian scans the PR for
+secrets. An up-to-date branch is required, so the checks cover the candidate
+merge with the latest `main`. A successful merge
+triggers a second CI run on `main` and Vercel's automatic Production deployment.
+The merge gate validates application behavior against disposable infrastructure;
+it does not test an already published Vercel deployment or replace a post-deploy
+health and browser check.
+
 For real browser journeys, follow the
 [full-stack setup](frontend-testing.md#full-stack-browser-journeys). Their
 API-owned cleanup command validates the test database name and limits deletion

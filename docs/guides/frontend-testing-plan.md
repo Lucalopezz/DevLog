@@ -1397,8 +1397,9 @@ Implemented entry point: `pnpm --filter web test:e2e:full-stack`. The maintained
 [setup guide](frontend-testing.md#full-stack-browser-journeys) describes the
 current configuration and its six journeys. `e2e/fixtures/real-api.ts` owns
 account/manifest tracking; `apps/api/scripts/cleanup-e2e-users.ts` removes only
-tracked E2E accounts after validating the test target. The inventory and CI
-proposals below include follow-up work and are not a completion claim.
+tracked E2E accounts after validating the test target. GitHub Actions now runs
+both browser modes; the inventory and historical proposals below still include
+follow-up work and are not a completion claim.
 
 **Goal:** establish that the built frontend, real authentication, API contracts,
 and database work together, then make the checks repeatable. Keep exhaustive
@@ -1584,10 +1585,12 @@ owning part before accepting the corresponding journey.
 
 ### 9D. Continuous integration
 
-There is no `.github/workflows` directory in the inspected baseline. If GitHub
-Actions is the repository's CI host, create
-`.github/workflows/frontend-tests.yml` during this phase. Use equivalent jobs
-if another host is selected; the required checks are the same.
+Implemented in `.github/workflows/ci.yml` with `quality` and `integration`
+checks. The table below preserves the earlier proposed job breakdown for study;
+the active commands and merge gate are in the
+[testing guide](testing.md#pull-request-ci). The active `integration` job runs
+both browser modes sequentially in one checkout to avoid build and port
+collisions.
 
 | Job | Preparation and commands | Dependency and artifacts |
 | --- | --- | --- |

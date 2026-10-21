@@ -3,7 +3,7 @@
 Status: learning guide and incremental strategy. Parts 0–6 and 8 of the
 [implementation plan](frontend-testing-plan.md) are implemented. Part 7 was
 intentionally skipped. Part 9 now includes six full-stack browser journeys;
-its CI rollout and dedicated tag journey remain planned.
+its CI rollout is implemented; a dedicated tag journey remains planned.
 
 This guide starts with the concepts. Read it before Part 0 of the plan. Examples
 use DevLog's current React, React Router, React Hook Form, Zod, Axios, and
@@ -167,7 +167,9 @@ Full-stack traces/reports are separate under `test-results/full-stack` and
 directories so they cannot erase full-stack traces or interrupted-run manifests.
 These artifacts and account manifests are ignored. Open either HTML report with
 `pnpm --filter web exec playwright show-report playwright-report/full-stack`
-or the equivalent `playwright-report/mocked` path.
+or the equivalent `playwright-report/mocked` path. The CI workflow runs both
+browser modes in sequence, after the API database suites, against its own
+PostgreSQL service.
 Local HTTP tests establish the test cookie policy; production HTTPS deployment
 behavior still needs a check using the deployed origins.
 
@@ -416,9 +418,10 @@ bypasses the integration that the test is meant to establish.
 Keep full-stack tests few and independent. They provide confidence at service
 boundaries but take longer to prepare and diagnose than a focused component
 test. The [full-stack setup](#full-stack-browser-journeys) describes the installed
-suite. The plan's [Part 9](frontend-testing-plan.md#part-9--full-stack-journeys-ci-and-completion)
-also records follow-up journeys, proposed CI jobs, and a completion checklist;
-CI remains pending.
+suite. The [API testing guide](testing.md#pull-request-ci) describes the active
+CI jobs and merge gate. The plan's
+[Part 9](frontend-testing-plan.md#part-9--full-stack-journeys-ci-and-completion)
+retains historical proposed jobs and follow-up journeys.
 
 ## 12. How to judge whether a test is useful
 
