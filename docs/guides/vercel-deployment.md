@@ -37,6 +37,12 @@ back to the browser. This keeps the browser on one origin, so the auth cookie
 does not need cross-origin CORS. The binding gives network reachability; Nest
 continues to enforce JWT authentication and record ownership.
 
+The gateway removes conditional cache validators from incoming API requests and
+marks API responses `Cache-Control: private, no-store`. Nest emits ETags by
+default; forwarding a browser's `If-None-Match` caused authenticated collection
+reads to return 304 without JSON. These responses depend on the session cookie,
+so browser and shared caches must not reuse them.
+
 Vercel Services is a Beta feature. The gateway is a separate Node service
 because the Vite static builder does not emit API functions from its service
 root. A direct public rewrite to Nest would be simpler, but would expose the
@@ -113,8 +119,8 @@ the old hostname will remain attached automatically.
 
 | Target | URL | Result |
 | --- | --- | --- |
-| Preview of this branch | `https://devlog-unified-preview-alxrtll81-lucas-projects-36c39d5f.vercel.app` | Browser registration flow called `/api/health` and submitted the intercepted account request to this same origin. Earlier direct API calls registered and signed in with an identifiable test account in Neon. |
-| Production target in the separate unified project | `https://devlog-unified-preview.vercel.app` | Deployment is Ready. `/register` and `/api/health` returned 200; `/api/users/me` returned 401 without a session. An earlier deployment of the same API completed registration, sign-in, session lookup, and sign-out against Neon. The current browser asset matches the Preview asset verified above. |
+| Preview of this branch | `https://devlog-unified-preview-870mzj8vo-lucas-projects-36c39d5f.vercel.app` | The browser registration test passed with same-origin API requests. A conditional `/api/health` request with the old ETag returned 200 with JSON and `private, no-store`, rather than the earlier 304. Earlier direct API calls registered and signed in with an identifiable test account in Neon. |
+| Production target in the separate unified project | `https://devlog-unified-preview.vercel.app` | Deployment is Ready. A conditional `/api/health` request returned 200 with JSON and `private, no-store`; `/api/project` returned 401 without a session. An earlier deployment of the same API completed registration, sign-in, session lookup, and sign-out against Neon. |
 | Existing production project | `https://devlog-eosin.vercel.app` | Still points to the existing `devlog` project and Render path. Its `/api/health` returned 200 after a slow Render warmup. No alias, Git branch, or domain was moved. |
 
 Vercel Authentication protects the new project's Production target. Its local

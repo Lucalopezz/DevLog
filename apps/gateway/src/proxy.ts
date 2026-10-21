@@ -14,6 +14,10 @@ export async function proxyRequest(request: Request): Promise<Response> {
   headers.delete('host')
   headers.delete('connection')
   headers.delete('content-length')
+  // Nest emits ETags by default. A browser can then revalidate an authenticated
+  // collection and receive 304 without the JSON body that Axios expects.
+  headers.delete('if-none-match')
+  headers.delete('if-modified-since')
 
   try {
     // Keep the public path and session cookie intact. Only the gateway has a
@@ -24,9 +28,15 @@ export async function proxyRequest(request: Request): Promise<Response> {
       body: ['GET', 'HEAD'].includes(request.method) ? undefined : await request.arrayBuffer(),
       redirect: 'manual',
     }))
+    const responseHeaders = new Headers(upstream.headers)
+    // API responses depend on the session cookie. Prevent browser and edge
+    // caches from reusing one response or issuing another conditional request.
+    responseHeaders.set('cache-control', 'private, no-store')
+    responseHeaders.delete('etag')
+    responseHeaders.delete('last-modified')
     return new Response(upstream.body, {
       status: upstream.status,
-      headers: upstream.headers,
+      headers: responseHeaders,
     })
   } catch {
     return Response.json({ message: 'API service unavailable.' }, { status: 502 })
