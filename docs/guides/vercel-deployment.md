@@ -43,6 +43,11 @@ default; forwarding a browser's `If-None-Match` caused authenticated collection
 reads to return 304 without JSON. These responses depend on the session cookie,
 so browser and shared caches must not reuse them.
 
+Node's `fetch` transparently decompresses upstream responses but leaves the
+upstream `Content-Encoding` and `Content-Length` headers visible. The gateway
+removes both before sending the decoded body to the browser; otherwise larger
+compressed collections can fail to decode even when the API and gateway log 200.
+
 Vercel Services is a Beta feature. The gateway is a separate Node service
 because the Vite static builder does not emit API functions from its service
 root. A direct public rewrite to Nest would be simpler, but would expose the
@@ -119,8 +124,8 @@ the old hostname will remain attached automatically.
 
 | Target | URL | Result |
 | --- | --- | --- |
-| Preview of this branch | `https://devlog-unified-preview-870mzj8vo-lucas-projects-36c39d5f.vercel.app` | The browser registration test passed with same-origin API requests. A conditional `/api/health` request with the old ETag returned 200 with JSON and `private, no-store`, rather than the earlier 304. Earlier direct API calls registered and signed in with an identifiable test account in Neon. |
-| Production target in the separate unified project | `https://devlog-unified-preview.vercel.app` | Deployment is Ready. A conditional `/api/health` request returned 200 with JSON and `private, no-store`; `/api/project` returned 401 without a session. An earlier deployment of the same API completed registration, sign-in, session lookup, and sign-out against Neon. |
+| Preview of this branch | `https://devlog-unified-preview-ipshnnr9k-lucas-projects-36c39d5f.vercel.app` | Deployment is Ready. The browser registration test passed with same-origin API requests after the gateway compression fix. A real HTTP regression test also confirmed that compressed collection JSON remains readable through the gateway. Earlier direct API calls registered and signed in with an identifiable test account in Neon. |
+| Production target in the separate unified project | `https://devlog-unified-preview.vercel.app` | Deployment `dpl_CG9UfgqwEHPMoS3A7Gx8CA4FqJZW` is Ready with the compression fix. `/api/health` returned 200 with JSON and `private, no-store` even when requesting gzip; `/api/project` returned 401 without a session. An earlier deployment of the same API completed registration, sign-in, session lookup, and sign-out against Neon. Confirmation that existing user projects and entries render in the browser remains pending. |
 | Existing production project | `https://devlog-eosin.vercel.app` | Still points to the existing `devlog` project and Render path. Its `/api/health` returned 200 after a slow Render warmup. No alias, Git branch, or domain was moved. |
 
 Vercel Authentication protects the new project's Production target. Its local

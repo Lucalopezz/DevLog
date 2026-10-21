@@ -34,6 +34,11 @@ export async function proxyRequest(request: Request): Promise<Response> {
     responseHeaders.set('cache-control', 'private, no-store')
     responseHeaders.delete('etag')
     responseHeaders.delete('last-modified')
+    // Node fetch exposes a decompressed body while retaining the upstream
+    // compression headers. Forwarding them makes the browser decode plain JSON
+    // as gzip and can also advertise the compressed byte length incorrectly.
+    responseHeaders.delete('content-encoding')
+    responseHeaders.delete('content-length')
     return new Response(upstream.body, {
       status: upstream.status,
       headers: responseHeaders,
