@@ -64,6 +64,12 @@ The API uses a container because the Services Node builder did not package
 all Nest dependencies from this pnpm workspace. The container runs the same
 compiled Nest server as local development and keeps pnpm's dependency layout.
 Its image takes longer to build and upload than a bundled Node function.
+At container startup, the API runs `prisma migrate deploy` before Nest listens.
+Vercel supplies the sensitive production database URL only at runtime, and
+Prisma records applied migrations so concurrent container starts remain safe.
+This makes pending schema changes part of a deployment, but database
+availability now also affects startup time and readiness. Migrations must remain
+compatible with the previous deployed code while a new deployment rolls out.
 `Dockerfile.vercel` generates Prisma Client with a placeholder URL at build
 time; the actual database URL enters only at runtime. `.dockerignore` excludes
 local environment files from the image.
@@ -116,9 +122,10 @@ same-origin gateway path. Local development still uses
    `SameSite=Lax` cookie and verify the account cannot read another user's
    data. The application has no user deletion endpoint; retain the test account
    unless its ownership is verified before targeted cleanup.
-4. Inspect Prisma migration status against the existing database. Do not run
-   `prisma migrate reset` or a seed script against it. Monitor service errors
-   and check the public domain's health after each production deployment.
+4. Inspect startup logs to confirm `prisma migrate deploy` completed against the
+   existing database. Do not run `prisma migrate reset` or a seed script against
+   it. Monitor service errors and check the public domain's health after each
+   production deployment.
 5. A push to `main` should create a Production deployment in
    `devlog-unified-preview`. Verify its Git commit, Ready state, and the public
    domain before considering the release complete. To roll back code, promote a

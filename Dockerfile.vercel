@@ -22,4 +22,6 @@ WORKDIR /app
 COPY --from=build /app /app
 ENV NODE_ENV=production
 ENV PORT=80
-CMD ["node", "dist/src/main.js"]
+# Vercel injects the production database URL only at runtime. Apply additive
+# Prisma migrations before accepting requests; Prisma coordinates concurrent starts.
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && exec node dist/src/main.js"]
