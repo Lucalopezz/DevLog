@@ -8,6 +8,7 @@ import { ProjectResourceEntity } from '../resource/project-resource.entity';
 import { ProjectResourceType } from '../resource/project-resource-type.enum';
 import { ProjectEnvironmentEntity } from '../environment/project-environment.entity';
 import { ProjectEnvironmentCategory } from '../environment/project-environment-category.enum';
+import { ProjectTodoEntity } from '../todo/project-todo.entity';
 
 export type ProjectProps = {
   userId: string;
@@ -91,6 +92,11 @@ export class ProjectEntity extends Entity<ProjectProps> {
   }): ProjectEnvironmentEntity {
     this.ensureCanBeModified();
     return new ProjectEnvironmentEntity({ projectId: this.id, ...input });
+  }
+
+  addTodo(title: string): ProjectTodoEntity {
+    this.ensureCanBeModified();
+    return new ProjectTodoEntity({ projectId: this.id, title });
   }
 
   update(props: ProjectUpdateProps): void {

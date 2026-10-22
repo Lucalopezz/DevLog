@@ -377,6 +377,17 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
   them when the project is permanently deleted.
 - [x] Cover domain, use cases, persistence, and the authenticated HTTP seam.
 
+### Project to-dos
+
+- [x] Store individual project actions with a title and optional completion
+  timestamp in `project_todos`.
+- [x] Add, list, update, complete/reopen, and remove to-dos through owned
+  projects with stable pagination.
+- [x] Keep archived project to-dos readable and reject writes until the
+  project is restored; cascade on permanent project deletion.
+- [x] Cover domain rules, database ordering and cascade, and authenticated
+  HTTP ownership checks.
+
 ## 9. Archiving
 
 ### ArchiveProject and RestoreProject
@@ -385,7 +396,7 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 - [x] Archive the project without hard deletion by setting `archivedAt`.
 - [x] Define the relationship between `archivedAt` and `ProjectStatus` (`ACTIVE`, `INACTIVE`, or `FINISHED`).
 - [x] Prevent operations incompatible with archived projects according to domain rules.
-- [x] Preserve related technologies, environments, commands, and resources; entry preservation is covered by the project/entry relationship.
+- [x] Preserve related technologies, environments, to-dos, commands, and resources; entry preservation is covered by the project/entry relationship.
 - [x] Create authenticated `PATCH /api/project/:id/archive` and `PATCH /api/project/:id/restore`.
 - [x] Test archiving, restoration, and authorization in the use case.
 - [x] Test relationship preservation through HTTP.
@@ -393,7 +404,7 @@ The authentication walkthrough is in [`docs/guides/authentication_workflow.md`](
 `archivedAt` is independent of `ProjectStatus`: archiving does not change
 `ACTIVE`, `INACTIVE`, or `FINISHED`, and restoration recovers the same status. While
 archived, the aggregate is read-only; queries remain available,
-but changes to the project, technologies, environments, commands, and resources require
+but changes to the project, technologies, environments, to-dos, commands, and resources require
 explicit restoration.
 
 ### ArchiveTechnicalEntry

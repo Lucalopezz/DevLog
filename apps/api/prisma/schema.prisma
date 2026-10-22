@@ -43,6 +43,7 @@ model Project {
   commands     ProjectCommand[]
   resources    ProjectResource[]
   environments ProjectEnvironment[]
+  todos        ProjectTodo[]
 
   @@unique([userId, name], map: "projects_user_id_name_key")
   @@index([userId], map: "idx_projects_user")
@@ -176,6 +177,19 @@ model ProjectEnvironment {
   @@index([projectId], map: "idx_project_environments_project")
   @@index([category], map: "idx_project_environments_category")
   @@map("project_environments")
+}
+
+model ProjectTodo {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId   String    @map("project_id") @db.Uuid
+  title       String    @db.VarChar(200)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, completedAt, createdAt, id], map: "idx_project_todos_order")
+  @@map("project_todos")
 }
 
 enum ProjectStatus {

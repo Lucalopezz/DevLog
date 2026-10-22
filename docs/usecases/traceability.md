@@ -39,6 +39,10 @@ represented in the behavioral documentation.
 | `GET /api/project/environments` | [UC-46 — Search owned environments](projects.md#uc-46--search-owned-environments) | Yes |
 | `PATCH /api/project/:projectId/environments/:environmentId` | [UC-47 — Update project environment](projects.md#uc-47--update-project-environment) | Yes |
 | `DELETE /api/project/:projectId/environments/:environmentId` | [UC-48 — Remove project environment](projects.md#uc-48--remove-project-environment) | Yes |
+| `POST /api/project/:projectId/todos` | [UC-49 — Add project to-do](projects.md#uc-49--add-project-to-do) | Yes |
+| `GET /api/project/:projectId/todos` | [UC-50 — List project to-dos](projects.md#uc-50--list-project-to-dos) | Yes |
+| `PATCH /api/project/:projectId/todos/:todoId` | [UC-51 — Update project to-do](projects.md#uc-51--update-project-to-do) | Yes |
+| `DELETE /api/project/:projectId/todos/:todoId` | [UC-52 — Remove project to-do](projects.md#uc-52--remove-project-to-do) | Yes |
 | `POST /api/technical-entry`                                         | [UC-30 — Create technical entry](technical-entries.md#uc-30--create-technical-entry)     |    Yes    |
 | `GET /api/technical-entry`                                          | [UC-31 — Search technical entries](technical-entries.md#uc-31--search-technical-entries) |    Yes    |
 | `GET /api/technical-entry/:id`                                      | [UC-32 — View technical entry](technical-entries.md#uc-32--view-technical-entry)         |    Yes    |

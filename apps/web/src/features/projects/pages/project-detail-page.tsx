@@ -28,6 +28,7 @@ import type { ProjectCommand, ProjectResource } from "../types/project-detail";
 import { useProjectEnvironments } from "@/features/environments/hooks/use-environments";
 import { ProjectEnvironmentsTab } from "@/features/environments/components/project-environments-tab";
 import type { ProjectEnvironment } from "@/features/environments/types/environment";
+import { ProjectTodosTab } from "../components/project-todos-tab";
 
 export default function ProjectDetailPage() {
   const { projectId = "" } = useParams<{ projectId: string }>();
@@ -151,6 +152,10 @@ export default function ProjectDetailPage() {
           onPageChange={setEntriesPage}
           onRetry={() => technicalEntriesQuery.refetch()}
         />
+      </ProjectDetailTabPanel>
+
+      <ProjectDetailTabPanel activeTab={activeTab} id="todos">
+        <ProjectTodosTab isArchived={isArchived} projectId={project.id} />
       </ProjectDetailTabPanel>
 
       <ProjectDetailTabPanel activeTab={activeTab} id="technologies">

@@ -20,9 +20,11 @@ the authenticated session endpoint. The private workspace overview lives at
 
 The `/projects` page supports paginated search, filtering, and project
 creation. A project detail page brings together its overview, technologies,
-technical entries, environments, commands, resources, and settings. Users can
+technical entries, environments, to-dos, commands, resources, and settings. Users can
 create, edit, and remove project environments, commands, and resources, add and
-remove technologies, and manage project metadata and lifecycle. Archived projects are read-only, and
+remove technologies, and manage project metadata and lifecycle. The To-dos tab
+supports adding, renaming, completing, reopening, and removing small project
+actions. Archived projects retain their details for reading but are read-only;
 permanent deletion is protected by confirmation.
 
 Only the project Overview shows a Repositories card below Technologies. It

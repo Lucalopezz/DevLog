@@ -96,6 +96,15 @@ Run commands from the repository root using pnpm 11.21.0.
 
 Write TypeScript throughout. Follow the nearest ESLint configuration: `apps/api` uses ESLint with Prettier, while `apps/web` uses ESLint with React Hooks and React Refresh rules. Format API TypeScript with `pnpm --filter api format`; let Prettier determine spacing and line endings. Use PascalCase for React components, Nest classes, and interfaces; camelCase for functions and variables; and kebab-case filenames such as `user-profile.tsx`. Keep Nest modules, controllers, and services grouped by feature under `apps/api/src/`.
 
+For backend features, follow the existing shared contracts instead of defining
+parallel ones: repository contracts use `RepositoryInterface` or
+`SearchableRepositoryInterface`, and searchable repositories use feature-specific
+`SearchParams` and `SearchResult` types. Put each use case in its own file with
+an explicit input type and `UseCaseContract`. Follow the nearest project child
+use case for ownership and membership checks; do not add a feature-specific
+base class solely to share those routine checks. See the
+[backend organization guide](docs/guides/backend_structure.md).
+
 For components from the shadcn/ui library, always use the shadcn CLI command to
 add or update them instead of writing the component file manually. If the CLI
 cannot be executed or does not support the required change, stop and ask the

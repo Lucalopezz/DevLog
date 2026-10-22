@@ -1,6 +1,6 @@
 # Use cases — projects and their details
 
-Use cases UC-10 through UC-29 are restricted to authenticated users. Whenever a
+Project use cases are restricted to authenticated users. Whenever a
 project or detail does not exist, does not belong to the user, or is not within
 the specified project, the API responds with resource not found. This policy
 is repeated in alternative flows only when it changes the meaning of the use case.
@@ -178,7 +178,7 @@ is repeated in alternative flows only when it changes the meaning of the use cas
 | Interests      | Permanently remove a project and its details without deleting technical entries.                             |
 | Preconditions  | An owned, unarchived project.                                                                                |
 | Trigger        | The user requests deletion.                                                                                  |
-| Postconditions | The project, technologies, commands, and resources are deleted; associated entries remain without a project. |
+| Postconditions | The project and its technologies, environments, to-dos, commands, and resources are deleted; associated entries remain without a project. |
 | Endpoint       | `DELETE /api/project/:id`                                                                                    |
 
 ### Main flow
@@ -583,3 +583,63 @@ is repeated in alternative flows only when it changes the meaning of the use cas
 
 - Missing, foreign, or mismatched environments are reported as not found.
 - Archived projects cannot have environments removed.
+
+## UC-49 — Add project to-do
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Authenticated user |
+| Interests | Record a small next action for a project. |
+| Preconditions | An owned, unarchived project. |
+| Trigger | The user submits a to-do title. |
+| Postconditions | An incomplete to-do belongs to the project. |
+| Endpoint | `POST /api/project/:projectId/todos` |
+
+The system checks project ownership and archive state, trims and validates the
+title, then creates a to-do. Titles may repeat because two actions can have the
+same wording. An invalid title is rejected without creating a row.
+
+## UC-50 — List project to-dos
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Authenticated user |
+| Interests | Review unfinished and completed project actions. |
+| Preconditions | An owned project. |
+| Trigger | The user opens the To-dos tab or changes its page. |
+| Postconditions | No state change. |
+| Endpoint | `GET /api/project/:projectId/todos` |
+
+The system returns a paginated collection with unfinished items first and a
+stable creation order within each group. Archived projects remain readable.
+Missing or foreign projects are reported as not found.
+
+## UC-51 — Update project to-do
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Authenticated user |
+| Interests | Revise an action or mark it complete or incomplete. |
+| Preconditions | An owned, unarchived project containing the to-do. |
+| Trigger | The user edits a title or toggles completion. |
+| Postconditions | The supplied values are updated. |
+| Endpoint | `PATCH /api/project/:projectId/todos/:todoId` |
+
+The request may provide a `title`, a `completed` boolean, or both. Completing
+sets `completedAt`; reopening clears it. Repeating the same completion state
+preserves the existing timestamp. An empty update or invalid title is rejected.
+The API reports a to-do from another project as not found.
+
+## UC-52 — Remove project to-do
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Authenticated user |
+| Interests | Remove an action that is no longer relevant. |
+| Preconditions | An owned, unarchived project containing the to-do. |
+| Trigger | The user confirms removal. |
+| Postconditions | The to-do is deleted. |
+| Endpoint | `DELETE /api/project/:projectId/todos/:todoId` |
+
+The system verifies ownership and membership before deletion and returns no
+content. Missing, foreign, or mismatched to-dos are reported as not found.
