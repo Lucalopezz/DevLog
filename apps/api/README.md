@@ -81,6 +81,11 @@ The file should include at least:
 | `JWT_EXPIRES_IN_SECONDS` | Token lifetime in seconds; use `3600` to match the cookie lifetime |
 | `CORS_ALLOWED_ORIGINS` | Allowed frontend origins |
 
+In the unified Vercel deployment, the browser calls the same-origin
+gateway, which reaches this API through a private service binding. The API has
+no direct public route. See the [deployment guide](../../docs/guides/vercel-deployment.md)
+for environment scoping and production checks.
+
 After the first installation, generate Prisma Client and apply migrations:
 
 ```bash

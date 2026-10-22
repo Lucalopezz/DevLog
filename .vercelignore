@@ -1,0 +1,11 @@
+# The CLI uploads from the monorepo root; nested .gitignore files are not enough.
+**/.env*
+**/node_modules/**
+**/dist/**
+**/coverage/**
+**/test-results/**
+**/playwright-report/**
+**/.playwright-browsers/**
+**/.turbo/**
+**/.vitest/**
+**/*.tsbuildinfo

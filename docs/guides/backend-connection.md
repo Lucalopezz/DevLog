@@ -1,22 +1,23 @@
 # API availability and cold starts
 
-Implemented on October 8, 2026. Production deployment has not been verified.
+Implemented on October 8, 2026. The unified Vercel deployment serves the
+public domain; see [the deployment guide](vercel-deployment.md).
 
 ## Architecture and purpose
 
-DevLog serves a React + Vite application and calls NestJS directly with Axios.
-Unlike a Next.js application, there are no Server Actions, Server Components,
-or frontend server functions to proxy health checks. The browser sends a public
-`GET ${VITE_API_URL}/health` directly to Nest's existing `/api/health` endpoint.
+DevLog serves a React + Vite application and calls its API with Axios. In a
+hosted build, the browser sends a same-origin `GET /api/health` through the
+gateway's private service binding to Nest's existing `/api/health` endpoint.
+Local development can still call Nest directly through `VITE_API_URL`.
 The request omits credentials, uses `cache: 'no-store'`, and requires Nest's
 `{ "status": "ok" }` response. An HTTP 200 hosting-provider loading page is not
 considered a successful check. Nest also returns `Cache-Control: no-store`.
 This is a liveness check; it does not verify database availability.
 
-Render documents that Free web services suspend after 15 minutes without inbound
-traffic and can take about a minute to start again. Browser supervision reduces
-idle periods during use and makes waiting recoverable; it does not make Nest
-itself start faster. See [Render's Free service documentation](https://render.com/docs/free).
+This supervision began while the API ran on Render's sleeping Free service.
+On Vercel it remains useful for temporary network or function failures, but
+periodic checks also consume gateway and API requests. It does not guarantee
+that a cold function starts faster.
 
 ## Responsibilities and data flow
 
@@ -95,9 +96,10 @@ logs, rather than form toasts or the route error page.
 
 ## Local configuration and deployment
 
-No new production environment variable is required for connection supervision.
-The existing `VITE_API_URL` must include `/api`; Vite embeds it during build.
-The API must allow the frontend origin in `CORS_ALLOWED_ORIGINS`.
+No new environment variable is required for connection supervision. A hosted
+build defaults to `/api`; if set, `VITE_API_URL` must include `/api` because
+Vite embeds it during build. Local cross-origin development requires the Vite
+origin in `CORS_ALLOWED_ORIGINS`. The hosted gateway path is same-origin.
 
 | Local file | Purpose |
 | --- | --- |
@@ -111,11 +113,12 @@ The API reads `JWT_EXPIRES_IN_SECONDS`, not `JWT_EXPIRES_IN`; the updated exampl
 use 3600 seconds, matching the existing authentication cookie lifetime.
 Test CORS origins are explicit because wildcards are rejected outside development.
 
-The frontend performs no background keep-alive when hidden. Closed browsers,
-suspended devices, and discarded tabs cannot keep the server running. A first
-cold start remains possible. More uptime also consumes Render's shared Free
-instance hours. External scheduling or a service without idle suspension would
-be separate hosting decisions; neither is included in this change.
+The frontend performs no periodic check when hidden. Closed browsers,
+suspended devices, and discarded tabs cannot trigger checks. A first cold start
+remains possible. The five-minute visible-tab check was retained for this
+migration to avoid changing form and recovery behavior at the same time; it
+costs additional Vercel service requests and can be removed in a separate,
+tested change if measurements show little recovery benefit.
 
 ## Validation
 
@@ -152,8 +155,8 @@ pnpm --filter api test:e2e health.e2e-spec.ts
 
 On this machine, Node 26's experimental Web Storage conflicts with jsdom.
 Run Vitest with `NODE_OPTIONS=--no-experimental-webstorage` when using that runtime.
-For deployment, verify a suspended API, direct private navigation, returning
-after more than 15 minutes, internet loss during a form draft, and expired JWTs.
+For deployment, verify an API cold start, direct private navigation, returning
+after an idle period, internet loss during a form draft, and expired JWTs.
 Compare observed timing before and after deployment before claiming latency gains.
 
 Topics worth studying: external stores, cancellation with `AbortController`,

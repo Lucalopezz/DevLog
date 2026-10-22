@@ -1,0 +1,15 @@
+**/.env*
+**/node_modules
+**/dist
+**/coverage
+**/test-results
+**/playwright-report
+**/.playwright-browsers
+**/.turbo
+**/.vitest
+**/*.tsbuildinfo
+apps/api/test
+apps/api/scripts
+apps/api/src/**/__tests__
+.git
+.vercel

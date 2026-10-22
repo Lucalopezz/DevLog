@@ -17,7 +17,7 @@ export interface ConnectionSnapshot {
 type HealthProbe = (signal: AbortSignal) => Promise<void>
 
 async function probeHealth(signal: AbortSignal) {
-  // Vite serves a static app: the public health request goes straight to Nest.
+  // The deployed Vite app reaches Nest through the same-origin gateway.
   // Omit cookies explicitly; this request must neither depend on nor renew auth.
   const response = await fetch(`${API_URL}/health`, {
     cache: 'no-store',
@@ -25,8 +25,8 @@ async function probeHealth(signal: AbortSignal) {
     signal,
   })
   if (!response.ok) throw new Error('Health request failed.')
-  // Render can return its own HTML loading page. Only Nest's response proves
-  // the application is listening; a successful HTTP status alone is insufficient.
+  // Only Nest's response proves the application is listening; an HTML fallback
+  // or a gateway error must not count as a healthy API.
   const body: unknown = await response.json()
   if (
     !body ||

@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.21.0
+          run_install: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Configure test environment
+        run: cp apps/api/.env.test.example apps/api/.env.test
+      - name: Generate Prisma Client for type checking
+        run: NODE_ENV=test pnpm --filter api exec prisma generate
+      - name: Lint API without changing files
+        run: pnpm --filter api exec eslint "{src,apps,libs,test}/**/*.ts"
+      - name: Lint web
+        run: pnpm --filter web lint
+      - name: Build all workspaces
+        run: pnpm build
+      - name: Type check browser tests
+        run: pnpm --filter web typecheck:e2e
+      - name: Test API units
+        run: pnpm --filter api exec jest --runInBand
+      - name: Test web units and components
+        run: pnpm --filter web test
+      - name: Test gateway
+        run: pnpm --filter gateway test
+
+  integration:
+    name: integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: devlog
+          POSTGRES_PASSWORD: ${{ github.run_id }}
+          POSTGRES_DB: devlog_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U devlog -d devlog_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.21.0
+          run_install: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Configure disposable test database
+        run: |
+          cp apps/api/.env.test.example apps/api/.env.test
+          sed -i "s|^DATABASE_URL=.*|DATABASE_URL=postgresql://devlog:${GITHUB_RUN_ID}@localhost:5433/devlog_test|" apps/api/.env.test
+      - name: Generate Prisma Client and apply migrations
+        run: |
+          NODE_ENV=test pnpm --filter api exec prisma generate
+          NODE_ENV=test pnpm --filter api exec prisma migrate deploy
+      # These suites share one database and the browser suites rebuild one dist directory.
+      - name: Test Prisma repositories
+        run: pnpm --filter api test:integration
+      - name: Test Nest HTTP API
+        run: pnpm --filter api test:e2e
+      - name: Build API for full-stack browser tests
+        run: pnpm --filter api build
+      - name: Install Chromium and system dependencies
+        run: pnpm --filter web exec env PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright install --with-deps chromium
+      - name: Test browser with intercepted API
+        run: pnpm --filter web test:e2e
+      - name: Test browser with real API and test database
+        run: pnpm --filter web test:e2e:full-stack
+      - name: Preserve browser failure reports
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-failures
+          path: |
+            apps/web/test-results/
+            apps/web/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 3

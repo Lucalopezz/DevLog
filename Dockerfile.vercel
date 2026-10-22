@@ -1,0 +1,25 @@
+FROM node:24-bookworm-slim AS build
+
+RUN npm install --global pnpm@11.21.0
+WORKDIR /workspace
+
+# Install from the workspace lockfile before copying source to cache dependencies.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json apps/api/package.json
+COPY apps/gateway/package.json apps/gateway/package.json
+COPY apps/web/package.json apps/web/package.json
+RUN pnpm install --frozen-lockfile
+
+COPY apps/api apps/api
+# Prisma generation needs a URL shape but does not connect to the database.
+# The real DATABASE_URL is injected only when the deployed container runs.
+RUN DATABASE_URL=postgresql://build:build@localhost:5432/build \
+    pnpm --filter api exec prisma generate && pnpm --filter api build
+RUN pnpm --filter api deploy --prod --legacy /app
+
+FROM node:24-bookworm-slim
+WORKDIR /app
+COPY --from=build /app /app
+ENV NODE_ENV=production
+ENV PORT=80
+CMD ["node", "dist/src/main.js"]
