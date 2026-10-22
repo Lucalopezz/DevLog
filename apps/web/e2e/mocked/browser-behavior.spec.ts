@@ -136,6 +136,66 @@ test('long Markdown, project paths and descriptions stay usable at a narrow widt
   assertNoUnexpected()
 })
 
+test('entry Markdown has a roomy scrollable reading and editing area', async ({ page }) => {
+  const longText = Array.from({ length: 80 }, (_, index) => `Paragraph ${index + 1}: a technical detail.`).join('\n\n')
+  const assertNoUnexpected = await mockApi(page, (request, url) => {
+    if (request.method() === 'GET' && url.pathname === `/api/technical-entry/${entryId}`) {
+      return { body: { ...entry, context: longText, conclusion: longText } }
+    }
+    return authenticatedApi(request, url)
+  })
+  await page.goto(`/technical-entries/${entryId}`)
+
+  for (const label of ['Context', 'Conclusion']) {
+    const section = page.locator('section').filter({ has: page.getByRole('heading', { name: label, exact: true }) }).first()
+    const readingArea = section.locator('div.overflow-y-auto').filter({ hasText: 'Paragraph 80' }).first()
+    await expect(readingArea).toBeVisible()
+    const readSize = await readingArea.evaluate((element) => ({ height: element.clientHeight, scrollHeight: element.scrollHeight }))
+    expect(readSize.height).toBeGreaterThan(500)
+    expect(readSize.scrollHeight).toBeGreaterThan(readSize.height)
+    expect(await readingArea.evaluate((element) => {
+      element.scrollTop = element.scrollHeight
+      return element.scrollTop
+    })).toBeGreaterThan(0)
+
+    await section.getByRole('button', { name: `Edit ${label.toLowerCase()}` }).click()
+    const editor = section.getByRole('textbox', { name: label })
+    await expect(editor).toHaveValue(longText)
+    const editSize = await editor.evaluate((element) => ({ height: element.clientHeight, scrollHeight: element.scrollHeight }))
+    expect(editSize.height).toBeGreaterThan(500)
+    expect(editSize.scrollHeight).toBeGreaterThan(editSize.height)
+    expect(await editor.evaluate((element) => {
+      element.scrollTop = element.scrollHeight
+      return element.scrollTop
+    })).toBeGreaterThan(0)
+    await section.getByRole('button', { name: 'Cancel' }).click()
+  }
+  assertNoUnexpected()
+})
+
+test('entry form gives both long-form fields room and stays reachable on a short screen', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 700 })
+  const assertNoUnexpected = await mockApi(page, authenticatedApi)
+  await page.goto('/technical-entries')
+  await page.getByRole('button', { name: 'New entry' }).click()
+  const dialog = page.getByRole('dialog', { name: 'New technical entry' })
+
+  for (const label of ['Context', 'Conclusion']) {
+    const field = dialog.getByRole('textbox', { name: label })
+    expect(await field.evaluate((element) => element.clientHeight)).toBeGreaterThan(150)
+  }
+  const size = await dialog.evaluate((element) => ({
+    height: element.getBoundingClientRect().height,
+    scrollHeight: element.scrollHeight,
+    clientHeight: element.clientHeight,
+  }))
+  expect(size.height).toBeLessThanOrEqual(700)
+  expect(size.scrollHeight).toBeGreaterThan(size.clientHeight)
+  await dialog.getByRole('button', { name: 'Cancel' }).click()
+  await expect(dialog).toBeHidden()
+  assertNoUnexpected()
+})
+
 test('a failed collection has a named error and a keyboard-reachable retry', async ({ page }) => {
   const assertNoUnexpected = await mockApi(page, (request, url) => {
     if (request.method() === 'GET' && url.pathname === '/api/project') {

@@ -43,7 +43,7 @@ export function TechnicalEntryFormFields<T extends CommonValues>({
             <FormControl>
               <textarea
                 {...field}
-                className="min-h-32 w-full resize-y rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="min-h-48 w-full resize-y rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={disabled}
                 placeholder="Describe what happened, where it happened, and what you tried."
               />
@@ -62,7 +62,7 @@ export function TechnicalEntryFormFields<T extends CommonValues>({
             <FormControl>
               <textarea
                 {...field}
-                className="min-h-24 w-full resize-y rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="min-h-48 w-full resize-y rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={disabled}
                 placeholder="What did you learn or how did you solve it?"
               />

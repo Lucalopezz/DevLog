@@ -85,7 +85,7 @@ export function TechnicalEntryStatusDialog({
       }}
       open={open}
     >
-      <DialogContent className="gap-6 border-border/60 bg-card p-7 shadow-2xl ring-0 sm:max-w-xl">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] gap-6 overflow-y-auto border-border/60 bg-card p-7 shadow-2xl ring-0 sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight">
             {isOpen ? "Close this issue" : "Reopen this issue"}
@@ -114,7 +114,7 @@ export function TechnicalEntryStatusDialog({
                       <textarea
                         {...field}
                         autoFocus
-                        className="min-h-32 w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm leading-6 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="min-h-48 w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm leading-6 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={isPending}
                         placeholder="What resolved the issue?"
                       />
