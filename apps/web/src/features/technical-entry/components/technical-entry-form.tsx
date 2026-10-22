@@ -117,7 +117,7 @@ export function TechnicalEntryForm({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="gap-6 border-border/60 bg-card p-7 shadow-2xl ring-0 sm:max-w-xl">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] gap-6 overflow-y-auto border-border/60 bg-card p-7 shadow-2xl ring-0 sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight">
             New technical entry

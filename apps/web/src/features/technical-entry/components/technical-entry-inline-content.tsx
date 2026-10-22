@@ -45,11 +45,10 @@ export function TechnicalEntryInlineContent({
   const [validationMessage, setValidationMessage] = useState<string>();
   const updateMutation = useUpdateTechnicalEntry();
 
-  // Read and edit modes intentionally share the same adaptive viewport rules.
-  // Short content stays compact; once the larger maximum is reached, the
-  // content scrolls inside the field instead of expanding the entire page.
+  // Short Markdown remains compact, while long content gets more reading room
+  // before scrolling. The editor starts taller so a new draft is useful too.
   const contentViewportClassName =
-    "min-h-24 max-h-110 overflow-y-auto rounded-lg";
+    "max-h-160 overflow-y-auto rounded-lg";
 
   function handleStartEditing() {
     // Re-read the latest server value when editing starts. This avoids
@@ -111,7 +110,7 @@ export function TechnicalEntryInlineContent({
           aria-invalid={Boolean(validationMessage)}
           aria-label={label}
           autoFocus
-          className={`${contentViewportClassName} field-sizing-content w-full resize-none border border-input bg-background px-3 py-2 text-sm leading-6 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50`}
+          className={`${contentViewportClassName} field-sizing-content min-h-48 w-full resize-none border border-input bg-background px-3 py-2 text-sm leading-6 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50`}
           disabled={updateMutation.isPending}
           onChange={(event) => {
             setDraft(event.target.value);
@@ -166,13 +165,13 @@ export function TechnicalEntryInlineContent({
       ) : null}
 
       {value.trim() ? (
-        <div className={`${contentViewportClassName} pr-2`}>
+        <div className={`${contentViewportClassName} min-h-24 pr-2`}>
           <Markdown className="max-w-3xl text-card-foreground/80">
             {value}
           </Markdown>
         </div>
       ) : (
-        <div className={`${contentViewportClassName} pr-2`}>
+        <div className={`${contentViewportClassName} min-h-24 pr-2`}>
           <p className="text-sm italic leading-6 text-muted-foreground">
             {emptyMessage}
           </p>
