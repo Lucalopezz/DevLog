@@ -88,12 +88,10 @@ import {
   SearchProjectTodoDto,
   UpdateProjectTodoDto,
 } from './dto/todo/project-todo.dto';
-import {
-  AddProjectTodoUseCase,
-  SearchProjectTodoUseCase,
-  UpdateProjectTodoUseCase,
-  RemoveProjectTodoUseCase,
-} from '../application/usecases/todo/project-todo.usecases';
+import { AddProjectTodoUseCase } from '../application/usecases/todo/add-project-todo.usecase';
+import { SearchProjectTodoUseCase } from '../application/usecases/todo/search-project-todo.usecase';
+import { UpdateProjectTodoUseCase } from '../application/usecases/todo/update-project-todo.usecase';
+import { RemoveProjectTodoUseCase } from '../application/usecases/todo/remove-project-todo.usecase';
 import {
   ProjectTodoCollectionPresenter,
   ProjectTodoPresenter,

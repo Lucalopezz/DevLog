@@ -45,3 +45,25 @@ The test type stays explicit without separating tests from the code they protect
 - Prefer direct imports; do not create `index.ts` files just to shorten paths.
 - A capability may depend on another capability's contract when a business rule requires it, but a file's directory should represent its primary responsibility.
 - Moving files between capabilities must not change HTTP routes, injection contracts, database schemas, or domain behavior.
+
+## Repository and use-case contracts
+
+Start a new repository contract from the shared interfaces in
+`src/shared/domain/repositories/`. Use `RepositoryInterface<Entity>` for basic
+persistence, or `SearchableRepositoryInterface<Entity, Filter, Params, Result>`
+when the feature lists records. Define the feature's filter and extend the
+shared `SearchParams` and `SearchResult` classes, as
+`ProjectEnvironmentRepository` does. The Prisma adapter implements the full
+contract, including `findAll`, `sortableFields`, and `search(props)` when it is
+searchable. This keeps pagination and repository operations consistent across
+project children.
+
+Give each use case its own file, explicit input type, and
+`UseCaseContract<Input, Output>` implementation. The environment add, search,
+update, and remove use cases are examples. Each child operation checks the
+authenticated user's project ownership; writes also check the project's
+archive state, and item operations check the child's project membership. Keep
+those checks visible in the use case that performs the operation. A
+feature-specific base class for these few repeated checks obscures the flow
+and departs from the current project pattern; introduce shared behavior only
+when a concrete invariant requires more than routine repetition.

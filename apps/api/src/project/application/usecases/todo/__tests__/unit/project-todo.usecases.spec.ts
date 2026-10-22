@@ -2,11 +2,11 @@ import { NotFoundException } from '@nestjs/common';
 import { ProjectEntity } from '@/project/domain/entities/project/project.entity';
 import { ProjectStatusEnum } from '@/project/domain/entities/project/project-status-enum';
 import { ProjectTodoEntity } from '@/project/domain/entities/todo/project-todo.entity';
-import {
-  AddProjectTodoUseCase,
-  UpdateProjectTodoUseCase,
-  RemoveProjectTodoUseCase,
-} from '../../project-todo.usecases';
+import { AddProjectTodoUseCase } from '../../add-project-todo.usecase';
+import { UpdateProjectTodoUseCase } from '../../update-project-todo.usecase';
+import { RemoveProjectTodoUseCase } from '../../remove-project-todo.usecase';
+import { SearchProjectTodoUseCase } from '../../search-project-todo.usecase';
+import { SearchResult } from '@/shared/domain/repositories/searchable.repository';
 
 const userId = '37588538-87ef-4776-bc30-c3b7f6280b35';
 const projectId = '71ac450c-f334-4d40-bb82-8480d2dd9148';
@@ -24,6 +24,7 @@ describe('Project todo use cases', () => {
     findById: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    search: jest.fn(),
   };
 
   beforeEach(() => {
@@ -41,6 +42,55 @@ describe('Project todo use cases', () => {
       expect.objectContaining({ projectId }),
     );
     expect(result.title).toBe('Task 2');
+  });
+
+  it('searches only within the owned project using standard search parameters', async () => {
+    todos.search.mockResolvedValue(
+      new SearchResult({
+        items: [todo],
+        total: 1,
+        currentPage: 2,
+        perPage: 10,
+      }),
+    );
+    const result = await new SearchProjectTodoUseCase(
+      projects as never,
+      todos as never,
+    ).execute({
+      userId,
+      projectId,
+      page: 2,
+      perPage: 10,
+      sort: 'title',
+      sortDir: 'desc',
+    });
+
+    expect(todos.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: 2,
+        perPage: 10,
+        sort: 'title',
+        sortDir: 'desc',
+        filter: { projectId },
+      }),
+    );
+    expect(result).toMatchObject({
+      items: [expect.objectContaining({ id: todo.id, projectId })],
+      total: 1,
+      currentPage: 2,
+      perPage: 10,
+      lastPage: 1,
+    });
+  });
+
+  it('does not query to-dos for a project owned by another user', async () => {
+    await expect(
+      new SearchProjectTodoUseCase(projects as never, todos as never).execute({
+        userId: otherProjectId,
+        projectId,
+      }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(todos.search).not.toHaveBeenCalled();
   });
 
   it('hides a foreign project and a child from another project', async () => {

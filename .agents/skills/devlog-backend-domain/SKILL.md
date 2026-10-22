@@ -41,6 +41,13 @@ check current implementation because older plans can describe superseded fields.
   `class-validator`. Preserve these established trade-offs for ordinary work.
   Greater framework independence is a separate architectural decision, not an
   excuse to refactor the feature while implementing unrelated behavior.
+- For new persistence contracts, use the shared `RepositoryInterface` or
+  `SearchableRepositoryInterface`; use feature-specific `SearchParams` and
+  `SearchResult` types for searchable child records. Give each use case its own
+  file, explicit input type, and `UseCaseContract` implementation. Follow the
+  neighboring project child use cases for visible ownership, archive, and child
+  membership checks instead of a feature-specific base class for routine checks.
+  See [backend organization](../../../docs/guides/backend_structure.md#repository-and-use-case-contracts).
 
 ## Complete the affected slice
 

@@ -1,21 +1,22 @@
+import {
+  SearchableRepositoryInterface,
+  SearchParams,
+  SearchResult,
+} from '@/shared/domain/repositories/searchable.repository';
 import { ProjectTodoEntity } from '../../entities/todo/project-todo.entity';
 
-export type ProjectTodoPage = {
-  items: ProjectTodoEntity[];
-  total: number;
-  currentPage: number;
-  perPage: number;
-  lastPage: number;
-};
+export type ProjectTodoFilter = { projectId: string };
 
-export interface ProjectTodoRepository {
-  insert(entity: ProjectTodoEntity): Promise<void>;
-  update(entity: ProjectTodoEntity): Promise<void>;
-  delete(id: string): Promise<void>;
-  findById(id: string): Promise<ProjectTodoEntity | null>;
-  search(
-    projectId: string,
-    page: number,
-    perPage: number,
-  ): Promise<ProjectTodoPage>;
-}
+export class ProjectTodoSearchParams extends SearchParams<ProjectTodoFilter> {}
+
+export class ProjectTodoSearchResult extends SearchResult<
+  ProjectTodoEntity,
+  ProjectTodoFilter
+> {}
+
+export type ProjectTodoRepository = SearchableRepositoryInterface<
+  ProjectTodoEntity,
+  ProjectTodoFilter,
+  ProjectTodoSearchParams,
+  ProjectTodoSearchResult
+>;

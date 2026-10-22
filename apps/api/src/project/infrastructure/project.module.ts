@@ -45,12 +45,10 @@ import { UpdateProjectEnvironmentUseCase } from '../application/usecases/environ
 import { RemoveProjectEnvironmentUseCase } from '../application/usecases/environment/remove-project-environment.usecase';
 import { ProjectTodoRepository } from '../domain/repositories/todo/project-todo.repository';
 import { ProjectTodoPrismaRepository } from './database/prisma/repositories/todo/project-todo-prisma.repository';
-import {
-  AddProjectTodoUseCase,
-  SearchProjectTodoUseCase,
-  UpdateProjectTodoUseCase,
-  RemoveProjectTodoUseCase,
-} from '../application/usecases/todo/project-todo.usecases';
+import { AddProjectTodoUseCase } from '../application/usecases/todo/add-project-todo.usecase';
+import { SearchProjectTodoUseCase } from '../application/usecases/todo/search-project-todo.usecase';
+import { UpdateProjectTodoUseCase } from '../application/usecases/todo/update-project-todo.usecase';
+import { RemoveProjectTodoUseCase } from '../application/usecases/todo/remove-project-todo.usecase';
 
 @Module({
   controllers: [ProjectController],
@@ -121,17 +119,30 @@ import {
         new ProjectTodoPrismaRepository(prismaService),
       inject: ['PrismaService'],
     },
-    ...[
-      AddProjectTodoUseCase,
-      SearchProjectTodoUseCase,
-      UpdateProjectTodoUseCase,
-      RemoveProjectTodoUseCase,
-    ].map((useCase) => ({
-      provide: useCase,
+    {
+      provide: AddProjectTodoUseCase,
       useFactory: (projects: ProjectRepository, todos: ProjectTodoRepository) =>
-        new useCase(projects, todos),
+        new AddProjectTodoUseCase(projects, todos),
       inject: ['ProjectRepository', 'ProjectTodoRepository'],
-    })),
+    },
+    {
+      provide: SearchProjectTodoUseCase,
+      useFactory: (projects: ProjectRepository, todos: ProjectTodoRepository) =>
+        new SearchProjectTodoUseCase(projects, todos),
+      inject: ['ProjectRepository', 'ProjectTodoRepository'],
+    },
+    {
+      provide: UpdateProjectTodoUseCase,
+      useFactory: (projects: ProjectRepository, todos: ProjectTodoRepository) =>
+        new UpdateProjectTodoUseCase(projects, todos),
+      inject: ['ProjectRepository', 'ProjectTodoRepository'],
+    },
+    {
+      provide: RemoveProjectTodoUseCase,
+      useFactory: (projects: ProjectRepository, todos: ProjectTodoRepository) =>
+        new RemoveProjectTodoUseCase(projects, todos),
+      inject: ['ProjectRepository', 'ProjectTodoRepository'],
+    },
     {
       provide: AddProjectEnvironmentUseCase,
       useFactory: (
