@@ -21,12 +21,14 @@ export function ProjectList({ projects }: ProjectListProps) {
         </p>
       </div>
 
-      <ul className="grid gap-4 md:grid-cols-2">
+      {/* A zero-minimum column and item let long project identifiers wrap
+          inside a phone-width card instead of sizing the entire grid. */}
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {projects.map((project) => {
           const status = presentProjectStatus(project.status);
 
           return (
-            <li key={project.id}>
+            <li className="min-w-0" key={project.id}>
               <Link
                 // A card contains an article and metadata; name its destination
                 // explicitly so browsers expose a short, stable link name.
@@ -35,9 +37,9 @@ export function ProjectList({ projects }: ProjectListProps) {
                 to={`/projects/${project.id}`}
               >
                 <article className="flex h-full flex-col gap-5 rounded-xl border bg-card p-5 shadow-sm transition-colors group-hover:border-primary/40 group-hover:bg-card/80">
-                  <header className="flex items-start justify-between gap-4">
-                    <h3 className="flex min-w-0 items-start gap-2 text-lg font-semibold break-words">
-                      <span>{project.name}</span>
+                  <header className="flex min-w-0 items-start justify-between gap-4">
+                    <h3 className="flex min-w-0 flex-1 items-start gap-2 text-lg font-semibold">
+                      <span className="min-w-0 wrap-anywhere">{project.name}</span>
                       <ArrowUpRight className="mt-1 size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                     </h3>
                     <span
@@ -48,7 +50,7 @@ export function ProjectList({ projects }: ProjectListProps) {
                   </header>
 
                   {project.description ? (
-                    <Markdown className="max-h-18 overflow-hidden text-sm leading-6 text-muted-foreground">
+                    <Markdown className="max-h-18 min-w-0 overflow-hidden wrap-anywhere text-sm leading-6 text-muted-foreground">
                       {project.description}
                     </Markdown>
                   ) : (
