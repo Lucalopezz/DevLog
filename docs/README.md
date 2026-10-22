@@ -74,8 +74,8 @@ Tracks planned implementation and known pending work. Use it to find what still 
 5. Check [`backlog/backend.md`](backlog/backend.md) before implementing a new task.
 
 The project and technical-journal workflows shipped for MVP 1.0 are complete
-in the frontend. Project screens aggregate technologies, environments, entries,
-commands, and resources; the journal supports tags, solution attempts, and issue
+in the frontend. Project screens aggregate technologies, environments, to-dos,
+entries, commands, and resources; the journal supports tags, solution attempts, and issue
 resolution. See the [web application guide](../apps/web/README.md) for the
 current screens and [`usecases/`](usecases/) for API behavior.
 
@@ -90,6 +90,8 @@ follow-up frontend areas are also implemented in the current working tree:
   by local creation day with project/type filters and incremental loading.
 - Knowledge Overview at `/knowledge-overview`, showing current journal totals,
   issue composition, and recent learnings/resolutions under a shared project scope.
+- A project To-dos tab for small actions with completion state and archived
+  read-only behavior.
 
 The authoritative task breakdown is kept in [`backlog/backend.md`](backlog/backend.md)
 and [`backlog/frontend.md`](backlog/frontend.md). The backend use cases for

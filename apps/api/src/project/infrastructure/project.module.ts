@@ -43,6 +43,14 @@ import { SearchProjectEnvironmentUseCase } from '../application/usecases/environ
 import { SearchOwnerProjectEnvironmentsUseCase } from '../application/usecases/environment/search-owner-project-environments.usecase';
 import { UpdateProjectEnvironmentUseCase } from '../application/usecases/environment/update-project-environment.usecase';
 import { RemoveProjectEnvironmentUseCase } from '../application/usecases/environment/remove-project-environment.usecase';
+import { ProjectTodoRepository } from '../domain/repositories/todo/project-todo.repository';
+import { ProjectTodoPrismaRepository } from './database/prisma/repositories/todo/project-todo-prisma.repository';
+import {
+  AddProjectTodoUseCase,
+  SearchProjectTodoUseCase,
+  UpdateProjectTodoUseCase,
+  RemoveProjectTodoUseCase,
+} from '../application/usecases/todo/project-todo.usecases';
 
 @Module({
   controllers: [ProjectController],
@@ -107,6 +115,23 @@ import { RemoveProjectEnvironmentUseCase } from '../application/usecases/environ
         new ProjectEnvironmentPrismaRepository(prismaService),
       inject: ['PrismaService'],
     },
+    {
+      provide: 'ProjectTodoRepository',
+      useFactory: (prismaService: PrismaService) =>
+        new ProjectTodoPrismaRepository(prismaService),
+      inject: ['PrismaService'],
+    },
+    ...[
+      AddProjectTodoUseCase,
+      SearchProjectTodoUseCase,
+      UpdateProjectTodoUseCase,
+      RemoveProjectTodoUseCase,
+    ].map((useCase) => ({
+      provide: useCase,
+      useFactory: (projects: ProjectRepository, todos: ProjectTodoRepository) =>
+        new useCase(projects, todos),
+      inject: ['ProjectRepository', 'ProjectTodoRepository'],
+    })),
     {
       provide: AddProjectEnvironmentUseCase,
       useFactory: (

@@ -3,6 +3,7 @@ import type { KeyboardEvent, ReactNode } from "react";
 export type ProjectDetailTab =
   | "overview"
   | "entries"
+  | "todos"
   | "technologies"
   | "environments"
   | "commands"
@@ -12,6 +13,7 @@ export type ProjectDetailTab =
 const projectDetailTabs: { id: ProjectDetailTab; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "entries", label: "Technical entries" },
+  { id: "todos", label: "To-dos" },
   { id: "technologies", label: "Technologies" },
   { id: "environments", label: "Environments" },
   { id: "commands", label: "Commands" },

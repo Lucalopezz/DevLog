@@ -12,6 +12,7 @@ erDiagram
     Project |o--o{ TechnicalEntry : contextualizes
     Project ||--o{ ProjectTechnology : contains
     Project ||--o{ ProjectEnvironment : contains
+    Project ||--o{ ProjectTodo : contains
     Project ||--o{ ProjectCommand : contains
     Project ||--o{ ProjectResource : contains
     TechnicalEntry ||--o{ SolutionAttempt : contains
@@ -29,6 +30,12 @@ erDiagram
         string runtime_version
         string description
     }
+    ProjectTodo {
+        uuid id PK
+        uuid project_id FK
+        string title
+        timestamp completed_at
+    }
 ```
 
 ### Cardinalities
@@ -43,6 +50,7 @@ erDiagram
 | TechnicalEntry ↔ Tag | N:N | An entry can have multiple tags, and a tag can appear on multiple entries. |
 | Project → ProjectTechnology | 1:N | A project can use multiple technologies. |
 | Project → ProjectEnvironment | 1:N | A project can document multiple execution contexts. |
+| Project → ProjectTodo | 1:N | A project can have multiple actions, each with its own completion state. |
 | Project → ProjectCommand | 1:N | A project can have multiple commands. |
 | Project → ProjectResource | 1:N | A project can have multiple links and resources. |
 
@@ -422,6 +430,38 @@ runtime conditions; they do not contain secrets or executable configuration.
 
 ---
 
+## `project_todos`
+
+```text
+project_todos
+-------------
+id             UUID PK
+project_id     UUID NOT NULL FK -> projects.id
+title          VARCHAR(200) NOT NULL
+completed_at   TIMESTAMPTZ NULL
+created_at     TIMESTAMPTZ NOT NULL
+updated_at     TIMESTAMPTZ NOT NULL
+```
+
+Each row is one action belonging to a project. A separate table supports any
+number of actions and lets the application update or remove one without
+rewriting a serialized list on `projects`. `completed_at` represents both the
+completion state and when it changed; `NULL` means unfinished. Reopening clears
+it, so this model records current state rather than a completion history.
+
+Titles are validated and trimmed in the domain. They are not unique: two
+actions may have the same wording. The index on `(project_id, completed_at,
+created_at, id)` helps retrieve the unfinished partition and scope both
+partitions to a project. The repository combines unfinished and completed
+queries, ordering each by creation time and ID for stable pages. Completed
+rows may need an additional sort because their completion timestamps differ;
+a second index is deferred until list size warrants it. The foreign key
+cascades on permanent project deletion; archiving keeps rows readable and
+prevents writes through the project aggregate. Ownership is checked through
+the parent project.
+
+---
+
 ## `project_commands`
 
 ```text
@@ -497,17 +537,19 @@ Relationships use these behaviors:
 | `Project` → `TechnicalEntry` | `ON DELETE SET NULL` |
 | `Project` → `ProjectTechnology` | `ON DELETE CASCADE` |
 | `Project` → `ProjectEnvironment` | `ON DELETE CASCADE` |
+| `Project` → `ProjectTodo` | `ON DELETE CASCADE` |
 | `Project` → `ProjectCommand` | `ON DELETE CASCADE` |
 | `Project` → `ProjectResource` | `ON DELETE CASCADE` |
 | `TechnicalEntry` → `SolutionAttempt` | `ON DELETE CASCADE` |
 | `TechnicalEntry`/`Tag` → `TechnicalEntryTag` | `ON DELETE CASCADE` |
 
-Directly deleting a project deletes its technologies, environments, commands,
-and resources. Associated technical entries are preserved with `project_id = NULL`.
+Directly deleting a project deletes its technologies, environments, to-dos,
+commands, and resources. Associated technical entries are preserved with
+`project_id = NULL`.
 
 Deleting a user also cascades to their projects, entries, and tags. Deleting
-those projects cascades to their technologies, environments, commands, and
-resources.
+those projects cascades to their technologies, environments, to-dos, commands,
+and resources.
 
 In normal use, projects and technical entries are archived rather than permanently deleted.
 
@@ -587,6 +629,23 @@ PROJECT_COMMANDS
 - command
 - description
 - execution_order
+- created_at
+- updated_at
+
+PROJECT_ENVIRONMENTS
+- id PK
+- project_id FK -> PROJECTS.id
+- name
+- normalized_name
+- category
+- created_at
+- updated_at
+
+PROJECT_TODOS
+- id PK
+- project_id FK -> PROJECTS.id
+- title
+- completed_at
 - created_at
 - updated_at
 
@@ -709,6 +768,9 @@ ON project_commands (project_id, execution_order);
 
 CREATE INDEX idx_resources_project
 ON project_resources (project_id);
+
+CREATE INDEX idx_project_todos_order
+ON project_todos (project_id, completed_at, created_at, id);
 ```
 
 The MVP uses the `title` parameter for case-insensitive partial matching on the title only. If search later includes context and conclusion, consider PostgreSQL `tsvector` and a GIN index:
@@ -744,8 +806,10 @@ The consolidated schema decisions are:
 8. **Make project names unique per user**, technology names unique per project, and resource URLs unique per project.
 9. **Allow repeated execution orders** for commands in the same project.
 10. **Validate cross-user rules and other invariants in the application**, without composite foreign keys, triggers, or `CHECK constraints`.
-11. **Preserve entries when deleting a project**, setting `project_id` to `NULL`, while cascading deletion of project technologies, commands, and resources.
+11. **Preserve entries when deleting a project**, setting `project_id` to `NULL`, while cascading deletion of project technologies, environments, to-dos, commands, and resources.
 12. **Default new projects to `ACTIVE`**.
 13. **Optimize unarchived entry listing** with an index on `(user_id, archived_at, created_at DESC)`, covering filtering and sorting.
 
-This model has **nine tables**, including the `technical_entry_tags` association table. It keeps the MVP small and supports planned features without introducing infrastructure structures outside the product scope.
+The original MVP model had **nine tables**, including the
+`technical_entry_tags` association table. Project environments and to-dos were
+added after MVP 1.0. The current model keeps their lifecycles under `Project`.

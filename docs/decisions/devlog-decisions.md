@@ -312,7 +312,9 @@ A relationship between two entities does not mean they belong to the same aggreg
 Project (aggregate root)
  ├── ProjectTechnology
  ├── ProjectCommand
- └── ProjectResource
+ ├── ProjectResource
+ ├── ProjectEnvironment
+ └── ProjectTodo
 
 TechnicalEntry (aggregate root)
  └── SolutionAttempt
@@ -330,7 +332,7 @@ Responsibilities are separated as follows:
 
 | Aggregate | Child entities | Ownership rule |
 | --- | --- | --- |
-| `Project` | `ProjectTechnology`, `ProjectCommand`, `ProjectResource` | Each entity belongs to one project and cannot exist outside it. |
+| `Project` | `ProjectTechnology`, `ProjectCommand`, `ProjectResource`, `ProjectEnvironment`, `ProjectTodo` | Each entity belongs to one project and cannot exist outside it. |
 | `TechnicalEntry` | `SolutionAttempt` | Each attempt belongs to one entry and exists only for `ISSUE`. |
 | `Tag` | None of the entities above | Independent user resource related to entries through `TechnicalEntryTag`. |
 
@@ -392,7 +394,9 @@ technical-entry/
 POST /technical-entry/:entryId/solution-attempts
 ```
 
-Likewise, operations on technologies, commands, and resources must validate `projectId`, project ownership, and resource membership before making changes.
+Likewise, operations on technologies, environments, to-dos, commands, and
+resources must validate `projectId`, project ownership, and child membership
+before making changes.
 
 ---
 
@@ -537,6 +541,7 @@ Currently displays:
 General information
 Technologies
 Environments
+To-dos
 Commands
 Links and resources
 Related technical entries
@@ -682,7 +687,8 @@ The initial version will not include:
 - Comments.
 - GitHub integration.
 - Artificial intelligence integration.
-- Kanban or task management.
+- Kanban or broader task management. A simple project to-do list was added
+  after MVP 1.0; it has no workflow board, assignment, priority, or due dates.
 - Browser command execution.
 - SSH access.
 - Continuous monitoring.
@@ -719,7 +725,25 @@ cloud services, or logs through environments.
 
 ---
 
-## 14. Decision summary
+## 14. Post-MVP project to-dos
+
+Each project has one simple list of actions. A to-do has a title and an optional
+completion timestamp. The timestamp supplies the current complete/incomplete
+state; reopening clears it, so the feature does not preserve a transition
+history. Titles may repeat, and unfinished items appear first in stable
+creation order.
+
+`ProjectTodo` is a child of the `Project` aggregate. The API checks project
+ownership and the child's project membership for every operation. Archived
+projects retain their list for reading and cannot change it. Permanent project
+deletion removes its to-dos through the foreign key cascade.
+
+The project detail To-dos tab owns this interaction. The list is deliberately
+limited to adding, renaming, completing, reopening, and removing actions.
+Named lists, manual order, assignment, priorities, and due dates would change
+the product contract and are separate decisions.
+
+## 15. Decision summary
 
 The product is a personal technical knowledge base organized by project context.
 
@@ -728,6 +752,7 @@ Technical journal = product core
 Projects = context and organization
 Tags = classification by topic or technology
 Environments = documented project runtime contexts
+Project to-dos = small next actions within a project
 Activity Timeline and Knowledge Overview = implemented views of the current
 journal
 Services = later extension

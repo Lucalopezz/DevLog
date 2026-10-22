@@ -38,6 +38,7 @@ class Project {
   +addCommand(title, command, description, order): ProjectCommand
   +addResource(label, url, type): ProjectResource
   +addEnvironment(input): ProjectEnvironment
+  +addTodo(title): ProjectTodo
   +update(changes): void
   +archive(): void
   +restore(): void
@@ -82,6 +83,15 @@ class ProjectEnvironment {
   -runtime: string?
   -runtimeVersion: string?
   -description: string?
+  -createdAt: Date
+  -updatedAt: Date
+  +update(changes): void
+}
+
+class ProjectTodo {
+  -projectId: UUID
+  -title: string
+  -completedAt: Date?
   -createdAt: Date
   -updatedAt: Date
   +update(changes): void
@@ -187,6 +197,7 @@ Entity <|-- ProjectTechnology
 Entity <|-- ProjectCommand
 Entity <|-- ProjectResource
 Entity <|-- ProjectEnvironment
+Entity <|-- ProjectTodo
 Entity <|-- TechnicalEntry
 Entity <|-- SolutionAttempt
 Entity <|-- Tag
@@ -199,6 +210,7 @@ Project "1" *-- "0..*" ProjectTechnology : composes
 Project "1" *-- "0..*" ProjectCommand : composes
 Project "1" *-- "0..*" ProjectResource : composes
 Project "1" *-- "0..*" ProjectEnvironment : composes
+Project "1" *-- "0..*" ProjectTodo : composes
 Project "0..1" <-- "0..*" TechnicalEntry : provides context
 TechnicalEntry "1" *-- "0..*" SolutionAttempt : composes
 
@@ -216,7 +228,7 @@ SolutionAttempt --> SolutionAttemptResult
 
 ### Reading the relationships
 
-- `Project` composes technologies, environments, commands, and resources because these objects
+- `Project` composes technologies, environments, to-dos, commands, and resources because these objects
   are created within a project, have no meaning without it, and are deleted
   in a cascade.
 - `TechnicalEntry` composes `SolutionAttempt` through the same lifecycle relationship.

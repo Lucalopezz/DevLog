@@ -66,6 +66,9 @@ of truth for API validation and lifecycle rules.
 - [x] **Knowledge Overview:** show learning and issue totals, current issue
   composition, and recent learnings/resolutions with a shared project filter.
   See [scope and implementation](../guides/knowledge-overview.md).
+- [x] **Project to-dos:** add, rename, complete, reopen, and remove actions in
+  the project detail To-dos tab. Archived projects show a read-only list.
+  See [project use cases](../usecases/projects.md#uc-49--add-project-to-do).
 
 The roadmap keeps these follow-up features separate from MVP 1.0 so the shipped
 project and journal workflows stay easy to identify. The timeline describes the

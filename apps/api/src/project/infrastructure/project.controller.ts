@@ -83,6 +83,21 @@ import {
   ProjectEnvironmentCollectionPresenter,
   ProjectEnvironmentPresenter,
 } from './presenter/environment/project-environment.presenter';
+import {
+  AddProjectTodoDto,
+  SearchProjectTodoDto,
+  UpdateProjectTodoDto,
+} from './dto/todo/project-todo.dto';
+import {
+  AddProjectTodoUseCase,
+  SearchProjectTodoUseCase,
+  UpdateProjectTodoUseCase,
+  RemoveProjectTodoUseCase,
+} from '../application/usecases/todo/project-todo.usecases';
+import {
+  ProjectTodoCollectionPresenter,
+  ProjectTodoPresenter,
+} from './presenter/todo/project-todo.presenter';
 
 @UseGuards(AuthGuard)
 @Controller('project')
@@ -164,6 +179,18 @@ export class ProjectController {
 
   @Inject(RemoveProjectEnvironmentUseCase)
   private readonly removeProjectEnvironmentUseCase: RemoveProjectEnvironmentUseCase;
+
+  @Inject(AddProjectTodoUseCase)
+  private readonly addProjectTodoUseCase: AddProjectTodoUseCase;
+
+  @Inject(SearchProjectTodoUseCase)
+  private readonly searchProjectTodoUseCase: SearchProjectTodoUseCase;
+
+  @Inject(UpdateProjectTodoUseCase)
+  private readonly updateProjectTodoUseCase: UpdateProjectTodoUseCase;
+
+  @Inject(RemoveProjectTodoUseCase)
+  private readonly removeProjectTodoUseCase: RemoveProjectTodoUseCase;
 
   static projectToResponse(output: ProjectOutput) {
     return new ProjectPresenter(output);
@@ -253,6 +280,64 @@ export class ProjectController {
       userId: user.id,
     });
     return new ProjectEnvironmentCollectionPresenter(output);
+  }
+
+  @Get(':projectId/todos')
+  async searchTodos(
+    @Param('projectId') projectId: string,
+    @Query() query: SearchProjectTodoDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.searchProjectTodoUseCase.execute({
+      ...query,
+      projectId,
+      userId: user.id,
+    });
+    return new ProjectTodoCollectionPresenter(output);
+  }
+
+  @Post(':projectId/todos')
+  async addTodo(
+    @Param('projectId') projectId: string,
+    @Body() body: AddProjectTodoDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.addProjectTodoUseCase.execute({
+      ...body,
+      projectId,
+      userId: user.id,
+    });
+    return new ProjectTodoPresenter(output);
+  }
+
+  @Patch(':projectId/todos/:todoId')
+  async updateTodo(
+    @Param('projectId') projectId: string,
+    @Param('todoId') todoId: string,
+    @Body() body: UpdateProjectTodoDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const output = await this.updateProjectTodoUseCase.execute({
+      ...body,
+      projectId,
+      todoId,
+      userId: user.id,
+    });
+    return new ProjectTodoPresenter(output);
+  }
+
+  @Delete(':projectId/todos/:todoId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeTodo(
+    @Param('projectId') projectId: string,
+    @Param('todoId') todoId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    await this.removeProjectTodoUseCase.execute({
+      projectId,
+      todoId,
+      userId: user.id,
+    });
   }
 
   @Post(':projectId/environments')
