@@ -65,7 +65,9 @@ function HomePage() {
         tags={{ isPending: tags.isPending, total: tags.data?.meta.total }}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(18rem,1fr)]">
+      {/* An explicit zero-minimum mobile track lets long journal titles wrap
+          inside their card instead of widening the whole dashboard. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(18rem,1fr)]">
         <RecentEntriesSection
           entries={entries.data?.data}
           isError={entries.isError}

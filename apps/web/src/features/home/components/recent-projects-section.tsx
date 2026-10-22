@@ -46,7 +46,7 @@ export function RecentProjectsSection({
   return (
     <section
       aria-labelledby="recent-projects-title"
-      className="rounded-2xl border bg-muted/30 p-4 shadow-sm sm:p-6"
+      className="min-w-0 rounded-2xl border bg-muted/30 p-4 shadow-sm sm:p-6"
     >
       <header className="mb-4 flex items-end justify-between gap-4">
         <div>

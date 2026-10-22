@@ -47,7 +47,7 @@ export function TechnicalEntriesSection({
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {entries.map((entry) => {
           const type = presentTechnicalEntryType(entry.type);
           const TypeIcon = type.icon;
@@ -57,22 +57,22 @@ export function TechnicalEntriesSection({
             // navigation target and avoids nesting the title link inside it.
             <Link
               aria-label={entry.title}
-              className="group block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="group block h-full min-w-0 rounded-2xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               key={entry.id}
               to={`/technical-entries/${entry.id}`}
             >
-              <article className="flex h-full flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm transition-colors group-hover:border-primary/40 group-hover:bg-card">
-                <header className="flex items-start justify-between gap-4">
-                  <div className="flex min-w-0 items-start gap-3">
+              <article className="flex h-full min-w-0 flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm transition-colors group-hover:border-primary/40 group-hover:bg-card">
+                <header className="flex min-w-0 items-start justify-between gap-4">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
                     <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                       <TypeIcon className="size-4 text-primary" />
                     </span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-muted-foreground">
                         {type.label}
                       </p>
-                      <h3 className="mt-1 flex items-start gap-1 break-words font-semibold">
-                        <span>{entry.title}</span>
+                      <h3 className="mt-1 flex min-w-0 items-start gap-1 font-semibold">
+                        <span className="min-w-0 wrap-anywhere">{entry.title}</span>
                         <ArrowUpRight
                           aria-hidden="true"
                           className="mt-0.5 size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
@@ -87,12 +87,12 @@ export function TechnicalEntriesSection({
                   ) : null}
                 </header>
 
-                <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
+                <p className="line-clamp-4 wrap-anywhere text-sm leading-6 text-muted-foreground">
                   {entry.context}
                 </p>
 
                 {entry.conclusion ? (
-                  <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+                  <p className="line-clamp-2 wrap-anywhere text-sm leading-6 text-muted-foreground">
                     {entry.conclusion}
                   </p>
                 ) : null}
@@ -101,7 +101,7 @@ export function TechnicalEntriesSection({
                   <ul className="flex flex-wrap gap-1.5">
                     {entry.tags.map((tag) => (
                       <li
-                        className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
+                        className="max-w-full wrap-anywhere rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
                         key={tag.id}
                       >
                         #{tag.name}
