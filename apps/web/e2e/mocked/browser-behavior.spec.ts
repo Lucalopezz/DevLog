@@ -34,6 +34,38 @@ test('dashboard stays available when the viewport changes to mobile', async ({ p
   assertNoUnexpected()
 })
 
+test('recent journal cards fit narrow screens with long entry titles', async ({ page }) => {
+  const longTitle = 'database-migration-'.repeat(24)
+  const assertNoUnexpected = await mockApi(page, (request, url) => {
+    if (request.method() === 'GET' && url.pathname === '/api/technical-entry') {
+      return { body: { data: [{ ...entry, title: longTitle }], meta: { currentPage: 1, perPage: 5, lastPage: 1, total: 1 } } }
+    }
+    return authenticatedApi(request, url)
+  })
+
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 })
+    await page.goto('/dashboard')
+    const section = page.getByRole('region', { name: 'Recent journal entries' })
+    await expect(section.getByText(longTitle)).toBeVisible()
+
+    const layout = await section.evaluate((element) => ({
+      sectionWidth: element.clientWidth,
+      contentWidth: element.scrollWidth,
+      sectionRight: element.getBoundingClientRect().right,
+      headerWidth: element.querySelector('header')?.clientWidth ?? 0,
+      headerContentWidth: element.querySelector('header')?.scrollWidth ?? 0,
+      viewportWidth: document.documentElement.clientWidth,
+      documentWidth: document.documentElement.scrollWidth,
+    }))
+    expect(layout.contentWidth, JSON.stringify(layout)).toBeLessThanOrEqual(layout.sectionWidth)
+    expect(layout.headerContentWidth, JSON.stringify(layout)).toBeLessThanOrEqual(layout.headerWidth)
+    expect(layout.sectionRight, JSON.stringify(layout)).toBeLessThanOrEqual(layout.viewportWidth)
+    expect(layout.documentWidth, JSON.stringify(layout)).toBeLessThanOrEqual(layout.viewportWidth)
+  }
+  assertNoUnexpected()
+})
+
 test('desktop sidebar collapses and identifies active entry scope', async ({ page }) => {
   const assertNoUnexpected = await mockApi(page, authenticatedApi)
   await page.goto('/technical-entries/archived')

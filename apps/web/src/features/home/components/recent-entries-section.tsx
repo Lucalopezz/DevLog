@@ -34,7 +34,9 @@ function RecentEntryRow({ entry }: { entry: TechnicalEntry }) {
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
-            <span className="truncate font-medium">{entry.title}</span>
+            <span className="min-w-0 line-clamp-2 wrap-anywhere font-medium">
+              {entry.title}
+            </span>
             {status ? (
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${status.className}`}
@@ -61,9 +63,9 @@ export function RecentEntriesSection({
   return (
     <section
       aria-labelledby="recent-entries-title"
-      className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6"
+      className="min-w-0 rounded-2xl border bg-card p-4 shadow-sm sm:p-6"
     >
-      <header className="mb-4 flex items-end justify-between gap-4 px-2">
+      <header className="mb-4 flex flex-col items-start gap-3 px-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
         <div>
           <p className="text-xs font-medium tracking-widest text-emerald-700 uppercase dark:text-emerald-300">
             Latest activity
