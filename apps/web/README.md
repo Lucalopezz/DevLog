@@ -44,9 +44,9 @@ store credentials or deployment configuration.
 ### Technical journal
 
 The journal provides paginated active and archived lists, filters for title,
-type, issue status, and tag, plus entry details with Markdown rendering. Users
-can create entries, edit title/context/conclusion, assign or remove tags, and
-archive, restore, or permanently delete entries.
+type, issue status, and tag, plus entry details with Markdown and Mermaid
+rendering. Users can create entries, edit title/context/conclusion, assign or
+remove tags, and archive, restore, or permanently delete entries.
 
 Links from Knowledge Overview can scope the active journal using `projectId`
 in the URL. Search and pagination preserve that scope. **Show all projects**

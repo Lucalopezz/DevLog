@@ -164,6 +164,34 @@ keeps profile consumers synchronized.
 
 Use `presentation.ts` for display details that should not leak into the API: status text, badge colors, icons, and specific formats. For example, a `PAUSED` API value could be displayed as “Paused” by that map. Use English display text throughout.
 
+## Markdown diagrams
+
+Project descriptions and technical-entry context and conclusions store plain
+Markdown. To include a diagram, write a fenced `mermaid` block. Add an
+accessible title and description when the diagram carries useful information:
+
+````markdown
+```mermaid
+flowchart LR
+  accTitle: Delivery flow
+  accDescr: A request moves from start to completion.
+  Start --> Done
+```
+````
+
+The shared [`Markdown` component](../../apps/web/src/components/markdown.tsx)
+renders these blocks in full detail fields. It loads Mermaid only when a diagram
+is present; ordinary Markdown and code fences keep their existing rendering.
+Compact list cards leave the fence as code because their content is clipped.
+Invalid diagrams retain their source with a readable error message, so saved
+text is never lost. Mermaid runs with strict security settings, which encode
+HTML labels and disable diagram links. The original source is also available
+from **View diagram source** below each successful diagram.
+
+See [Mermaid's syntax guide](https://mermaid.js.org/intro/syntax-reference.html)
+for diagram types and [accessibility options](https://mermaid.js.org/config/accessibility)
+for `accTitle` and `accDescr`.
+
 ## Tests
 
 The frontend uses Vitest with Testing Library and MSW. `src/test/` holds shared
