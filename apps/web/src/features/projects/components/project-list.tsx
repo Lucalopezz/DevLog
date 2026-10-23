@@ -50,7 +50,7 @@ export function ProjectList({ projects }: ProjectListProps) {
                   </header>
 
                   {project.description ? (
-                    <Markdown className="max-h-18 min-w-0 overflow-hidden wrap-anywhere text-sm leading-6 text-muted-foreground">
+                    <Markdown className="max-h-18 min-w-0 overflow-hidden wrap-anywhere text-sm leading-6 text-muted-foreground" renderDiagrams={false}>
                       {project.description}
                     </Markdown>
                   ) : (

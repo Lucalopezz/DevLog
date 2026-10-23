@@ -1,15 +1,18 @@
+import { Children, isValidElement } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import { MermaidDiagram } from "./mermaid-diagram";
 
 type MarkdownProps = React.ComponentProps<typeof ReactMarkdown> & {
   className?: string;
+  renderDiagrams?: boolean;
 };
 
 // Renders Markdown content using ReactMarkdown and remarkGfm. The wrapper
 // owns typography, block spacing, and element styles so every feature gets
 // the same reading experience without duplicating Markdown configuration.
-export function Markdown({ className, ...props }: MarkdownProps) {
+export function Markdown({ className, renderDiagrams = true, ...props }: MarkdownProps) {
   return (
     <div
       className={cn(
@@ -19,7 +22,23 @@ export function Markdown({ className, ...props }: MarkdownProps) {
     >
       {/* Keep GFM enabled after spreading props so callers cannot accidentally
           replace the plugin and lose tables, task lists, or strikethrough. */}
-      <ReactMarkdown {...props} remarkPlugins={[remarkGfm]} />
+      <ReactMarkdown
+        {...props}
+        components={{
+          ...props.components,
+          pre({ children }) {
+            const code = Children.toArray(children)[0];
+            if (renderDiagrams && isValidElement<{ className?: string; children?: string }>(code)) {
+              const language = code.props.className?.split(/\s+/).includes("language-mermaid");
+              if (language && typeof code.props.children === "string") {
+                return <MermaidDiagram source={code.props.children.trimEnd()} />;
+              }
+            }
+            return <pre>{children}</pre>;
+          },
+        }}
+        remarkPlugins={[remarkGfm]}
+      />
     </div>
   );
 }
