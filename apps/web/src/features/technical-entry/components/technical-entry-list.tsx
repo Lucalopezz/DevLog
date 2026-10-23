@@ -77,14 +77,14 @@ export function TechnicalEntryList({
                     ) : null}
                   </header>
 
-                  <Markdown className="max-h-24 overflow-hidden text-sm leading-6 text-muted-foreground">
+                  <Markdown className="max-h-24 overflow-hidden text-sm leading-6 text-muted-foreground" renderDiagrams={false}>
                     {entry.context}
                   </Markdown>
 
                   {entry.conclusion?.trim() ? (
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-muted-foreground">Conclusion</p>
-                      <Markdown className="max-h-16 overflow-hidden text-sm leading-6 text-muted-foreground">
+                      <Markdown className="max-h-16 overflow-hidden text-sm leading-6 text-muted-foreground" renderDiagrams={false}>
                         {entry.conclusion}
                       </Markdown>
                     </div>
