@@ -6,14 +6,14 @@ test('the deployed registration form calls its own API', async ({ page, baseURL 
   const email = 'same-origin-check@example.invalid'
   const apiRequests: string[] = []
 
-  // Readiness can start when the page mounts, before the form is submitted.
+  // Track the guest-session check and form submission across navigation.
   page.on('request', (request) => {
     if (new URL(request.url()).pathname.startsWith('/api/')) {
       apiRequests.push(request.url())
     }
   })
 
-  // The health request reaches the real deployment. Intercept the write so
+  // The guest-session request reaches the deployment. Intercept the write so
   // this browser regression test never creates a user in the shared database.
   await page.route('**/api/users', async (route) => {
     await route.fulfill({
@@ -31,7 +31,7 @@ test('the deployed registration form calls its own API', async ({ page, baseURL 
 
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page).toHaveURL(/\/login$/)
-  expect(apiRequests.filter((url) => new URL(url).pathname === '/api/health')).toHaveLength(1)
+  expect(apiRequests.filter((url) => new URL(url).pathname === '/api/health')).toHaveLength(0)
   expect(apiRequests.filter((url) => new URL(url).pathname === '/api/users')).toHaveLength(1)
   expect(apiRequests.every((url) => new URL(url).origin === deploymentOrigin)).toBe(true)
 })

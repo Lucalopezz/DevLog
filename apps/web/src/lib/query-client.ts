@@ -8,9 +8,8 @@ export const queryClient = new QueryClient({
       // This does not mean data is removed from the cache after that time;
       // only that it becomes stale and can be refetched if needed
       staleTime: 30_000,
-      // Connection supervision already reacts to focus. Disable Query's broad
-      // focus refetch so returning to a cold API does not reload every stale query.
-      refetchOnWindowFocus: false,
+      // Query's default focus/reconnect behavior refreshes stale mounted reads
+      // directly, including the session profile, without background health pings.
       retry: retryRead,
     },
     // Losing a response does not tell us whether a write reached the database.

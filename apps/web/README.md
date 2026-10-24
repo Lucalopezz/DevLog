@@ -170,11 +170,11 @@ API must be running and allow the Vite origin in `CORS_ALLOWED_ORIGINS`. See
 [unified Vercel deployment](../../docs/guides/vercel-deployment.md) for the
 hosted request path and private binding.
 
-API warmup and reconnection run globally, including protected routes. Slow checks
-show a waiting notice; failed active reads can recover while session data and
-form drafts remain available. Login and registration wait for availability
-before a single submission. See [API availability and cold starts](../../docs/guides/backend-connection.md)
-for responsibilities, retry limits, trade-offs, and deployment checks.
+API requests run directly, including login and registration. The browser does not
+warm the API or poll health; `/api/health` remains available for monitoring and
+deployment checks. Read timeouts, bounded temporary-error retries, direct page
+retry, and session preservation remain. See [API requests and failure recovery](../../docs/guides/backend-connection.md)
+for responsibilities, Vercel trade-offs, and validation.
 
 ## Running
 

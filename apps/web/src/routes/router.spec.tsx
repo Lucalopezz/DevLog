@@ -1,8 +1,7 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-import { deferred } from '@/test/deferred'
 import { createProjectFixture } from '@/test/factories/project'
 import { createTechnicalEntry } from '@/test/factories/technical-entry'
 import { createUser } from '@/test/factories/user'
@@ -54,11 +53,6 @@ function useSignedInApplication() {
 }
 
 describe('application routing', () => {
-  beforeEach(() => {
-    server.use(
-      http.get(apiUrl('/health'), () => HttpResponse.json({ status: 'ok' })),
-    )
-  })
 
   it('renders the public landing page without checking a session', async () => {
     let sessionRequestCount = 0
@@ -86,54 +80,45 @@ describe('application routing', () => {
     ['/', 'Keep the reasoning behind your code.'],
     ['/login', 'Sign in'],
     ['/register', 'Create account'],
-  ])('renders %s and starts warming the API without waiting', async (route, heading) => {
-    const healthGate = deferred<void>()
-    let healthRequestCount = 0
-    useGuestSession()
-    server.use(
-      http.get(apiUrl('/health'), async ({ request }) => {
-        expect(request.cache).toBe('no-store')
-        healthRequestCount += 1
-        await healthGate.promise
-        return HttpResponse.json({ status: 'ok' })
-      }),
-    )
-
-    try {
-      renderApp(route)
-
-      expect(await screen.findByRole('heading', { name: heading })).toBeVisible()
-      await waitFor(() => expect(healthRequestCount).toBe(1))
-      if (route !== '/') {
-        expect(screen.getByRole('button', { name: heading })).toBeEnabled()
-      }
-    } finally {
-      healthGate.resolve(undefined)
-    }
-  })
-
-  it.each([
-    ['/', 'Keep the reasoning behind your code.'],
-    ['/login', 'Sign in'],
-    ['/register', 'Create account'],
-  ])('keeps %s usable when the warmup request fails', async (route, heading) => {
+  ])('renders %s without probing API health', async (route, heading) => {
     let healthRequestCount = 0
     useGuestSession()
     server.use(
       http.get(apiUrl('/health'), () => {
         healthRequestCount += 1
-        return HttpResponse.error()
+        return HttpResponse.json({ status: 'ok' })
       }),
     )
 
     renderApp(route)
 
     expect(await screen.findByRole('heading', { name: heading })).toBeVisible()
-    await waitFor(() => expect(healthRequestCount).toBe(1))
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(healthRequestCount).toBe(0)
     if (route !== '/') {
       expect(screen.getByRole('button', { name: heading })).toBeEnabled()
     }
+  })
+
+  it('retries a failed private loader directly without a health gate', async () => {
+    useSignedInApplication()
+    let available = false
+    let healthRequests = 0
+    server.use(
+      http.get(apiUrl('/health'), () => {
+        healthRequests += 1
+        return new HttpResponse(null, { status: 503 })
+      }),
+      http.get(apiUrl('/users/me'), () => available
+        ? HttpResponse.json(createUser())
+        : new HttpResponse(null, { status: 503 })),
+    )
+    const { user, router } = renderApp('/account')
+    expect(await screen.findByRole('heading', { name: 'Could not load this page' })).toBeVisible()
+    expect(router.state.location.pathname).toBe('/account')
+    available = true
+    await user.click(screen.getByRole('button', { name: 'Try loading again' }))
+    expect(await screen.findByRole('heading', { name: 'User account' })).toBeVisible()
+    expect(healthRequests).toBe(0)
   })
 
   it.each([

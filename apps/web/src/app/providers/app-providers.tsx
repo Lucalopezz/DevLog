@@ -4,7 +4,6 @@ import { Toaster } from 'sonner'
 
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { queryClient as productionQueryClient } from '@/lib/query-client'
-import { BackendConnectionProvider } from './backend-connection-provider'
 
 // In DEV, asynchronously imports ReactQueryDevtools; otherwise, sets it to null
 const ReactQueryDevtools = import.meta.env.DEV
@@ -29,7 +28,7 @@ export function AppProviders({
   return (
     <TooltipProvider>
       <QueryClientProvider client={client}>
-        <BackendConnectionProvider>{children}</BackendConnectionProvider>
+        {children}
         <Toaster closeButton position="top-right" richColors theme="dark" />
         {showDevtools && ReactQueryDevtools ? (
           <Suspense fallback={null}>
