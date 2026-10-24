@@ -88,3 +88,17 @@ html.dark {
     min-width: 20rem;
   }
 }
+
+/* The mobile sidebar is portaled outside the app layout. Give the drawer its
+   own opaque theme surface so page content cannot compete with navigation. */
+[data-slot='sidebar'][data-mobile='true'] {
+  @apply bg-background text-foreground;
+  backdrop-filter: none;
+}
+
+/* Limit the darker scrim to navigation; other sheets keep their own styling.
+   Radix renders the overlay immediately before its portaled drawer. */
+[data-slot='sheet-overlay']:has(+ [data-slot='sidebar'][data-mobile='true']) {
+  @apply bg-black/70;
+  backdrop-filter: none;
+}
