@@ -4,23 +4,14 @@ import { toast } from 'sonner'
 
 import { getApiErrorMessage } from '@/lib/get-api-error-message'
 import { registerUser } from '../api/register'
-import { useBackendConnection } from '@/app/providers/backend-connection-context'
-import type { RegisterFormData } from '../types/auth'
 
 export function useRegister() {
   const navigate = useNavigate()
-  const connection = useBackendConnection()
 
   return useMutation({
-    mutationFn: async (data: RegisterFormData) => {
-      // Validation has already produced RegisterFormData. Readiness belongs
-      // inside the mutation so its pending state covers both warmup and the POST.
-      if (!(await connection.ensureReady()))
-        throw new Error('Connection unavailable.')
-      return registerUser(data)
-    },
-    // Creating an account changes server state. Even after recovery, a lost
-    // response must not cause this POST to be sent again automatically.
+    // The mutation owns the POST and its pending state. Submit validated data
+    // directly; a separate health request cannot guarantee this write succeeds.
+    mutationFn: registerUser,
     retry: false,
     onSuccess: () => {
       // Registration does not authenticate automatically; the user must sign in

@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { Route, Routes } from 'react-router'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { currentUserQueryKey } from '@/features/auth/api/get-current-user'
 import { deferred } from '@/test/deferred'
@@ -32,10 +32,26 @@ async function completeForm(
 }
 
 describe('RegisterPage', () => {
-  beforeEach(() => {
+
+  it('registers directly even when the health endpoint is unavailable', async () => {
+    let healthCount = 0
+    let postCount = 0
     server.use(
-      http.get(apiUrl('/health'), () => HttpResponse.json({ status: 'ok' })),
+      http.get(apiUrl('/health'), () => {
+        healthCount += 1
+        return new HttpResponse(null, { status: 503 })
+      }),
+      http.post(apiUrl('/users'), () => {
+        postCount += 1
+        return HttpResponse.json(createUser(), { status: 201 })
+      }),
     )
+    const { user } = renderRegisterPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: 'Create account' }))
+    expect(await screen.findByRole('heading', { name: 'Login destination' })).toBeVisible()
+    expect(postCount).toBe(1)
+    expect(healthCount).toBe(0)
   })
 
   it('shows field validation and attaches mismatch to confirmation', async () => {

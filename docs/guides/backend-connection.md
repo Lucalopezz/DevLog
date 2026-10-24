@@ -1,164 +1,96 @@
-# API availability and cold starts
+# API requests and failure recovery
 
-Implemented on October 8, 2026. The unified Vercel deployment serves the
-public domain; see [the deployment guide](vercel-deployment.md).
+The frontend sends API requests directly. Following the Vercel migration, the
+browser no longer warms the API, periodically polls health, shows global
+connection notices, or waits for a health check before login and registration.
+The removed supervision originated with Render's sleeping Free service.
 
-## Architecture and purpose
+## Request flow and responsibilities
 
-DevLog serves a React + Vite application and calls its API with Axios. In a
-hosted build, the browser sends a same-origin `GET /api/health` through the
-gateway's private service binding to Nest's existing `/api/health` endpoint.
-Local development can still call Nest directly through `VITE_API_URL`.
-The request omits credentials, uses `cache: 'no-store'`, and requires Nest's
-`{ "status": "ok" }` response. An HTTP 200 hosting-provider loading page is not
-considered a successful check. Nest also returns `Cache-Control: no-store`.
-This is a liveness check; it does not verify database availability.
+- `api/http.ts` configures the base URL, browser credentials, JSON headers, and
+  a 15-second timeout for GET/HEAD requests unless a caller provides a deadline.
+  It does not track a separate global connection state.
+- Feature request helpers call their endpoints directly. `useLogin` and
+  `useRegister` submit validated data through their mutation. The mutation's
+  pending state covers the POST, blocks duplicate submissions, and preserves
+  the form draft after a failure.
+- TanStack Query owns cached server data and read retries. The shared policy
+  permits one retry for network/timeouts and HTTP 502/503/504; authentication
+  loaders and features with `retry: false` keep their explicit policy.
+- Stale active queries use TanStack Query's default refetch on tab visibility
+  and internet reconnection. Returning to the app can therefore refresh stale
+  profile and feature data directly, without first checking health. Successful
+  data remains cached; there is no independent connection recovery controller.
+- The router shows its loading screen during initial session validation and
+  a page error when that read fails. **Try loading again** revalidates the
+  failed loader directly, with the button disabled while it is loading.
 
-This supervision began while the API ran on Render's sleeping Free service.
-On Vercel it remains useful for temporary network or function failures, but
-periodic checks also consume gateway and API requests. It does not guarantee
-that a cold function starts faster.
+A health response cannot guarantee that the next authenticated request or
+write will succeed. Removing that prerequisite avoids an extra round trip and
+allows business requests to succeed even if the health endpoint is unavailable.
+It also removes periodic gateway/API traffic from visible idle tabs.
 
-## Responsibilities and data flow
+## Sessions and writes
 
-- `lib/backend-connection.ts` owns connection state, health rounds, timers,
-  browser events, cancellation, and the shared `ensureReady()` promise.
-- `BackendConnectionProvider`, mounted in `AppProviders`, subscribes with
-  `useSyncExternalStore`. It displays accessible connection notices on all
-  routes and recovers failed active queries without clearing the cache.
-- Axios records successful API contacts, including HTTP 4xx responses that
-  prove reachability. Temporary network errors and HTTP 502/503/504 invalidate
-  that contact. Ordinary successful traffic can replace an unnecessary ping.
-- `useLogin` and `useRegister` receive validated form data and await
-  `ensureReady()` before sending it once. React Query's mutation pending state
-  includes the health wait, so the existing forms block duplicate submissions
-  and retain entered values on failure.
-- TanStack Query owns the general read retry policy. Axios applies the read
-  timeout. Keeping retries in one layer avoids multiplying attempts.
-- The router shows a skeleton during initial session validation and an error
-  page with manual retry. Failed loaders have no active query observer, so the
-  error boundary revalidates them after a detected recovery.
+Only a confirmed HTTP 401 from the session request clears user-scoped data and
+returns the user to login. Network errors, timeouts, and server failures preserve
+the session and cache. `ProtectedSession` still observes the shared profile
+query, including a stale profile refetched when the user returns to the tab.
 
-The controller is an external store because timers and in-flight requests must
-remain shared across navigation and forms. A new controller can be injected in
-tests without mocking React or relying on production's singleton state.
+Writes are never retried automatically. A lost response can mean the database
+already accepted the operation; replaying it could create duplicates. The user
+can review the result and deliberately retry. Stronger automatic guarantees
+would require server-side idempotency support.
 
-## Scheduling and limits
+HTTP 5xx responses use the operation's public fallback message, while useful
+4xx validation messages remain visible. Internal infrastructure details stay in
+server logs rather than form notifications or the route error page.
 
-| Control | Value |
-| --- | --- |
-| Periodic check while visible and online | 5 minutes |
-| Automatic event cooldown | 10 seconds |
-| Health attempts per round | At most 3 |
-| Delays before the second and third attempt | 2 seconds, 5 seconds |
-| Deadline per health attempt | 22 seconds, including response body |
-| Delay before displaying the waiting notice | 1.5 seconds |
-| Axios GET/HEAD timeout, unless explicitly configured | 15 seconds |
-| General QueryClient read retry | At most one retry for temporary errors |
-| Mutation retries | Disabled |
+## Health endpoint and Vercel trade-offs
 
-A fully timed-out health round can take up to 73 seconds. Initial reads and
-health checks run in parallel; a failed route can recover when the health round
-finishes. Some feature queries and authentication loaders already set
-`retry: false`; they retain that policy and use explicit or connection recovery.
-Axios API helpers called outside QueryClient do not automatically retry.
+`GET /api/health` remains available for monitoring, deployment checks, and local
+test-server readiness. It returns Nest's `{ "status": "ok" }` response with
+`Cache-Control: no-store`. This is a liveness check, not a database readiness
+check. The frontend does not call it automatically.
 
-`visibilitychange`, focus, `pageshow`, and internet reconnection check the last
-successful contact. Nearby events and forms share the current round. Hiding a
-tab cancels the periodic timer; returning checks again when contact is stale.
-Losing internet aborts the current round and invalidates the previous contact.
-Unmounting removes listeners, aborts the round, and clears timers. Cancellation
-from React StrictMode does not turn into an unavailable-server notification.
+The API uses Vercel's container runtime. [Vercel's scale-in behavior](https://vercel.com/docs/functions/runtimes/container#scale-in-behavior)
+still allows idle containers to scale down, so removing browser supervision
+cannot eliminate cold-start latency. An initial request may take longer or
+reach its existing deadline. The trade-off is simpler request handling and
+fewer service invocations, without claiming a deployment latency improvement.
 
-## Recovery, authentication, and writes
-
-Connection recovery refetches only active queries with temporary errors.
-Inactive queries, successful cached collections, 401/404/business errors, and
-mutations are not replayed. Query data is retained; each feature still owns its
-loading/error presentation. Existing section error screens can replace their
-content while cached data remains available for a later successful read.
-
-Separately, after a successful connection check, a stale, previously successful
-active profile query is rechecked. This detects actual session expiration.
-`ProtectedSession` clears user-scoped cache and returns to login only after the
-profile receives a 401. Initial protected-route loaders already redirect only
-on 401. Timeout, offline, 502, 503, and 504 never trigger logout or remove the
-authentication cookie. Health checks do not renew the JWT.
-
-Writes keep their existing timeout behavior and a single send. A lost response
-can mean a write succeeded even if the browser saw a failure. Automatic replay
-would risk duplicates. If stronger guarantees become necessary, implement
-server-side idempotency keys before introducing automatic write retries.
-
-HTTP 5xx messages use the operation's public fallback; validation messages from
-4xx responses remain visible. Internal infrastructure details belong in server
-logs, rather than form toasts or the route error page.
-
-## Local configuration and deployment
-
-No new environment variable is required for connection supervision. A hosted
-build defaults to `/api`; if set, `VITE_API_URL` must include `/api` because
-Vite embeds it during build. Local cross-origin development requires the Vite
-origin in `CORS_ALLOWED_ORIGINS`. The hosted gateway path is same-origin.
-
-| Local file | Purpose |
-| --- | --- |
-| Root `.env` | Docker database credentials and ports |
-| `apps/api/.env` | Development database, API port, JWT, and CORS |
-| `apps/api/.env.test` | Separate test database on port 5433 and API on 3001 |
-| `apps/web/.env` | Public API base URL on port 3000 |
-
-These files are ignored by Git. The development JWT secret is randomly generated.
-The API reads `JWT_EXPIRES_IN_SECONDS`, not `JWT_EXPIRES_IN`; the updated examples
-use 3600 seconds, matching the existing authentication cookie lifetime.
-Test CORS origins are explicit because wildcards are rejected outside development.
-
-The frontend performs no periodic check when hidden. Closed browsers,
-suspended devices, and discarded tabs cannot trigger checks. A first cold start
-remains possible. The five-minute visible-tab check was retained for this
-migration to avoid changing form and recovery behavior at the same time; it
-costs additional Vercel service requests and can be removed in a separate,
-tested change if measurements show little recovery benefit.
+See [the unified deployment guide](vercel-deployment.md) for same-origin `/api`
+routing through the gateway. `VITE_API_URL` remains the public build-time
+configuration for local cross-origin development; no configuration change is
+required by this removal.
 
 ## Validation
 
-Unit/component tests cover shared rounds, retries, deadlines, event scheduling,
-offline recovery, StrictMode cleanup, safe query recovery, form gating, and
-public error messages. Playwright uses an intercepted API to test navigation,
-failed private-route recovery, offline preservation, and real 401 handling.
-These browser tests verify application behavior, not production cold-start
-latency or deployment cookies.
+Component tests cover public routes without health probes, direct login and
+registration while health is unavailable, pending submission, preserved drafts,
+manual loader recovery, and the distinction between HTTP 401 and outages.
+Shared-client tests protect read deadlines and single-send writes.
 
-Local validation results for this delivery:
-
-- Web lint, production build, and browser-test TypeScript checks passed.
-- Vitest: 416 of 424 tests passed. The remaining eight failures also reproduce
-  in a temporary snapshot of the unchanged `HEAD`: six in
-  `technical-entry-detail-page.spec.tsx` and two in `project-detail-page.spec.tsx`.
-  They are pre-existing fixture/UI expectations outside connection supervision.
-- Playwright: all eight connection and route-access scenarios passed in Chromium.
-- API environment configuration: four unit tests passed; the public health
-  HTTP contract passed its existing end-to-end test without a live database.
+Browser tests in `apps/web/e2e/mocked/api-availability.spec.ts` cover navigation,
+a lost login response followed by deliberate retry, direct private-route
+recovery, idle/browser events without health polling, and a stale profile's
+401 response on return. These intercept API responses; they establish frontend
+behavior rather than real deployment latency or server cookie correctness.
 
 From the repository root:
 
 ```bash
-pnpm --filter web test
+NODE_OPTIONS=--no-experimental-webstorage pnpm --filter web test
 pnpm --filter web lint
 pnpm --filter web build
 pnpm --filter web typecheck:e2e
-PLAYWRIGHT_BROWSERS_PATH=apps/web/.playwright-browsers pnpm --filter web exec playwright install chromium
-pnpm --filter web test:e2e e2e/mocked/api-warmup.spec.ts
-pnpm --filter api exec prisma generate
-pnpm --filter api test:e2e health.e2e-spec.ts
+pnpm --filter web test:e2e e2e/mocked/api-availability.spec.ts
 ```
 
-On this machine, Node 26's experimental Web Storage conflicts with jsdom.
-Run Vitest with `NODE_OPTIONS=--no-experimental-webstorage` when using that runtime.
-For deployment, verify an API cold start, direct private navigation, returning
-after an idle period, internet loss during a form draft, and expired JWTs.
-Compare observed timing before and after deployment before claiming latency gains.
+Node 26's experimental Web Storage conflicts with jsdom, so the Vitest command
+uses the existing compatibility option. After deployment, check an idle first
+request, direct protected navigation, temporary connection loss with a draft,
+and an expired session before drawing conclusions about production timing.
 
-Topics worth studying: external stores, cancellation with `AbortController`,
-liveness versus readiness, HTTP idempotency, query observers versus router
-loaders, and session expiry versus network availability.
+Topics worth studying: liveness versus readiness, HTTP idempotency, query
+freshness and focus refetching, and session expiry versus network availability.

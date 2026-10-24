@@ -20,8 +20,7 @@ export function createAuthLoaders(client: QueryClient) {
       return await client.query({
         queryKey: currentUserQueryKey,
         queryFn: getCurrentUser,
-        // Let the route error boundary coordinate recovery with the shared
-        // health round instead of adding a separate loader retry sequence.
+        // The route error boundary offers a deliberate retry of this read.
         retry: false,
       })
     } catch (error) {
@@ -34,7 +33,7 @@ export function createAuthLoaders(client: QueryClient) {
       }
 
       // Propagate temporary failures to the route error boundary. Treating them
-      // as "no user" would send a valid session to login during a cold start.
+      // as "no user" would send a valid session to login during an outage.
       throw error
     }
   }

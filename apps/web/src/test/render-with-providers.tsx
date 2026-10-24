@@ -6,7 +6,6 @@ import { MemoryRouter } from 'react-router'
 import { Toaster } from 'sonner'
 
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { BackendConnectionProvider } from '@/app/providers/backend-connection-provider'
 
 import { createTestQueryClient } from './query-client'
 
@@ -21,7 +20,7 @@ export function renderWithProviders(
     <MemoryRouter initialEntries={[route]}>
       <QueryClientProvider client={client}>
         <TooltipProvider>
-          <BackendConnectionProvider>{ui}</BackendConnectionProvider>
+          {ui}
           <Toaster />
         </TooltipProvider>
       </QueryClientProvider>

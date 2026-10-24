@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { Route, Routes } from 'react-router'
 import { describe, expect, it } from 'vitest'
@@ -30,15 +30,13 @@ async function completeLoginForm(
 }
 
 describe('LoginForm', () => {
-  it('waits for the shared health request before sending credentials once', async () => {
-    const healthGate = deferred<void>()
+  it('signs in directly even when the health endpoint is unavailable', async () => {
     let healthCount = 0
     let postCount = 0
     server.use(
-      http.get(apiUrl('/health'), async () => {
+      http.get(apiUrl('/health'), () => {
         healthCount += 1
-        await healthGate.promise
-        return HttpResponse.json({ status: 'ok' })
+        return new HttpResponse(null, { status: 503 })
       }),
       http.post(apiUrl('/auth/login'), () => {
         postCount += 1
@@ -46,22 +44,11 @@ describe('LoginForm', () => {
       }),
     )
     const { user } = renderLoginForm()
-    try {
-      await waitFor(() => expect(healthCount).toBe(1))
-      await completeLoginForm(user)
-      await user.click(screen.getByRole('button', { name: 'Sign in' }))
-      const pending = await screen.findByRole('button', {
-        name: 'Signing in...',
-      })
-      expect(pending).toBeDisabled()
-      await user.click(pending)
-      expect(postCount).toBe(0)
-      expect(healthCount).toBe(1)
-    } finally {
-      healthGate.resolve(undefined)
-    }
-    await screen.findByRole('heading', { name: 'Home destination' })
+    await completeLoginForm(user)
+    await user.click(screen.getByRole('button', { name: 'Sign in' }))
+    expect(await screen.findByRole('heading', { name: 'Home destination' })).toBeVisible()
     expect(postCount).toBe(1)
+    expect(healthCount).toBe(0)
   })
   it('exposes labeled fields and blocks an empty submission', async () => {
     let postCount = 0
