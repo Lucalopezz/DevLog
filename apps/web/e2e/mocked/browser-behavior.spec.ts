@@ -1,6 +1,44 @@
 import { expect, test } from '@playwright/test'
 import { authenticatedApi, entry, entryId, guestApi, mockApi, project, projectId } from './mock-api'
 
+function backgroundPixels(element: Element) {
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')!
+  context.fillStyle = getComputedStyle(element).backgroundColor
+  context.fillRect(0, 0, 1, 1)
+  return Array.from(context.getImageData(0, 0, 1, 1).data)
+}
+
+for (const theme of ['dark', 'light']) {
+  test(`mobile navigation has an opaque ${theme} surface and a dark backdrop without blur`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    const assertNoUnexpected = await mockApi(page, authenticatedApi)
+    await page.goto('/dashboard')
+    await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), theme === 'dark')
+    await page.getByRole('button', { name: 'Open navigation menu' }).click()
+    const drawer = page.getByRole('dialog', { name: 'Sidebar' })
+    await expect(drawer).toBeVisible()
+
+    // Browser-computed colors catch transparent surfaces even when the theme's
+    // CSS variables or generated utility classes change.
+    const surface = await drawer.evaluate(backgroundPixels)
+    expect(surface[3], 'Navigation must hide the page behind it').toBe(255)
+    expect(surface[0]).toBe(theme === 'dark' ? 10 : 255)
+    await expect(drawer).toHaveCSS('backdrop-filter', 'none')
+
+    const overlay = page.locator('[data-slot="sheet-overlay"]')
+    await expect(overlay).toHaveCSS('backdrop-filter', 'none')
+    const backdrop = await overlay.evaluate(backgroundPixels)
+    expect(backdrop.slice(0, 3)).toEqual([0, 0, 0])
+    expect(backdrop[3]).toBeGreaterThanOrEqual(178)
+    expect(backdrop[3]).toBeLessThanOrEqual(179)
+    await page.screenshot({ path: testInfo.outputPath(`mobile-navigation-${theme}.png`) })
+    await page.keyboard.press('Escape')
+    await expect(drawer).toBeHidden()
+    assertNoUnexpected()
+  })
+}
+
 test('mobile drawer exposes working links and closes after navigation', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   const assertNoUnexpected = await mockApi(page, authenticatedApi)
